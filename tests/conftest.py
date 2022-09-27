@@ -18,6 +18,7 @@ import pytest
 from httpx import AsyncClient
 
 from mb.app.main import app
+from mb.app.utility import User, is_active
 from mb.utility.config import init_mongo
 
 
@@ -30,6 +31,32 @@ async def mongo_connection():
 async def mock_client():
     async with AsyncClient(app=app, base_url='http://test') as ac:
         yield ac
+
+
+async def always_active():
+    return User(
+        username='test',
+        email='test',
+        last_name='test',
+        first_name='test',
+        hashed_password='test',
+        disabled=False,
+        can_upload=True,
+        can_delete=True
+    )
+
+
+@pytest.fixture(scope='function', autouse=True)
+async def mock_client_superuser():
+    app.dependency_overrides[is_active] = always_active
+    async with AsyncClient(app=app, base_url='http://test') as ac:
+        yield ac
+    app.dependency_overrides = {}
+
+
+@pytest.fixture(scope='function', autouse=True)
+async def mock_header():
+    return {"WWW-Authenticate": "Bearer"}
 
 
 @pytest.fixture(scope='function', autouse=True)
