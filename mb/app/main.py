@@ -25,7 +25,7 @@ from fastapi.security import OAuth2PasswordRequestForm
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
 from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
-    create_superuser, create_token, is_active
+    create_superuser, create_task, create_token, is_active
 from mb.utility.config import init_mongo
 
 app = FastAPI(docs_url='/docs', title='Strong Motion Database')
@@ -96,9 +96,8 @@ async def async_task(task_id: UUID):
         await task.delete()
 
 
-@app.get('/ten_second_delay', tags=['misc'], response_model=UploadTask)
+@app.get('/ten_second_delay', tags=['misc'])
 async def for_test_only(tasks: BackgroundTasks):
-    task = UploadTask()
-    await task.save()
-    tasks.add_task(async_task, task.id)
-    return task
+    task_id = await create_task()
+    tasks.add_task(async_task, task_id)
+    return {'task_id': task_id}

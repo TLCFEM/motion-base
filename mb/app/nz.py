@@ -15,7 +15,6 @@
 import os
 import tarfile
 from http import HTTPStatus
-from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
@@ -23,7 +22,6 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from mb.app.response import SequenceResponse
 from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
 from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
-from mb.record.record import Record
 
 router = APIRouter(tags=['New Zealand'])
 
@@ -62,7 +60,7 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
 
 
 async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
-    records = await _parse_archive_in_background(archive, task_id)
+    records: list = await _parse_archive_in_background(archive, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -89,7 +87,7 @@ async def upload_archive(
             'task_id': task_id,
         }
 
-    records = await _parse_archive_in_background(archive)
+    records: list = await _parse_archive_in_background(archive)
 
     return {'message': 'successfully uploaded and processed', 'records': records}
 
@@ -99,7 +97,7 @@ async def download_single_random_raw_record():
     '''
     Retrieve a single random record from the database.
     '''
-    result = await NZSM.aggregate([{'$sample': {'size': 1}}], projection_model=NZSM).to_list()
+    result: list[NZSM] = await NZSM.aggregate([{'$sample': {'size': 1}}], projection_model=NZSM).to_list()
     if result:
         return result[0]
 
@@ -111,7 +109,7 @@ async def download_single_random_waveform():
     '''
     Retrieve a single random waveform from the database.
     '''
-    result = await download_single_random_raw_record()
+    result: NZSM = await download_single_random_raw_record()
 
     interval, record = result.to_waveform(type='a')
     return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
@@ -122,7 +120,7 @@ async def download_single_random_spectrum():
     '''
     Retrieve a single random spectrum from the database.
     '''
-    result = await download_single_random_raw_record()
+    result: NZSM = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum(type='a')
     return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
@@ -136,9 +134,9 @@ async def download_single_raw_record(file_name: str):
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: Record = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_name.upper())
     if result:
-        return cast(NZSM, result)
+        return result
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -154,7 +152,7 @@ async def download_single_waveform(file_name: str, normalised: bool = False):
     # type_char = _validate_record_type(record_type)
     type_char = 'a'
 
-    result: Record = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_name.upper())
 
     if result:
         interval, record = result.to_waveform(type=type_char, normalised=normalised)
@@ -174,7 +172,7 @@ async def download_single_spectrum(file_name: str):
     # type_char = _validate_record_type(record_type)
     type_char = 'a'
 
-    result: Record = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_name.upper())
 
     if result:
         frequency, record = result.to_spectrum(type=type_char)

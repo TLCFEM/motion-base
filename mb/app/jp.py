@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from http import HTTPStatus
-from typing import cast
 from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
@@ -21,13 +20,12 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from mb.app.response import SequenceResponse
 from mb.app.utility import User, create_task, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
-from mb.record.record import Record
 
 router = APIRouter(tags=['Japan'])
 
 
 async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None = None) -> list:
-    records = await ParserNIED.parse_archive(
+    records: list = await ParserNIED.parse_archive(
         archive_obj=archive.file,
         archive_name=archive.filename,
         task_id=task_id
@@ -36,7 +34,7 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
 
 
 async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
-    records = await _parse_archive_in_background(archive, task_id)
+    records: list = await _parse_archive_in_background(archive, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -64,7 +62,7 @@ async def upload_archive(
             'task_id': task_id
         }
 
-    records = await _parse_archive_in_background(archive)
+    records: list = await _parse_archive_in_background(archive)
 
     return {'message': 'successfully uploaded and processed', 'records': records}
 
@@ -74,7 +72,7 @@ async def download_single_random_raw_record():
     '''
     Retrieve a single random record from the database.
     '''
-    result = await NIED.aggregate([{'$sample': {'size': 1}}], projection_model=NIED).to_list()
+    result: list[NIED] = await NIED.aggregate([{'$sample': {'size': 1}}], projection_model=NIED).to_list()
     if result:
         return result[0]
 
@@ -86,7 +84,7 @@ async def download_single_random_waveform():
     '''
     Retrieve a single random waveform from the database.
     '''
-    result = await download_single_random_raw_record()
+    result: NIED = await download_single_random_raw_record()
 
     interval, record = result.to_waveform()
     return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
@@ -97,7 +95,7 @@ async def download_single_random_spectrum():
     '''
     Retrieve a single random spectrum from the database.
     '''
-    result = await download_single_random_raw_record()
+    result: NIED = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum()
     return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
@@ -111,9 +109,9 @@ async def download_single_raw_record(file_name: str, sub_category: str):
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: Record = await retrieve_single_record(sub_category.lower(), file_name.upper())
+    result: NIED = await retrieve_single_record(sub_category.lower(), file_name.upper())
     if result:
-        return cast(NIED, result)
+        return result
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -126,7 +124,7 @@ async def download_single_waveform(file_name: str, sub_category: str, normalised
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: Record = await retrieve_single_record(sub_category.lower(), file_name.upper())
+    result: NIED = await retrieve_single_record(sub_category.lower(), file_name.upper())
 
     if result:
         interval, record = result.to_waveform(normalised=normalised)
@@ -143,7 +141,7 @@ async def download_single_spectrum(file_name: str, sub_category: str):
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: Record = await retrieve_single_record(sub_category.lower(), file_name.upper())
+    result: NIED = await retrieve_single_record(sub_category.lower(), file_name.upper())
 
     if result:
         frequency, record = result.to_spectrum()

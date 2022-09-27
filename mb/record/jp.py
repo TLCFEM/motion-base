@@ -207,8 +207,8 @@ def _parse_unit(line: str) -> str:
     return matches[0]
 
 
-async def retrieve_single_record(sub_category: str, file_name: str) -> Record:
-    result: Record = await NIED.find_one(
+async def retrieve_single_record(sub_category: str, file_name: str) -> NIED:
+    result = await NIED.find_one(
         NIED.sub_category == sub_category,
         NIED.file_name == file_name)
     return result

@@ -169,6 +169,6 @@ def _parse_header(lines: List[str]) -> (list, list):
     return int_header, float_header
 
 
-async def retrieve_single_record(file_name: str) -> Record:
-    result: Record = await NZSM.find_one(NZSM.file_name == file_name)
+async def retrieve_single_record(file_name: str) -> NZSM:
+    result: NZSM = await NZSM.find_one(NZSM.file_name == file_name)
     return result
