@@ -55,7 +55,7 @@ async def upload_archive(
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
     if not wait_for_result:
-        task_id = await create_task()
+        task_id: UUID = await create_task()
         tasks.add_task(_parse_archive_in_background_task, archive, task_id)
         return {
             'message': 'successfully uploaded and will be processed in the background',

@@ -79,7 +79,7 @@ async def upload_archive(
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Archive must be a tar.gz file.')
 
     if not wait_for_result:
-        task_id = create_task()
+        task_id: UUID = await create_task()
         tasks.add_task(_parse_archive_in_background_task, archive, task_id)
 
         return {

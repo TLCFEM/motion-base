@@ -32,9 +32,8 @@ async def test_alive(mock_client):
     pytest.param('true', id='wait-for-result'),
     pytest.param('false', id='no-wait')
 ])
-@pytest.mark.parametrize('file_path', [pytest.param('data/jp_test.knt.tar.gz', id='good-file')])
-async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, status, if_wait, file_path):
-    with open(os.path.join(pwd, file_path), 'rb') as file:
+async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
+    with open(os.path.join(pwd, 'data/jp_test.knt.tar.gz'), 'rb') as file:
         files = {'archive': (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
             f'/jp/upload?wait_for_result={if_wait}', files=files, headers=mock_header)
@@ -49,9 +48,8 @@ async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, sta
     pytest.param('true', id='wait-for-result'),
     pytest.param('false', id='no-wait')
 ])
-@pytest.mark.parametrize('file_path', ['data/nz_test.tar.gz'])
-async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, status, if_wait, file_path):
-    with open(os.path.join(pwd, file_path), 'rb') as file:
+async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
+    with open(os.path.join(pwd, 'data/nz_test.tar.gz'), 'rb') as file:
         files = {'archive': (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
             f'/nz/upload?wait_for_result={if_wait}', files=files, headers=mock_header)
