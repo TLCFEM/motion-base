@@ -13,13 +13,26 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-
 from typing import List
+from uuid import UUID
 
 from pydantic import BaseModel
 
 
 class SequenceResponse(BaseModel):
+    '''
+    Response represents a record which can be either waveform or spectrum.
+    '''
+    id: UUID
     file_name: str
     interval: float
     data: List[float]
+
+
+class IDListResponse(BaseModel):
+    '''
+    A list of IDs of the target records.
+    One can later use the ID to retrieve the record.
+    '''
+    query: dict
+    id: List[UUID]

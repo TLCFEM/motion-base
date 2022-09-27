@@ -15,9 +15,9 @@
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import SequenceResponse
+from mb.app.response import IDListResponse, SequenceResponse
 from mb.app.utility import User, create_task, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
 
@@ -87,7 +87,7 @@ async def download_single_random_waveform():
     result: NIED = await download_single_random_raw_record()
 
     interval, record = result.to_waveform()
-    return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+    return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
 
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
@@ -98,7 +98,7 @@ async def download_single_random_spectrum():
     result: NIED = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum()
-    return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+    return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
 
 
 @router.get('/raw/{file_name}', response_model=NIED)
@@ -128,7 +128,7 @@ async def download_single_waveform(file_name: str, sub_category: str, normalised
 
     if result:
         interval, record = result.to_waveform(normalised=normalised)
-        return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+        return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -145,6 +145,34 @@ async def download_single_spectrum(file_name: str, sub_category: str):
 
     if result:
         frequency, record = result.to_spectrum()
-        return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+        return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
+
+
+@router.post('/query', response_model=IDListResponse)
+async def query_records(
+        min_magnitude: float = Query(default=0, ge=0, le=10),
+        max_magnitude: float = Query(default=10, ge=0, le=10),
+        sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
+        page_size: int = Query(default=100, ge=1, le=1000),
+        page_number: int = Query(default=0, ge=0)
+):
+    '''
+    Query records from the database.
+    '''
+    query_dict = {
+        '$and': [
+            {'magnitude': {
+                '$gte': min_magnitude,
+                '$lte': max_magnitude
+            }},
+            {'sub_category': sub_category.lower() if sub_category else {'$regex': 'knt|kik', '$options': 'i'}}
+        ]
+    }
+
+    result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size)
+    if result:
+        return IDListResponse(query=query_dict, id=[record.id async for record in result])
+
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')

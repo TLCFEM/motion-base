@@ -23,7 +23,7 @@ import mb.app.main
 
 def run_app(**kwargs):
     config = {}
-    if 'workers' in kwargs:
+    if 'workers' in kwargs and kwargs['workers'] > 1:
         config['workers'] = kwargs['workers']
         config['log_level'] = 'info'
     else:

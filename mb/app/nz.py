@@ -112,7 +112,7 @@ async def download_single_random_waveform():
     result: NZSM = await download_single_random_raw_record()
 
     interval, record = result.to_waveform(type='a')
-    return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+    return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
 
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
@@ -123,7 +123,7 @@ async def download_single_random_spectrum():
     result: NZSM = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum(type='a')
-    return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+    return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
 
 
 @router.get('/raw/{file_name}', response_model=NZSM)
@@ -156,7 +156,7 @@ async def download_single_waveform(file_name: str, normalised: bool = False):
 
     if result:
         interval, record = result.to_waveform(type=type_char, normalised=normalised)
-        return {'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+        return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -176,6 +176,6 @@ async def download_single_spectrum(file_name: str):
 
     if result:
         frequency, record = result.to_spectrum(type=type_char)
-        return {'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+        return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
