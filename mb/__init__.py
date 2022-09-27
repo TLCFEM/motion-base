@@ -15,6 +15,7 @@
 
 import click
 import uvicorn
+from dotenv import load_dotenv
 
 import mb.app.main
 
@@ -29,6 +30,7 @@ def run_app(**kwargs):
         config['log_level'] = 'debug'
         config['debug'] = True
 
+    load_dotenv()
     uvicorn.run('mb.app.main:app', **config)
 
 

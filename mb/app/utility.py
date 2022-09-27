@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import os
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from typing import Dict
@@ -36,7 +36,7 @@ class CredentialException(HTTPException):
 
 
 class UploadTask(BaseModel):
-    task_id: UUID = uuid4()
+    task_id: UUID = Field(default_factory=uuid4)
     total_size: int = 0
     current_size: int = 0
 
@@ -108,9 +108,9 @@ def hash_password(password):
 
 OAUTH2 = OAuth2PasswordBearer(tokenUrl='token')
 
-SECRET_KEY = '09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7'
-ALGORITHM = 'HS256'
-ACCESS_TOKEN_EXPIRE_MINUTES = 120
+SECRET_KEY = os.getenv('SECRET_KEY')
+ALGORITHM = os.getenv('ALGORITHM', 'HS256')
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', 30))
 
 
 def create_token(data: dict, expires_delta: timedelta | None = None):
