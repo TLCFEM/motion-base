@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import dataclasses
+import os
 
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -25,8 +26,8 @@ from mb.record.nz import NZSM
 
 @dataclasses.dataclass
 class MotionBaseConfig:
-    username: str = 'test'
-    password: str = 'password'
+    username: str = os.getenv('MONGO_USERNAME')
+    password: str = os.getenv('MONGO_PASSWORD')
     host: str = 'localhost'
     port: int = 27017
     mongo_uri: str = f'mongodb://{username}:{password}@{host}:{port}/'

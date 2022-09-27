@@ -21,6 +21,7 @@ from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
+# noinspection PyPackageRequirements
 from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
@@ -77,11 +78,11 @@ class UserInformation(BaseModel):
 
 async def create_superuser():
     await User(
-        username='admin',
-        email='admin@localhost',
-        first_name='Admin',
-        last_name='Admin',
-        hashed_password=hash_password('admin'),
+        username=os.getenv('SUPERUSER_USERNAME'),
+        email=os.getenv('SUPERUSER_EMAIL'),
+        first_name=os.getenv('SUPERUSER_FIRST_NAME'),
+        last_name=os.getenv('SUPERUSER_LAST_NAME'),
+        hashed_password=hash_password(os.getenv('SUPERUSER_PASSWORD')),
         disabled=False,
         can_upload=True,
         can_delete=True
@@ -110,7 +111,7 @@ OAUTH2 = OAuth2PasswordBearer(tokenUrl='token')
 
 SECRET_KEY = os.getenv('SECRET_KEY')
 ALGORITHM = os.getenv('ALGORITHM', 'HS256')
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', 30))
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
 
 
 def create_token(data: dict, expires_delta: timedelta | None = None):
