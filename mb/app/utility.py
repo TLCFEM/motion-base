@@ -144,4 +144,23 @@ async def send_notification(mail: dict):  # pylint: disable=W0613
     pass
 
 
-background_tasks: Dict[UUID, UploadTask] = {}
+class BackgroundTaskPool:
+    def __init__(self):
+        self.__task_pool: Dict[UUID, UploadTask] = {}
+
+    def add(self):
+        task = UploadTask()
+        self.__task_pool[task.task_id] = task
+        return task
+
+    def __contains__(self, task_id: UUID):
+        return task_id in self.__task_pool
+
+    def __getitem__(self, item):
+        return self.__task_pool[item]
+
+    def __repr__(self):
+        return repr(self.__task_pool)
+
+
+background_tasks = BackgroundTaskPool()

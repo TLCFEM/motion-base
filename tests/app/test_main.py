@@ -81,7 +81,7 @@ async def test_jackpot(mock_client, data_type, collection_type):
     pytest.param('NIG0190412201728.EW', HTTPStatus.OK, id='correct-name'),
     pytest.param('random-wrong-name-does-not-exist', HTTPStatus.NOT_FOUND, id='wrong-name')
 ])
-async def test_jp_download(mock_client, data_type, file_name, status):
+async def test_download_jp(mock_client, data_type, file_name, status):
     target_url = f'/jp/{data_type}/{file_name}?sub_category=knt'
     if data_type == 'waveform':
         target_url += '&normalised=true'
@@ -98,7 +98,7 @@ async def test_jp_download(mock_client, data_type, file_name, status):
     pytest.param('20030821_121249_BDCS.V2A', HTTPStatus.OK, id='correct-name'),
     pytest.param('random-wrong-name-does-not-exist', HTTPStatus.NOT_FOUND, id='wrong-name')
 ])
-async def test_nz_download(mock_client, data_type, file_name, status):
+async def test_download_nz(mock_client, data_type, file_name, status):
     target_url = f'/nz/{data_type}/{file_name}'
     if data_type == 'waveform':
         target_url += '?normalised=true'

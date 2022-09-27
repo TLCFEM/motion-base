@@ -36,8 +36,6 @@ async def _parse_archive_in_background(archive: UploadFile, task: UploadTask | N
 
 async def _parse_archive_in_background_task(archive: UploadFile, task: UploadTask):
     records = await _parse_archive_in_background(archive, task)
-    if task.task_id in background_tasks:
-        del background_tasks[task.task_id]
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -58,10 +56,8 @@ async def upload_archive(
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
     if not wait_for_result:
-        task = UploadTask()
-        background_tasks[task.task_id] = task
+        task = background_tasks.add()
         tasks.add_task(_parse_archive_in_background_task, archive, task)
-
         return {
             'message': 'successfully uploaded and will be processed in the background',
             'task_id': task.task_id
