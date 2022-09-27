@@ -25,7 +25,8 @@ from mb.record.nz import NZSM
 
 
 def mongo_uri():
-    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
+    if not load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')):
+        raise RuntimeError('No .env file found')
     username: str = os.getenv('MONGO_USERNAME')
     password: str = os.getenv('MONGO_PASSWORD')
     host: str = 'localhost'

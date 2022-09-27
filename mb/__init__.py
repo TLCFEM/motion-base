@@ -31,7 +31,9 @@ def run_app(**kwargs):
         config['log_level'] = 'debug'
         config['debug'] = True
 
-    load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
+    if not load_dotenv(os.path.join(os.path.dirname(__file__), '.env')):
+        raise RuntimeError('No .env file found')
+
     uvicorn.run('mb.app.main:app', **config)
 
 
