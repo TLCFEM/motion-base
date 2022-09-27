@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import os
 
 import click
 import uvicorn
@@ -30,7 +31,7 @@ def run_app(**kwargs):
         config['log_level'] = 'debug'
         config['debug'] = True
 
-    load_dotenv()
+    load_dotenv(os.path.join(os.path.dirname(__file__), '.env'))
     uvicorn.run('mb.app.main:app', **config)
 
 

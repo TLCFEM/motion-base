@@ -13,10 +13,10 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import dataclasses
 import os
 
 from beanie import init_beanie
+from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from mb.app.utility import User
@@ -24,15 +24,15 @@ from mb.record.jp import NIED
 from mb.record.nz import NZSM
 
 
-@dataclasses.dataclass
-class MotionBaseConfig:
+def mongo_uri():
+    load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env'))
     username: str = os.getenv('MONGO_USERNAME')
     password: str = os.getenv('MONGO_PASSWORD')
     host: str = 'localhost'
     port: int = 27017
-    mongo_uri: str = f'mongodb://{username}:{password}@{host}:{port}/'
+    return f'mongodb://{username}:{password}@{host}:{port}/'
 
 
 async def init_mongo():
-    client = AsyncIOMotorClient(MotionBaseConfig.mongo_uri)
+    client = AsyncIOMotorClient(mongo_uri())
     await init_beanie(database=client['StrongMotion'], document_models=[NIED, NZSM, User])
