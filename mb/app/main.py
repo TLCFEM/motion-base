@@ -1,0 +1,87 @@
+#  Copyright (C) 2022 Theodore Chang
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import uuid
+from datetime import timedelta
+from http import HTTPStatus
+
+from fastapi import Depends, FastAPI, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
+from fastapi.security import OAuth2PasswordRequestForm
+
+from mb.app.jp import router as jp_router
+from mb.app.nz import router as nz_router
+from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, \
+    authenticate_user, background_tasks, create_superuser, create_token, is_active
+from mb.utility.config import init_mongo
+
+app = FastAPI(docs_url='/docs', title='Strong Motion Database')
+app.include_router(jp_router, prefix='/jp')
+app.include_router(nz_router, prefix='/nz')
+app.add_middleware(GZipMiddleware, minimum_size=1024)
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=[
+        'http://localhost',
+        'http://localhost:3000',
+    ],
+    allow_credentials=True,
+    allow_methods=['*'],
+    allow_headers=['*'],
+)
+
+
+@app.on_event('startup')
+async def init():
+    await init_mongo()
+    await create_superuser()
+
+
+@app.get('/', tags=['status'])
+async def root():
+    return {'message': 'Hello World'}
+
+
+@app.get('/alive', tags=['status'])
+async def alive():
+    return {'message': 'I\'m alive!'}
+
+
+@app.get('/task/status/{task_id}', tags=['status'], status_code=HTTPStatus.OK, response_model=UploadTask)
+async def get_task_status(task_id: uuid.UUID) -> UploadTask:
+    if task_id not in background_tasks:
+        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Task not found')
+    return background_tasks[task_id]
+
+
+@app.post('/token', tags=['account'], response_model=Token)
+async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
+    user = await authenticate_user(form_data.username, form_data.password)
+    if not user:
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED,
+            detail='Incorrect username or password',
+            headers={'WWW-Authenticate': 'Bearer'},
+        )
+    access_token = create_token(
+        data={'sub': user.username},
+        expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    )
+    return {'access_token': access_token, 'token_type': 'bearer'}
+
+
+@app.get('/whoami/', tags=['account'], response_model=UserInformation)
+async def retrieve_myself(user: User = Depends(is_active)):
+    return UserInformation(**user.dict())
