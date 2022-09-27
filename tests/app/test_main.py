@@ -32,7 +32,7 @@ async def test_alive(mock_client):
     pytest.param('true', id='wait-for-result'),
     pytest.param('false', id='no-wait')
 ])
-@pytest.mark.parametrize('file_path', ['data/jp_test.knt.tar.gz'])
+@pytest.mark.parametrize('file_path', [pytest.param('data/jp_test.knt.tar.gz', id='good-file')])
 async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, status, if_wait, file_path):
     with open(os.path.join(pwd, file_path), 'rb') as file:
         files = {'archive': (file_name, file, "multipart/form-data")}
