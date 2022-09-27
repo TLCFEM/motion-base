@@ -125,8 +125,8 @@ async def current_user(token: str = Depends(OAUTH2)):
         username: str = payload.get('sub')
         if username is None:
             raise CredentialException()
-    except JWTError:
-        raise CredentialException()
+    except JWTError as e:
+        raise CredentialException() from e
     user = await User.find_one(User.username == username)
     if user is None:
         raise CredentialException()
