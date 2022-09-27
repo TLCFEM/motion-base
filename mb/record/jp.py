@@ -18,6 +18,7 @@ import re
 import tarfile
 from datetime import datetime
 from typing import BinaryIO, IO, List, Tuple
+from uuid import UUID
 
 import aiofiles
 import numpy as np
@@ -85,7 +86,7 @@ class ParserNIED:
     async def parse_archive(
             archive_obj: str | BinaryIO,
             archive_name: str | None = None,
-            task: UploadTask | None = None
+            task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError('Need archive name if archive is provided as a BinaryIO.')
@@ -99,13 +100,17 @@ class ParserNIED:
         else:
             kwargs = dict(mode='r:gz', fileobj=archive_obj)
 
-        if task is None:
-            task = UploadTask()
+        task: UploadTask | None = None
+        if task_id is not None:
+            task = await UploadTask.find_one(UploadTask.id == task_id)
 
         with tarfile.open(**kwargs) as archive:
-            task.total_size = len(archive.getnames())
+            if task:
+                task.total_size = len(archive.getnames())
             for f in archive:
-                task.current_size += 1
+                if task:
+                    task.current_size += 1
+                    await task.save()
                 if not f.isfile() or f.name.endswith('.ps.gz'):
                     continue
                 target = archive.extractfile(f)
@@ -117,6 +122,9 @@ class ParserNIED:
                 record.set_id()
                 await record.save()
                 records.append(record.file_name)
+
+        if task:
+            await task.delete()
 
         return records
 
@@ -204,7 +212,3 @@ async def retrieve_single_record(sub_category: str, file_name: str) -> Record:
         NIED.sub_category == sub_category,
         NIED.file_name == file_name)
     return result
-
-
-if __name__ == '__main__':
-    pass

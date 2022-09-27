@@ -19,7 +19,7 @@ from beanie import init_beanie
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from mb.app.utility import User
+from mb.app.utility import UploadTask, User
 from mb.record.jp import NIED
 from mb.record.nz import NZSM
 
@@ -36,4 +36,4 @@ def mongo_uri():
 
 async def init_mongo():
     client = AsyncIOMotorClient(mongo_uri())
-    await init_beanie(database=client['StrongMotion'], document_models=[NIED, NZSM, User])
+    await init_beanie(database=client['StrongMotion'], document_models=[NIED, NZSM, User, UploadTask])

@@ -16,11 +16,12 @@ import os
 import tarfile
 from http import HTTPStatus
 from typing import cast
+from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
 from mb.app.response import SequenceResponse
-from mb.app.utility import UploadTask, User, background_tasks, is_active, send_notification
+from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
 from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
 from mb.record.record import Record
 
@@ -35,26 +36,33 @@ def _validate_record_type(record_type: str) -> str:
     return type_char
 
 
-async def _parse_archive_in_background(archive: UploadFile, task: UploadTask | None = None) -> list:
-    if task is None:
-        task = UploadTask()
+async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None = None) -> list:
+    task: UploadTask | None = None
+    if task_id is not None:
+        task = await UploadTask.find_one(UploadTask.id == task_id)
 
     records: list = []
     with tarfile.open(mode='r:gz', fileobj=archive.file) as archive_obj:
-        task.total_size = len(archive_obj.getnames())
+        if task:
+            task.total_size = len(archive_obj.getnames())
         for f in archive_obj:
-            task.current_size += 1
+            if task:
+                task.current_size += 1
+                await task.save()
             if not f.name.endswith('.V2A'):
                 continue
             target = archive_obj.extractfile(f)
             if target:
                 records.extend(await ParserNZSM.parse_archive(target, os.path.basename(f.name)))
 
+    if task:
+        await task.delete()
+
     return records
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, task: UploadTask):
-    records = await _parse_archive_in_background(archive, task)
+async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
+    records = await _parse_archive_in_background(archive, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -73,12 +81,12 @@ async def upload_archive(
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Archive must be a tar.gz file.')
 
     if not wait_for_result:
-        task = background_tasks.add()
-        tasks.add_task(_parse_archive_in_background_task, archive, task)
+        task_id = create_task()
+        tasks.add_task(_parse_archive_in_background_task, archive, task_id)
 
         return {
             'message': 'successfully uploaded and will be processed in the background',
-            'task_id': task.task_id,
+            'task_id': task_id,
         }
 
     records = await _parse_archive_in_background(archive)

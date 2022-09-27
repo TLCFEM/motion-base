@@ -12,19 +12,20 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import uuid
+import asyncio
 from datetime import timedelta
 from http import HTTPStatus
+from uuid import UUID
 
-from fastapi import Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
-from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, \
-    authenticate_user, background_tasks, create_superuser, create_token, is_active
+from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
+    create_superuser, create_token, is_active
 from mb.utility.config import init_mongo
 
 app = FastAPI(docs_url='/docs', title='Strong Motion Database')
@@ -60,10 +61,11 @@ async def alive():
 
 
 @app.get('/task/status/{task_id}', tags=['status'], status_code=HTTPStatus.OK, response_model=UploadTask)
-async def get_task_status(task_id: uuid.UUID) -> UploadTask:
-    if task_id not in background_tasks:
-        raise HTTPException(status_code=HTTPStatus.NOT_FOUND, detail='Task not found')
-    return background_tasks[task_id]
+async def get_task_status(task_id: UUID) -> UploadTask:
+    task = await UploadTask.find_one(UploadTask.id == task_id)
+    if task is None:
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail='Task not found. It may have finished.')
+    return task
 
 
 @app.post('/token', tags=['account'], response_model=Token)
@@ -82,6 +84,21 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
     return {'access_token': access_token, 'token_type': 'bearer'}
 
 
-@app.get('/whoami/', tags=['account'], response_model=UserInformation)
+@app.get('/whoami', tags=['account'], response_model=UserInformation)
 async def retrieve_myself(user: User = Depends(is_active)):
     return UserInformation(**user.dict())
+
+
+async def async_task(task_id: UUID):
+    await asyncio.sleep(10)
+    task = await UploadTask.find_one(UploadTask.id == task_id)
+    if task:
+        await task.delete()
+
+
+@app.get('/ten_second_delay', tags=['misc'], response_model=UploadTask)
+async def for_test_only(tasks: BackgroundTasks):
+    task = UploadTask()
+    await task.save()
+    tasks.add_task(async_task, task.id)
+    return task

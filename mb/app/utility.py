@@ -15,7 +15,6 @@
 import os
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from typing import Dict
 from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 
 from beanie import Document
@@ -36,8 +35,8 @@ class CredentialException(HTTPException):
         )
 
 
-class UploadTask(BaseModel):
-    task_id: UUID = Field(default_factory=uuid4)
+class UploadTask(Document):
+    id: UUID = Field(default_factory=uuid4)
     total_size: int = 0
     current_size: int = 0
 
@@ -140,27 +139,12 @@ async def is_active(user: User = Depends(current_user)):
     return user
 
 
+# noinspection PyUnusedLocal
 async def send_notification(mail: dict):  # pylint: disable=W0613
     pass
 
 
-class BackgroundTaskPool:
-    def __init__(self):
-        self.__task_pool: Dict[UUID, UploadTask] = {}
-
-    def add(self):
-        task = UploadTask()
-        self.__task_pool[task.task_id] = task
-        return task
-
-    def __contains__(self, task_id: UUID):
-        return task_id in self.__task_pool
-
-    def __getitem__(self, item):
-        return self.__task_pool[item]
-
-    def __repr__(self):
-        return repr(self.__task_pool)
-
-
-background_tasks = BackgroundTaskPool()
+async def create_task():
+    task = UploadTask()
+    await task.save()
+    return task.id

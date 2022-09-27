@@ -14,28 +14,29 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from http import HTTPStatus
 from typing import cast
+from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
 from mb.app.response import SequenceResponse
-from mb.app.utility import UploadTask, User, background_tasks, is_active, send_notification
+from mb.app.utility import User, create_task, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
 from mb.record.record import Record
 
 router = APIRouter(tags=['Japan'])
 
 
-async def _parse_archive_in_background(archive: UploadFile, task: UploadTask | None = None) -> list:
+async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None = None) -> list:
     records = await ParserNIED.parse_archive(
         archive_obj=archive.file,
         archive_name=archive.filename,
-        task=task
+        task_id=task_id
     )
     return records
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, task: UploadTask):
-    records = await _parse_archive_in_background(archive, task)
+async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
+    records = await _parse_archive_in_background(archive, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -56,11 +57,11 @@ async def upload_archive(
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail=str(e)) from e
 
     if not wait_for_result:
-        task = background_tasks.add()
-        tasks.add_task(_parse_archive_in_background_task, archive, task)
+        task_id = await create_task()
+        tasks.add_task(_parse_archive_in_background_task, archive, task_id)
         return {
             'message': 'successfully uploaded and will be processed in the background',
-            'task_id': task.task_id
+            'task_id': task_id
         }
 
     records = await _parse_archive_in_background(archive)
