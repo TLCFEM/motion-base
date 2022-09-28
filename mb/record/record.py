@@ -17,6 +17,7 @@ from typing import Tuple
 from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 
 import numpy as np
+import pint
 import pymongo
 from beanie import Document, Indexed
 from pydantic import Field
@@ -64,3 +65,10 @@ class Record(Document):
     def _perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
         fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
         return 1 / sampling_frequency, fft_magnitude
+
+
+def to_unit(quantity: pint.Quantity, unit: pint.Unit):
+    if unit:
+        return quantity.to(unit).magnitude
+
+    return quantity.magnitude

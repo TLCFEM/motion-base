@@ -117,7 +117,7 @@ async def download_single_random_waveform():
     '''
     result: NZSM = await download_single_random_raw_record()
 
-    interval, record = result.to_waveform(type='a')
+    interval, record = result.to_waveform(unit='cm/s/s')
     return {
         'id': result.id,
         'file_name': result.file_name,
@@ -137,7 +137,7 @@ async def download_single_random_spectrum():
     '''
     result: NZSM = await download_single_random_raw_record()
 
-    frequency, record = result.to_spectrum(type='a')
+    frequency, record = result.to_spectrum(unit='cm/s/s')
     return {
         'id': result.id,
         'file_name': result.file_name,
@@ -173,13 +173,10 @@ async def download_single_waveform(file_name: str, normalised: bool = False):
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    # type_char = _validate_record_type(record_type)
-    type_char = 'a'
-
     result: NZSM = await retrieve_single_record(file_name.upper())
 
     if result:
-        interval, record = result.to_waveform(type=type_char, normalised=normalised)
+        interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
         return {
             'id': result.id,
             'file_name': result.file_name,
@@ -202,13 +199,10 @@ async def download_single_spectrum(file_name: str):
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    # type_char = _validate_record_type(record_type)
-    type_char = 'a'
-
     result: NZSM = await retrieve_single_record(file_name.upper())
 
     if result:
-        frequency, record = result.to_spectrum(type=type_char)
+        frequency, record = result.to_spectrum(unit='cm/s/s')
         return {
             'id': result.id,
             'file_name': result.file_name,

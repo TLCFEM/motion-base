@@ -86,7 +86,7 @@ async def download_single_random_waveform():
     '''
     result: NIED = await download_single_random_raw_record()
 
-    interval, record = result.to_waveform()
+    interval, record = result.to_waveform(unit='cm/s/s')
     return {
         'id': result.id,
         'file_name': result.file_name,
@@ -145,7 +145,7 @@ async def download_single_waveform(file_name: str, sub_category: str, normalised
     result: NIED = await retrieve_single_record(sub_category.lower(), file_name.upper())
 
     if result:
-        interval, record = result.to_waveform(normalised=normalised)
+        interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
         return {
             'id': result.id,
             'file_name': result.file_name,

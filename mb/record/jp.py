@@ -27,7 +27,7 @@ import structlog
 from beanie import Indexed
 
 from mb.app.utility import UploadTask
-from mb.record.record import Record
+from mb.record.record import Record, to_unit
 
 _logger = structlog.get_logger(__name__)
 
@@ -65,13 +65,15 @@ class NIED(Record):
             max_value: float = abs(np.max(numpy_array))
             min_value: float = abs(np.min(numpy_array))
             numpy_array /= max_value if max_value > min_value else min_value
+            unit = None
         else:
             numpy_array *= self.scale_factor
+            unit = kwargs.get('unit', None)
 
-        return sampling_interval, numpy_array
+        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.maximum_acceleration_unit), unit)
 
     def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
-        _, waveform = self.to_waveform(normalised=False)
+        _, waveform = self.to_waveform(normalised=False, unit=kwargs.get('unit', None))
         return self._perform_fft(self.sampling_frequency, waveform)
 
 

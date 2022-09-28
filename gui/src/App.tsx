@@ -8,11 +8,6 @@ import 'tippy.js/themes/material.css';
 import 'tippy.js/animations/scale.css';
 import Button from "@suid/material/Button";
 import Typography from "@suid/material/Typography"
-import FormControl from "@suid/material/FormControl";
-import FormControlLabel from "@suid/material/FormControlLabel";
-import FormLabel from "@suid/material/FormLabel";
-import Radio from "@suid/material/Radio";
-import RadioGroup from "@suid/material/RadioGroup";
 import 'leaflet/dist/leaflet.css';
 // @ts-ignore
 import L from 'leaflet';
@@ -51,7 +46,7 @@ const plot = () => {
         station_position = [res.data.station_latitude, res.data.station_longitude];
         event_location.remove();
         station_location.remove();
-        map.flyTo(position, 6);
+        map.flyTo(position, 5);
         event_location = L.marker(position).addTo(map);
         station_location = L.marker(station_position).addTo(map);
         event_location.bindPopup('event location');
@@ -80,7 +75,7 @@ const plot = () => {
                 },
             },
             xaxis: axis_label('Time (s)', 18),
-            yaxis: axis_label('Amplitude', 18),
+            yaxis: axis_label('Amplitude (cm/s^2)', 18),
         }, {
             responsive: true,
         });
@@ -96,26 +91,12 @@ const plot = () => {
     return null;
 }
 
-function RadioButtonsGroupExample() {
-    return (
-        <FormControl>
-            <FormLabel id="region">Region</FormLabel>
-            <RadioGroup aria-labelledby="region" defaultValue="NZ" name="region-selection">
-                <FormControlLabel value="JP" control={() => <Radio/>} label="JP"/>
-                <FormControlLabel value="NZ" control={() => <Radio/>} label="NZ"/>
-            </RadioGroup>
-        </FormControl>
-    );
-}
-
 const App: Component = () => {
     return (
         <div>
-            {plot()}
             <Typography variant="h3">Motion Base</Typography>
-            <RadioButtonsGroupExample/>
-            <br/>
             <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
+            {plot()}
         </div>
     );
 };

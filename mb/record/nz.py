@@ -11,7 +11,7 @@ import pymongo
 import structlog
 from beanie import Indexed
 
-from mb.record.record import Record
+from mb.record.record import Record, to_unit
 
 _FTI_ = 10000
 
@@ -23,24 +23,10 @@ class NZSM(Record):
     scale_factor: float = 1 / _FTI_
     maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
     maximum_acceleration_unit: str = None
-    # maximum_velocity: Indexed(float, pymongo.DESCENDING) = None
-    # maximum_velocity_unit: str = None
-    # maximum_displacement: Indexed(float, pymongo.DESCENDING) = None
-    # maximum_displacement_unit: str = None
     raw_data: List[int] = None
 
-    # raw_velocity: List[float] = None
-    # raw_displacement: List[float] = None
-
     def to_raw_waveform(self, **kwargs) -> Tuple[float, list]:
-        if kwargs['type'] == 'a':
-            return 1 / self.sampling_frequency, self.raw_data
-        # if kwargs['type'] == 'v':
-        #     return 1 / self.sampling_frequency, self.raw_velocity
-        # if kwargs['type'] == 'd':
-        #     return 1 / self.sampling_frequency, self.raw_displacement
-
-        raise ValueError('Unknown type')
+        return 1 / self.sampling_frequency, self.raw_data
 
     def to_waveform(self, normalised: bool = False, **kwargs) -> Tuple[float, np.ndarray]:
         sampling_interval: float = 1 / self.sampling_frequency
@@ -50,10 +36,12 @@ class NZSM(Record):
             max_value: float = abs(np.max(numpy_array))
             min_value: float = abs(np.min(numpy_array))
             numpy_array /= max_value if max_value > min_value else min_value
+            unit = None
         else:
             numpy_array *= self.scale_factor
+            unit = kwargs.get('unit', None)
 
-        return sampling_interval, numpy_array
+        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.maximum_acceleration_unit), unit)
 
     def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(**kwargs)
@@ -63,8 +51,12 @@ class NZSM(Record):
 class ParserNZSM:
     @staticmethod
     def validate_file(file_path: str):
-        if not file_path.endswith('.V2A'):
-            raise ValueError('NZSM archive file should be a V2A file.')
+        if file_path.lower().endswith('.v2a'):
+            return
+        if file_path.lower().endswith('.v1a'):
+            return
+
+        raise ValueError('NZSM archive file should be a V2A/V1A file.')
 
     @staticmethod
     async def parse_archive(file_path: str | IO[bytes], file_name: str | None = None) -> List[str]:
@@ -95,11 +87,9 @@ class ParserNZSM:
             record.depth_unit = str(pint.Unit('km'))
             record.sampling_frequency_unit = str(pint.Unit('Hz'))
             record.maximum_acceleration_unit = str(pint.Unit('mm/s/s'))
-            # record.maximum_velocity_unit = str(pint.Unit('mm/s'))
-            # record.maximum_displacement_unit = str(pint.Unit('mm'))
             record.duration_unit = str(pint.Unit('s'))
             record.file_name = os.path.basename(file_name if file_name else file_path)
-            record.sub_category = 'processed'
+            record.sub_category = 'processed' if record.file_name.endswith('.V2A') else 'unprocessed'
             record.set_id(record.file_name + record.direction)
             await record.save()
             record_names.append(record.file_name)
@@ -122,16 +112,11 @@ class ParserNZSM:
         record.magnitude = float_header[16]
         record.station_latitude = -float_header[10]
         record.station_longitude = float_header[11]
-        if float_header[0] != 0:
-            record.sampling_frequency = float_header[0]
-        else:
-            record.sampling_frequency = 1 / _parse_interval(lines[10])
+        record.sampling_frequency = 1 / _parse_interval(lines[10])
 
         record.duration = float_header[23]
         record.direction = lines[12].split()[1]
         record.maximum_acceleration = float_header[35]
-        # record.maximum_velocity = float_header[40]
-        # record.maximum_displacement = float_header[45]
 
         offset: int = 26
         a_samples = int_header[33]
@@ -139,28 +124,6 @@ class ParserNZSM:
         record.raw_data = [
             int(_FTI_ * float(v)) for line in lines[offset:offset + a_lines] for v in _fixed_size_split(line, 8)
         ]
-
-        # offset += a_lines
-        #
-        # assert len(record.raw_acceleration) == a_samples, 'Number of samples does not match.'
-        #
-        # v_samples = int_header[34]
-        # v_lines = ceil(v_samples / 10)
-        # record.raw_velocity = [
-        #     float(v) for line in lines[offset:offset + v_lines] for v in _fixed_size_split(line, 8)
-        # ]
-        #
-        # offset += v_lines
-        #
-        # assert len(record.raw_velocity) == v_samples, 'Number of samples does not match.'
-        #
-        # d_samples = int_header[35]
-        # d_lines = ceil(d_samples / 10)
-        # record.raw_displacement = [
-        #     float(v) for line in lines[offset:offset + d_lines] for v in _fixed_size_split(line, 8)
-        # ]
-        #
-        # assert len(record.raw_displacement) == d_samples, 'Number of samples does not match.'
 
         return record
 
@@ -186,5 +149,4 @@ def _parse_header(lines: List[str]) -> (list, list):
 
 
 async def retrieve_single_record(file_name: str) -> NZSM:
-    result: NZSM = await NZSM.find_one(NZSM.file_name == file_name)
-    return result
+    return await NZSM.find_one(NZSM.file_name == file_name)

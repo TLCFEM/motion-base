@@ -12,10 +12,6 @@ code {
     monospace;
 }
 
-h1 {
-    font-size: 40px;
-}
-
 #canvas {
     width: 75%;
     float: left;
