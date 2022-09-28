@@ -12,12 +12,12 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import logging
 import os
 import tarfile
 from http import HTTPStatus
 from uuid import UUID
 
+import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
 from mb.app.response import SequenceResponse
@@ -25,6 +25,8 @@ from mb.app.utility import UploadTask, User, create_task, is_active, send_notifi
 from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
 
 router = APIRouter(tags=['New Zealand'])
+
+_logger = structlog.get_logger(__name__)
 
 
 def _validate_record_type(record_type: str) -> str:
@@ -55,7 +57,7 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
                 try:
                     records.extend(await ParserNZSM.parse_archive(target, os.path.basename(f.name)))
                 except Exception as e:
-                    logging.critical(f'Failed to parse {f.name} due to {e}')
+                    _logger.critical('Failed to parse.', file_name=f.name, exe_info=e)
 
     if task:
         await task.delete()

@@ -12,7 +12,6 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import logging
 import os
 import re
 import tarfile
@@ -24,10 +23,13 @@ import aiofiles
 import numpy as np
 import pint
 import pymongo
+import structlog
 from beanie import Indexed
 
 from mb.app.utility import UploadTask
 from mb.record.record import Record
+
+_logger = structlog.get_logger(__name__)
 
 
 class NIED(Record):
@@ -124,7 +126,7 @@ class ParserNIED:
                     await record.save()
                     records.append(record.file_name)
                 except Exception as e:
-                    logging.critical(f'Failed to parse file {f.name} due to {e}.')
+                    _logger.critical(f'Failed to parse.', file_name=f.name, exe_info=e)
 
         if task:
             await task.delete()

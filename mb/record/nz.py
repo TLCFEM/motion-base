@@ -8,11 +8,14 @@ import aiofiles
 import numpy as np
 import pint
 import pymongo
+import structlog
 from beanie import Indexed
 
 from mb.record.record import Record
 
 _FTI_ = 10000
+
+_logger = structlog.get_logger(__name__)
 
 
 class NZSM(Record):
