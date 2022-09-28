@@ -14,12 +14,17 @@ import L from 'leaflet';
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
-let map = L.map('map').setView([42.35, -71.08], 13);
+let position: Array<number> = [42.35, -71.08];
+let station_position: Array<number> = position;
+let map = L.map('map').setView(position, 8);
 
 L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
     maxZoom: 19,
     attribution: '© OpenStreetMap'
 }).addTo(map);
+
+let event_location = L.marker(position).addTo(map);
+let station_location = L.marker(station_position).addTo(map);
 
 const getBasicInfo = () => {
     const [info, setInfo] = createSignal(null);
@@ -29,7 +34,17 @@ const getBasicInfo = () => {
 
 const plot = () => {
     let canvas = document.getElementById('canvas');
-    axios.get('/jp/waveform/jackpot').then(res => {
+    axios.get('/nz/waveform/jackpot').then(res => {
+        position = [res.data.latitude, res.data.longitude];
+        station_position = [res.data.station_latitude, res.data.station_longitude];
+        event_location.remove();
+        station_location.remove();
+        map.flyTo(position, 6);
+        event_location = L.marker(position).addTo(map);
+        station_location = L.marker(station_position).addTo(map);
+        event_location.bindPopup('event location');
+        station_location.bindPopup('station location');
+
         let interval: number = res.data.interval;
 
         let x: Array<number> = [];

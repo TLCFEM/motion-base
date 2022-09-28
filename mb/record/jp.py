@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import logging
 import os
 import re
 import tarfile
@@ -116,12 +116,15 @@ class ParserNIED:
                 target = archive.extractfile(f)
                 if not target:
                     continue
-                record = await ParserNIED.parse_file(target)
-                record.file_name = os.path.basename(f.name)
-                record.sub_category = sub_category
-                record.set_id()
-                await record.save()
-                records.append(record.file_name)
+                try:
+                    record = await ParserNIED.parse_file(target)
+                    record.file_name = os.path.basename(f.name)
+                    record.sub_category = sub_category
+                    record.set_id()
+                    await record.save()
+                    records.append(record.file_name)
+                except Exception as e:
+                    logging.critical(f'Failed to parse file {f.name} due to {e}.')
 
         if task:
             await task.delete()

@@ -25,6 +25,10 @@ class SequenceResponse(BaseModel):
     '''
     id: UUID
     file_name: str
+    latitude: float
+    longitude: float
+    station_latitude: float
+    station_longitude: float
     interval: float
     data: List[float]
 

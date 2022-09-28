@@ -87,7 +87,16 @@ async def download_single_random_waveform():
     result: NIED = await download_single_random_raw_record()
 
     interval, record = result.to_waveform()
-    return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+    return {
+        'id': result.id,
+        'file_name': result.file_name,
+        'latitude': result.latitude,
+        'longitude': result.longitude,
+        'station_latitude': result.station_latitude,
+        'station_longitude': result.station_longitude,
+        'interval': interval,
+        'data': record.tolist()
+    }
 
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
@@ -98,7 +107,16 @@ async def download_single_random_spectrum():
     result: NIED = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum()
-    return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+    return {
+        'id': result.id,
+        'file_name': result.file_name,
+        'latitude': result.latitude,
+        'longitude': result.longitude,
+        'station_latitude': result.station_latitude,
+        'station_longitude': result.station_longitude,
+        'interval': frequency,
+        'data': record.tolist()
+    }
 
 
 @router.get('/raw/{file_name}', response_model=NIED)
@@ -128,7 +146,16 @@ async def download_single_waveform(file_name: str, sub_category: str, normalised
 
     if result:
         interval, record = result.to_waveform(normalised=normalised)
-        return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+        return {
+            'id': result.id,
+            'file_name': result.file_name,
+            'latitude': result.latitude,
+            'longitude': result.longitude,
+            'station_latitude': result.station_latitude,
+            'station_longitude': result.station_longitude,
+            'interval': interval,
+            'data': record.tolist()
+        }
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -145,7 +172,16 @@ async def download_single_spectrum(file_name: str, sub_category: str):
 
     if result:
         frequency, record = result.to_spectrum()
-        return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+        return {
+            'id': result.id,
+            'file_name': result.file_name,
+            'latitude': result.latitude,
+            'longitude': result.longitude,
+            'station_latitude': result.station_latitude,
+            'station_longitude': result.station_longitude,
+            'interval': frequency,
+            'data': record.tolist()
+        }
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 

@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import logging
 import os
 import tarfile
 from http import HTTPStatus
@@ -51,7 +52,10 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
                 continue
             target = archive_obj.extractfile(f)
             if target:
-                records.extend(await ParserNZSM.parse_archive(target, os.path.basename(f.name)))
+                try:
+                    records.extend(await ParserNZSM.parse_archive(target, os.path.basename(f.name)))
+                except Exception as e:
+                    logging.critical(f'Failed to parse {f.name} due to {e}')
 
     if task:
         await task.delete()
@@ -112,7 +116,16 @@ async def download_single_random_waveform():
     result: NZSM = await download_single_random_raw_record()
 
     interval, record = result.to_waveform(type='a')
-    return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+    return {
+        'id': result.id,
+        'file_name': result.file_name,
+        'latitude': result.latitude,
+        'longitude': result.longitude,
+        'station_latitude': result.station_latitude,
+        'station_longitude': result.station_longitude,
+        'interval': interval,
+        'data': record.tolist()
+    }
 
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
@@ -123,7 +136,16 @@ async def download_single_random_spectrum():
     result: NZSM = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum(type='a')
-    return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+    return {
+        'id': result.id,
+        'file_name': result.file_name,
+        'latitude': result.latitude,
+        'longitude': result.longitude,
+        'station_latitude': result.station_latitude,
+        'station_longitude': result.station_longitude,
+        'interval': frequency,
+        'data': record.tolist()
+    }
 
 
 @router.get('/raw/{file_name}', response_model=NZSM)
@@ -156,7 +178,16 @@ async def download_single_waveform(file_name: str, normalised: bool = False):
 
     if result:
         interval, record = result.to_waveform(type=type_char, normalised=normalised)
-        return {'id': result.id, 'file_name': result.file_name, 'interval': interval, 'data': record.tolist()}
+        return {
+            'id': result.id,
+            'file_name': result.file_name,
+            'latitude': result.latitude,
+            'longitude': result.longitude,
+            'station_latitude': result.station_latitude,
+            'station_longitude': result.station_longitude,
+            'interval': interval,
+            'data': record.tolist()
+        }
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -176,6 +207,15 @@ async def download_single_spectrum(file_name: str):
 
     if result:
         frequency, record = result.to_spectrum(type=type_char)
-        return {'id': result.id, 'file_name': result.file_name, 'interval': frequency, 'data': record.tolist()}
+        return {
+            'id': result.id,
+            'file_name': result.file_name,
+            'latitude': result.latitude,
+            'longitude': result.longitude,
+            'station_latitude': result.station_latitude,
+            'station_longitude': result.station_longitude,
+            'interval': frequency,
+            'data': record.tolist()
+        }
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')

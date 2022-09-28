@@ -113,13 +113,17 @@ class ParserNZSM:
 
         int_header, float_header = _parse_header(lines)
 
-        record.latitude = float_header[12]
+        record.latitude = -float_header[12]
         record.longitude = float_header[13]
         record.depth = int_header[16]
         record.magnitude = float_header[16]
-        record.station_latitude = float_header[10]
+        record.station_latitude = -float_header[10]
         record.station_longitude = float_header[11]
-        record.sampling_frequency = float_header[0]
+        if float_header[0] != 0:
+            record.sampling_frequency = float_header[0]
+        else:
+            record.sampling_frequency = 1 / _parse_interval(lines[10])
+
         record.duration = float_header[23]
         record.direction = lines[12].split()[1]
         record.maximum_acceleration = float_header[35]
@@ -156,6 +160,15 @@ class ParserNZSM:
         # assert len(record.raw_displacement) == d_samples, 'Number of samples does not match.'
 
         return record
+
+
+def _parse_interval(line: str):
+    pattern = re.compile(r'\s(\d+\.\d+)\s')
+    matches = pattern.search(line)
+    if matches:
+        return float(matches[1])
+
+    raise ValueError('Sampling frequency/interval not found.')
 
 
 def _fixed_size_split(line: str, size: int = 8) -> List[str]:
