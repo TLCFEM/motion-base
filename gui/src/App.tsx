@@ -1,5 +1,4 @@
 import type {Component} from 'solid-js';
-import {createSignal} from "solid-js";
 import axios from "axios";
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min';
@@ -8,6 +7,12 @@ import 'tippy.js/dist/tippy.css';
 import 'tippy.js/themes/material.css';
 import 'tippy.js/animations/scale.css';
 import Button from "@suid/material/Button";
+import Typography from "@suid/material/Typography"
+import FormControl from "@suid/material/FormControl";
+import FormControlLabel from "@suid/material/FormControlLabel";
+import FormLabel from "@suid/material/FormLabel";
+import Radio from "@suid/material/Radio";
+import RadioGroup from "@suid/material/RadioGroup";
 import 'leaflet/dist/leaflet.css';
 // @ts-ignore
 import L from 'leaflet';
@@ -26,11 +31,18 @@ L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
 let event_location = L.marker(position).addTo(map);
 let station_location = L.marker(station_position).addTo(map);
 
-const getBasicInfo = () => {
-    const [info, setInfo] = createSignal(null);
-    axios.get('/alive').then(res => res.data.message).then(setInfo);
-    return info;
+const axis_label = (label: string, size: number) => {
+    return {
+        title: {
+            text: label,
+            font: {
+                size: size,
+                color: '#812618'
+            }
+        },
+    }
 }
+
 
 const plot = () => {
     let canvas = document.getElementById('canvas');
@@ -67,24 +79,8 @@ const plot = () => {
                     size: 24
                 },
             },
-            xaxis: {
-                title: {
-                    text: 'Time (s)',
-                    font: {
-                        size: 16,
-                        color: '#812618'
-                    }
-                },
-            },
-            yaxis: {
-                title: {
-                    text: 'Amplitude',
-                    font: {
-                        size: 16,
-                        color: '#812618'
-                    }
-                }
-            }
+            xaxis: axis_label('Time (s)', 18),
+            yaxis: axis_label('Amplitude', 18),
         }, {
             responsive: true,
         });
@@ -100,13 +96,26 @@ const plot = () => {
     return null;
 }
 
+function RadioButtonsGroupExample() {
+    return (
+        <FormControl>
+            <FormLabel id="region">Region</FormLabel>
+            <RadioGroup aria-labelledby="region" defaultValue="NZ" name="region-selection">
+                <FormControlLabel value="JP" control={() => <Radio/>} label="JP"/>
+                <FormControlLabel value="NZ" control={() => <Radio/>} label="NZ"/>
+            </RadioGroup>
+        </FormControl>
+    );
+}
+
 const App: Component = () => {
     return (
         <div>
-            <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
-            <h1>Motion Base</h1>
-            <p>{getBasicInfo()}</p>
             {plot()}
+            <Typography variant="h3">Motion Base</Typography>
+            <RadioButtonsGroupExample/>
+            <br/>
+            <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
         </div>
     );
 };
