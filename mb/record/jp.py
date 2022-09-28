@@ -126,7 +126,7 @@ class ParserNIED:
                     await record.save()
                     records.append(record.file_name)
                 except Exception as e:
-                    _logger.critical(f'Failed to parse.', file_name=f.name, exe_info=e)
+                    _logger.critical('Failed to parse.', file_name=f.name, exe_info=e)
 
         if task:
             await task.delete()
