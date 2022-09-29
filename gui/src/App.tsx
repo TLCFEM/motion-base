@@ -1,6 +1,5 @@
 import type {Component} from 'solid-js';
-import {createEffect, createRoot, createSignal, onMount} from "solid-js";
-import axios from "axios";
+import {createEffect, createSignal, onMount} from "solid-js";
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min';
 import tippy from 'tippy.js';
@@ -21,31 +20,8 @@ import Toolbar from "@suid/material/Toolbar";
 import MenuIcon from "@suid/icons-material/Menu";
 import {jackpot} from "./API";
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000';
-
 const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317]);
 const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317]);
-
-createRoot(() => {
-    const map = L.map('map').setView(event_location(), 8);
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 15,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
-
-    let event_marker = L.marker(event_location()).addTo(map);
-    let station_marker = L.marker(station_location()).addTo(map);
-
-    event_marker.bindPopup('event location');
-    station_marker.bindPopup('station location');
-
-    createEffect(() => {
-        event_marker.setLatLng(event_location());
-        station_marker.setLatLng(station_location());
-
-        map.flyTo(event_location(), 5);
-    });
-});
 
 
 const axis_label = (label: string, size: number) => {
@@ -54,25 +30,20 @@ const axis_label = (label: string, size: number) => {
             text: label,
             font: {
                 size: size,
-                color: '#812618'
+                color: '#548861'
             }
         },
     }
 }
 
-
 export const plot = (data: any) => {
-    let canvas = document.getElementById('canvas');
-
     set_event_location([data.latitude, data.longitude]);
     set_station_location([data.station_latitude, data.station_longitude]);
 
-    let interval: number = data.interval;
+    const interval: number = data.interval;
 
     let x: Array<number> = [];
-    for (let i = 0; i < data.data.length; i++) {
-        x.push(i * interval);
-    }
+    for (let i = 0; i < data.data.length; i++) x.push(i * interval);
 
     let trace = {
         x: x,
@@ -80,7 +51,8 @@ export const plot = (data: any) => {
         type: 'scatter',
         name: data.file_name
     };
-    Plotly.newPlot(canvas, [trace], {
+
+    Plotly.newPlot(document.getElementById('canvas'), [trace], {
         autosize: true,
         automargin: true,
         title: {
@@ -105,7 +77,33 @@ const Item = styled(Paper)(({theme}) => ({
     color: theme.palette.text.secondary,
 }));
 
+let map: L.Map = L.map('map');
+
 const App: Component = () => {
+    let container = L.DomUtil.get('map');
+    if (container != null) {
+        container._leaflet_id = null;
+    }
+
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 12,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
+
+    let event_marker = L.marker(event_location()).addTo(map);
+    let station_marker = L.marker(station_location()).addTo(map);
+    event_marker.bindPopup('event location');
+    station_marker.bindPopup('station location');
+
+    map.setView(event_location(), 6);
+
+    createEffect(() => {
+        event_marker.setLatLng(event_location());
+        station_marker.setLatLng(station_location());
+
+        map.flyTo(event_location(), 5);
+    });
+
     onMount(() => {
         tippy('#refresh', {
             arrow: true,
