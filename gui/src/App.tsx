@@ -1,4 +1,5 @@
 import type {Component} from 'solid-js';
+import {createEffect, createRoot, createSignal, onMount} from "solid-js";
 import axios from "axios";
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min';
@@ -14,21 +15,38 @@ import L from 'leaflet';
 import RegionGroup from "./QuerySetting";
 import Paper from "@suid/material/Paper";
 import styled from "@suid/material/styles/styled";
-import Stack from "@suid/material/Stack";
+import AppBar from "@suid/material/AppBar"
+import IconButton from "@suid/material/IconButton";
+import Toolbar from "@suid/material/Toolbar";
+import MenuIcon from "@suid/icons-material/Menu";
+import {jackpot} from "./API";
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
-let position: Array<number> = [42.35, -71.08];
-let station_position: Array<number> = position;
-let map = L.map('map').setView(position, 8);
+const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317]);
+const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317]);
 
-L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    maxZoom: 19,
-    attribution: '© OpenStreetMap'
-}).addTo(map);
+createRoot(() => {
+    const map = L.map('map').setView(event_location(), 8);
+    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        maxZoom: 15,
+        attribution: '© OpenStreetMap'
+    }).addTo(map);
 
-let event_location = L.marker(position).addTo(map);
-let station_location = L.marker(station_position).addTo(map);
+    let event_marker = L.marker(event_location()).addTo(map);
+    let station_marker = L.marker(station_location()).addTo(map);
+
+    event_marker.bindPopup('event location');
+    station_marker.bindPopup('station location');
+
+    createEffect(() => {
+        event_marker.setLatLng(event_location());
+        station_marker.setLatLng(station_location());
+
+        map.flyTo(event_location(), 5);
+    });
+});
+
 
 const axis_label = (label: string, size: number) => {
     return {
@@ -43,61 +61,40 @@ const axis_label = (label: string, size: number) => {
 }
 
 
-const plot = () => {
+export const plot = (data: any) => {
     let canvas = document.getElementById('canvas');
-    let region = document.querySelector('[name="region-selector"]:checked');
-    let region_value = region?.getAttribute('value');
-    if (region_value === undefined) {
-        region_value = 'jp';
+
+    set_event_location([data.latitude, data.longitude]);
+    set_station_location([data.station_latitude, data.station_longitude]);
+
+    let interval: number = data.interval;
+
+    let x: Array<number> = [];
+    for (let i = 0; i < data.data.length; i++) {
+        x.push(i * interval);
     }
-    let url = `/${region_value}/waveform/jackpot`;
-    axios.get(url).then(res => {
-        position = [res.data.latitude, res.data.longitude];
-        station_position = [res.data.station_latitude, res.data.station_longitude];
-        event_location.remove();
-        station_location.remove();
-        map.flyTo(position, 5);
-        event_location = L.marker(position).addTo(map);
-        station_location = L.marker(station_position).addTo(map);
-        event_location.bindPopup('event location');
-        station_location.bindPopup('station location');
 
-        let interval: number = res.data.interval;
-
-        let x: Array<number> = [];
-        for (let i = 0; i < res.data.data.length; i++) {
-            x.push(i * interval);
-        }
-
-        let trace = {
-            x: x,
-            y: res.data.data,
-            type: 'scatter',
-            name: res.data.file_name
-        };
-        Plotly.newPlot(canvas, [trace], {
-            autosize: true,
-            automargin: true,
-            title: {
-                text: res.data.file_name,
-                font: {
-                    size: 24
-                },
+    let trace = {
+        x: x,
+        y: data.data,
+        type: 'scatter',
+        name: data.file_name
+    };
+    Plotly.newPlot(canvas, [trace], {
+        autosize: true,
+        automargin: true,
+        title: {
+            text: data.file_name,
+            font: {
+                size: 24
             },
-            xaxis: axis_label('Time (s)', 18),
-            yaxis: axis_label('Amplitude (cm/s^2)', 18),
-        }, {
-            responsive: true,
-        });
+        },
+        xaxis: axis_label('Time (s)', 18),
+        yaxis: axis_label('Amplitude (cm/s^2)', 18),
+    }, {
+        responsive: true,
     });
 
-    tippy('#refresh', {
-        arrow: true,
-        animation: 'shift-toward',
-        inertia: true,
-        theme: 'material',
-        content: 'Get a new random waveform!',
-    });
     return null;
 }
 
@@ -109,21 +106,34 @@ const Item = styled(Paper)(({theme}) => ({
 }));
 
 const App: Component = () => {
+    onMount(() => {
+        tippy('#refresh', {
+            arrow: true,
+            animation: 'shift-toward',
+            inertia: true,
+            theme: 'material',
+            content: 'Get a new random waveform!',
+        });
+    });
+
     return (
-        <div id="high">
-            <Typography variant="h3">Motion Base</Typography>
-            <Stack spacing={2} id="setting">
-                <Item>
-                    <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
-                    <Button variant="contained">Hello</Button>
-                    <Button variant="contained">World</Button>
-                </Item>
-                <Item><RegionGroup/></Item>
-            </Stack>
-            {plot()}
+        <div>
+            <AppBar position="static">
+                <Toolbar>
+                    <IconButton size="medium" edge="start" color="inherit" aria-label="menu" sx={{mr: 2}}>
+                        <MenuIcon/>
+                    </IconButton>
+                    <Typography variant="h5" component="div" sx={{flexGrow: 2}}>
+                        Motion Base
+                    </Typography>
+                    <Button variant="outlined">Login</Button>
+                    <Button variant="contained" id="refresh" onClick={jackpot}>Refresh</Button>
+                </Toolbar>
+            </AppBar>
+            {jackpot()}
+            <Item id='high'><RegionGroup/></Item>
         </div>
-    )
-        ;
+    );
 };
 
 export default App;

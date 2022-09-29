@@ -1,6 +1,5 @@
 import FormControl from "@suid/material/FormControl";
 import FormControlLabel from "@suid/material/FormControlLabel";
-import FormLabel from "@suid/material/FormLabel";
 import Radio from "@suid/material/Radio";
 import RadioGroup from "@suid/material/RadioGroup";
 // @ts-ignore
@@ -16,14 +15,7 @@ export default function RegionGroup() {
 
     return (
         <FormControl>
-            <FormLabel id="region">Region</FormLabel>
-            <RadioGroup
-                aria-labelledby="region"
-                name="region-selector"
-                id="region-selector"
-                value={value()}
-                onChange={handleChange}
-            >
+            <RadioGroup aria-labelledby="region" name="region" id="region" value={value()} onChange={handleChange}>
                 <FormControlLabel value="jp" control={<Radio/>} label="JP"/>
                 <FormControlLabel value="nz" control={<Radio/>} label="NZ"/>
             </RadioGroup>
