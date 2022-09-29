@@ -4,20 +4,34 @@ import Radio from "@suid/material/Radio";
 import RadioGroup from "@suid/material/RadioGroup";
 // @ts-ignore
 import * as ST from "@suid/types";
-import {createSignal} from "solid-js";
+import {createSignal, For} from "solid-js";
+import FormLabel from "@suid/material/FormLabel";
+import Stack from "@suid/material/Stack";
+import Divider from "@suid/material/Divider";
+
 
 export default function RegionGroup() {
-    const [value, setValue] = createSignal("jp");
+    let region_set: Array<string> = ['jp', 'nz', 'us', 'eu']
 
-    const handleChange = (event: ST.ChangeEvent<HTMLInputElement>) => {
-        setValue(event.target.value);
+    const [region, set_region] = createSignal(region_set[0]);
+
+    const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => {
+        set_region(event.target.value);
     };
 
     return (
         <FormControl>
-            <RadioGroup aria-labelledby="region" name="region" id="region" value={value()} onChange={handleChange}>
-                <FormControlLabel value="jp" control={<Radio/>} label="JP"/>
-                <FormControlLabel value="nz" control={<Radio/>} label="NZ"/>
+            <FormLabel>Region</FormLabel>
+            <RadioGroup aria-labelledby="region" name="region" id="region" value={region()} onChange={handle_change}>
+                <Stack
+                    direction='row'
+                    justifyContent="center"
+                    alignItems="center"
+                    divider={<Divider orientation="vertical" flexItem/>}>
+                    <For each={region_set}>{(r) =>
+                        <FormControlLabel value={r} control={<Radio size="small"/>} label={r.toUpperCase()}/>
+                    }</For>
+                </Stack>
             </RadioGroup>
         </FormControl>
     );

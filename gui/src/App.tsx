@@ -1,24 +1,25 @@
 import type {Component} from 'solid-js';
-import {createEffect, createSignal, onMount} from "solid-js";
+import {createEffect, createSignal, onMount} from 'solid-js';
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min';
 import tippy from 'tippy.js';
 import 'tippy.js/dist/tippy.css';
-import 'tippy.js/themes/material.css';
+import 'tippy.js/themes/translucent.css';
 import 'tippy.js/animations/scale.css';
-import Button from "@suid/material/Button";
-import Typography from "@suid/material/Typography"
+import Button from '@suid/material/Button';
+import Typography from '@suid/material/Typography'
 import 'leaflet/dist/leaflet.css';
 // @ts-ignore
 import L from 'leaflet';
-import RegionGroup from "./QuerySetting";
-import Paper from "@suid/material/Paper";
+import RegionGroup from './QuerySetting';
+import AppBar from '@suid/material/AppBar'
+import IconButton from '@suid/material/IconButton';
+import Toolbar from '@suid/material/Toolbar';
+import MenuIcon from '@suid/icons-material/Menu';
+import Stack from "@suid/material/Stack";
+import {jackpot} from './API';
 import styled from "@suid/material/styles/styled";
-import AppBar from "@suid/material/AppBar"
-import IconButton from "@suid/material/IconButton";
-import Toolbar from "@suid/material/Toolbar";
-import MenuIcon from "@suid/icons-material/Menu";
-import {jackpot} from "./API";
+import Paper from "@suid/material/Paper";
 
 const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317]);
 const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317]);
@@ -45,27 +46,15 @@ export const plot = (data: any) => {
     let x: Array<number> = [];
     for (let i = 0; i < data.data.length; i++) x.push(i * interval);
 
-    let trace = {
-        x: x,
-        y: data.data,
-        type: 'scatter',
-        name: data.file_name
-    };
+    let trace = {x: x, y: data.data, type: 'scatter', name: data.file_name};
 
     Plotly.newPlot(document.getElementById('canvas'), [trace], {
         autosize: true,
         automargin: true,
-        title: {
-            text: data.file_name,
-            font: {
-                size: 24
-            },
-        },
+        title: {text: data.file_name, font: {size: 24},},
         xaxis: axis_label('Time (s)', 18),
         yaxis: axis_label('Amplitude (cm/s^2)', 18),
-    }, {
-        responsive: true,
-    });
+    }, {responsive: true,});
 
     return null;
 }
@@ -73,29 +62,38 @@ export const plot = (data: any) => {
 const Item = styled(Paper)(({theme}) => ({
     ...theme.typography.body2,
     padding: theme.spacing(1),
-    textAlign: "center",
+    textAlign: 'center',
     color: theme.palette.text.secondary,
 }));
 
-let map: L.Map = L.map('map');
-
 const App: Component = () => {
-    let container = L.DomUtil.get('map');
-    if (container != null) {
-        container._leaflet_id = null;
-    }
+    let map: L.Map;
+    let event_marker: L.Marker;
+    let station_marker: L.Marker;
 
-    L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        maxZoom: 12,
-        attribution: '© OpenStreetMap'
-    }).addTo(map);
+    onMount(() => {
+        map = L.map('map').setView(event_location(), 6);
 
-    let event_marker = L.marker(event_location()).addTo(map);
-    let station_marker = L.marker(station_location()).addTo(map);
-    event_marker.bindPopup('event location');
-    station_marker.bindPopup('station location');
+        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            maxZoom: 12,
+            attribution: '© OpenStreetMap'
+        }).addTo(map);
 
-    map.setView(event_location(), 6);
+        event_marker = L.marker(event_location()).addTo(map);
+        station_marker = L.marker(station_location()).addTo(map);
+        event_marker.bindPopup('event location');
+        station_marker.bindPopup('station location');
+
+        tippy('#random', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Get A Random Waveform!',
+        });
+
+        jackpot();
+    })
 
     createEffect(() => {
         event_marker.setLatLng(event_location());
@@ -104,33 +102,26 @@ const App: Component = () => {
         map.flyTo(event_location(), 5);
     });
 
-    onMount(() => {
-        tippy('#refresh', {
-            arrow: true,
-            animation: 'shift-toward',
-            inertia: true,
-            theme: 'material',
-            content: 'Get a new random waveform!',
-        });
-    });
-
     return (
-        <div>
-            <AppBar position="static">
+        <>
+            <AppBar position='static' id='app-bar'>
                 <Toolbar>
-                    <IconButton size="medium" edge="start" color="inherit" aria-label="menu" sx={{mr: 2}}>
+                    <IconButton size='medium' edge='start' color='inherit' aria-label='menu' sx={{mr: 2}}>
                         <MenuIcon/>
                     </IconButton>
-                    <Typography variant="h5" component="div" sx={{flexGrow: 2}}>
+                    <Typography variant='h5' component='div' sx={{flexGrow: 2}}>
                         Motion Base
                     </Typography>
-                    <Button variant="outlined">Login</Button>
-                    <Button variant="contained" id="refresh" onClick={jackpot}>Refresh</Button>
+                    <Stack spacing={2} direction="row">
+                        <Button variant='contained' id='random' onClick={jackpot}>Roll</Button>
+                        <Button variant='contained' id='login'>Login</Button>
+                    </Stack>
                 </Toolbar>
             </AppBar>
-            {jackpot()}
-            <Item id='high'><RegionGroup/></Item>
-        </div>
+            <Stack spacing={2} direction="row">
+                <Item><RegionGroup/></Item>
+            </Stack>
+        </>
     );
 };
 

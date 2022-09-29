@@ -24,7 +24,11 @@ code {
     height: 400px;
 }
 
-#high {
+#header {
     margin-bottom: 20px;
     margin-top: 20px;
+}
+
+#app-bar {
+    margin-bottom: 20px;
 }
