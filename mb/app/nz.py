@@ -150,7 +150,7 @@ async def download_single_random_spectrum():
     }
 
 
-@router.get('/raw/{file_name}', response_model=NZSM)
+@router.get('/raw/{file_id_or_name}', response_model=NZSM)
 async def download_single_raw_record(file_id_or_name: str):
     '''
     Retrieve raw record.
@@ -165,7 +165,7 @@ async def download_single_raw_record(file_id_or_name: str):
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
 
-@router.get('/waveform/{file_name}', response_model=SequenceResponse)
+@router.get('/waveform/{file_id_or_name}', response_model=SequenceResponse)
 async def download_single_waveform(file_id_or_name: str, normalised: bool = False):
     '''
     Retrieve raw waveform.
@@ -191,7 +191,7 @@ async def download_single_waveform(file_id_or_name: str, normalised: bool = Fals
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
 
-@router.get('/spectrum/{file_name}', response_model=SequenceResponse)
+@router.get('/spectrum/{file_id_or_name}', response_model=SequenceResponse)
 async def download_single_spectrum(file_id_or_name: str):
     '''
     Retrieve raw spectrum.
