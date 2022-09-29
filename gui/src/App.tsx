@@ -118,7 +118,7 @@ const App: Component = () => {
                     </Stack>
                 </Toolbar>
             </AppBar>
-            <Stack spacing={2} direction="row">
+            <Stack spacing={2} direction='row' style='margin-bottom:20px'>
                 <Item><RegionGroup/></Item>
             </Stack>
         </>
