@@ -11,6 +11,10 @@ import Typography from "@suid/material/Typography"
 import 'leaflet/dist/leaflet.css';
 // @ts-ignore
 import L from 'leaflet';
+import RegionGroup from "./QuerySetting";
+import Paper from "@suid/material/Paper";
+import styled from "@suid/material/styles/styled";
+import Stack from "@suid/material/Stack";
 
 axios.defaults.baseURL = 'http://127.0.0.1:8000';
 
@@ -41,7 +45,13 @@ const axis_label = (label: string, size: number) => {
 
 const plot = () => {
     let canvas = document.getElementById('canvas');
-    axios.get('/nz/waveform/jackpot').then(res => {
+    let region = document.querySelector('[name="region-selector"]:checked');
+    let region_value = region?.getAttribute('value');
+    if (region_value === undefined) {
+        region_value = 'jp';
+    }
+    let url = `/${region_value}/waveform/jackpot`;
+    axios.get(url).then(res => {
         position = [res.data.latitude, res.data.longitude];
         station_position = [res.data.station_latitude, res.data.station_longitude];
         event_location.remove();
@@ -91,14 +101,29 @@ const plot = () => {
     return null;
 }
 
+const Item = styled(Paper)(({theme}) => ({
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: "center",
+    color: theme.palette.text.secondary,
+}));
+
 const App: Component = () => {
     return (
-        <div>
+        <div id="high">
             <Typography variant="h3">Motion Base</Typography>
-            <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
+            <Stack spacing={2} id="setting">
+                <Item>
+                    <Button variant="contained" id="refresh" onClick={plot}>Refresh</Button>
+                    <Button variant="contained">Hello</Button>
+                    <Button variant="contained">World</Button>
+                </Item>
+                <Item><RegionGroup/></Item>
+            </Stack>
             {plot()}
         </div>
-    );
+    )
+        ;
 };
 
 export default App;

@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
-from typing import Tuple
+from typing import List, Tuple
 from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 
 import numpy as np
@@ -41,6 +41,8 @@ class Record(Document):
     duration: float = None
     duration_unit: str = None
     direction: str = None
+    raw_data: List[int] = None
+    raw_data_unit: str = None
 
     def set_id(self, id_seed: str | None = None):
         if id_seed is None:
@@ -65,6 +67,13 @@ class Record(Document):
     def _perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
         fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
         return 1 / sampling_frequency, fft_magnitude
+
+    @staticmethod
+    def _normalise(magnitude: np.ndarray) -> np.ndarray:
+        max_value: float = abs(np.max(magnitude))
+        min_value: float = abs(np.min(magnitude))
+        magnitude /= max_value if max_value > min_value else min_value
+        return magnitude
 
 
 def to_unit(quantity: pint.Quantity, unit: pint.Unit):

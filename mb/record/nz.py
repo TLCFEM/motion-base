@@ -3,6 +3,7 @@ import re
 from datetime import datetime
 from math import ceil
 from typing import IO, List, Tuple
+from uuid import UUID
 
 import aiofiles
 import numpy as np
@@ -11,6 +12,7 @@ import pymongo
 import structlog
 from beanie import Indexed
 
+from mb.app.utility import match_uuid
 from mb.record.record import Record, to_unit
 
 _FTI_ = 10000
@@ -22,8 +24,6 @@ class NZSM(Record):
     record_time: datetime = None
     scale_factor: float = 1 / _FTI_
     maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
-    maximum_acceleration_unit: str = None
-    raw_data: List[int] = None
 
     def to_raw_waveform(self, **kwargs) -> Tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data
@@ -33,15 +33,13 @@ class NZSM(Record):
 
         numpy_array: np.ndarray = np.array(self.to_raw_waveform(**kwargs)[1], dtype=float)
         if normalised:
-            max_value: float = abs(np.max(numpy_array))
-            min_value: float = abs(np.min(numpy_array))
-            numpy_array /= max_value if max_value > min_value else min_value
+            numpy_array = self._normalise(numpy_array)
             unit = None
         else:
             numpy_array *= self.scale_factor
             unit = kwargs.get('unit', None)
 
-        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.maximum_acceleration_unit), unit)
+        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.raw_data_unit), unit)
 
     def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(**kwargs)
@@ -86,7 +84,7 @@ class ParserNZSM:
             record.station_code = matches[3]
             record.depth_unit = str(pint.Unit('km'))
             record.sampling_frequency_unit = str(pint.Unit('Hz'))
-            record.maximum_acceleration_unit = str(pint.Unit('mm/s/s'))
+            record.raw_data_unit = str(pint.Unit('mm/s/s'))
             record.duration_unit = str(pint.Unit('s'))
             record.file_name = os.path.basename(file_name if file_name else file_path)
             record.sub_category = 'processed' if record.file_name.endswith('.V2A') else 'unprocessed'
@@ -148,5 +146,8 @@ def _parse_header(lines: List[str]) -> (list, list):
     return int_header, float_header
 
 
-async def retrieve_single_record(file_name: str) -> NZSM:
-    return await NZSM.find_one(NZSM.file_name == file_name)
+async def retrieve_single_record(file_id_or_name: str) -> NZSM:
+    if match_uuid(file_id_or_name):
+        return await NZSM.find_one(NZSM.id == UUID(file_id_or_name.lower()))
+
+    return await NZSM.find_one(NZSM.file_name == file_id_or_name.upper())

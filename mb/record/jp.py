@@ -16,7 +16,8 @@ import os
 import re
 import tarfile
 from datetime import datetime
-from typing import BinaryIO, IO, List, Tuple
+from http import HTTPStatus
+from typing import BinaryIO, IO, Tuple
 from uuid import UUID
 
 import aiofiles
@@ -25,8 +26,9 @@ import pint
 import pymongo
 import structlog
 from beanie import Indexed
+from fastapi import HTTPException
 
-from mb.app.utility import UploadTask
+from mb.app.utility import UploadTask, match_uuid
 from mb.record.record import Record, to_unit
 
 _logger = structlog.get_logger(__name__)
@@ -38,8 +40,6 @@ class NIED(Record):
     record_time: datetime = None
     scale_factor: float = None
     maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
-    maximum_acceleration_unit: str = None
-    raw_data: List[int] = None
 
     class Config:
         arbitrary_types_allowed = False
@@ -62,15 +62,13 @@ class NIED(Record):
 
         numpy_array: np.ndarray = np.array(self.raw_data, dtype=float) + self.offset
         if normalised:
-            max_value: float = abs(np.max(numpy_array))
-            min_value: float = abs(np.min(numpy_array))
-            numpy_array /= max_value if max_value > min_value else min_value
+            numpy_array = self._normalise(numpy_array)
             unit = None
         else:
             numpy_array *= self.scale_factor
             unit = kwargs.get('unit', None)
 
-        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.maximum_acceleration_unit), unit)
+        return sampling_interval, to_unit(pint.Quantity(numpy_array, self.raw_data_unit), unit)
 
     def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(normalised=False, unit=kwargs.get('unit', None))
@@ -165,7 +163,7 @@ class ParserNIED:
         record.direction = _parse_direction(lines[12][18:])
         record.scale_factor = float(_strip_unit(lines[13][18:]))
         record.maximum_acceleration = float(lines[14][18:])
-        record.maximum_acceleration_unit = _normalised_unit(lines[14])
+        record.raw_data_unit = _normalised_unit(lines[14])
 
         record.raw_data = [int(value) for line in lines[17:] for value in line.split()]
 
@@ -194,8 +192,7 @@ def _parse_direction(line: str) -> str:
 
 
 def _parse_value(line: str) -> str:
-    regex = r'([0-9.]+)'
-    matches = re.findall(regex, line)
+    matches = re.findall(r'([0-9.]+)', line)
     if len(matches) == 0:
         raise ValueError(f'No value found in line: {line}')
     if len(matches) > 1:
@@ -204,8 +201,7 @@ def _parse_value(line: str) -> str:
 
 
 def _parse_unit(line: str) -> str:
-    regex = r'\(([^)]+)\)'
-    matches = re.findall(regex, line)
+    matches = re.findall(r'\(([^)]+)\)', line)
     if len(matches) == 0:
         raise ValueError(f'No unit found in line: {line}')
     if len(matches) > 1:
@@ -214,8 +210,14 @@ def _parse_unit(line: str) -> str:
     return matches[0]
 
 
-async def retrieve_single_record(sub_category: str, file_name: str) -> NIED:
-    result = await NIED.find_one(
-        NIED.sub_category == sub_category,
-        NIED.file_name == file_name)
-    return result
+async def retrieve_single_record(file_id_or_name: str, sub_category: str | None = None) -> NIED:
+    if sub_category is None:
+        if not match_uuid(file_id_or_name):
+            raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Invalid file ID.')
+
+        return await NIED.find_one(NIED.id == UUID(file_id_or_name.lower()))
+
+    return await NIED.find_one(
+        NIED.file_name == file_id_or_name.upper(),
+        NIED.sub_category == sub_category.lower()
+    )

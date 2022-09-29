@@ -151,14 +151,14 @@ async def download_single_random_spectrum():
 
 
 @router.get('/raw/{file_name}', response_model=NZSM)
-async def download_single_raw_record(file_name: str):
+async def download_single_raw_record(file_id_or_name: str):
     '''
     Retrieve raw record.
     The NZStrongMotion collection has acceleration records.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: NZSM = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_id_or_name)
     if result:
         return result
 
@@ -166,14 +166,14 @@ async def download_single_raw_record(file_name: str):
 
 
 @router.get('/waveform/{file_name}', response_model=SequenceResponse)
-async def download_single_waveform(file_name: str, normalised: bool = False):
+async def download_single_waveform(file_id_or_name: str, normalised: bool = False):
     '''
     Retrieve raw waveform.
     The NZStrongMotion collection has acceleration records.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: NZSM = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_id_or_name)
 
     if result:
         interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
@@ -192,14 +192,14 @@ async def download_single_waveform(file_name: str, normalised: bool = False):
 
 
 @router.get('/spectrum/{file_name}', response_model=SequenceResponse)
-async def download_single_spectrum(file_name: str):
+async def download_single_spectrum(file_id_or_name: str):
     '''
     Retrieve raw spectrum.
     The NZStrongMotion collection has acceleration records.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
     '''
-    result: NZSM = await retrieve_single_record(file_name.upper())
+    result: NZSM = await retrieve_single_record(file_id_or_name)
 
     if result:
         frequency, record = result.to_spectrum(unit='cm/s/s')

@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
+import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
 from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
@@ -148,3 +149,8 @@ async def create_task():
     task = UploadTask()
     await task.save()
     return task.id
+
+
+def match_uuid(uuid_string: str):
+    uuid_regex = re.compile(r'[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}')
+    return uuid_regex.match(uuid_string)
