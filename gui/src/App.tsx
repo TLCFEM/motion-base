@@ -25,7 +25,6 @@ import Radio from '@suid/material/Radio';
 import RadioGroup from '@suid/material/RadioGroup';
 // @ts-ignore
 import * as ST from '@suid/types';
-import FormLabel from '@suid/material/FormLabel';
 import Divider from '@suid/material/Divider';
 import CasinoIcon from '@suid/icons-material/Casino';
 import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline';
@@ -63,7 +62,6 @@ function RegionGroup() {
     };
 
     return (<FormControl>
-        <FormLabel>Region</FormLabel>
         <RadioGroup aria-labelledby='region' name='region' id='region' value={region()} onChange={handle_change}>
             <Stack
                 direction='row'
@@ -138,10 +136,25 @@ function RecordTableHeader() {
     return <TableHead>
         <TableRow>
             <For each={table_header}>
-                {(h) => <StyledTableCell>{h}</StyledTableCell>}
+                {(h) => {
+                    if (h === 'ID')
+                        return <StyledTableCell id={'table-header-id'}>{h}</StyledTableCell>
+                    return <StyledTableCell>{h}</StyledTableCell>
+                }}
             </For>
         </TableRow>
     </TableHead>
+}
+
+const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
+    if (event.target.tagName != 'TH') return;
+
+    for (let i = 0; i < record_metadata().length; i++) {
+        if (record_metadata()[i].id == event.target.innerText) {
+            set_current_record(record_metadata()[i]);
+            break;
+        }
+    }
 }
 
 function RecordEntry(record_entry: Record) {
@@ -152,7 +165,7 @@ function RecordEntry(record_entry: Record) {
     };
 
     return <StyledTableRow>
-        <StyledTableCell component="th" scope="row">{record_entry.id}</StyledTableCell>
+        <StyledTableCell component="th" scope="row" onClick={select_record}>{record_entry.id}</StyledTableCell>
         <StyledTableCell>{record_entry.file_name}</StyledTableCell>
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude}</StyledTableCell>
@@ -167,7 +180,7 @@ function RecordEntry(record_entry: Record) {
 
 function RecordTableBody() {
     return <TableBody>
-        {mapArray(record_metadata, (record_entry) => <RecordEntry {...record_entry}/>)}
+        {mapArray(record_metadata, (record_entry) => <RecordEntry  {...record_entry}/>)}
     </TableBody>
 }
 
@@ -218,7 +231,7 @@ const Epicenter: Component = () => {
         map = L.map(document.getElementById('epicenter')).setView(event_location(), 6);
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 15,
+            maxZoom: 12,
             attribution: '© OpenStreetMap'
         }).addTo(map);
 
@@ -282,6 +295,9 @@ const ButtonStack: Component = () => {
         });
         tippy('#login', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Login to Upload!',
+        });
+        tippy('#table-header-id', {
+            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Click Target ID to Replot!',
         });
     })
 
