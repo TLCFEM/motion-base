@@ -76,7 +76,7 @@ class ParserNZSM:
         assert 3 * num_lines == len(lines), 'Number of lines should be a multiple of 3.'
 
         record_names: List[str] = []
-        pattern = re.compile(r'(\d{8})_(\d{6})_(\w{3,4})_?')
+        pattern = re.compile(r'(\d{8})_(\d{6})_([A-Za-z0-9]{3,4})_?')
         matches = pattern.search(lines[0])
 
         async def _populate_common_fields(record: NZSM):
@@ -87,7 +87,7 @@ class ParserNZSM:
             record.raw_data_unit = str(pint.Unit('mm/s/s'))
             record.duration_unit = str(pint.Unit('s'))
             record.file_name = os.path.basename(file_name if file_name else file_path)
-            record.sub_category = 'processed' if record.file_name.endswith('.V2A') else 'unprocessed'
+            record.sub_category = 'processed' if record.file_name.upper().endswith('.V2A') else 'unprocessed'
             record.set_id(record.file_name + record.direction)
             await record.save()
             record_names.append(record.file_name)
@@ -107,13 +107,13 @@ class ParserNZSM:
         record.latitude = -float_header[12]
         record.longitude = float_header[13]
         record.depth = int_header[16]
-        record.magnitude = float_header[16]
+        record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
         record.station_latitude = -float_header[10]
         record.station_longitude = float_header[11]
         record.sampling_frequency = 1 / _parse_interval(lines[10])
 
         record.duration = float_header[23]
-        record.direction = lines[12].split()[1]
+        record.direction = lines[12].split()[1].upper()
         record.maximum_acceleration = float_header[35]
 
         offset: int = 26

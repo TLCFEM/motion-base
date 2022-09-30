@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+from datetime import datetime
 from typing import List
 from uuid import UUID
 
@@ -25,10 +25,22 @@ class SequenceResponse(BaseModel):
     '''
     id: UUID
     file_name: str
+    sub_category: str
+    magnitude: float
+    origin_time: datetime
     latitude: float
     longitude: float
+    depth: float
+    depth_unit: str
+    station_code: str
     station_latitude: float
     station_longitude: float
+    sampling_frequency: float
+    sampling_frequency_unit: str
+    duration: float
+    duration_unit: str
+    direction: str
+
     interval: float
     data: List[float]
 
