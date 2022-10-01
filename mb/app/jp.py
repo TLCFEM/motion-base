@@ -80,13 +80,13 @@ async def download_single_random_raw_record():
 
 
 @router.get('/waveform/jackpot', response_model=SequenceResponse)
-async def download_single_random_waveform():
+async def download_single_random_waveform(normalised: bool = False):
     '''
     Retrieve a single random waveform from the database.
     '''
     result: NIED = await download_single_random_raw_record()
 
-    interval, record = result.to_waveform(unit='cm/s/s')
+    interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
     # noinspection PyTypeChecker
     return SequenceResponse(**result.dict(), interval=interval, data=record.tolist())
 

@@ -36,7 +36,96 @@ import TableHead from '@suid/material/TableHead'
 import TableRow from '@suid/material/TableRow'
 import TableCell, {tableCellClasses} from '@suid/material/TableCell'
 import Container from "@suid/material/Container"
+import Modal from "@suid/material/Modal";
+import Alert from '@suid/material/Alert'
+import LinearProgress from "@suid/material/LinearProgress";
+import Switch from "@suid/material/Switch";
+import Box from '@suid/material/Box'
+import Link from "@suid/material/Link";
 
+const [open, set_open] = createSignal(false);
+const [open_about, set_open_about] = createSignal(false);
+const [error_message, set_error_message] = createSignal('');
+
+const ErrorModal = () => {
+    const error_toggle_off = () => set_open(false);
+
+    return (
+        <div>
+            <Modal
+                open={open()} onClose={error_toggle_off} aria-labelledby="error-model"
+                aria-describedby="error-model">
+                <LinearProgress/>
+                <Alert sx={{
+                    position: "absolute",
+                    top: "50%",
+                    left: "50%",
+                    transform: "translate(-50%, -50%)",
+                    border: "1px solid",
+                }} severity="error">{error_message()}</Alert>
+            </Modal>
+        </div>
+    )
+}
+
+
+const AboutModal = () => {
+    const about_toggle_off = () => set_open_about(false);
+
+    return (
+        <Modal
+            component='div' open={open_about()} onClose={about_toggle_off} aria-labelledby="about-model"
+            aria-describedby="about-model">
+            <Box component={Paper} sx={{
+                position: "absolute",
+                top: "50%",
+                left: "50%",
+                transform: "translate(-50%, -50%)",
+                p: 2,
+            }}>
+                <Typography variant="h4" sx={{p: 1}}>
+                    About
+                </Typography>
+                <Typography variant="body1" sx={{p: 1}}>
+                    This is a demo of strong motion database. The source code is available at GitHub.
+                </Typography>
+                <Typography variant="h6" sx={{p: 1}}>
+                    Japan Database
+                </Typography>
+                <Typography variant="body1" sx={{p: 1}}>
+                    The data is retrieved from <Link
+                    href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>. The data is not
+                    processed. Users may want to further filter the records.
+                </Typography>
+                <Typography variant="h6" sx={{p: 1}}>
+                    New Zealand Database
+                </Typography>
+                <Typography variant="body1" sx={{p: 1}}>
+                    The data is retrieved from <Link
+                    href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand
+                    Strong-Motion</Link> database. The selected strong motions are processed (*.V2A files). The other
+                    records (*.V1A files) are not processed. Users may want to further filter the records.
+                </Typography>
+            </Box>
+        </Modal>
+    )
+}
+
+const [normalised, set_normalised] = createSignal(false);
+
+function NormLabel() {
+    const handle_normalised = () => {
+        set_normalised(!normalised());
+    };
+
+    return (
+        <FormControlLabel
+            sx={{color: "text.secondary"}}
+            control={<Switch checked={normalised()} onChange={handle_normalised}/>}
+            label="Normalised"
+        />
+    );
+}
 
 const Item = styled(Paper)(({theme}) => ({
     ...theme.typography.body2, padding: theme.spacing(1), textAlign: 'center', color: theme.palette.text.secondary,
@@ -169,7 +258,7 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell component="th" scope="row" onClick={select_record}>{record_entry.id}</StyledTableCell>
         <StyledTableCell>{record_entry.file_name}</StyledTableCell>
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
-        <StyledTableCell>{record_entry.magnitude}</StyledTableCell>
+        <StyledTableCell>{record_entry.magnitude.toFixed(1)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
         <StyledTableCell>{record_entry.depth} {record_entry.depth_unit}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
@@ -212,13 +301,15 @@ function clear() {
 async function jackpot() {
     let region_value = region()
     if (region_value === 'us' || region_value === 'eu') region_value = 'jp'
-    const url = `/${region_value}/waveform/jackpot`
+    let url = `/${region_value}/waveform/jackpot`
+    if (normalised()) url += '?normalised=true'
     await axios.get(url).then(res => {
         let new_record = new Record(res.data)
         set_current_record(new_record)
         set_record_metadata(record_metadata().concat(new_record))
     }).catch(err => {
-        console.log(err)
+        set_error_message('Fail to retrieve data: ' + err.message)
+        set_open(true)
     })
 }
 
@@ -290,6 +381,8 @@ const login = () => {
 }
 
 const ButtonStack: Component = () => {
+    const about_toggle_on = () => set_open_about(true);
+
     onMount(() => {
         tippy('#random', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Get A Random Waveform!',
@@ -304,7 +397,7 @@ const ButtonStack: Component = () => {
 
     return <Stack spacing={2} direction="row">
         <Button variant='contained' id='api'>API</Button>
-        <Button variant='contained' id='about'>About</Button>
+        <Button variant='contained' id='about' onClick={about_toggle_on}>About</Button>
         <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
         <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
         <Button variant='contained' id='login' onClick={login}><LoginIcon/></Button>
@@ -333,6 +426,7 @@ const App: Component = () => {
         <Container maxWidth='xl' sx={{my: 1}}>
             <Stack spacing={1} justifyContent='flex-end' direction='row'>
                 <Item><RegionGroup/></Item>
+                <Item><NormLabel/></Item>
             </Stack>
         </Container>
         <Container maxWidth='xl' sx={{my: 1}} style='min-height:400px'>
@@ -342,6 +436,8 @@ const App: Component = () => {
         <Container maxWidth='xl' sx={{my: 1}}>
             <RecordTable/>
         </Container>
+        <ErrorModal/>
+        <AboutModal/>
     </>
 }
 

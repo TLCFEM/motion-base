@@ -110,9 +110,8 @@ class ParserNZSM:
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
         record.station_latitude = -float_header[10]
         record.station_longitude = float_header[11]
-        interval = _parse_interval(lines[10])
-        record.sampling_frequency = 1 / interval
-        record.duration = float_header[23] + interval
+        record.sampling_frequency = 1 / _parse_interval(lines[10])
+        record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
         record.maximum_acceleration = float_header[35]
 
