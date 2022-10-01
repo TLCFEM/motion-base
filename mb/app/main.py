@@ -21,7 +21,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
-from starlette.responses import RedirectResponse
+from fastapi.responses import RedirectResponse
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
