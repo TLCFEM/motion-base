@@ -1,7 +1,7 @@
-import {Component} from "solid-js";
+import {Component} from "solid-js"
 
 const Process: Component = () => {
-    return <div></div>;
-};
+    return <div></div>
+}
 
-export default Process;
+export default Process

@@ -1,46 +1,46 @@
-import type {Component} from 'solid-js';
-import {createEffect, createSignal, For, mapArray, onMount} from 'solid-js';
+import type {Component} from 'solid-js'
+import {createEffect, createSignal, For, mapArray, onMount} from 'solid-js'
 // @ts-ignore
-import Plotly from 'plotly.js-dist-min';
-import tippy from 'tippy.js';
-import 'tippy.js/dist/tippy.css';
-import 'tippy.js/themes/translucent.css';
-import 'tippy.js/animations/scale.css';
-import Button from '@suid/material/Button';
+import Plotly from 'plotly.js-dist-min'
+import tippy from 'tippy.js'
+import 'tippy.js/dist/tippy.css'
+import 'tippy.js/themes/translucent.css'
+import 'tippy.js/animations/scale.css'
+import Button from '@suid/material/Button'
 import Typography from '@suid/material/Typography'
-import 'leaflet/dist/leaflet.css';
+import 'leaflet/dist/leaflet.css'
 // @ts-ignore
-import L from 'leaflet';
+import L from 'leaflet'
 import AppBar from '@suid/material/AppBar'
-import IconButton from '@suid/material/IconButton';
-import Toolbar from '@suid/material/Toolbar';
-import MenuIcon from '@suid/icons-material/Menu';
-import Stack from "@suid/material/Stack";
-import styled from "@suid/material/styles/styled";
-import Paper from "@suid/material/Paper";
-import axios from "axios";
-import FormControl from '@suid/material/FormControl';
-import FormControlLabel from '@suid/material/FormControlLabel';
-import Radio from '@suid/material/Radio';
-import RadioGroup from '@suid/material/RadioGroup';
+import IconButton from '@suid/material/IconButton'
+import Toolbar from '@suid/material/Toolbar'
+import MenuIcon from '@suid/icons-material/Menu'
+import Stack from "@suid/material/Stack"
+import styled from "@suid/material/styles/styled"
+import Paper from "@suid/material/Paper"
+import axios from "axios"
+import FormControl from '@suid/material/FormControl'
+import FormControlLabel from '@suid/material/FormControlLabel'
+import Radio from '@suid/material/Radio'
+import RadioGroup from '@suid/material/RadioGroup'
 // @ts-ignore
-import * as ST from '@suid/types';
-import Divider from '@suid/material/Divider';
-import CasinoIcon from '@suid/icons-material/Casino';
-import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline';
-import LoginIcon from '@suid/icons-material/Login';
-import Table from '@suid/material/Table';
-import TableBody from '@suid/material/TableBody';
-import TableContainer from '@suid/material/TableContainer';
-import TableHead from '@suid/material/TableHead';
-import TableRow from '@suid/material/TableRow';
-import TableCell, {tableCellClasses} from '@suid/material/TableCell';
-import Container from "@suid/material/Container";
+import * as ST from '@suid/types'
+import Divider from '@suid/material/Divider'
+import CasinoIcon from '@suid/icons-material/Casino'
+import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline'
+import LoginIcon from '@suid/icons-material/Login'
+import Table from '@suid/material/Table'
+import TableBody from '@suid/material/TableBody'
+import TableContainer from '@suid/material/TableContainer'
+import TableHead from '@suid/material/TableHead'
+import TableRow from '@suid/material/TableRow'
+import TableCell, {tableCellClasses} from '@suid/material/TableCell'
+import Container from "@suid/material/Container"
 
 
 const Item = styled(Paper)(({theme}) => ({
     ...theme.typography.body2, padding: theme.spacing(1), textAlign: 'center', color: theme.palette.text.secondary,
-}));
+}))
 
 
 const PaddingPaper = styled(Paper)(({theme}) => ({
@@ -50,17 +50,17 @@ const PaddingPaper = styled(Paper)(({theme}) => ({
     // padding: theme.spacing(1),
     textAlign: 'center',
     color: theme.palette.text.secondary,
-}));
+}))
 
 
 let region_set: Array<string> = ['jp', 'nz', 'us', 'eu']
 
-const [region, set_region] = createSignal(region_set[0]);
+const [region, set_region] = createSignal(region_set[0])
 
 function RegionGroup() {
     const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => {
-        set_region(event.target.value);
-    };
+        set_region(event.target.value)
+    }
 
     return (<FormControl>
         <RadioGroup aria-labelledby='region' name='region' id='region' value={region()} onChange={handle_change}>
@@ -74,42 +74,42 @@ function RegionGroup() {
                 </For>
             </Stack>
         </RadioGroup>
-    </FormControl>);
+    </FormControl>)
 }
 
-const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317]);
-const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317]);
-const [waveform, set_waveform] = createSignal([Array<number>(0), Array<number>(0), '']);
+const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317])
+const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317])
+const [waveform, set_waveform] = createSignal([Array<number>(0), Array<number>(0), ''])
 
 class Record {
-    public id: string = '';
-    public file_name: string = '';
-    public sub_category: string = '';
-    public magnitude: number = 0;
-    public origin_time: string = '';
-    public latitude: number = 52.5068441;
-    public longitude: number = 13.4247317;
-    public depth: number = 0;
-    public depth_unit: string = '';
-    public station_code: string = '';
-    public station_latitude: number = 52.5068441;
-    public station_longitude: number = 13.4247317;
-    public sampling_frequency: number = 0;
-    public sampling_frequency_unit: string = '';
-    public duration: number = 0;
-    public duration_unit: string = '';
-    public direction: string = '';
+    public id: string = ''
+    public file_name: string = ''
+    public sub_category: string = ''
+    public magnitude: number = 0
+    public origin_time: string = ''
+    public latitude: number = 52.5068441
+    public longitude: number = 13.4247317
+    public depth: number = 0
+    public depth_unit: string = ''
+    public station_code: string = ''
+    public station_latitude: number = 52.5068441
+    public station_longitude: number = 13.4247317
+    public sampling_frequency: number = 0
+    public sampling_frequency_unit: string = ''
+    public duration: number = 0
+    public duration_unit: string = ''
+    public direction: string = ''
 
-    public interval: number = 0;
-    public data: Array<number> = Array<number>(0);
+    public interval: number = 0
+    public data: Array<number> = Array<number>(0)
 
     public constructor(data: any) {
-        Object.assign(this, data);
+        Object.assign(this, data)
     }
 }
 
-const [record_metadata, set_record_metadata] = createSignal<Array<Record>>(Array<Record>(0));
-const [current_record, set_current_record] = createSignal<Record>(new Record({}));
+const [record_metadata, set_record_metadata] = createSignal<Array<Record>>(Array<Record>(0))
+const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -120,7 +120,7 @@ const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.body}`]: {
         fontSize: 14,
     },
-}));
+}))
 
 const StyledTableRow = styled(TableRow)(({theme}) => ({
     '&:nth-of-type(odd)': {
@@ -129,7 +129,7 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
     '&:last-child td, &:last-child th': {
         border: 0,
     },
-}));
+}))
 
 function RecordTableHeader() {
     const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
@@ -148,22 +148,22 @@ function RecordTableHeader() {
 }
 
 const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.tagName != 'TH') return;
+    if (event.target.tagName != 'TH') return
 
     for (let i = 0; i < record_metadata().length; i++) {
         if (record_metadata()[i].id == event.target.innerText) {
-            set_current_record(record_metadata()[i]);
-            break;
+            set_current_record(record_metadata()[i])
+            break
         }
     }
 }
 
 function RecordEntry(record_entry: Record) {
     let convert_time = (time: string) => {
-        if (time === '') return '';
-        let date = new Date(time);
-        return date.toLocaleString('en-GB');
-    };
+        if (time === '') return ''
+        let date = new Date(time)
+        return date.toLocaleString('en-GB')
+    }
 
     return <StyledTableRow>
         <StyledTableCell component="th" scope="row" onClick={select_record}>{record_entry.id}</StyledTableCell>
@@ -205,74 +205,74 @@ const axis_label = (label: string, size: number) => {
 }
 
 function clear() {
-    set_record_metadata(Array<Record>(0));
+    set_record_metadata(Array<Record>(0))
 }
 
 
 async function jackpot() {
-    let region_value = region();
-    if (region_value === 'us' || region_value === 'eu') region_value = 'jp';
-    const url = `/${region_value}/waveform/jackpot`;
+    let region_value = region()
+    if (region_value === 'us' || region_value === 'eu') region_value = 'jp'
+    const url = `/${region_value}/waveform/jackpot`
     await axios.get(url).then(res => {
-        let new_record = new Record(res.data);
-        set_current_record(new_record);
-        set_record_metadata(record_metadata().concat(new_record));
+        let new_record = new Record(res.data)
+        set_current_record(new_record)
+        set_record_metadata(record_metadata().concat(new_record))
     }).catch(err => {
-        console.log(err);
-    });
+        console.log(err)
+    })
 }
 
 
 const Epicenter: Component = () => {
-    let map: L.Map;
-    let event_marker: L.Marker;
-    let station_marker: L.Marker;
+    let map: L.Map
+    let event_marker: L.Marker
+    let station_marker: L.Marker
 
     onMount(() => {
-        map = L.map(document.getElementById('epicenter')).setView(event_location(), 6);
+        map = L.map(document.getElementById('epicenter')).setView(event_location(), 6)
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 12,
             attribution: '© OpenStreetMap'
-        }).addTo(map);
+        }).addTo(map)
 
-        event_marker = L.marker(event_location()).addTo(map);
-        station_marker = L.marker(station_location()).addTo(map);
+        event_marker = L.marker(event_location()).addTo(map)
+        station_marker = L.marker(station_location()).addTo(map)
 
-        event_marker.bindPopup('event location');
-        station_marker.bindPopup('station location');
+        event_marker.bindPopup('event location')
+        station_marker.bindPopup('station location')
 
-        jackpot().then();
+        jackpot().then()
     })
 
     createEffect(() => {
-        event_marker.setLatLng(event_location());
-        station_marker.setLatLng(station_location());
+        event_marker.setLatLng(event_location())
+        station_marker.setLatLng(station_location())
 
-        map.flyTo(event_location(), 6);
-    });
-
-    createEffect(() => {
-        const metadata = current_record();
-
-        set_event_location([metadata.latitude, metadata.longitude]);
-        set_station_location([metadata.station_latitude, metadata.station_longitude]);
-
-        const interval: number = metadata.interval;
-
-        let x: Array<number> = [];
-        for (let i = 0; i < metadata.data.length; i++) x.push(i * interval);
-
-        set_waveform([x, metadata.data, metadata.file_name]);
+        map.flyTo(event_location(), 6)
     })
 
-    return <div id='epicenter'></div>;
+    createEffect(() => {
+        const metadata = current_record()
+
+        set_event_location([metadata.latitude, metadata.longitude])
+        set_station_location([metadata.station_latitude, metadata.station_longitude])
+
+        const interval: number = metadata.interval
+
+        let x: Array<number> = []
+        for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
+
+        set_waveform([x, metadata.data, metadata.file_name])
+    })
+
+    return <div id='epicenter'></div>
 }
 
 
 const Waveform: Component = () => {
     createEffect(() => {
-        const trace = {x: waveform()[0], y: waveform()[1], type: 'scatter', name: waveform()[2]};
+        const trace = {x: waveform()[0], y: waveform()[1], type: 'scatter', name: waveform()[2]}
 
         Plotly.newPlot(document.getElementById('canvas'), [trace], {
             autosize: true,
@@ -280,10 +280,10 @@ const Waveform: Component = () => {
             title: {text: waveform()[2], font: {size: 20},},
             xaxis: axis_label('Time (s)', 14),
             yaxis: axis_label('Amplitude (Gal)', 14),
-        }, {responsive: true,});
+        }, {responsive: true,})
     })
 
-    return <div id='canvas'></div>;
+    return <div id='canvas'></div>
 }
 
 const login = () => {
@@ -293,13 +293,13 @@ const ButtonStack: Component = () => {
     onMount(() => {
         tippy('#random', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Get A Random Waveform!',
-        });
+        })
         tippy('#login', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Login to Upload!',
-        });
+        })
         tippy('#table-header-id', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Click Target ID to Replot!',
-        });
+        })
     })
 
     return <Stack spacing={2} direction="row">
@@ -343,6 +343,6 @@ const App: Component = () => {
             <RecordTable/>
         </Container>
     </>
-};
+}
 
-export default App;
+export default App
