@@ -42,6 +42,7 @@ import Toolbar from '@suid/material/Toolbar'
 import type {Component} from 'solid-js'
 import {createEffect, createSignal, For, mapArray, onMount} from 'solid-js'
 import Typography from '@suid/material/Typography'
+import logo from './assets/logo.svg'
 
 const [open, set_open] = createSignal(false);
 const [open_about, set_open_about] = createSignal(false);
@@ -113,7 +114,12 @@ function NormLabel() {
 }
 
 const Item = styled(Paper)(({theme}) => ({
-    ...theme.typography.body2, padding: theme.spacing(1), textAlign: 'center', color: theme.palette.text.secondary,
+    ...theme.typography.body2,
+    paddingBottom: theme.spacing(.5),
+    paddingTop: theme.spacing(.5),
+    paddingLeft: theme.spacing(2),
+    paddingRight: theme.spacing(.5),
+    textAlign: 'center', color: theme.palette.text.secondary, alignContent: "center", alignItems: "center",
 }))
 
 const PaddingPaper = styled(Paper)(({theme}) => ({
@@ -368,7 +374,7 @@ const ButtonStack: Component = () => {
         })
     })
 
-    return <Stack spacing={2} direction="row">
+    return <Stack spacing={2} direction="row" alignItems={'center'}>
         <Button variant='contained' id='api'>API</Button>
         <Button variant='contained' id='about' onClick={about_toggle_on}>About</Button>
         <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
@@ -383,7 +389,7 @@ const Header = () => {
             <IconButton size='medium' edge='start' color='inherit' aria-label='menu' sx={{mr: 2}}>
                 <MenuIcon/>
             </IconButton>
-            <Typography variant='h5' component='div' sx={{flexGrow: 2}}>
+            <Typography variant='h5' sx={{flexGrow: 2}}>
                 Motion Base
             </Typography>
             <ButtonStack/>
@@ -397,9 +403,10 @@ const App: Component = () => {
             <Header/>
         </Container>
         <Container maxWidth='xl' sx={{my: 1}}>
-            <Stack spacing={1} justifyContent='flex-end' direction='row'>
+            <Stack spacing={1} justifyContent='flex-end' direction='row' alignItems='center'>
                 <Item><RegionGroup/></Item>
                 <Item><NormLabel/></Item>
+                <img src={logo} alt='logo' width='40' height='40'/>
             </Stack>
         </Container>
         <Container maxWidth='xl' sx={{my: 1}} style='min-height:400px'>
