@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import asyncio
+import os
 from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
@@ -21,6 +22,7 @@ from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
@@ -45,11 +47,6 @@ app.add_middleware(
 async def init():
     await init_mongo()
     await create_superuser()
-
-
-@app.get('/', tags=['status'])
-async def root():
-    return {'message': 'Hello World'}
 
 
 @app.get('/alive', tags=['status'])

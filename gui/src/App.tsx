@@ -302,6 +302,8 @@ const ButtonStack: Component = () => {
     })
 
     return <Stack spacing={2} direction="row">
+        <Button variant='contained' id='api'>API</Button>
+        <Button variant='contained' id='about'>About</Button>
         <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
         <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
         <Button variant='contained' id='login' onClick={login}><LoginIcon/></Button>
