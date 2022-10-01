@@ -50,8 +50,7 @@ const [error_message, set_error_message] = createSignal('');
 const ErrorModal = () => {
     const error_toggle_off = () => set_open(false);
 
-    return (
-        <div>
+    return (<div>
             <Modal
                 open={open()} onClose={error_toggle_off} aria-labelledby="error-model"
                 aria-describedby="error-model">
@@ -64,24 +63,18 @@ const ErrorModal = () => {
                     border: "1px solid",
                 }} severity="error">{error_message()}</Alert>
             </Modal>
-        </div>
-    )
+        </div>)
 }
 
 
 const AboutModal = () => {
     const about_toggle_off = () => set_open_about(false);
 
-    return (
-        <Modal
+    return (<Modal
             component='div' open={open_about()} onClose={about_toggle_off} aria-labelledby="about-model"
             aria-describedby="about-model">
             <Box component={Paper} sx={{
-                position: "absolute",
-                top: "50%",
-                left: "50%",
-                transform: "translate(-50%, -50%)",
-                p: 2,
+                position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", p: 2,
             }}>
                 <Typography variant="h4" sx={{p: 1}}>
                     About
@@ -107,8 +100,7 @@ const AboutModal = () => {
                     records (*.V1A files) are not processed. Users may want to further filter the records.
                 </Typography>
             </Box>
-        </Modal>
-    )
+        </Modal>)
 }
 
 const [normalised, set_normalised] = createSignal(false);
@@ -118,13 +110,11 @@ function NormLabel() {
         set_normalised(!normalised());
     };
 
-    return (
-        <FormControlLabel
+    return (<FormControlLabel
             sx={{color: "text.secondary"}}
             control={<Switch checked={normalised()} onChange={handle_normalised}/>}
             label="Normalised"
-        />
-    );
+        />);
 }
 
 const Item = styled(Paper)(({theme}) => ({
@@ -133,12 +123,10 @@ const Item = styled(Paper)(({theme}) => ({
 
 
 const PaddingPaper = styled(Paper)(({theme}) => ({
-    ...theme.typography.body2,
-    // marginBottom: theme.spacing(1),
+    ...theme.typography.body2, // marginBottom: theme.spacing(1),
     // marginTop: theme.spacing(1),
     // padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
+    textAlign: 'center', color: theme.palette.text.secondary,
 }))
 
 
@@ -202,11 +190,9 @@ const [current_record, set_current_record] = createSignal<Record>(new Record({})
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
     [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.primary.main,
-        // backgroundColor: theme.palette.common.black,
+        backgroundColor: theme.palette.primary.main, // backgroundColor: theme.palette.common.black,
         color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
+    }, [`&.${tableCellClasses.body}`]: {
         fontSize: 14,
     },
 }))
@@ -214,8 +200,7 @@ const StyledTableCell = styled(TableCell)(({theme}) => ({
 const StyledTableRow = styled(TableRow)(({theme}) => ({
     '&:nth-of-type(odd)': {
         backgroundColor: theme.palette.action.hover,
-    },
-    '&:last-child td, &:last-child th': {
+    }, '&:last-child td, &:last-child th': {
         border: 0,
     },
 }))
@@ -227,8 +212,7 @@ function RecordTableHeader() {
         <TableRow>
             <For each={table_header}>
                 {(h) => {
-                    if (h === 'ID')
-                        return <StyledTableCell id={'table-header-id'}>{h}</StyledTableCell>
+                    if (h === 'ID') return <StyledTableCell id={'table-header-id'}>{h}</StyledTableCell>
                     return <StyledTableCell>{h}</StyledTableCell>
                 }}
             </For>
@@ -323,8 +307,7 @@ const Epicenter: Component = () => {
         map = L.map(document.getElementById('epicenter')).setView(event_location(), 6)
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 12,
-            attribution: '© OpenStreetMap'
+            maxZoom: 12, attribution: '© OpenStreetMap'
         }).addTo(map)
 
         event_marker = L.marker(event_location()).addTo(map)
