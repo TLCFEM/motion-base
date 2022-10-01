@@ -4,3 +4,5 @@ venv
 __pycache__
 build
 mb/app/dist
+mp/gui/dist
+mp/gui/node_modules
