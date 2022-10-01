@@ -37,6 +37,7 @@ import TableRow from '@suid/material/TableRow';
 import TableCell, {tableCellClasses} from '@suid/material/TableCell';
 import Container from "@suid/material/Container";
 
+
 const Item = styled(Paper)(({theme}) => ({
     ...theme.typography.body2, padding: theme.spacing(1), textAlign: 'center', color: theme.palette.text.secondary,
 }));
@@ -131,7 +132,7 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 }));
 
 function RecordTableHeader() {
-    const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station Code', 'Sampling Frequency', 'Duration', 'Direction']
+    const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
     return <TableHead>
         <TableRow>
@@ -173,7 +174,7 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell>{record_entry.depth} {record_entry.depth_unit}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
         <StyledTableCell>{record_entry.sampling_frequency} {record_entry.sampling_frequency_unit}</StyledTableCell>
-        <StyledTableCell>{record_entry.duration} {record_entry.duration_unit}</StyledTableCell>
+        <StyledTableCell>{record_entry.duration.toFixed(0)} {record_entry.duration_unit}</StyledTableCell>
         <StyledTableCell>{record_entry.direction}</StyledTableCell>
     </StyledTableRow>
 }
@@ -325,7 +326,7 @@ const Header = () => {
 }
 
 const App: Component = () => {
-    return (<>
+    return <>
         <Container maxWidth='xl' sx={{my: 1}}>
             <Header/>
         </Container>
@@ -341,7 +342,7 @@ const App: Component = () => {
         <Container maxWidth='xl' sx={{my: 1}}>
             <RecordTable/>
         </Container>
-    </>);
+    </>
 };
 
 export default App;

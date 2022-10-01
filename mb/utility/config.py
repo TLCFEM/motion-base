@@ -29,8 +29,8 @@ def mongo_uri():
         raise RuntimeError('No .env file found')
     username: str = os.getenv('MONGO_USERNAME')
     password: str = os.getenv('MONGO_PASSWORD')
-    host: str = 'localhost'
-    port: int = 27017
+    host: str = os.getenv('MONGO_HOST')
+    port: str = os.getenv('MONGO_PORT')
     return f'mongodb://{username}:{password}@{host}:{port}/'
 
 
