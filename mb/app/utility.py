@@ -157,7 +157,7 @@ def match_uuid(uuid_string: str):
     return uuid_regex.match(uuid_string) is not None
 
 
-async def rewrite_static_files(if_remove_old: bool = False):
+async def rewrite_static_files():
     current_path = os.path.dirname(__file__)
     target_path = os.path.join(current_path, 'dist-pre')
     if not os.path.exists(target_path):
@@ -170,8 +170,6 @@ async def rewrite_static_files(if_remove_old: bool = False):
                 content = await f.read()
             for match in pattern.findall(content):
                 content = content.replace(match[0], f'{prefix}/{match[0]}')
-            async with aiofiles.open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+            async with aiofiles.open(os.path.join(root, file), 'w', encoding='utf-8') as f:
                 await f.write(content)
     os.rename(target_path, os.path.join(current_path, 'dist'))
-    if if_remove_old:
-        os.rmdir(target_path)

@@ -3,11 +3,13 @@ FROM node:18 as gui
 COPY . /mb
 WORKDIR /mb/gui
 
+RUN sed -i 's/127.0.0.1/0.0.0.0/g' /mb/gui/src/index.tsx
+
 RUN curl -f https://get.pnpm.io/v6.16.js | node - add --global pnpm && pnpm install && pnpm build
 
 FROM python:3.10.7-slim as dependency
 
-COPY ./requirements.txt /mb
+COPY . /mb
 WORKDIR /mb
 
 RUN apt-get update && apt-get install -y python3-pip
@@ -21,5 +23,6 @@ WORKDIR /mb
 
 COPY --from=gui /mb/gui/dist ./mb/app/dist-pre
 COPY --from=dependency /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
+RUN sed -i 's/MONGO_HOST = localhost/MONGO_HOST = mongo/g' /mb/mb/.env
 
-CMD ["python3", "mb.py", "workers", "4"]
+CMD ["python3", "mb.py", "workers", "4", "host", "0.0.0.0"]

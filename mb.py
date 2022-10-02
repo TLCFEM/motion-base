@@ -9,6 +9,9 @@ if __name__ == '__main__':
         if sys.argv[index].startswith('w'):
             arg_dict['workers'] = int(sys.argv[index + 1])
             index += 2
+        elif sys.argv[index].startswith('h'):
+            arg_dict['host'] = sys.argv[index + 1]
+            index += 2
         else:
             index += 1
 

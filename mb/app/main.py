@@ -34,7 +34,8 @@ from mb.utility.config import init_mongo
 app = FastAPI(docs_url='/docs', title='Strong Motion Database')
 app.include_router(jp_router, prefix='/jp')
 app.include_router(nz_router, prefix='/nz')
-app.mount("/gui", StaticFiles(directory=os.path.join(os.path.dirname(__file__), 'dist'), html=True), name="gui")
+app.mount("/gui", StaticFiles(
+    directory=os.path.join(os.path.dirname(__file__), 'dist'), html=True, check_dir=False), name="gui")
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
@@ -47,7 +48,7 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def init():
-    await rewrite_static_files(True)
+    await rewrite_static_files()
     await init_mongo()
     await create_superuser()
 
