@@ -21,8 +21,9 @@ FROM python:3.10.7-slim
 COPY . /mb
 WORKDIR /mb
 
-COPY --from=gui /mb/gui/dist ./mb/app/dist-pre
+COPY --from=gui /mb/gui/dist ./mb/app/dist
 COPY --from=dependency /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 RUN sed -i 's/MONGO_HOST = localhost/MONGO_HOST = mongo/g' /mb/mb/.env
+RUN python3 -c 'from mb import rewrite; rewrite()'
 
 CMD ["python3", "mb.py", "workers", "4", "host", "0.0.0.0"]

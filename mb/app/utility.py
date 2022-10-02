@@ -159,7 +159,7 @@ def match_uuid(uuid_string: str):
 
 async def rewrite_static_files():
     current_path = os.path.dirname(__file__)
-    target_path = os.path.join(current_path, 'dist-pre')
+    target_path = os.path.join(current_path, 'dist')
     if not os.path.exists(target_path):
         return
     prefix: str = 'gui'
@@ -172,4 +172,3 @@ async def rewrite_static_files():
                 content = content.replace(match[0], f'{prefix}/{match[0]}')
             async with aiofiles.open(os.path.join(root, file), 'w', encoding='utf-8') as f:
                 await f.write(content)
-    os.rename(target_path, os.path.join(current_path, 'dist'))

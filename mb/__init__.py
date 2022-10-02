@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import asyncio
 import os
 
 import click
@@ -19,6 +20,7 @@ import uvicorn
 from dotenv import load_dotenv
 
 import mb.app.main
+from mb.app.utility import rewrite_static_files
 
 
 def run_app(**kwargs):
@@ -47,6 +49,10 @@ def run(workers: int = 1):
         run_app(workers=workers)
     else:
         run_app()
+
+
+def rewrite():
+    asyncio.run(rewrite_static_files())
 
 
 if __name__ == '__main__':

@@ -28,7 +28,7 @@ from fastapi.staticfiles import StaticFiles
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
 from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
-    create_superuser, create_task, create_token, is_active, rewrite_static_files
+    create_superuser, create_task, create_token, is_active
 from mb.utility.config import init_mongo
 
 app = FastAPI(docs_url='/docs', title='Strong Motion Database')
@@ -48,7 +48,6 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def init():
-    await rewrite_static_files()
     await init_mongo()
     await create_superuser()
 
