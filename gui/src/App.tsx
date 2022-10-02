@@ -48,7 +48,7 @@ import fastapi from './assets/fastapi.svg'
 import beanie from './assets/beanie.svg'
 import solid from './assets/solid.svg'
 import tippylogo from './assets/tippy.svg'
-import plotlylogo from './assets/plotly-stripe.svg'
+import plotlylogo from './assets/plotly.svg'
 import leaflletlogo from './assets/leaflet.svg'
 
 const [open, set_open] = createSignal(false);
@@ -108,12 +108,12 @@ const AboutModal = () => {
             <Typography variant="h6" sx={{p: 1}}>
                 Built with
             </Typography>
-            <Stack direction="row" spacing={2} sx={{p: 1}} alignItems='center' justifyContent='center'>
+            <Stack direction="row" spacing={3} sx={{p: 1}} alignItems='center' justifyContent='center'>
                 <img src={mongodb} alt='mongodb' height='40px'/>
                 <img src={fastapi} alt='fastapi' height='40px'/>
                 <img src={solid} alt='solid' height='40px'/>
             </Stack>
-            <Stack direction="row" spacing={2} sx={{p: 1}} alignItems='center' justifyContent='center'>
+            <Stack direction="row" spacing={3} sx={{p: 1}} alignItems='center' justifyContent='center'>
                 <img src={beanie} alt='beanie' height='40px'/>
                 <img src={leaflletlogo} alt='leaflet' height='40px'/>
                 <img src={plotlylogo} alt='plotly' height='40px'/>
