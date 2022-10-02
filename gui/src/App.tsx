@@ -43,6 +43,13 @@ import type {Component} from 'solid-js'
 import {createEffect, createSignal, For, mapArray, onMount} from 'solid-js'
 import Typography from '@suid/material/Typography'
 import logo from './assets/logo.svg'
+import mongodb from './assets/mongodb.svg'
+import fastapi from './assets/fastapi.svg'
+import beanie from './assets/beanie.svg'
+import solid from './assets/solid.svg'
+import tippylogo from './assets/tippy.svg'
+import plotlylogo from './assets/plotly-stripe.svg'
+import leaflletlogo from './assets/leaflet.svg'
 
 const [open, set_open] = createSignal(false);
 const [open_about, set_open_about] = createSignal(false);
@@ -72,9 +79,12 @@ const AboutModal = () => {
         <Box component={Paper} sx={{
             position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", p: 2,
         }}>
-            <Typography variant="h4" sx={{p: 1}}>
-                About
-            </Typography>
+            <Stack direction="row" spacing={2} sx={{p: 1}} alignItems='center'>
+                <img src={logo} alt='logo' height='50px'/>
+                <Typography variant="h4" sx={{p: 1}}>
+                    About
+                </Typography>
+            </Stack>
             <Typography variant="body1" sx={{p: 1}}>
                 This is a demo of strong motion database. The source code is available at GitHub.
             </Typography>
@@ -95,6 +105,20 @@ const AboutModal = () => {
                 Strong-Motion</Link> database. The selected strong motions are processed (*.V2A files). The other
                 records (*.V1A files) are not processed. Users may want to further filter the records.
             </Typography>
+            <Typography variant="h6" sx={{p: 1}}>
+                Built with
+            </Typography>
+            <Stack direction="row" spacing={2} sx={{p: 1}} alignItems='center' justifyContent='center'>
+                <img src={mongodb} alt='mongodb' height='40px'/>
+                <img src={fastapi} alt='fastapi' height='40px'/>
+                <img src={solid} alt='solid' height='40px'/>
+            </Stack>
+            <Stack direction="row" spacing={2} sx={{p: 1}} alignItems='center' justifyContent='center'>
+                <img src={beanie} alt='beanie' height='40px'/>
+                <img src={leaflletlogo} alt='leaflet' height='40px'/>
+                <img src={plotlylogo} alt='plotly' height='40px'/>
+                <img src={tippylogo} alt='tippy' height='40px'/>
+            </Stack>
         </Box>
     </Modal>)
 }
@@ -123,10 +147,9 @@ const Item = styled(Paper)(({theme}) => ({
 }))
 
 const PaddingPaper = styled(Paper)(({theme}) => ({
-    ...theme.typography.body2, // marginBottom: theme.spacing(1),
-    // marginTop: theme.spacing(1),
-    // padding: theme.spacing(1),
-    textAlign: 'center', color: theme.palette.text.secondary,
+    ...theme.typography.body2,
+    padding: theme.spacing(.5),
+    textAlign: 'center', color: theme.palette.text.secondary, alignContent: "center", alignItems: "center",
 }))
 
 let region_set: Array<string> = ['jp', 'nz', 'us', 'eu']
@@ -423,7 +446,6 @@ const App: Component = () => {
             <Stack spacing={1} justifyContent='flex-end' direction='row' alignItems='center'>
                 <Item><RegionGroup/></Item>
                 <Item><NormLabel/></Item>
-                <img src={logo} alt='logo' width='40' height='40'/>
             </Stack>
         </Container>
         <Container maxWidth='xl' sx={{my: 1}} style='min-height:400px'>

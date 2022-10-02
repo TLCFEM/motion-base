@@ -31,7 +31,13 @@ from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User,
     create_superuser, create_task, create_token, is_active
 from mb.utility.config import init_mongo
 
-app = FastAPI(docs_url='/docs', title='Strong Motion Database')
+app = FastAPI(
+    docs_url='/docs',
+    title='Strong Motion Database',
+    contact={'name': 'Theodore Chang', 'email': 'tlcfem@gmail.com'},
+    description='A database for strong motion records.',
+    license_info={'name': 'GNU General Public License v3.0'}
+)
 app.include_router(jp_router, prefix='/jp')
 app.include_router(nz_router, prefix='/nz')
 app.mount("/gui", StaticFiles(
@@ -54,7 +60,9 @@ async def init():
 
 @app.get('/', response_class=RedirectResponse)
 async def redirect_to_docs():
-    return '/gui'
+    if os.path.exists(os.path.join(os.path.dirname(__file__), 'dist')):
+        return '/gui'
+    return '/docs'
 
 
 @app.get('/alive', tags=['status'])
