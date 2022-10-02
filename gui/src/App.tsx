@@ -299,6 +299,23 @@ const Epicenter: Component = () => {
     let map: L.Map
     let event_marker: L.Marker
     let station_marker: L.Marker
+    const LeafIcon = L.Icon.extend({
+        options: {
+            iconSize: [38, 95],
+            shadowSize: [50, 64],
+            iconAnchor: [22, 94],
+            shadowAnchor: [4, 62],
+            popupAnchor: [-3, -76]
+        }
+    });
+    const event_icon = new LeafIcon({
+        iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-red.png',
+        shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
+    })
+    const station_icon = new LeafIcon({
+        iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-green.png',
+        shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
+    })
 
     onMount(() => {
         map = L.map(document.getElementById('epicenter')).setView(event_location(), 6)
@@ -307,8 +324,8 @@ const Epicenter: Component = () => {
             maxZoom: 12, attribution: '© OpenStreetMap'
         }).addTo(map)
 
-        event_marker = L.marker(event_location()).addTo(map)
-        station_marker = L.marker(station_location()).addTo(map)
+        event_marker = L.marker(event_location(), {icon: event_icon}).addTo(map)
+        station_marker = L.marker(station_location(), {icon: station_icon}).addTo(map)
 
         event_marker.bindPopup('event location')
         station_marker.bindPopup('station location')

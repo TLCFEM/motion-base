@@ -18,6 +18,7 @@ from datetime import datetime, timedelta
 from http import HTTPStatus
 from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 
+import aiofiles
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
@@ -154,3 +155,23 @@ async def create_task():
 def match_uuid(uuid_string: str):
     uuid_regex = re.compile(r'[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}')
     return uuid_regex.match(uuid_string) is not None
+
+
+async def rewrite_static_files(if_remove_old: bool = False):
+    current_path = os.path.dirname(__file__)
+    target_path = os.path.join(current_path, 'dist-pre')
+    if not os.path.exists(target_path):
+        return
+    prefix: str = 'gui'
+    pattern = re.compile(r'(assets/[\w.]+\.(js|css|svg|png))')
+    for root, _, files in os.walk(target_path):
+        for file in files:
+            async with aiofiles.open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                content = await f.read()
+            for match in pattern.findall(content):
+                content = content.replace(match[0], f'{prefix}/{match[0]}')
+            async with aiofiles.open(os.path.join(root, file), 'r', encoding='utf-8') as f:
+                await f.write(content)
+    os.rename(target_path, os.path.join(current_path, 'dist'))
+    if if_remove_old:
+        os.rmdir(target_path)

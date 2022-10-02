@@ -19,7 +19,7 @@ FROM python:3.10.7-slim
 COPY . /mb
 WORKDIR /mb
 
-COPY --from=gui /mb/gui/dist ./mb/app/dist
+COPY --from=gui /mb/gui/dist ./mb/app/dist-pre
 COPY --from=dependency /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 
 CMD ["python3", "mb.py", "workers", "4"]

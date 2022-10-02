@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import asyncio
+import os.path
 from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
@@ -20,18 +21,20 @@ from uuid import UUID
 from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.security import OAuth2PasswordRequestForm
 from fastapi.responses import RedirectResponse
+from fastapi.security import OAuth2PasswordRequestForm
+from fastapi.staticfiles import StaticFiles
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
 from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
-    create_superuser, create_task, create_token, is_active
+    create_superuser, create_task, create_token, is_active, rewrite_static_files
 from mb.utility.config import init_mongo
 
 app = FastAPI(docs_url='/docs', title='Strong Motion Database')
 app.include_router(jp_router, prefix='/jp')
 app.include_router(nz_router, prefix='/nz')
+app.mount("/gui", StaticFiles(directory=os.path.join(os.path.dirname(__file__), 'dist'), html=True), name="gui")
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
@@ -44,13 +47,14 @@ app.add_middleware(
 
 @app.on_event('startup')
 async def init():
+    await rewrite_static_files(True)
     await init_mongo()
     await create_superuser()
 
 
 @app.get('/', response_class=RedirectResponse)
 async def redirect_to_docs():
-    return '/docs'
+    return '/gui'
 
 
 @app.get('/alive', tags=['status'])
