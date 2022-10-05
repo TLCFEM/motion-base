@@ -415,7 +415,7 @@ const ButtonStack: Component = () => {
     })
 
     return <Stack spacing={2} direction="row" alignItems={'center'}>
-        <Button variant='contained' id='api'>API</Button>
+        <Link href='/docs'><Button variant='contained' id='api'>API</Button></Link>
         <Button variant='contained' id='about' onClick={about_toggle_on}>About</Button>
         <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
         <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
@@ -437,11 +437,8 @@ const Header = () => {
     </AppBar>
 }
 
-const App: Component = () => {
+const Jackpot: Component = () => {
     return <>
-        <Container maxWidth='xl' sx={{my: 1}}>
-            <Header/>
-        </Container>
         <Container maxWidth='xl' sx={{my: 1}}>
             <Stack spacing={1} justifyContent='flex-end' direction='row' alignItems='center'>
                 <Item><RegionGroup/></Item>
@@ -455,6 +452,15 @@ const App: Component = () => {
         <Container maxWidth='xl' sx={{my: 1}}>
             <RecordTable/>
         </Container>
+    </>
+}
+
+const App: Component = () => {
+    return <>
+        <Container maxWidth='xl' sx={{my: 1}}>
+            <Header/>
+        </Container>
+        <Jackpot/>
         <ErrorModal/>
         <AboutModal/>
     </>
