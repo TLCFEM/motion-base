@@ -63,7 +63,7 @@ async def upload_archive(
             'task_id': task_id
         }
 
-    records: list = await _parse_archive_in_background(archive)
+    records: list = await _parse_archive_in_background(archive, user.id)
 
     return {'message': 'successfully uploaded and processed', 'records': records}
 
