@@ -24,17 +24,18 @@ from mb.record.jp import NIED, ParserNIED, retrieve_single_record
 router = APIRouter(tags=['Japan'])
 
 
-async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None = None) -> list:
+async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
     records: list = await ParserNIED.parse_archive(
         archive_obj=archive.file,
+        user_id=user_id,
         archive_name=archive.filename,
         task_id=task_id
     )
     return records
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
-    records: list = await _parse_archive_in_background(archive, task_id)
+async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
+    records: list = await _parse_archive_in_background(archive, user_id, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -56,7 +57,7 @@ async def upload_archive(
 
     if not wait_for_result:
         task_id: UUID = await create_task()
-        tasks.add_task(_parse_archive_in_background_task, archive, task_id)
+        tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
         return {
             'message': 'successfully uploaded and will be processed in the background',
             'task_id': task_id

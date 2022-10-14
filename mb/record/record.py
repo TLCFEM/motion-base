@@ -25,6 +25,7 @@ from pydantic import Field
 
 class Record(Document):
     id: UUID = Field(default_factory=uuid4)
+    uploaded_by: UUID = Field(default_factory=uuid4)
     file_name: Indexed(str) = None
     sub_category: Indexed(str) = None
     magnitude: Indexed(float, pymongo.DESCENDING) = None

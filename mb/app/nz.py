@@ -37,7 +37,7 @@ def _validate_record_type(record_type: str) -> str:
     return type_char
 
 
-async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None = None) -> list:
+async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
     task: UploadTask | None = None
     if task_id is not None:
         task = await UploadTask.find_one(UploadTask.id == task_id)
@@ -55,7 +55,7 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
             target = archive_obj.extractfile(f)
             if target:
                 try:
-                    records.extend(await ParserNZSM.parse_archive(target, os.path.basename(f.name)))
+                    records.extend(await ParserNZSM.parse_archive(target, user_id, os.path.basename(f.name)))
                 except Exception as e:
                     _logger.critical('Failed to parse.', file_name=f.name, exe_info=e)
 
@@ -65,8 +65,8 @@ async def _parse_archive_in_background(archive: UploadFile, task_id: UUID | None
     return records
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, task_id: UUID):
-    records: list = await _parse_archive_in_background(archive, task_id)
+async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
+    records: list = await _parse_archive_in_background(archive, user_id, task_id)
     mail_body = 'The following records are parsed:\n'
     mail_body += '\n'.join([f'{record}' for record in records])
     mail = {'body': mail_body}
@@ -86,7 +86,7 @@ async def upload_archive(
 
     if not wait_for_result:
         task_id: UUID = await create_task()
-        tasks.add_task(_parse_archive_in_background_task, archive, task_id)
+        tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
 
         return {
             'message': 'successfully uploaded and will be processed in the background',

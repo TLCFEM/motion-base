@@ -87,6 +87,7 @@ class ParserNIED:
     @staticmethod
     async def parse_archive(
             archive_obj: str | BinaryIO,
+            user_id: UUID,
             archive_name: str | None = None,
             task_id: UUID | None = None
     ) -> list[str]:
@@ -120,6 +121,7 @@ class ParserNIED:
                     continue
                 try:
                     record = await ParserNIED.parse_file(target)
+                    record.uploaded_by = user_id
                     record.file_name = os.path.basename(f.name)
                     record.sub_category = sub_category
                     record.set_id()

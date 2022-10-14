@@ -57,7 +57,7 @@ class ParserNZSM:
         raise ValueError('NZSM archive file should be a V2A/V1A file.')
 
     @staticmethod
-    async def parse_archive(file_path: str | IO[bytes], file_name: str | None = None) -> List[str]:
+    async def parse_archive(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> List[str]:
         if isinstance(file_path, str):
             async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
                 lines = await f.readlines()
@@ -86,6 +86,7 @@ class ParserNZSM:
             record.sampling_frequency_unit = str(pint.Unit('Hz'))
             record.raw_data_unit = str(pint.Unit('mm/s/s'))
             record.duration_unit = str(pint.Unit('s'))
+            record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path)
             record.sub_category = 'processed' if record.file_name.upper().endswith('.V2A') else 'unprocessed'
             record.set_id(record.file_name + record.direction)
