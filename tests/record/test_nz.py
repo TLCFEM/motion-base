@@ -15,6 +15,7 @@
 import asyncio
 import os.path
 import tarfile
+from uuid import uuid4
 
 import pytest
 
@@ -23,7 +24,7 @@ from mb.record.nz import ParserNZSM
 
 @pytest.mark.parametrize('file_path', ['data/20110222_015029_MQZ.V2A'])
 async def test_nz_parse_archive(pwd, file_path):
-    await ParserNZSM.parse_archive(os.path.join(pwd, file_path))
+    await ParserNZSM.parse_archive(os.path.join(pwd, file_path), uuid4())
 
 
 @pytest.mark.parametrize('file_path', ['data/nz_test.tar.gz'])
@@ -34,5 +35,5 @@ async def test_nz_parse_archive(pwd, file_path):
         for f in archive_obj.getnames():
             target = archive_obj.extractfile(f)
             if target:
-                tasks.append(ParserNZSM.parse_archive(target, f))
+                tasks.append(ParserNZSM.parse_archive(target, uuid4(), f))
         await asyncio.gather(*tasks)

@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
+from uuid import uuid4
 
 import pytest
 
@@ -26,4 +27,4 @@ async def test_jp_parse_file(pwd, file_path):
 
 @pytest.mark.parametrize('file_path', ['data/jp_test.knt.tar.gz'])
 async def test_jp_parse_archive(pwd, file_path):
-    await ParserNIED.parse_archive(os.path.join(pwd, file_path))
+    await ParserNIED.parse_archive(os.path.join(pwd, file_path), uuid4())
