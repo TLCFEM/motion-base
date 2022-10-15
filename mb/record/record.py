@@ -21,6 +21,7 @@ import pint
 import pymongo
 from beanie import Document, Indexed
 from pydantic import Field
+from scipy import signal
 
 
 class Record(Document):
@@ -82,3 +83,38 @@ def to_unit(quantity: pint.Quantity, unit: pint.Unit):
         return quantity.to(unit).magnitude
 
     return quantity.magnitude
+
+
+def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
+    return np.convolve(waveform, window, mode='same')
+
+
+def zero_stuff(ratio: int, waveform: np.ndarray) -> np.ndarray:
+    output: np.ndarray = np.zeros(len(waveform) * ratio)
+    output[::ratio] = waveform
+    return output
+
+
+def get_window(filter_type: str, window_type: str, length: int, cutoff: float | list[float], **kwargs) -> np.ndarray:
+    if window_type == 'flattop':
+        window = ('flattop',)
+    elif window_type == 'blackmanharris':
+        window = ('blackmanharris',)
+    elif window_type == 'nuttall':
+        window = ('nuttall',)
+    elif window_type == 'hann':
+        window = ('hann',)
+    elif window_type == 'hamming':
+        window = ('hamming',)
+    elif window_type == 'kaiser':
+        beta = kwargs.get('beta', 9)
+        window = ('kaiser', beta)
+    elif window_type == 'chebwin':
+        at = kwargs.get('at', 80)
+        window = ('chebwin', at)
+    else:
+        raise ValueError(f'Unknown window type: {window_type}')
+
+    bin_num = 2 * length + 1
+
+    return signal.firwin(bin_num, cutoff, window=window, pass_zero=filter_type) * kwargs.get('ratio', 1)
