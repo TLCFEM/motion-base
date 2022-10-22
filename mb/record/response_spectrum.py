@@ -50,8 +50,6 @@ class Oscillator:
         for i in range(2, len(motion)):
             displacement[i] = self.b * displacement[i - 1] - self.c * displacement[i - 2] - motion[i - 1]
 
-        n_elem = len(motion) - 1
-
         velocity = np.zeros_like(motion)
         velocity[1:] = np.diff(displacement)
 

@@ -107,7 +107,7 @@ async def download_single_random_spectrum():
 
 
 @router.get('/response_spectrum/jackpot', response_model=ResponseSpectrumResponse)
-async def download_single_random_spectrum(
+async def download_single_random_response_spectrum(
         damping_ratio: float = Query(0.05, ge=0., le=1.),
         period_start: float = Query(0.01, ge=0.),
         period_end: float = Query(10., ge=0.),

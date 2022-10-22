@@ -17,12 +17,14 @@ import tarfile
 from http import HTTPStatus
 from uuid import UUID
 
+import numpy as np
 import structlog
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import SequenceResponse
+from mb.app.response import ResponseSpectrumResponse, SequenceResponse
 from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
 from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
+from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['New Zealand'])
 
@@ -132,6 +134,24 @@ async def download_single_random_spectrum():
     frequency, record = result.to_spectrum(unit='cm/s/s')
     # noinspection PyTypeChecker
     return SequenceResponse(**result.dict(), interval=frequency, data=record.tolist())
+
+
+@router.get('/response_spectrum/jackpot', response_model=ResponseSpectrumResponse)
+async def download_single_random_response_spectrum(
+        damping_ratio: float = Query(0.05, ge=0., le=1.),
+        period_start: float = Query(0.01, ge=0.),
+        period_end: float = Query(10., ge=0.),
+        period_step: float = Query(0.01, ge=0.)):
+    """
+    Retrieve a single random response spectrum from the database.
+    """
+    result: NZSM = await download_single_random_raw_record()
+
+    interval, record = result.to_waveform(unit='cm/s/s')
+    period = np.arange(period_start, period_end + period_step, period_step)
+    spectrum = response_spectrum(damping_ratio, interval, record, period)
+    # noinspection PyTypeChecker
+    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
 
 
 @router.get('/raw/{file_id_or_name}', response_model=NZSM)
