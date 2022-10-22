@@ -40,7 +40,7 @@ import TableRow from '@suid/material/TableRow'
 import tippy from 'tippy.js'
 import Toolbar from '@suid/material/Toolbar'
 import type {Component} from 'solid-js'
-import {createEffect, createSignal, For, mapArray, onMount} from 'solid-js'
+import {createEffect, createSignal, For, onMount} from 'solid-js'
 import Typography from '@suid/material/Typography'
 import logo from './assets/logo.svg'
 import mongodb from './assets/mongodb.svg'
@@ -50,6 +50,8 @@ import solid from './assets/solid.svg'
 import tippylogo from './assets/tippy.svg'
 import plotlylogo from './assets/plotly.svg'
 import leaflletlogo from './assets/leaflet.svg'
+import {createStore} from "solid-js/store";
+import Card from "@suid/material/Card";
 
 const [open, set_open] = createSignal(false);
 const [open_about, set_open_about] = createSignal(false);
@@ -207,7 +209,7 @@ class Record {
     }
 }
 
-const [record_metadata, set_record_metadata] = createSignal<Array<Record>>(Array<Record>(0))
+const [record_metadata, set_record_metadata] = createStore<Array<Record>>(Array<Record>(0))
 const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
@@ -245,9 +247,9 @@ function RecordTableHeader() {
 const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
     if (event.target.tagName != 'TH') return
 
-    for (let i = 0; i < record_metadata().length; i++) {
-        if (record_metadata()[i].id == event.target.innerText) {
-            set_current_record(record_metadata()[i])
+    for (let i = 0; i < record_metadata.length; i++) {
+        if (record_metadata[i].id == event.target.innerText) {
+            set_current_record(record_metadata[i])
             break
         }
     }
@@ -276,12 +278,14 @@ function RecordEntry(record_entry: Record) {
 
 function RecordTableBody() {
     return <TableBody>
-        {mapArray(record_metadata, (record_entry) => <RecordEntry  {...record_entry}/>)}
+        <For each={record_metadata}>
+            {(record_entry) => <RecordEntry {...record_entry}/>}
+        </For>
     </TableBody>
 }
 
 function RecordTable() {
-    return <TableContainer component={Paper}>
+    return <TableContainer component={Paper} sx={{my: 1}}>
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
             <RecordTableHeader/>
             <RecordTableBody/>
@@ -311,7 +315,7 @@ async function jackpot() {
     await axios.get(url).then(res => {
         let new_record = new Record(res.data)
         set_current_record(new_record)
-        set_record_metadata(record_metadata().concat(new_record))
+        set_record_metadata([...record_metadata, new_record])
     }).catch(err => {
         set_error_message('Fail to retrieve data: ' + err.message)
         set_open(true)
@@ -423,9 +427,9 @@ const ButtonStack: Component = () => {
     </Stack>
 }
 
-const Header = () => {
-    return <AppBar position='static' id='app-bar' component={Paper}>
-        <Toolbar>
+const App: Component = () => {
+    return <Container maxWidth='xl'>
+        <AppBar position='static' id='app-bar' component={Paper}><Toolbar>
             <IconButton size='medium' edge='start' color='inherit' aria-label='menu' sx={{mr: 2}}>
                 <MenuIcon/>
             </IconButton>
@@ -433,37 +437,16 @@ const Header = () => {
                 Motion Base
             </Typography>
             <ButtonStack/>
-        </Toolbar>
-    </AppBar>
-}
-
-const Jackpot: Component = () => {
-    return <>
-        <Container maxWidth='xl' sx={{my: 1}}>
-            <Stack spacing={1} justifyContent='flex-end' direction='row' alignItems='center'>
-                <Item><RegionGroup/></Item>
-                <Item><NormLabel/></Item>
-            </Stack>
-        </Container>
-        <Container maxWidth='xl' sx={{my: 1}} style='min-height:400px'>
-            <Waveform/>
-            <Epicenter/>
-        </Container>
-        <Container maxWidth='xl' sx={{my: 1}}>
-            <RecordTable/>
-        </Container>
-    </>
-}
-
-const App: Component = () => {
-    return <>
-        <Container maxWidth='xl' sx={{my: 1}}>
-            <Header/>
-        </Container>
-        <Jackpot/>
+        </Toolbar></AppBar>
+        <Stack spacing={1} justifyContent='flex-end' direction='row' alignItems='center' sx={{my: 1}}>
+            <Item><RegionGroup/></Item>
+            <Item><NormLabel/></Item>
+        </Stack>
+        <Card variant="outlined" style='min-height:400px' sx={{my: 1}}><Waveform/><Epicenter/></Card>
+        <RecordTable/>
         <ErrorModal/>
         <AboutModal/>
-    </>
+    </Container>
 }
 
 export default App
