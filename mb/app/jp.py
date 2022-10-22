@@ -15,11 +15,13 @@
 from http import HTTPStatus
 from uuid import UUID
 
+import numpy as np
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import IDListResponse, SequenceResponse
+from mb.app.response import IDListResponse, ResponseSpectrumResponse, SequenceResponse
 from mb.app.utility import User, create_task, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
+from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['Japan'])
 
@@ -70,9 +72,9 @@ async def upload_archive(
 
 @router.get('/raw/jackpot', response_model=NIED)
 async def download_single_random_raw_record():
-    '''
+    """
     Retrieve a single random record from the database.
-    '''
+    """
     result: list[NIED] = await NIED.aggregate([{'$sample': {'size': 1}}], projection_model=NIED).to_list()
     if result:
         return result[0]
@@ -82,9 +84,9 @@ async def download_single_random_raw_record():
 
 @router.get('/waveform/jackpot', response_model=SequenceResponse)
 async def download_single_random_waveform(normalised: bool = False):
-    '''
+    """
     Retrieve a single random waveform from the database.
-    '''
+    """
     result: NIED = await download_single_random_raw_record()
 
     interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
@@ -94,9 +96,9 @@ async def download_single_random_waveform(normalised: bool = False):
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
 async def download_single_random_spectrum():
-    '''
+    """
     Retrieve a single random spectrum from the database.
-    '''
+    """
     result: NIED = await download_single_random_raw_record()
 
     frequency, record = result.to_spectrum()
@@ -104,17 +106,35 @@ async def download_single_random_spectrum():
     return SequenceResponse(**result.dict(), interval=frequency, data=record.tolist())
 
 
+@router.get('/response_spectrum/jackpot', response_model=ResponseSpectrumResponse)
+async def download_single_random_spectrum(
+        damping_ratio: float = Query(0.05, ge=0., le=1.),
+        period_start: float = Query(0.01, ge=0.),
+        period_end: float = Query(10., ge=0.),
+        period_step: float = Query(0.01, ge=0.)):
+    """
+    Retrieve a single random response spectrum from the database.
+    """
+    result: NIED = await download_single_random_raw_record()
+
+    interval, record = result.to_waveform(unit='cm/s/s')
+    period = np.arange(period_start, period_end + period_step, period_step)
+    spectrum = response_spectrum(damping_ratio, interval, record, period)
+    # noinspection PyTypeChecker
+    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
+
+
 @router.get('/raw/{file_id_or_name}', response_model=NIED)
 async def download_single_raw_record(
         file_id_or_name: str,
         sub_category: str | None = Query(default=None, regex='^(knt|kik)$')
 ):
-    '''
+    """
     Retrieve raw accelerograph record.
     The NIED collection has two sub-categories: `knt` and `kik`.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
-    '''
+    """
     result: NIED = await retrieve_single_record(file_id_or_name, sub_category)
 
     if result:
@@ -129,12 +149,12 @@ async def download_single_waveform(
         sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
         normalised: bool = Query(default=False)
 ):
-    '''
+    """
     Retrieve raw accelerograph waveform.
     The NIED collection has two sub-categories: `knt` and `kik`.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
-    '''
+    """
     result: NIED = await retrieve_single_record(file_id_or_name, sub_category)
 
     if result:
@@ -150,12 +170,12 @@ async def download_single_spectrum(
         file_id_or_name: str,
         sub_category: str | None = Query(default=None, regex='^(knt|kik)$')
 ):
-    '''
+    """
     Retrieve raw accelerograph spectrum.
     The NIED collection has two sub-categories: `knt` and `kik`.
     This endpoint has a limit of 1 record per request since the file name is unique.
     In order to download more records, please use other endpoints.
-    '''
+    """
     result: NIED = await retrieve_single_record(file_id_or_name, sub_category)
 
     if result:
@@ -174,9 +194,9 @@ async def query_records(
         page_size: int = Query(default=100, ge=1, le=1000),
         page_number: int = Query(default=0, ge=0)
 ):
-    '''
+    """
     Query records from the database.
-    '''
+    """
     query_dict = {
         '$and': [
             {'magnitude': {

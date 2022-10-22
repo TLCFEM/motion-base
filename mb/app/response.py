@@ -19,10 +19,7 @@ from uuid import UUID
 from pydantic import BaseModel
 
 
-class SequenceResponse(BaseModel):
-    '''
-    Response represents a record which can be either waveform or spectrum.
-    '''
+class MetadataResponse(BaseModel):
     id: UUID
     file_name: str
     sub_category: str
@@ -41,14 +38,26 @@ class SequenceResponse(BaseModel):
     duration_unit: str
     direction: str
 
+
+class SequenceResponse(MetadataResponse):
+    """
+    Response represents a record which can be either waveform or spectrum.
+    """
     interval: float
     data: List[float]
 
 
+class ResponseSpectrumResponse(MetadataResponse):
+    """
+    Response represents a record which can be either waveform or spectrum.
+    """
+    data: List[List[float]]
+
+
 class IDListResponse(BaseModel):
-    '''
+    """
     A list of IDs of the target records.
     One can later use the ID to retrieve the record.
-    '''
+    """
     query: dict
     id: List[UUID]
