@@ -12,8 +12,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import asyncio
-import os.path
 from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
@@ -23,7 +23,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
-from fastapi.staticfiles import StaticFiles
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
@@ -40,8 +39,6 @@ app = FastAPI(
 )
 app.include_router(jp_router, prefix='/jp')
 app.include_router(nz_router, prefix='/nz')
-app.mount("/gui", StaticFiles(
-    directory=os.path.join(os.path.dirname(__file__), 'dist'), html=True, check_dir=False), name="gui")
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
@@ -60,8 +57,6 @@ async def init():
 
 @app.get('/', response_class=RedirectResponse)
 async def redirect_to_docs():
-    if os.path.exists(os.path.join(os.path.dirname(__file__), 'dist')):
-        return '/gui'
     return '/docs'
 
 

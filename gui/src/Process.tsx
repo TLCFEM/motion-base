@@ -1,7 +1,7 @@
 import {Component} from "solid-js"
 
-const Process: Component = () => {
-    return <div></div>
+const ProcessPage: Component = () => {
+    return <div><p>Hello</p></div>
 }
 
-export default Process
+export default ProcessPage
