@@ -12,8 +12,9 @@ services:
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: StrongMotion
       MONGO_DATA_DIR: /data/db
-      volumes:
-        motion_mongo:/data/db
+    volumes:
+      - motion_mongo:/data/db
+      - motion_mongoconfig:/data/configdb
   motion-base-back:
     image: motion-base-back
     container_name: motion-base-back
@@ -33,3 +34,4 @@ services:
 
 volumes:
   motion_mongo:
+  motion_mongoconfig:
