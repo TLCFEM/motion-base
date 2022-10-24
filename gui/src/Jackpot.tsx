@@ -234,7 +234,8 @@ async function jackpot() {
     let url = `/${region_value}/waveform/jackpot`
     if (normalised()) url += '?normalised=true'
     await axios.get(url).then(res => {
-        let new_record = new Record(res.data)
+        if (res.status !== 200) return
+        const new_record = new Record(res.data)
         set_current_record(new_record)
         set_record_metadata([...record_metadata, new_record])
     }).catch(err => {
