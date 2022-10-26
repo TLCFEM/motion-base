@@ -303,15 +303,15 @@ const Epicenter: Component = () => {
         station_marker.setLatLng([current_record().station_latitude, current_record().station_longitude])
 
         map.flyTo(event_location, 6)
+
+        const metadata = current_record()
+        const interval: number = metadata.interval
+
+        let x: Array<number> = []
+        for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
+
+        set_waveform([x, metadata.data, metadata.file_name])
     })
-
-    const metadata = current_record()
-    const interval: number = metadata.interval
-
-    let x: Array<number> = []
-    for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
-
-    set_waveform([x, metadata.data, metadata.file_name])
 
     return <Item id='epicenter'></Item>
 }
