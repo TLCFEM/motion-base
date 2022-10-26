@@ -132,11 +132,11 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
     },
 }))
 
-const sort_by_magnitude = (event: ST.ChangeEvent<HTMLInputElement>) => {
+const sort_by_magnitude = () => {
     set_record_metadata(record_metadata.slice().sort((a, b) => b.magnitude - a.magnitude))
 }
 
-const sort_by_time = (event: ST.ChangeEvent<HTMLInputElement>) =>
+const sort_by_time = () =>
     set_record_metadata(record_metadata.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
 
 function RecordTableHeader() {
