@@ -32,7 +32,6 @@ import TableRow from '@suid/material/TableRow'
 import type {Component} from 'solid-js'
 import {createEffect, createSignal, For, onMount} from 'solid-js'
 import {createStore} from "solid-js/store";
-import Card from "@suid/material/Card";
 import Grid from "@suid/material/Grid";
 import tippy from "tippy.js";
 
@@ -52,7 +51,7 @@ const ErrorModal = () => {
     </Modal>
 }
 
-const region_set: Array<string> = ['jp', 'nz', 'us', 'eu']
+const region_set: Array<string> = ['jp', 'nz']
 
 const [normalised, set_normalised] = createSignal(false);
 const [region, set_region] = createSignal(region_set[0])
@@ -61,8 +60,7 @@ function RegionGroup() {
     const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
     const handle_normalised = () => set_normalised(!normalised())
 
-    return <Stack component={Item} spacing={1} justifyContent='center' direction='column' alignItems='center'
-                  alignContent='center'>
+    return <Stack component={Item} justifyContent='center' direction='column' alignItems='center' alignContent='center'>
         <FormControl size='small'>
             <RadioGroup aria-labelledby='region' name='region' id='region' row={true} value={region()}
                         onChange={handle_change}>
@@ -71,12 +69,9 @@ function RegionGroup() {
                 </For>
             </RadioGroup>
         </FormControl>
-        <Stack spacing={1} direction='row' alignItems='stretch' alignContent='stretch'
-               justifyContent={'center'} sx={{my: 1}}>
-            <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
-            <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
-            <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
-        </Stack>
+        <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
+        <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
+        <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
     </Stack>
 }
 
@@ -105,6 +100,12 @@ class Record {
 
     public interval: number = 0
     public data: Array<number> = Array<number>(0)
+
+    // response spectrum related
+    public freq: Array<number> = Array<number>(0)
+    public SA: Array<number> = Array<number>(0)
+    public SV: Array<number> = Array<number>(0)
+    public SD: Array<number> = Array<number>(0)
 
     public constructor(data: any) {
         Object.assign(this, data)
@@ -202,7 +203,7 @@ function RecordEntry(record_entry: Record) {
 }
 
 function RecordTable() {
-    return <TableContainer component={Paper} sx={{my: 1}}>
+    return <TableContainer component={Paper}>
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
             <RecordTableHeader/>
             <TableBody>
@@ -233,16 +234,36 @@ async function jackpot() {
     if (region_value === 'us' || region_value === 'eu') region_value = 'jp'
     let url = `/${region_value}/waveform/jackpot`
     if (normalised()) url += '?normalised=true'
-    await axios.get(url).then(res => {
+    let new_record: Record
+    await axios.get(url).then(async res => {
         if (res.status !== 200) return
-        const new_record = new Record(res.data)
-        set_current_record(new_record)
-        set_record_metadata([...record_metadata, new_record])
+        new_record = new Record(res.data)
+        url = `/${region_value}/response_spectrum/${new_record.id}`
+        await axios.get(url).then(res => {
+            if (res.status !== 200) return
+            new_record.freq = res.data.data.map((d: Array<number>) => d[0])
+            new_record.SD = res.data.data.map((d: Array<number>) => d[1])
+            new_record.SV = res.data.data.map((d: Array<number>) => d[2])
+            new_record.SA = res.data.data.map((d: Array<number>) => d[3])
+            set_current_record(new_record)
+            set_record_metadata([...record_metadata, new_record])
+        }).catch(err => {
+            set_error_message('Fail to retrieve data: ' + err.message)
+            set_open(true)
+        })
     }).catch(err => {
         set_error_message('Fail to retrieve data: ' + err.message)
         set_open(true)
     })
 }
+
+const Item = styled(Paper)(({theme}) => ({
+    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
+    ...theme.typography.body2,
+    padding: theme.spacing(1),
+    textAlign: 'center',
+    color: theme.palette.text.secondary,
+}));
 
 const Epicenter: Component = () => {
     let map: L.Map
@@ -315,7 +336,7 @@ const Epicenter: Component = () => {
         set_waveform([x, metadata.data, metadata.file_name])
     })
 
-    return <div id='epicenter'></div>
+    return <Item id='epicenter'></Item>
 }
 
 const Waveform: Component = () => {
@@ -331,28 +352,91 @@ const Waveform: Component = () => {
         }, {responsive: true,})
     })
 
-    return <div id='canvas'></div>
+    return <Item id='canvas'></Item>
 }
 
-const Item = styled(Paper)(({theme}) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
+const SpectrumSA: Component = () => {
+    createEffect(() => {
+        Plotly.newPlot(document.getElementById('spectrum_sa'),
+            [{x: current_record().freq, y: current_record().SA, type: 'scatter', name: 'SA (5% damping)'}],
+            {
+                autosize: true,
+                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                automargin: true,
+                title: {text: 'SA (5% damping)', font: {size: 14},},
+                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
+                yaxis: Object.assign({}, axis_label('Amplitude (Gal)', 12), {range: [0, Math.max(...current_record().SA) * 1.1]}),
+                showlegend: false,
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            }, {responsive: true,})
+    })
+
+    return <Item id='spectrum_sa'></Item>
+}
+
+const SpectrumSV: Component = () => {
+    createEffect(() => {
+        Plotly.newPlot(document.getElementById('spectrum_sv'),
+            [{x: current_record().freq, y: current_record().SV, type: 'scatter', name: 'SV (5% damping)'}],
+            {
+                autosize: true,
+                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                automargin: true,
+                title: {text: 'SV (5% damping)', font: {size: 14},},
+                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
+                yaxis: Object.assign({}, axis_label('Amplitude (cm/s)', 12), {range: [0, Math.max(...current_record().SV) * 1.1]}),
+                showlegend: false,
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            }, {responsive: true,})
+    })
+
+    return <Item id='spectrum_sv'></Item>
+}
+
+const SpectrumSD: Component = () => {
+    createEffect(() => {
+        Plotly.newPlot(document.getElementById('spectrum_sd'),
+            [{x: current_record().freq, y: current_record().SD, type: 'scatter', name: 'SD (5% damping)'}],
+            {
+                autosize: true,
+                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                automargin: true,
+                title: {text: 'SD (5% damping)', font: {size: 14},},
+                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
+                yaxis: Object.assign({}, axis_label('Amplitude (cm)', 12), {range: [0, Math.max(...current_record().SD) * 1.1]}),
+                showlegend: false,
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            }, {responsive: true,})
+    })
+
+    return <Item id='spectrum_sd'></Item>
+}
 
 const Jackpot: Component = () => {
     return <>
         <Grid container spacing={1}>
-            <Grid item xs={3}>
-                <Stack spacing={1} direction='column' alignItems='stretch' alignContent='stretch' sx={{my: 1}}>
-                    <RegionGroup/>
-                </Stack>
+            <Grid item xs={2}>
+                <RegionGroup/>
             </Grid>
-            <Grid item xs={9}>
-                <Card variant="outlined" style='min-height:400px' sx={{my: 1}}><Waveform/><Epicenter/></Card>
-                <RecordTable/>
+            <Grid container item xs={10} spacing={1}>
+                <Grid item xs={8}><Waveform/></Grid>
+                <Grid item xs={4}><Epicenter/></Grid>
+                <Grid item xs={4}><SpectrumSA/></Grid>
+                <Grid item xs={4}><SpectrumSV/></Grid>
+                <Grid item xs={4}><SpectrumSD/></Grid>
+                <Grid item xs={12}><RecordTable/></Grid>
             </Grid>
         </Grid>
         <ErrorModal/>

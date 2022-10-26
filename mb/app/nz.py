@@ -203,3 +203,22 @@ async def download_single_spectrum(file_id_or_name: str):
         return SequenceResponse(**result.dict(), interval=frequency, data=record.tolist())
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
+
+
+@router.get('/response_spectrum/{file_id_or_name}', response_model=ResponseSpectrumResponse)
+async def download_single_response_spectrum(
+        file_id_or_name: str,
+        damping_ratio: float = Query(0.05, ge=0., le=1.),
+        period_start: float = Query(0.01, ge=0.),
+        period_end: float = Query(10., ge=0.),
+        period_step: float = Query(0.01, ge=0.)):
+    """
+    Retrieve a single response spectrum from the database.
+    """
+    result: NZSM = await retrieve_single_record(file_id_or_name)
+
+    interval, record = result.to_waveform(unit='cm/s/s')
+    period = np.arange(period_start, period_end + period_step, period_step)
+    spectrum = response_spectrum(damping_ratio, interval, record, period)
+    # noinspection PyTypeChecker
+    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())

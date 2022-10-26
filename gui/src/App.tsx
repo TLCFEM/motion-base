@@ -118,7 +118,7 @@ const ButtonStack: Component = () => {
 }
 
 const App: Component = () => {
-    return <Container maxWidth={'xl'}>
+    return <Container maxWidth={false}>
         <AppBar position='static' id='app-bar'><Toolbar>
             <IconButton size='medium' edge='start' color='inherit' aria-label='menu' sx={{mr: 2}}>
                 <MenuIcon/>

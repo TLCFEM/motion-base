@@ -24,3 +24,4 @@ setuptools~=60.2.0
 uvicorn~=0.18.3
 structlog~=22.1.0
 scipy~=1.9.2
+joblib~=1.2.0

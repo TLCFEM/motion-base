@@ -17,9 +17,11 @@ import os.path
 import tarfile
 from uuid import uuid4
 
+import numpy as np
 import pytest
 
 from mb.record.nz import ParserNZSM
+from mb.record.response_spectrum import response_spectrum
 
 
 @pytest.mark.parametrize('file_path', ['data/20110222_015029_MQZ.V2A'])
@@ -37,3 +39,10 @@ async def test_nz_parse_archive(pwd, file_path):
             if target:
                 tasks.append(ParserNZSM.parse_archive(target, uuid4(), f))
         await asyncio.gather(*tasks)
+
+
+def test_nz_response_spectrum():
+    motion = np.array([0, 1, 1, 0, 2, 0, 0])
+    interval = .01
+    period = np.arange(.1, .2, interval)
+    response_spectrum(.05, interval, motion, period)

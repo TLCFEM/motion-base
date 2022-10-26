@@ -12,13 +12,21 @@ code {
 }
 
 #canvas {
-    width: 70%;
-    float: left;
     height: 400px;
 }
 
 #epicenter {
-    width: 30%;
-    float: right;
     height: 400px;
+}
+
+#spectrum_sa {
+    height: 300px;
+}
+
+#spectrum_sv {
+    height: 300px;
+}
+
+#spectrum_sd {
+    height: 300px;
 }

@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import numpy as np
+from joblib import Parallel, delayed
 
 
 class Oscillator:
@@ -77,17 +78,17 @@ class Oscillator:
         return np.array([
             self.amplitude(displacement) * self.factor * interval,
             self.amplitude(velocity) * self.factor,
-            self.amplitude(acceleration) * self.factor / interval])
+            self.amplitude(acceleration * self.factor / interval + motion)])
 
 
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
-    spectrum = np.zeros((3, len(period)))
-
-    for i, p in enumerate(period):
+    def compute_task(p):
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
-        spectrum[:, i] = oscillator.compute_maximum_response(interval, motion)
+        return oscillator.compute_maximum_response(interval, motion)
 
-    return np.column_stack((period, spectrum.transpose()))
+    spectrum = Parallel(n_jobs=4, prefer='processes')(delayed(compute_task)(p) for p in period)
+
+    return np.column_stack((period, np.array(spectrum)))
 
 
 def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:
