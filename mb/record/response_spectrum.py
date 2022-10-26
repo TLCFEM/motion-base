@@ -12,6 +12,8 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import os
+
 import numpy as np
 from joblib import Parallel, delayed
 
@@ -86,7 +88,8 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 
-    spectrum = Parallel(n_jobs=4, prefer='processes')(delayed(compute_task)(p) for p in period)
+    spectrum = Parallel(n_jobs=len(os.sched_getaffinity(0)), prefer='processes')(
+        delayed(compute_task)(p) for p in period)
 
     return np.column_stack((period, np.array(spectrum)))
 

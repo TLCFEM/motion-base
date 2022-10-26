@@ -8,14 +8,14 @@ import Alert from '@suid/material/Alert'
 import axios from "./API"
 import Button from '@suid/material/Button'
 import CasinoIcon from '@suid/icons-material/Casino'
-import CloudDownloadIcon from '@suid/icons-material/CloudDownload';
+import CloudDownloadIcon from '@suid/icons-material/CloudDownload'
 import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline'
 import FormControl from '@suid/material/FormControl'
 import FormControlLabel from '@suid/material/FormControlLabel'
 // @ts-ignore
 import L from 'leaflet'
-import LinearProgress from "@suid/material/LinearProgress";
-import Modal from "@suid/material/Modal";
+import LinearProgress from "@suid/material/LinearProgress"
+import Modal from "@suid/material/Modal"
 import Paper from "@suid/material/Paper"
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
@@ -23,7 +23,7 @@ import Radio from '@suid/material/Radio'
 import RadioGroup from '@suid/material/RadioGroup'
 import Stack from "@suid/material/Stack"
 import styled from "@suid/material/styles/styled"
-import Switch from "@suid/material/Switch";
+import Switch from "@suid/material/Switch"
 import Table from '@suid/material/Table'
 import TableBody from '@suid/material/TableBody'
 import TableCell, {tableCellClasses} from '@suid/material/TableCell'
@@ -32,25 +32,22 @@ import TableHead from '@suid/material/TableHead'
 import TableRow from '@suid/material/TableRow'
 import type {Component} from 'solid-js'
 import {createEffect, createResource, createSignal, For, onMount} from 'solid-js'
-import {createStore} from "solid-js/store";
-import Grid from "@suid/material/Grid";
-import tippy from "tippy.js";
-import CircularProgress from "@suid/material/CircularProgress";
-import Typography from "@suid/material/Typography";
+import {createStore} from "solid-js/store"
+import Grid from "@suid/material/Grid"
+import tippy from "tippy.js"
+import CircularProgress from "@suid/material/CircularProgress"
+import Typography from "@suid/material/Typography"
 
-const [open, set_open] = createSignal(false);
-const [error_message, set_error_message] = createSignal('');
+const [open, set_open] = createSignal(false)
+const [error_message, set_error_message] = createSignal('')
 
 const modal_prop: object = {
     position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", border: "1px solid",
 }
 
 const ErrorModal = () => {
-    const error_toggle_off = () => set_open(false);
-
     return <Modal
-        open={open()} onClose={error_toggle_off} aria-labelledby="error-model"
-        aria-describedby="error-model">
+        open={open()} onClose={() => set_open(false)} aria-labelledby="error-model" aria-describedby="error-model">
         <LinearProgress/>
         <Alert sx={modal_prop} severity="error">{error_message()}</Alert>
     </Modal>
@@ -58,11 +55,9 @@ const ErrorModal = () => {
 
 const region_set: Array<string> = ['jp', 'nz']
 
-const [normalised, set_normalised] = createSignal(false);
+const [normalised, set_normalised] = createSignal(false)
 const [region, set_region] = createSignal(region_set[0])
 
-const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317])
-const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317])
 const [waveform, set_waveform] = createSignal([Array<number>(0), Array<number>(0), ''])
 
 class Record {
@@ -98,7 +93,7 @@ class Record {
     }
 }
 
-const [record_metadata, set_record_metadata] = createStore<Array<Record>>(Array<Record>(0))
+const [record_pool, set_record_pool] = createStore<Array<Record>>(Array<Record>(0))
 const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
 const StyledTableCell = styled(TableCell)(({theme}) => ({
@@ -119,11 +114,11 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
 }))
 
 const sort_by_magnitude = () => {
-    set_record_metadata(record_metadata.slice().sort((a, b) => b.magnitude - a.magnitude))
+    set_record_pool(record_pool.slice().sort((a, b) => b.magnitude - a.magnitude))
 }
 
 const sort_by_time = () =>
-    set_record_metadata(record_metadata.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
+    set_record_pool(record_pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
 
 function RecordTableHeader() {
     const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
@@ -160,9 +155,9 @@ function RecordTableHeader() {
 
 const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
     if (event.target.tagName != 'TH') return
-    for (let i = 0; i < record_metadata.length; i++)
-        if (record_metadata[i].id == event.target.innerText) {
-            set_current_record(record_metadata[i])
+    for (let i = 0; i < record_pool.length; i++)
+        if (record_pool[i].id == event.target.innerText) {
+            set_current_record(record_pool[i])
             break
         }
 }
@@ -193,7 +188,7 @@ function RecordTable() {
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
             <RecordTableHeader/>
             <TableBody>
-                <For each={record_metadata}>
+                <For each={record_pool}>
                     {(record_entry) => <RecordEntry {...record_entry}/>}
                 </For>
             </TableBody>
@@ -212,7 +207,7 @@ const axis_label = (label: string, size: number) => {
 }
 
 function clear() {
-    set_record_metadata(Array<Record>(0))
+    set_record_pool(Array<Record>(0))
     set_current_record(new Record({}))
 }
 
@@ -233,7 +228,7 @@ async function jackpot() {
             new_record.SV = res.data.data.map((d: Array<number>) => d[2])
             new_record.SA = res.data.data.map((d: Array<number>) => d[3])
             set_current_record(new_record)
-            set_record_metadata([...record_metadata, new_record])
+            set_record_pool([...record_pool, new_record])
         }).catch(err => {
             set_error_message('Fail to retrieve data: ' + err.message)
             set_open(true)
@@ -277,14 +272,14 @@ const Epicenter: Component = () => {
     })
 
     onMount(() => {
-        map = L.map(document.getElementById('epicenter')).setView(event_location(), 6)
+        map = L.map(document.getElementById('epicenter')).setView([current_record().latitude, current_record().longitude], 6)
 
         L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
             maxZoom: 12, attribution: '© OpenStreetMap'
         }).addTo(map)
 
-        event_marker = L.marker(event_location(), {icon: event_icon}).addTo(map)
-        station_marker = L.marker(station_location(), {icon: station_icon}).addTo(map)
+        event_marker = L.marker([current_record().latitude, current_record().longitude], {icon: event_icon}).addTo(map)
+        station_marker = L.marker([current_record().station_latitude, current_record().station_longitude], {icon: station_icon}).addTo(map)
 
         event_marker.bindPopup('event location')
         station_marker.bindPopup('station location')
@@ -303,25 +298,20 @@ const Epicenter: Component = () => {
     })
 
     createEffect(() => {
-        event_marker.setLatLng(event_location())
-        station_marker.setLatLng(station_location())
+        const event_location = [current_record().latitude, current_record().longitude]
+        event_marker.setLatLng(event_location)
+        station_marker.setLatLng([current_record().station_latitude, current_record().station_longitude])
 
-        map.flyTo(event_location(), 6)
+        map.flyTo(event_location, 6)
     })
 
-    createEffect(() => {
-        const metadata = current_record()
+    const metadata = current_record()
+    const interval: number = metadata.interval
 
-        set_event_location([metadata.latitude, metadata.longitude])
-        set_station_location([metadata.station_latitude, metadata.station_longitude])
+    let x: Array<number> = []
+    for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
 
-        const interval: number = metadata.interval
-
-        let x: Array<number> = []
-        for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
-
-        set_waveform([x, metadata.data, metadata.file_name])
-    })
+    set_waveform([x, metadata.data, metadata.file_name])
 
     return <Item id='epicenter'></Item>
 }
@@ -412,31 +402,30 @@ const SpectrumSD: Component = () => {
 }
 
 function download() {
-    const metadata = current_record()
+    const record = current_record()
 
-    if (metadata.freq.length === 0) {
+    if (record.freq.length === 0) {
         set_error_message('No data to download.')
         set_open(true)
         return
     }
 
-    const x = waveform()[0]
-
     const data = new Blob([JSON.stringify({
-        'time': x,
-        'waveform': metadata.data,
-        'frequency': metadata.freq,
-        'sa': metadata.SA,
-        'sv': metadata.SV,
-        'sd': metadata.SD
+        'time': waveform()[0],
+        'waveform': record.data,
+        'frequency': record.freq,
+        'sa': record.SA,
+        'sv': record.SV,
+        'sd': record.SD
     })], {type: 'application/json'})
 
     const url = window.URL.createObjectURL(data)
     const link = document.createElement('a')
     link.href = url
-    link.setAttribute('download', metadata.file_name + '.json')
+    link.setAttribute('download', record.file_name + '.json')
     document.body.appendChild(link)
     link.click()
+    document.body.removeChild(link)
 }
 
 function RegionGroup() {

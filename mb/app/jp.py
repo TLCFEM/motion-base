@@ -70,6 +70,34 @@ async def upload_archive(
     return {'message': 'successfully uploaded and processed', 'records': records}
 
 
+@router.post('/query', response_model=IDListResponse)
+async def query_records(
+        min_magnitude: float = Query(default=0, ge=0, le=10),
+        max_magnitude: float = Query(default=10, ge=0, le=10),
+        sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
+        page_size: int = Query(default=100, ge=1, le=1000),
+        page_number: int = Query(default=0, ge=0)
+):
+    """
+    Query records from the database.
+    """
+    query_dict = {
+        '$and': [
+            {'magnitude': {
+                '$gte': min_magnitude,
+                '$lte': max_magnitude
+            }},
+            {'sub_category': sub_category.lower() if sub_category else {'$regex': 'knt|kik', '$options': 'i'}}
+        ]
+    }
+
+    result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size)
+    if result:
+        return IDListResponse(query=query_dict, id=[record.id async for record in result])
+
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
+
+
 @router.get('/raw/jackpot', response_model=NIED)
 async def download_single_random_raw_record():
     """
@@ -204,31 +232,3 @@ async def download_single_response_spectrum(
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
     return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
-
-
-@router.post('/query', response_model=IDListResponse)
-async def query_records(
-        min_magnitude: float = Query(default=0, ge=0, le=10),
-        max_magnitude: float = Query(default=10, ge=0, le=10),
-        sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
-        page_size: int = Query(default=100, ge=1, le=1000),
-        page_number: int = Query(default=0, ge=0)
-):
-    """
-    Query records from the database.
-    """
-    query_dict = {
-        '$and': [
-            {'magnitude': {
-                '$gte': min_magnitude,
-                '$lte': max_magnitude
-            }},
-            {'sub_category': sub_category.lower() if sub_category else {'$regex': 'knt|kik', '$options': 'i'}}
-        ]
-    }
-
-    result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size)
-    if result:
-        return IDListResponse(query=query_dict, id=[record.id async for record in result])
-
-    raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
