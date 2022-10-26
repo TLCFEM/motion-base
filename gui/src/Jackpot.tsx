@@ -428,13 +428,16 @@ function RegionGroup() {
     </Stack>
 }
 
+const LoadingModal: Component = () => {
+    return <Modal open={data?.loading}>
+        <Stack sx={modal_prop} component={Item} justifyContent='center' direction='row' alignItems='center'
+               alignContent='center' spacing={2} padding={2}>
+            <CircularProgress/><Typography variant={'subtitle1'}>Loading...</Typography></Stack>
+    </Modal>
+}
+
 const Jackpot: Component = () => {
     return <>
-        <Modal open={data?.loading}>
-            <Stack sx={modal_prop} component={Item} justifyContent='center' direction='row' alignItems='center'
-                   alignContent='center' spacing={2}>
-                <CircularProgress/><Typography variant={'subtitle1'}>Loading...</Typography></Stack>
-        </Modal>
         <Grid container spacing={1}>
             <Grid item xs={2}>
                 <RegionGroup/>
@@ -449,6 +452,7 @@ const Jackpot: Component = () => {
             </Grid>
         </Grid>
         <ErrorModal/>
+        <LoadingModal/>
     </>
 }
 
