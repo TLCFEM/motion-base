@@ -96,8 +96,6 @@ const AboutModal = () => {
 const login = () => {
 }
 
-const BASE_URL = '/gui'
-
 const ButtonStack: Component = () => {
     const about_toggle_on = () => set_open_about(true);
 

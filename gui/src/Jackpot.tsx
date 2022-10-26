@@ -5,7 +5,7 @@ import 'leaflet/dist/leaflet.css'
 // @ts-ignore
 import * as ST from '@suid/types'
 import Alert from '@suid/material/Alert'
-import axios from "axios"
+import axios from "./API"
 import Button from '@suid/material/Button'
 import CasinoIcon from '@suid/icons-material/Casino'
 import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline'
@@ -30,13 +30,19 @@ import TableContainer from '@suid/material/TableContainer'
 import TableHead from '@suid/material/TableHead'
 import TableRow from '@suid/material/TableRow'
 import type {Component} from 'solid-js'
-import {createEffect, createSignal, For, onMount} from 'solid-js'
+import {createEffect, createResource, createSignal, For, onMount} from 'solid-js'
 import {createStore} from "solid-js/store";
 import Grid from "@suid/material/Grid";
 import tippy from "tippy.js";
+import CircularProgress from "@suid/material/CircularProgress";
+import Typography from "@suid/material/Typography";
 
 const [open, set_open] = createSignal(false);
 const [error_message, set_error_message] = createSignal('');
+
+const modal_prop: object = {
+    position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", border: "1px solid",
+}
 
 const ErrorModal = () => {
     const error_toggle_off = () => set_open(false);
@@ -45,9 +51,7 @@ const ErrorModal = () => {
         open={open()} onClose={error_toggle_off} aria-labelledby="error-model"
         aria-describedby="error-model">
         <LinearProgress/>
-        <Alert sx={{
-            position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", border: "1px solid",
-        }} severity="error">{error_message()}</Alert>
+        <Alert sx={modal_prop} severity="error">{error_message()}</Alert>
     </Modal>
 }
 
@@ -55,25 +59,6 @@ const region_set: Array<string> = ['jp', 'nz']
 
 const [normalised, set_normalised] = createSignal(false);
 const [region, set_region] = createSignal(region_set[0])
-
-function RegionGroup() {
-    const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
-    const handle_normalised = () => set_normalised(!normalised())
-
-    return <Stack component={Item} justifyContent='center' direction='column' alignItems='center' alignContent='center'>
-        <FormControl size='small'>
-            <RadioGroup aria-labelledby='region' name='region' id='region' row={true} value={region()}
-                        onChange={handle_change}>
-                <For each={region_set}>
-                    {(r) => <FormControlLabel value={r} control={<Radio size='small'/>} label={r.toUpperCase()}/>}
-                </For>
-            </RadioGroup>
-        </FormControl>
-        <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
-        <Button variant='contained' id='random' onClick={jackpot}><CasinoIcon/></Button>
-        <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
-    </Stack>
-}
 
 const [event_location, set_event_location] = createSignal([52.5068441, 13.4247317])
 const [station_location, set_station_location] = createSignal([52.5068441, 13.4247317])
@@ -257,6 +242,8 @@ async function jackpot() {
     })
 }
 
+const [data, {mutate, refetch}] = createResource(jackpot);
+
 const Item = styled(Paper)(({theme}) => ({
     backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
     ...theme.typography.body2,
@@ -311,8 +298,6 @@ const Epicenter: Component = () => {
         tippy('#clear', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Clear the Table!',
         })
-
-        jackpot().then()
     })
 
     createEffect(() => {
@@ -424,8 +409,32 @@ const SpectrumSD: Component = () => {
     return <Item id='spectrum_sd'></Item>
 }
 
+function RegionGroup() {
+    const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
+    const handle_normalised = () => set_normalised(!normalised())
+
+    return <Stack component={Item} justifyContent='center' direction='column' alignItems='center' alignContent='center'>
+        <FormControl size='small'>
+            <RadioGroup aria-labelledby='region' name='region' id='region' row={true} value={region()}
+                        onChange={handle_change}>
+                <For each={region_set}>
+                    {(r) => <FormControlLabel value={r} control={<Radio size='small'/>} label={r.toUpperCase()}/>}
+                </For>
+            </RadioGroup>
+        </FormControl>
+        <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
+        <Button variant='contained' id='random' onClick={refetch}><CasinoIcon/></Button>
+        <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
+    </Stack>
+}
+
 const Jackpot: Component = () => {
     return <>
+        <Modal open={data?.loading}>
+            <Stack sx={modal_prop} component={Item} justifyContent='center' direction='row' alignItems='center'
+                   alignContent='center' spacing={2}>
+                <CircularProgress/><Typography variant={'subtitle1'}>Loading...</Typography></Stack>
+        </Modal>
         <Grid container spacing={1}>
             <Grid item xs={2}>
                 <RegionGroup/>
