@@ -8,6 +8,7 @@ import Alert from '@suid/material/Alert'
 import axios from "./API"
 import Button from '@suid/material/Button'
 import CasinoIcon from '@suid/icons-material/Casino'
+import CloudDownloadIcon from '@suid/icons-material/CloudDownload';
 import DeleteOutlineIcon from '@suid/icons-material/DeleteOutline'
 import FormControl from '@suid/material/FormControl'
 import FormControlLabel from '@suid/material/FormControlLabel'
@@ -212,6 +213,7 @@ const axis_label = (label: string, size: number) => {
 
 function clear() {
     set_record_metadata(Array<Record>(0))
+    set_current_record(new Record({}))
 }
 
 async function jackpot() {
@@ -409,14 +411,42 @@ const SpectrumSD: Component = () => {
     return <Item id='spectrum_sd'></Item>
 }
 
+function download() {
+    const metadata = current_record()
+
+    if (metadata.freq.length === 0) {
+        set_error_message('No data to download.')
+        set_open(true)
+        return
+    }
+
+    const x = waveform()[0]
+
+    const data = new Blob([JSON.stringify({
+        'time': x,
+        'waveform': metadata.data,
+        'frequency': metadata.freq,
+        'sa': metadata.SA,
+        'sv': metadata.SV,
+        'sd': metadata.SD
+    })], {type: 'application/json'})
+
+    const url = window.URL.createObjectURL(data)
+    const link = document.createElement('a')
+    link.href = url
+    link.setAttribute('download', metadata.file_name + '.json')
+    document.body.appendChild(link)
+    link.click()
+}
+
 function RegionGroup() {
     const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
     const handle_normalised = () => set_normalised(!normalised())
 
-    return <Stack component={Item} justifyContent='center' direction='column' alignItems='center' alignContent='center'>
+    return <Stack component={Item} spacing={1} justifyContent='center' direction='column' alignItems='center'
+                  alignContent='center'>
         <FormControl size='small'>
-            <RadioGroup aria-labelledby='region' name='region' id='region' row={true} value={region()}
-                        onChange={handle_change}>
+            <RadioGroup aria-labelledby='region' name='region' id='region' value={region()} onChange={handle_change}>
                 <For each={region_set}>
                     {(r) => <FormControlLabel value={r} control={<Radio size='small'/>} label={r.toUpperCase()}/>}
                 </For>
@@ -425,6 +455,7 @@ function RegionGroup() {
         <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
         <Button variant='contained' id='random' onClick={refetch}><CasinoIcon/></Button>
         <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
+        <Button variant='contained' id='download' onClick={download}><CloudDownloadIcon/></Button>
     </Stack>
 }
 
@@ -439,10 +470,10 @@ const LoadingModal: Component = () => {
 const Jackpot: Component = () => {
     return <>
         <Grid container spacing={1}>
-            <Grid item xs={2}>
+            <Grid item xs={1}>
                 <RegionGroup/>
             </Grid>
-            <Grid container item xs={10} spacing={1}>
+            <Grid container item xs={11} spacing={1}>
                 <Grid item xs={8}><Waveform/></Grid>
                 <Grid item xs={4}><Epicenter/></Grid>
                 <Grid item xs={4}><SpectrumSA/></Grid>
