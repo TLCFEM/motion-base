@@ -151,3 +151,8 @@ async def retrieve_single_record(file_id_or_name: str) -> NZSM:
         return await NZSM.find_one(NZSM.id == UUID(file_id_or_name.lower()))
 
     return await NZSM.find_one(NZSM.file_name == file_id_or_name.upper())
+
+
+class MetadataNZSM(NZSM):
+    class Settings:
+        projection = {'raw_data': False}

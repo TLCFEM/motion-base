@@ -15,7 +15,6 @@
 import asyncio
 import os.path
 import tarfile
-import timeit
 from uuid import uuid4
 
 import numpy as np

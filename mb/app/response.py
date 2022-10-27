@@ -54,10 +54,10 @@ class ResponseSpectrumResponse(MetadataResponse):
     data: List[List[float]]
 
 
-class IDListResponse(BaseModel):
+class MetadataListResponse(BaseModel):
     """
     A list of IDs of the target records.
     One can later use the ID to retrieve the record.
     """
     query: dict
-    id: List[UUID]
+    result: list[MetadataResponse]

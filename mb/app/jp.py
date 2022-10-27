@@ -18,9 +18,9 @@ from uuid import UUID
 import numpy as np
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import IDListResponse, ResponseSpectrumResponse, SequenceResponse
+from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse
 from mb.app.utility import User, create_task, is_active, send_notification
-from mb.record.jp import NIED, ParserNIED, retrieve_single_record
+from mb.record.jp import MetadataNIED, NIED, ParserNIED, retrieve_single_record
 from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['Japan'])
@@ -70,7 +70,7 @@ async def upload_archive(
     return {'message': 'successfully uploaded and processed', 'records': records}
 
 
-@router.post('/query', response_model=IDListResponse)
+@router.post('/query', response_model=MetadataListResponse)
 async def query_records(
         min_magnitude: float = Query(default=0, ge=0, le=10),
         max_magnitude: float = Query(default=10, ge=0, le=10),
@@ -91,9 +91,11 @@ async def query_records(
         ]
     }
 
-    result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size)
+    result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNIED)
     if result:
-        return IDListResponse(query=query_dict, id=[record.id async for record in result])
+        return MetadataListResponse(
+            query=query_dict,
+            result=[MetadataResponse(**record.dict()) async for record in result])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
 

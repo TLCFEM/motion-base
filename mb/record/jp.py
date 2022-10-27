@@ -223,3 +223,8 @@ async def retrieve_single_record(file_id_or_name: str, sub_category: str | None 
         NIED.file_name == file_id_or_name.upper(),
         NIED.sub_category == sub_category.lower()
     )
+
+
+class MetadataNIED(NIED):
+    class Settings:
+        projection = {'raw_data': False}

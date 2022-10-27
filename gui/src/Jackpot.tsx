@@ -36,7 +36,6 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
-import Typography from "@suid/material/Typography"
 
 const [open, set_open] = createSignal(false)
 const [error_message, set_error_message] = createSignal('')
@@ -450,18 +449,12 @@ function RegionGroup() {
             </RadioGroup>
         </FormControl>
         <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
-        <Button variant='contained' id='random' onClick={refetch}><CasinoIcon/></Button>
+        <Button variant='contained' id='random' onClick={refetch} disabled={data?.loading}>
+            {data?.loading ? <CircularProgress color="secondary" size={24}/> : <CasinoIcon/>}
+        </Button>
         <Button variant='contained' id='clear' onClick={clear}><DeleteOutlineIcon/></Button>
         <Button variant='contained' id='download' onClick={download}><CloudDownloadIcon/></Button>
     </Stack>
-}
-
-const LoadingModal: Component = () => {
-    return <Modal open={data?.loading}>
-        <Stack sx={modal_prop} component={Item} justifyContent='center' direction='row' alignItems='center'
-               alignContent='center' spacing={2} padding={2}>
-            <CircularProgress/><Typography variant={'subtitle1'}>Loading...</Typography></Stack>
-    </Modal>
 }
 
 const Jackpot: Component = () => {
@@ -480,7 +473,6 @@ const Jackpot: Component = () => {
             </Grid>
         </Grid>
         <ErrorModal/>
-        <LoadingModal/>
     </>
 }
 

@@ -30,7 +30,7 @@ services:
     depends_on:
       - mongo
     ports:
-      - '3000:3000'
+      - '4173:4173'
 
 volumes:
   motion_mongo:
