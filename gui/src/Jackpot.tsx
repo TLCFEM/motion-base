@@ -221,6 +221,7 @@ async function jackpot() {
         if (res.status !== 200) return
         new_record = new Record(res.data)
         url = `/${region_value}/response_spectrum/${new_record.id}`
+        if (normalised()) url += '?normalised=true'
         await axios.get(url).then(res => {
             if (res.status !== 200) return
             new_record.freq = res.data.data.map((d: Array<number>) => d[0])
@@ -295,6 +296,14 @@ const Epicenter: Component = () => {
         tippy('#clear', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Clear the Table!',
         })
+
+        tippy('#download', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Download Current Record as json!',
+        })
     })
 
     createEffect(() => {
@@ -307,8 +316,7 @@ const Epicenter: Component = () => {
         const metadata = current_record()
         const interval: number = metadata.interval
 
-        let x: Array<number> = []
-        for (let i = 0; i < metadata.data.length; i++) x.push(i * interval)
+        const x: Array<number> = Array<number>(metadata.data.length).fill(0).map((_, i) => i * interval)
 
         set_waveform([x, metadata.data, metadata.file_name])
     })
@@ -320,7 +328,7 @@ const Waveform: Component = () => {
     createEffect(() => {
         const trace = {x: waveform()[0], y: waveform()[1], type: 'scatter', name: waveform()[2]}
 
-        Plotly.newPlot(document.getElementById('canvas'), [trace], {
+        Plotly.react(document.getElementById('canvas'), [trace], {
             autosize: true,
             automargin: true,
             title: {text: waveform()[2], font: {size: 20},},
@@ -334,11 +342,11 @@ const Waveform: Component = () => {
 
 const SpectrumSA: Component = () => {
     createEffect(() => {
-        Plotly.newPlot(document.getElementById('spectrum_sa'),
+        Plotly.react(document.getElementById('spectrum_sa'),
             [{x: current_record().freq, y: current_record().SA, type: 'scatter', name: 'SA (5% damping)'}],
             {
                 autosize: true,
-                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
                 automargin: true,
                 title: {text: 'SA (5% damping)', font: {size: 14},},
                 xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
@@ -357,11 +365,11 @@ const SpectrumSA: Component = () => {
 
 const SpectrumSV: Component = () => {
     createEffect(() => {
-        Plotly.newPlot(document.getElementById('spectrum_sv'),
+        Plotly.react(document.getElementById('spectrum_sv'),
             [{x: current_record().freq, y: current_record().SV, type: 'scatter', name: 'SV (5% damping)'}],
             {
                 autosize: true,
-                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
                 automargin: true,
                 title: {text: 'SV (5% damping)', font: {size: 14},},
                 xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
@@ -380,11 +388,11 @@ const SpectrumSV: Component = () => {
 
 const SpectrumSD: Component = () => {
     createEffect(() => {
-        Plotly.newPlot(document.getElementById('spectrum_sd'),
+        Plotly.react(document.getElementById('spectrum_sd'),
             [{x: current_record().freq, y: current_record().SD, type: 'scatter', name: 'SD (5% damping)'}],
             {
                 autosize: true,
-                margin: {l: 40, r: 40, b: 40, t: 40, pad: 0},
+                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
                 automargin: true,
                 title: {text: 'SD (5% damping)', font: {size: 14},},
                 xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),

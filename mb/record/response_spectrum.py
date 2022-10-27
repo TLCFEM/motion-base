@@ -97,6 +97,8 @@ class Oscillator:
 
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
     def compute_task(p):
+        if p == 0:
+            return np.array([0, 0, Oscillator.amplitude(motion)])
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 

@@ -139,16 +139,16 @@ async def download_single_random_spectrum():
 @router.get('/response_spectrum/jackpot', response_model=ResponseSpectrumResponse)
 async def download_single_random_response_spectrum(
         damping_ratio: float = Query(0.05, ge=0., le=1.),
-        period_start: float = Query(0.01, ge=0.),
-        period_end: float = Query(10., ge=0.),
-        period_step: float = Query(0.01, ge=0.)):
+        period_end: float = Query(20., ge=0.),
+        period_step: float = Query(0.05, ge=0.),
+        normalised: bool = Query(default=False)):
     """
     Retrieve a single random response spectrum from the database.
     """
     result: NZSM = await download_single_random_raw_record()
 
-    interval, record = result.to_waveform(unit='cm/s/s')
-    period = np.arange(period_start, period_end + period_step, period_step)
+    interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
+    period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
     return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
@@ -209,16 +209,16 @@ async def download_single_spectrum(file_id_or_name: str):
 async def download_single_response_spectrum(
         file_id_or_name: str,
         damping_ratio: float = Query(0.05, ge=0., le=1.),
-        period_start: float = Query(0.01, ge=0.),
-        period_end: float = Query(10., ge=0.),
-        period_step: float = Query(0.01, ge=0.)):
+        period_end: float = Query(20., ge=0.),
+        period_step: float = Query(0.05, ge=0.),
+        normalised: bool = Query(default=False)):
     """
     Retrieve a single response spectrum from the database.
     """
     result: NZSM = await retrieve_single_record(file_id_or_name)
 
-    interval, record = result.to_waveform(unit='cm/s/s')
-    period = np.arange(period_start, period_end + period_step, period_step)
+    interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
+    period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
     return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
