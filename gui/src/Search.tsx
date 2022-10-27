@@ -1,20 +1,24 @@
-import {Component, createEffect, For, onMount} from "solid-js"
-import Grid from "@suid/material/Grid"
-import Button from "@suid/material/Button"
+import {Component, createEffect, createSignal, For, onMount} from 'solid-js'
+import Grid from '@suid/material/Grid'
+import Button from '@suid/material/Button'
 // @ts-ignore
 import L from 'leaflet'
-import {DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from "./Utility"
-import {createStore} from "solid-js/store"
-import axios from "./API"
-import tippy from "tippy.js"
-import TableHead from "@suid/material/TableHead"
-import TableRow from "@suid/material/TableRow"
-import TableContainer from "@suid/material/TableContainer"
-import Paper from "@suid/material/Paper"
-import Table from "@suid/material/Table"
-import TableBody from "@suid/material/TableBody"
+import {DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
+import {createStore} from 'solid-js/store'
+import axios from './API'
+import tippy from 'tippy.js'
+import TableHead from '@suid/material/TableHead'
+import TableRow from '@suid/material/TableRow'
+import TableContainer from '@suid/material/TableContainer'
+import Paper from '@suid/material/Paper'
+import Table from '@suid/material/Table'
+import TableBody from '@suid/material/TableBody'
+import Box from '@suid/material/Box'
+import TextField from '@suid/material/TextField'
 // @ts-ignore
 import * as ST from '@suid/types'
+import ToggleButton from '@suid/material/ToggleButton'
+import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
 
 const [records, set_records] = createStore<Array<Record>>([]);
 
@@ -60,7 +64,7 @@ function RecordEntry(record_entry: Record) {
     }
 
     return <StyledTableRow>
-        <StyledTableCell component="th" scope="row">{record_entry.id}</StyledTableCell>
+        <StyledTableCell component='th' scope='row'>{record_entry.id}</StyledTableCell>
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
@@ -74,7 +78,7 @@ function RecordEntry(record_entry: Record) {
 
 function RecordTable({pool}: { pool: Array<Record> }) {
     return <TableContainer component={Paper}>
-        <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
+        <Table sx={{minWidth: 1080}} size='small' aria-label='record-metadata'>
             <RecordTableHeader {...pool}/>
             <TableBody>
                 <For each={pool}>
@@ -84,7 +88,6 @@ function RecordTable({pool}: { pool: Array<Record> }) {
         </Table>
     </TableContainer>
 }
-
 
 const EventMap: Component = () => {
     let map: L.Map
@@ -124,9 +127,12 @@ const EventMap: Component = () => {
     return <Item id='event_map'></Item>
 }
 
+const [alignment, set_alignment] = createSignal('jp')
+const [page_size, set_page_size] = createSignal(20)
+
 async function fetch() {
-    let region_value = 'nz'
-    let url = `/${region_value}/query?page_size=40`
+    let url = `/${alignment()}/query?page_size=${page_size() > 0 ? page_size() : 20}`
+    console.log(page_size())
     await axios.post(url).then(
         res => {
             let obj = Array<Record>(res.data.result.length)
@@ -136,12 +142,53 @@ async function fetch() {
     )
 }
 
+function ColorToggleButton() {
+    return (
+        <ToggleButtonGroup color='primary' value={alignment()} exclusive onChange={(event, new_alignment) => {
+            set_alignment(new_alignment);
+        }}>
+            <ToggleButton value='jp'>Japan</ToggleButton>
+            <ToggleButton value='nz'>New Zealand</ToggleButton>
+        </ToggleButtonGroup>
+    );
+}
+
+function SearchConfig() {
+    return (
+        <Box component='form' sx={{[`& .${TextField}`]: {m: 1, width: '15ch'}, textAlign: 'center',}} noValidate
+             autocomplete='off'>
+            <div>
+                <ColorToggleButton/>
+                <Button variant='contained' id='clear' onClick={fetch}>Search</Button>
+            </div>
+            <div>
+                <TextField id='min-magnitude' label='Min. Mag.' type='number'/>
+                <TextField id='max-magnitude' label='Max. Mag.' type='number'/>
+            </div>
+            <div>
+                <TextField id='event_lat' label='Event Lat.' type='number'/>
+                <TextField id='event_log' label='Event Log.' type='number'/>
+            </div>
+            <div>
+                <TextField id='station_lat' label='Station Lat.' type='number'/>
+                <TextField id='station_log' label='Station Log.' type='number'/>
+            </div>
+            <div>
+                <TextField id='page_size' label='Records per Page' type='number' defaultValue={20}
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_page_size(event.target.value)
+                           }}/>
+            </div>
+        </Box>
+    );
+}
+
 const SearchPage: Component = () => {
     return <Grid container spacing={1}>
-        <Grid item xs={4}>
-            <Button variant='contained' id='clear' onClick={fetch}>Search</Button>
+        <Grid item xs={3}>
+            <SearchConfig/>
         </Grid>
-        <Grid container item xs={8} spacing={1}>
+        <Grid container item xs={9} spacing={1}>
             <Grid item xs={12}><EventMap/></Grid>
             {records?.length > 0 && <Grid item xs={12}><RecordTable pool={records}/></Grid>}
         </Grid>
