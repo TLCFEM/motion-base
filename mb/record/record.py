@@ -20,6 +20,7 @@ import numpy as np
 import pint
 import pymongo
 from beanie import Document, Indexed
+from numba import njit
 from pydantic import Field
 from scipy import signal
 
@@ -66,11 +67,13 @@ class Record(Document):
         raise NotImplementedError()
 
     @staticmethod
+    @njit
     def _perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
         fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
         return 1 / sampling_frequency, fft_magnitude
 
     @staticmethod
+    @njit
     def _normalise(magnitude: np.ndarray) -> np.ndarray:
         max_value: float = abs(np.max(magnitude))
         min_value: float = abs(np.min(magnitude))
@@ -85,10 +88,12 @@ def to_unit(quantity: pint.Quantity, unit: pint.Unit):
     return quantity.magnitude
 
 
+@njit
 def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
     return np.convolve(waveform, window, mode='same')
 
 
+@njit
 def zero_stuff(ratio: int, waveform: np.ndarray) -> np.ndarray:
     output: np.ndarray = np.zeros(len(waveform) * ratio)
     output[::ratio] = waveform

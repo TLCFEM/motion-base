@@ -16,8 +16,20 @@ import os
 
 import numpy as np
 from joblib import Parallel, delayed
+from numba import float64
+from numba.experimental import jitclass
 
 
+@jitclass([
+    ('omega', float64),
+    ('zeta', float64),
+    ('alpha', float64),
+    ('beta', float64),
+    ('gamma', float64),
+    ('a', float64),
+    ('b', float64),
+    ('c', float64),
+])
 class Oscillator:
     def __init__(self, o: float, z: float):
         self.omega: float = o
@@ -46,17 +58,17 @@ class Oscillator:
 
         self.gamma = (1 - self.b + self.c) / self.a / interval / self.omega ** 2
 
-    def populate(self, motion: np.ndarray) -> tuple:
-        displacement = np.zeros_like(motion)
+    def populate(self, motion: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+        displacement: np.ndarray = np.zeros_like(motion, dtype=np.float64)
         displacement[1] = self.b * displacement[0] - motion[0]
 
         for i in range(2, len(motion)):
             displacement[i] = self.b * displacement[i - 1] - self.c * displacement[i - 2] - motion[i - 1]
 
-        velocity = np.zeros_like(motion)
+        velocity: np.ndarray = np.zeros_like(motion, dtype=np.float64)
         velocity[1:] = np.diff(displacement)
 
-        acceleration = np.zeros_like(motion)
+        acceleration: np.ndarray = np.zeros_like(motion, dtype=np.float64)
         acceleration[1:] = np.diff(velocity)
 
         return displacement, velocity, acceleration
@@ -88,8 +100,9 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 
-    spectrum = Parallel(n_jobs=len(os.sched_getaffinity(0)), prefer='processes')(
+    spectrum = Parallel(n_jobs=len(os.sched_getaffinity(0)), prefer='threads')(
         delayed(compute_task)(p) for p in period)
+    # spectrum = np.array([compute_task(p) for p in period])
 
     return np.column_stack((period, np.array(spectrum)))
 
