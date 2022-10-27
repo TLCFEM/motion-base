@@ -100,11 +100,11 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 
-    spectrum = Parallel(n_jobs=len(os.sched_getaffinity(0)), prefer='threads')(
-        delayed(compute_task)(p) for p in period)
-    # spectrum = np.array([compute_task(p) for p in period])
+    spectrum = np.array(Parallel(n_jobs=len(os.sched_getaffinity(0)), prefer='threads')(
+        delayed(compute_task)(p) for p in period))
+    # spectrum = np.array(compute_task(p) for p in period)
 
-    return np.column_stack((period, np.array(spectrum)))
+    return np.column_stack((period, spectrum))
 
 
 def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:
