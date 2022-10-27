@@ -182,12 +182,12 @@ function RecordEntry(record_entry: Record) {
     </StyledTableRow>
 }
 
-function RecordTable() {
+function RecordTable({pool}: { pool: Array<Record> }) {
     return <TableContainer component={Paper}>
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
             <RecordTableHeader/>
             <TableBody>
-                <For each={record_pool}>
+                <For each={pool}>
                     {(record_entry) => <RecordEntry {...record_entry}/>}
                 </For>
             </TableBody>
@@ -469,7 +469,7 @@ const Jackpot: Component = () => {
                 <Grid item xs={4}><SpectrumSA/></Grid>
                 <Grid item xs={4}><SpectrumSV/></Grid>
                 <Grid item xs={4}><SpectrumSD/></Grid>
-                <Grid item xs={12}><RecordTable/></Grid>
+                <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>
             </Grid>
         </Grid>
         <ErrorModal/>
