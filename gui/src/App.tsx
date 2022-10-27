@@ -7,12 +7,10 @@ import * as ST from '@suid/types'
 import AppBar from '@suid/material/AppBar'
 import Box from '@suid/material/Box'
 import Button from '@suid/material/Button'
-import IconButton from '@suid/material/IconButton'
 // @ts-ignore
 import L from 'leaflet'
 import Link from "@suid/material/Link"
 import LoginIcon from '@suid/icons-material/Login'
-import MenuIcon from '@suid/icons-material/Menu'
 import Modal from "@suid/material/Modal"
 import Paper from "@suid/material/Paper"
 // @ts-ignore
@@ -118,9 +116,6 @@ const ButtonStack: Component = () => {
 const App: Component = () => {
     return <Container maxWidth={false}>
         <AppBar position='static' id='app-bar' sx={{mb: 2}}><Toolbar>
-            <IconButton size='medium' edge='start' color='inherit' aria-label='menu' sx={{mr: 2}}>
-                <MenuIcon/>
-            </IconButton>
             <Typography variant='h5' sx={{flexGrow: 2}}>
                 Motion Base
             </Typography>
