@@ -31,19 +31,17 @@ class Record(Document):
     file_name: Indexed(str) = None
     sub_category: Indexed(str) = None
     magnitude: Indexed(float, pymongo.DESCENDING) = None
-    origin_time: datetime = None
-    latitude: float = None
-    longitude: float = None
+    origin_time: Indexed(datetime, pymongo.DESCENDING) = None
+    event_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
     depth: float = None
     depth_unit: str = None
     station_code: str = None
-    station_latitude: float = None
-    station_longitude: float = None
+    station_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
     sampling_frequency: float = None
     sampling_frequency_unit: str = None
     duration: float = None
     duration_unit: str = None
-    direction: str = None
+    direction: Indexed(str) = None
     raw_data: List[int] = None
     raw_data_unit: str = None
 

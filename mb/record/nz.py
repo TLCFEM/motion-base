@@ -105,12 +105,10 @@ class ParserNZSM:
 
         int_header, float_header = _parse_header(lines)
 
-        record.latitude = -float_header[12]
-        record.longitude = float_header[13]
+        record.event_location = [float_header[13], -float_header[12]]
         record.depth = int_header[16]
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
-        record.station_latitude = -float_header[10]
-        record.station_longitude = float_header[11]
+        record.station_location = [float_header[11], -float_header[10]]
         record.sampling_frequency = 1 / _parse_interval(lines[10])
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()

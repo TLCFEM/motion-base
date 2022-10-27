@@ -105,8 +105,8 @@ const ButtonStack: Component = () => {
 
     return <Stack spacing={2} direction="row" alignItems={'center'}>
         <Link href='/jackpot'><Button variant='contained' id='jackpot'>Jackpot</Button></Link>
-        <Link href='/process'><Button variant='contained' id='process'>Process</Button></Link>
         <Link href='/search'><Button variant='contained' id='search'>Search</Button></Link>
+        <Link href='/process'><Button variant='contained' id='process'>Process</Button></Link>
         <Link href={`${axios.defaults.baseURL}/docs`}><Button variant='contained' id='api'>API</Button></Link>
         <Button variant='contained' id='about' onClick={about_toggle_on}>About</Button>
         <Button variant='contained' id='login' onClick={login}><LoginIcon/></Button>
@@ -125,8 +125,8 @@ const App: Component = () => {
             <Routes>
                 <Route path='/' element={<Navigate href={({navigate, location}) => '/jackpot'}/>}/>
                 <Route path='/jackpot' component={Jackpot}/>
-                <Route path='/process' component={ProcessPage}/>
                 <Route path='/search' component={SearchPage}/>
+                <Route path='/process' component={ProcessPage}/>
             </Routes>
         </Box>
         <AboutModal/>

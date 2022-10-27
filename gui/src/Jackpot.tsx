@@ -22,11 +22,9 @@ import Plotly from 'plotly.js-dist-min'
 import Radio from '@suid/material/Radio'
 import RadioGroup from '@suid/material/RadioGroup'
 import Stack from "@suid/material/Stack"
-import styled from "@suid/material/styles/styled"
 import Switch from "@suid/material/Switch"
 import Table from '@suid/material/Table'
 import TableBody from '@suid/material/TableBody'
-import TableCell, {tableCellClasses} from '@suid/material/TableCell'
 import TableContainer from '@suid/material/TableContainer'
 import TableHead from '@suid/material/TableHead'
 import TableRow from '@suid/material/TableRow'
@@ -36,6 +34,7 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
+import {DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
 
 const [open, set_open] = createSignal(false)
 const [error_message, set_error_message] = createSignal('')
@@ -59,68 +58,17 @@ const [region, set_region] = createSignal(region_set[0])
 
 const [waveform, set_waveform] = createSignal([Array<number>(0), Array<number>(0), ''])
 
-class Record {
-    public id: string = ''
-    public file_name: string = ''
-    public sub_category: string = ''
-    public magnitude: number = 0
-    public origin_time: string = ''
-    public latitude: number = 52.5068441
-    public longitude: number = 13.4247317
-    public depth: number = 0
-    public depth_unit: string = ''
-    public station_code: string = ''
-    public station_latitude: number = 52.5068441
-    public station_longitude: number = 13.4247317
-    public sampling_frequency: number = 0
-    public sampling_frequency_unit: string = ''
-    public duration: number = 0
-    public duration_unit: string = ''
-    public direction: string = ''
-
-    public interval: number = 0
-    public data: Array<number> = Array<number>(0)
-
-    // response spectrum related
-    public freq: Array<number> = Array<number>(0)
-    public SA: Array<number> = Array<number>(0)
-    public SV: Array<number> = Array<number>(0)
-    public SD: Array<number> = Array<number>(0)
-
-    public constructor(data: any) {
-        Object.assign(this, data)
-    }
-}
-
 const [record_pool, set_record_pool] = createStore<Array<Record>>(Array<Record>(0))
 const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
-const StyledTableCell = styled(TableCell)(({theme}) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: theme.palette.primary.main, // backgroundColor: theme.palette.common.black,
-        color: theme.palette.common.white,
-    }, [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}))
-
-const StyledTableRow = styled(TableRow)(({theme}) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    }, '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}))
-
-function RecordTableHeader() {
+function RecordTableHeader(pool: Array<Record>) {
     const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
-    const sort_by_magnitude = () => {
-        set_record_pool(record_pool.slice().sort((a, b) => b.magnitude - a.magnitude))
-    }
+    const sort_by_magnitude = () =>
+        set_record_pool(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
 
     const sort_by_time = () =>
-        set_record_pool(record_pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
+        set_record_pool(pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
 
     onMount(() => {
         tippy('#table-header-id', {
@@ -185,7 +133,7 @@ function RecordEntry(record_entry: Record) {
 function RecordTable({pool}: { pool: Array<Record> }) {
     return <TableContainer component={Paper}>
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
-            <RecordTableHeader/>
+            <RecordTableHeader {...pool}/>
             <TableBody>
                 <For each={pool}>
                     {(record_entry) => <RecordEntry {...record_entry}/>}
@@ -241,78 +189,31 @@ async function jackpot() {
 
 const [data, {mutate, refetch}] = createResource(jackpot);
 
-const Item = styled(Paper)(({theme}) => ({
-    backgroundColor: theme.palette.mode === 'dark' ? '#1A2027' : '#fff',
-    ...theme.typography.body2,
-    padding: theme.spacing(1),
-    textAlign: 'center',
-    color: theme.palette.text.secondary,
-}));
-
 const Epicenter: Component = () => {
     let map: L.Map
     let event_marker: L.Marker
     let station_marker: L.Marker
-    const LeafIcon = L.Icon.extend({
-        options: {
-            iconSize: [38, 95],
-            shadowSize: [50, 64],
-            iconAnchor: [22, 94],
-            shadowAnchor: [4, 62],
-            popupAnchor: [-3, -76]
-        }
-    });
-    const event_icon = new LeafIcon({
-        iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-red.png',
-        shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
-    })
-    const station_icon = new LeafIcon({
-        iconUrl: 'http://leafletjs.com/examples/custom-icons/leaf-green.png',
-        shadowUrl: 'http://leafletjs.com/examples/custom-icons/leaf-shadow.png'
-    })
 
     onMount(() => {
-        map = L.map(document.getElementById('epicenter')).setView([current_record().latitude, current_record().longitude], 6)
+        const event_location = current_record().event_location.slice().reverse()
+        map = DefaultMap('epicenter', event_location)
 
-        L.tileLayer('https://tile.openstreetmap.org/{z}/{x}/{y}.png', {
-            maxZoom: 12, attribution: '© OpenStreetMap'
-        }).addTo(map)
-
-        event_marker = L.marker([current_record().latitude, current_record().longitude], {icon: event_icon}).addTo(map)
-        station_marker = L.marker([current_record().station_latitude, current_record().station_longitude], {icon: station_icon}).addTo(map)
+        event_marker = L.marker(event_location, {icon: RedIcon}).addTo(map)
+        station_marker = L.marker(current_record().station_location.slice().reverse(), {icon: GreenIcon}).addTo(map)
 
         event_marker.bindPopup('event location')
         station_marker.bindPopup('station location')
-
-        tippy('#random', {
-            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Get a Random Waveform!',
-        })
-
-        tippy('#normalised', {
-            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'if normalised',
-        })
-
-        tippy('#clear', {
-            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Clear the Table!',
-        })
-
-        tippy('#download', {
-            arrow: true,
-            animation: 'scale',
-            inertia: true,
-            theme: 'translucent',
-            content: 'Download Current Record as json!',
-        })
     })
 
     createEffect(() => {
-        const event_location = [current_record().latitude, current_record().longitude]
-        event_marker.setLatLng(event_location)
-        station_marker.setLatLng([current_record().station_latitude, current_record().station_longitude])
+        const metadata = current_record()
 
+        const event_location = metadata.event_location.slice().reverse()
         map.flyTo(event_location, 6)
 
-        const metadata = current_record()
+        event_marker.setLatLng(event_location)
+        station_marker.setLatLng(metadata.station_location.slice().reverse())
+
         const interval: number = metadata.interval
 
         const x: Array<number> = Array<number>(metadata.data.length).fill(0).map((_, i) => i * interval)
@@ -439,6 +340,28 @@ function RegionGroup() {
     const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
     const handle_normalised = () => set_normalised(!normalised())
 
+    onMount(() => {
+        tippy('#random', {
+            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Get a Random Waveform!',
+        })
+
+        tippy('#normalised', {
+            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'if normalised',
+        })
+
+        tippy('#clear', {
+            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Clear the Table!',
+        })
+
+        tippy('#download', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Download Current Record as json!',
+        })
+    })
+
     return <Stack component={Item} spacing={1} justifyContent='center' direction='column' alignItems='center'
                   alignContent='center'>
         <FormControl size='small'>
@@ -469,7 +392,7 @@ const Jackpot: Component = () => {
                 <Grid item xs={4}><SpectrumSA/></Grid>
                 <Grid item xs={4}><SpectrumSV/></Grid>
                 <Grid item xs={4}><SpectrumSD/></Grid>
-                <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>
+                {record_pool?.length > 0 && <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>}
             </Grid>
         </Grid>
         <ErrorModal/>

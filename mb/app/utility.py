@@ -154,3 +154,45 @@ async def create_task():
 def match_uuid(uuid_string: str):
     uuid_regex = re.compile(r'[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}')
     return uuid_regex.match(uuid_string) is not None
+
+
+def generate_query_string(**kwargs):
+    query_dict: dict = {'$and': []}
+
+    min_magnitude: float | None = kwargs.get('min_magnitude', None)
+    max_magnitude: float | None = kwargs.get('max_magnitude', None)
+
+    magnitude = {}
+    if min_magnitude is not None:
+        magnitude['$gte'] = min_magnitude
+    if max_magnitude is not None:
+        magnitude['$lte'] = max_magnitude
+    if magnitude:
+        query_dict['$and'].append({'magnitude': magnitude})
+
+    sub_category: str | None = kwargs.get('sub_category', None)
+    if sub_category is not None:
+        query_dict['$and'].append({'sub_category': sub_category.lower()})
+
+    event_location: list | None = kwargs.get('event_location', None)
+    if event_location is not None:
+        query_dict['event_location'] = {'$nearSphere': event_location}
+
+    station_location: list | None = kwargs.get('station_location', None)
+    if station_location is not None:
+        query_dict['station_location'] = {'$nearSphere': station_location}
+
+    from_date: datetime | None = kwargs.get('from_date', None)
+    to_date: datetime | None = kwargs.get('to_date', None)
+    date_range: dict = {}
+    if from_date is not None:
+        date_range['$gte'] = from_date
+    if to_date is not None:
+        date_range['$lte'] = to_date
+    if date_range:
+        query_dict['$and'].append({'origin_time': date_range})
+
+    if not query_dict['$and']:
+        del query_dict['$and']
+
+    return query_dict

@@ -147,14 +147,12 @@ class ParserNIED:
 
         record = NIED()
         record.origin_time = datetime.strptime(lines[0][18:], '%Y/%m/%d %H:%M:%S')
-        record.latitude = float(lines[1][18:])
-        record.longitude = float(lines[2][18:])
+        record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
         record.depth = float(lines[3][18:])
         record.depth_unit = _normalised_unit(lines[3])
         record.magnitude = float(lines[4][18:])
         record.station_code = lines[5][18:]
-        record.station_latitude = float(lines[6][18:])
-        record.station_longitude = float(lines[7][18:])
+        record.station_location = [float(lines[7][18:]), float(lines[6][18:])]
         record.station_elevation = float(lines[8][18:])
         record.station_elevation_unit = _normalised_unit(lines[8])
         record.record_time = datetime.strptime(lines[9][18:], '%Y/%m/%d %H:%M:%S')

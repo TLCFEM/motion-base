@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 import tarfile
+from datetime import datetime
 from http import HTTPStatus
 from uuid import UUID
 
@@ -22,7 +23,7 @@ import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse
-from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
+from mb.app.utility import UploadTask, User, create_task, generate_query_string, is_active, send_notification
 from mb.record.nz import MetadataNZSM, NZSM, ParserNZSM, retrieve_single_record
 from mb.record.response_spectrum import response_spectrum
 
@@ -102,22 +103,33 @@ async def upload_archive(
 
 @router.post('/query', response_model=MetadataListResponse)
 async def query_records(
-        min_magnitude: float = Query(default=0, ge=0, le=10),
-        max_magnitude: float = Query(default=10, ge=0, le=10),
-        page_size: int = Query(default=100, ge=1, le=1000),
-        page_number: int = Query(default=0, ge=0)
+        min_magnitude: float | None = Query(default=None, ge=0, le=10),
+        max_magnitude: float | None = Query(default=None, ge=0, le=10),
+        sub_category: str | None = Query(default=None, regex='^(un)?processed$'),
+        event_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
+        station_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
+        from_date: datetime | None = Query(default=None),
+        to_date: datetime | None = Query(default=None),
+        page_size: int | None = Query(default=None, ge=1, le=1000),
+        page_number: int | None = Query(default=None, ge=0)
 ):
     """
     Query records from the database.
     """
-    query_dict = {
-        '$and': [
-            {'magnitude': {
-                '$gte': min_magnitude,
-                '$lte': max_magnitude
-            }}
-        ]
-    }
+    query_dict: dict = generate_query_string(
+        min_magnitude=min_magnitude,
+        max_magnitude=max_magnitude,
+        sub_category=sub_category,
+        event_location=event_location,
+        station_location=station_location,
+        from_date=from_date,
+        to_date=to_date
+    )
+
+    if page_size is None:
+        page_size = 10
+    if page_number is None:
+        page_number = 0
 
     result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM)
     if result:
