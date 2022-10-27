@@ -112,15 +112,15 @@ const StyledTableRow = styled(TableRow)(({theme}) => ({
     },
 }))
 
-const sort_by_magnitude = () => {
-    set_record_pool(record_pool.slice().sort((a, b) => b.magnitude - a.magnitude))
-}
-
-const sort_by_time = () =>
-    set_record_pool(record_pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
-
 function RecordTableHeader() {
     const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
+
+    const sort_by_magnitude = () => {
+        set_record_pool(record_pool.slice().sort((a, b) => b.magnitude - a.magnitude))
+    }
+
+    const sort_by_time = () =>
+        set_record_pool(record_pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
 
     onMount(() => {
         tippy('#table-header-id', {
@@ -152,20 +152,20 @@ function RecordTableHeader() {
     </TableHead>
 }
 
-const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
-    if (event.target.tagName != 'TH') return
-    for (let i = 0; i < record_pool.length; i++)
-        if (record_pool[i].id == event.target.innerText) {
-            set_current_record(record_pool[i])
-            break
-        }
-}
-
 function RecordEntry(record_entry: Record) {
     const convert_time = (time: string) => {
         if (time === '') return ''
         const date = new Date(time)
         return date.toLocaleString('en-GB')
+    }
+
+    const select_record = (event: ST.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.tagName != 'TH') return
+        for (let i = 0; i < record_pool.length; i++)
+            if (record_pool[i].id == event.target.innerText) {
+                set_current_record(record_pool[i])
+                break
+            }
     }
 
     return <StyledTableRow>
