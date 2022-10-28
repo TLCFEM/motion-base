@@ -26,7 +26,7 @@ async def test_alive(mock_client):
 
 @pytest.mark.parametrize('file_name,status', [
     pytest.param('jp_test.knt.tar.gz', HTTPStatus.ACCEPTED, id='correct-name'),
-    pytest.param('wrong_name', HTTPStatus.BAD_REQUEST, id='wrong-name')
+    pytest.param('wrong_name', HTTPStatus.ACCEPTED, id='wrong-name')
 ])
 @pytest.mark.parametrize('if_wait', [
     pytest.param('true', id='wait-for-result'),
@@ -42,7 +42,7 @@ async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, sta
 
 @pytest.mark.parametrize('file_name,status', [
     pytest.param('nz_test.tar.gz', HTTPStatus.ACCEPTED, id='correct-name'),
-    pytest.param('wrong_name', HTTPStatus.BAD_REQUEST, id='wrong-name')
+    pytest.param('wrong_name', HTTPStatus.ACCEPTED, id='wrong-name')
 ])
 @pytest.mark.parametrize('if_wait', [
     pytest.param('true', id='wait-for-result'),
