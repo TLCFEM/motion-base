@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+import itertools
 import os
 import tarfile
 from datetime import datetime
@@ -78,27 +79,33 @@ async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, 
 
 @router.post('/upload', status_code=HTTPStatus.ACCEPTED)
 async def upload_archive(
-        archive: UploadFile,
+        archives: list[UploadFile],
         tasks: BackgroundTasks,
         user: User = Depends(is_active),
         wait_for_result: bool = False):
     if not user.can_upload:
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail='User is not allowed to upload.')
-    if not archive.filename.endswith('.tar.gz'):
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Archive must be a tar.gz file.')
+
+    valid_archives: list[UploadFile] = []
+    for archive in archives:
+        if archive.filename.endswith('.tar.gz'):
+            valid_archives.append(archive)
 
     if not wait_for_result:
-        task_id: UUID = await create_task()
-        tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
+        task_id_pool: list[UUID] = []
+        for archive in valid_archives:
+            task_id: UUID = await create_task()
+            tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
+            task_id_pool.append(task_id)
 
         return {
             'message': 'successfully uploaded and will be processed in the background',
-            'task_id': task_id,
+            'task_id': task_id_pool
         }
 
-    records: list = await _parse_archive_in_background(archive, user.id)
+    records: list = [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
 
-    return {'message': 'successfully uploaded and processed', 'records': records}
+    return {'message': 'successfully uploaded and processed', 'records': list(itertools.chain.from_iterable(records))}
 
 
 @router.post('/query', response_model=MetadataListResponse)
