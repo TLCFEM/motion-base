@@ -202,6 +202,14 @@ def generate_query_string(**kwargs):
     if pga:
         query_dict['$and'].append({'maximum_acceleration': pga})
 
+    direction = kwargs.get('direction', None)
+    if direction is not None:
+        query_dict['$and'].append({'direction': {'$regex': direction, '$options': 'i'}})
+
+    event_name = kwargs.get('event_name', None)
+    if event_name is not None:
+        query_dict['$and'].append({'file_name': {'$regex': event_name, '$options': 'i'}})
+
     if not query_dict['$and']:
         del query_dict['$and']
 

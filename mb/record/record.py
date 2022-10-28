@@ -33,14 +33,12 @@ class Record(Document):
     magnitude: Indexed(float, pymongo.DESCENDING) = None
     origin_time: Indexed(datetime, pymongo.DESCENDING) = None
     event_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
-    depth: float = None
-    depth_unit: str = None
+    depth: Indexed(float) = None  # in kilometer
     station_code: str = None
     station_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
     sampling_frequency: float = None
     sampling_frequency_unit: str = None
-    duration: float = None
-    duration_unit: str = None
+    duration: float = None  # in seconds
     direction: Indexed(str) = None
     maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None  # PGA in Gal
     raw_data: List[int] = None

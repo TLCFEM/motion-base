@@ -91,6 +91,8 @@ async def query_records(
         to_date: datetime | None = Query(default=None),
         min_pga: float | None = Query(default=None),
         max_pga: float | None = Query(default=None),
+        event_name: str | None = Query(default=None),
+        direction: str | None = Query(default=None),
         page_size: int | None = Query(default=None, ge=1, le=1000),
         page_number: int | None = Query(default=None, ge=0)
 ):
@@ -106,7 +108,9 @@ async def query_records(
         from_date=from_date,
         to_date=to_date,
         min_pga=min_pga,
-        max_pga=max_pga
+        max_pga=max_pga,
+        event_name=event_name,
+        direction=direction,
     )
 
     if page_size is None:

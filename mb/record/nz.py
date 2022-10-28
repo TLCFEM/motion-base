@@ -81,10 +81,8 @@ class ParserNZSM:
         async def _populate_common_fields(record: NZSM):
             record.origin_time = datetime.strptime(matches[1] + matches[2], '%Y%m%d%H%M%S')
             record.station_code = matches[3]
-            record.depth_unit = str(pint.Unit('km'))
             record.sampling_frequency_unit = str(pint.Unit('Hz'))
             record.raw_data_unit = str(pint.Unit('mm/s/s'))
-            record.duration_unit = str(pint.Unit('s'))
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path)
             record.sub_category = 'processed' if record.file_name.upper().endswith('.V2A') else 'unprocessed'

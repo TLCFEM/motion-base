@@ -45,13 +45,11 @@ export class Record {
     public origin_time: string = ''
     public event_location: Array<number> = [13.4247317, 52.5068441]
     public depth: number = 0
-    public depth_unit: string = ''
     public station_code: string = ''
     public station_location: Array<number> = [13.4247317, 52.5068441]
     public sampling_frequency: number = 0
     public sampling_frequency_unit: string = ''
     public duration: number = 0
-    public duration_unit: string = ''
     public direction: string = ''
     public maximum_acceleration: number = 0
 

@@ -27,13 +27,11 @@ class MetadataResponse(BaseModel):
     origin_time: datetime
     event_location: list[float, float]
     depth: float
-    depth_unit: str
     station_code: str
     station_location: list[float, float]
     sampling_frequency: float
     sampling_frequency_unit: str
     duration: float
-    duration_unit: str
     direction: str
     maximum_acceleration: float
 

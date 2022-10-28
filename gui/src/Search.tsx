@@ -69,11 +69,11 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
-        <StyledTableCell>{record_entry.depth} {record_entry.depth_unit}</StyledTableCell>
+        <StyledTableCell>{record_entry.depth} km</StyledTableCell>
         <StyledTableCell>{Math.abs(record_entry.maximum_acceleration).toFixed(1)}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
         <StyledTableCell>{record_entry.sampling_frequency} {record_entry.sampling_frequency_unit}</StyledTableCell>
-        <StyledTableCell>{record_entry.duration.toFixed(0)} {record_entry.duration_unit}</StyledTableCell>
+        <StyledTableCell>{record_entry.duration.toFixed(0)} s</StyledTableCell>
         <StyledTableCell>{record_entry.direction}</StyledTableCell>
     </StyledTableRow>
 }

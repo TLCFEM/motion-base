@@ -26,6 +26,7 @@ import pint
 import structlog
 from fastapi import HTTPException
 from numba import jit
+from pint import Quantity
 
 from mb.app.utility import UploadTask, match_uuid
 from mb.record.record import Record, to_unit
@@ -146,8 +147,7 @@ class ParserNIED:
         record = NIED()
         record.origin_time = datetime.strptime(lines[0][18:], '%Y/%m/%d %H:%M:%S')
         record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
-        record.depth = float(lines[3][18:])
-        record.depth_unit = _normalised_unit(lines[3])
+        record.depth = Quantity(float(lines[3][18:]), _normalised_unit(lines[3])).to('km').magnitude
         record.magnitude = float(lines[4][18:])
         record.station_code = lines[5][18:]
         record.station_location = [float(lines[7][18:]), float(lines[6][18:])]
@@ -156,8 +156,7 @@ class ParserNIED:
         record.record_time = datetime.strptime(lines[9][18:], '%Y/%m/%d %H:%M:%S')
         record.sampling_frequency = float(_parse_value(lines[10][18:]))
         record.sampling_frequency_unit = _normalised_unit(lines[10])
-        record.duration = float(lines[11][18:])
-        record.duration_unit = _normalised_unit(lines[11])
+        record.duration = Quantity(float(lines[11][18:]), _normalised_unit(lines[11])).to('s').magnitude
         record.direction = _parse_direction(lines[12][18:])
         record.scale_factor = float(_strip_unit(lines[13][18:]))
         record.maximum_acceleration = float(lines[14][18:])
