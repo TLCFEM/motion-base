@@ -19,6 +19,7 @@ import TextField from '@suid/material/TextField'
 import * as ST from '@suid/types'
 import ToggleButton from '@suid/material/ToggleButton'
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
+import SearchIcon from '@suid/icons-material/Search'
 
 const [records, set_records] = createStore<Array<Record>>([]);
 
@@ -168,7 +169,7 @@ function SearchConfig() {
              autocomplete='off'>
             <div>
                 <ColorToggleButton/>
-                <Button variant='contained' id='clear' onClick={fetch}>Search</Button>
+                <Button variant='contained' id='clear' onClick={fetch}><SearchIcon/></Button>
             </div>
             <div>
                 <TextField id='min-magnitude' label='Min. Mag.' type='number'
