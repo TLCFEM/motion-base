@@ -25,6 +25,7 @@ import numpy as np
 import pint
 import structlog
 from fastapi import HTTPException
+from numba import jit
 
 from mb.app.utility import UploadTask, match_uuid
 from mb.record.record import Record, to_unit
@@ -184,10 +185,12 @@ def _strip_unit(line: str) -> float:
     return float(numerator) / float(denominator)
 
 
+@jit
 def _parse_direction(line: str) -> str:
     return line.replace('-', '').upper()
 
 
+@jit
 def _parse_value(line: str) -> str:
     matches = re.findall(r'([0-9.]+)', line)
     if len(matches) == 0:

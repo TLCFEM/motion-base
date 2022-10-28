@@ -62,7 +62,7 @@ const [record_pool, set_record_pool] = createStore<Array<Record>>(Array<Record>(
 const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
 function RecordTableHeader(pool: Array<Record>) {
-    const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
+    const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'PGA', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
     const sort_by_magnitude = () =>
         set_record_pool(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
@@ -123,6 +123,7 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
         <StyledTableCell>{record_entry.depth} {record_entry.depth_unit}</StyledTableCell>
+        <StyledTableCell>{Math.abs(record_entry.maximum_acceleration).toFixed(1)}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
         <StyledTableCell>{record_entry.sampling_frequency} {record_entry.sampling_frequency_unit}</StyledTableCell>
         <StyledTableCell>{record_entry.duration.toFixed(0)} {record_entry.duration_unit}</StyledTableCell>

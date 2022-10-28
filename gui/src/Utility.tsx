@@ -53,6 +53,7 @@ export class Record {
     public duration: number = 0
     public duration_unit: string = ''
     public direction: string = ''
+    public maximum_acceleration: number = 0
 
     public interval: number = 0
     public data: Array<number> = Array<number>(0)

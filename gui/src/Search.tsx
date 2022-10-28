@@ -23,7 +23,7 @@ import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
 const [records, set_records] = createStore<Array<Record>>([]);
 
 function RecordTableHeader(pool: Array<Record>) {
-    const table_header: Array<string> = ['ID', 'Category', 'Mw', 'Event Time', 'Depth', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
+    const table_header: Array<string> = ['ID', 'Category', 'Mw', 'Event Time', 'Depth', 'PGA', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
     const sort_by_magnitude = () =>
         set_records(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
@@ -69,6 +69,7 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
         <StyledTableCell>{record_entry.depth} {record_entry.depth_unit}</StyledTableCell>
+        <StyledTableCell>{Math.abs(record_entry.maximum_acceleration).toFixed(1)}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
         <StyledTableCell>{record_entry.sampling_frequency} {record_entry.sampling_frequency_unit}</StyledTableCell>
         <StyledTableCell>{record_entry.duration.toFixed(0)} {record_entry.duration_unit}</StyledTableCell>

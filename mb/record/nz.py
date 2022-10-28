@@ -9,6 +9,8 @@ import aiofiles
 import numpy as np
 import pint
 import structlog
+from numba import jit
+from pint import Quantity
 
 from mb.app.utility import match_uuid
 from mb.record.record import Record, to_unit
@@ -97,6 +99,7 @@ class ParserNZSM:
         return record_names
 
     @staticmethod
+    @jit
     def parse_file(lines: List[str]) -> NZSM:
         record = NZSM()
 
@@ -109,7 +112,7 @@ class ParserNZSM:
         record.sampling_frequency = 1 / _parse_interval(lines[10])
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
-        record.maximum_acceleration = float_header[35]
+        record.maximum_acceleration = Quantity(float_header[35], 'mm/s/s').to('Gal').magnitude
 
         offset: int = 26
         a_samples = int_header[33]
@@ -130,6 +133,7 @@ def _parse_interval(line: str):
     raise ValueError('Sampling frequency/interval not found.')
 
 
+@jit
 def _fixed_size_split(line: str, size: int = 8) -> List[str]:
     line = line.replace('\n', '')
     return [line[i:i + size] for i in range(0, len(line), size)]
