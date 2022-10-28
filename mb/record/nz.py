@@ -99,7 +99,7 @@ class ParserNZSM:
         return record_names
 
     @staticmethod
-    @jit
+    @jit(forceobj=True)
     def parse_file(lines: List[str]) -> NZSM:
         record = NZSM()
 
