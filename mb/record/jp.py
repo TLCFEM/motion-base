@@ -23,9 +23,7 @@ from uuid import UUID
 import aiofiles
 import numpy as np
 import pint
-import pymongo
 import structlog
-from beanie import Indexed
 from fastapi import HTTPException
 
 from mb.app.utility import UploadTask, match_uuid
@@ -39,7 +37,6 @@ class NIED(Record):
     station_elevation_unit: str = None
     record_time: datetime = None
     scale_factor: float = None
-    maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
 
     class Config:
         arbitrary_types_allowed = False

@@ -35,6 +35,7 @@ class MetadataResponse(BaseModel):
     duration: float
     duration_unit: str
     direction: str
+    maximum_acceleration: float
 
 
 class SequenceResponse(MetadataResponse):

@@ -129,9 +129,17 @@ const EventMap: Component = () => {
 
 const [alignment, set_alignment] = createSignal('jp')
 const [page_size, set_page_size] = createSignal(20)
+const [min_mag, set_min_mag] = createSignal(0)
+const [max_mag, set_max_mag] = createSignal(10)
+const [min_pga, set_min_pga] = createSignal(0)
+const [max_pga, set_max_pga] = createSignal(0)
 
 async function fetch() {
     let url = `/${alignment()}/query?page_size=${page_size() > 0 ? page_size() : 20}`
+    if (min_mag() > 0) url += `&min_magnitude=${min_mag()}`
+    if (max_mag() > 0 && max_mag() >= min_mag()) url += `&max_magnitude=${max_mag()}`
+    if (min_pga() > 0) url += `&min_pga=${min_pga()}`
+    if (max_pga() > 0 && max_pga() >= min_pga()) url += `&max_pga=${max_pga()}`
     console.log(page_size())
     await axios.post(url).then(
         res => {
@@ -162,8 +170,24 @@ function SearchConfig() {
                 <Button variant='contained' id='clear' onClick={fetch}>Search</Button>
             </div>
             <div>
-                <TextField id='min-magnitude' label='Min. Mag.' type='number'/>
-                <TextField id='max-magnitude' label='Max. Mag.' type='number'/>
+                <TextField id='min-magnitude' label='Min. Mag.' type='number'
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_min_mag(event.target.value)
+                           }}/>
+                <TextField id='max-magnitude' label='Max. Mag.' type='number'
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_max_mag(event.target.value)
+                           }}/>
+            </div>
+            <div>
+                <TextField id='min-pga' label='Min. PGA' type='number'
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_min_pga(event.target.value)
+                           }}/>
+                <TextField id='max-pga' label='Max. PGA' type='number'
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_max_pga(event.target.value)
+                           }}/>
             </div>
             <div>
                 <TextField id='event_lat' label='Event Lat.' type='number'/>

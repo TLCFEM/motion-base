@@ -80,6 +80,8 @@ async def query_records(
         station_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
         from_date: datetime | None = Query(default=None),
         to_date: datetime | None = Query(default=None),
+        min_pga: float | None = Query(default=None),
+        max_pga: float | None = Query(default=None),
         page_size: int | None = Query(default=None, ge=1, le=1000),
         page_number: int | None = Query(default=None, ge=0)
 ):
@@ -93,7 +95,9 @@ async def query_records(
         event_location=event_location,
         station_location=station_location,
         from_date=from_date,
-        to_date=to_date
+        to_date=to_date,
+        min_pga=min_pga,
+        max_pga=max_pga
     )
 
     if page_size is None:

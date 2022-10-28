@@ -42,6 +42,7 @@ class Record(Document):
     duration: float = None
     duration_unit: str = None
     direction: Indexed(str) = None
+    maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
     raw_data: List[int] = None
     raw_data_unit: str = None
 

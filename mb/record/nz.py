@@ -8,9 +8,7 @@ from uuid import UUID
 import aiofiles
 import numpy as np
 import pint
-import pymongo
 import structlog
-from beanie import Indexed
 
 from mb.app.utility import match_uuid
 from mb.record.record import Record, to_unit
@@ -23,7 +21,6 @@ _logger = structlog.get_logger(__name__)
 class NZSM(Record):
     record_time: datetime = None
     scale_factor: float = 1 / _FTI_
-    maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None
 
     def to_raw_waveform(self, **kwargs) -> Tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data

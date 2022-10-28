@@ -162,7 +162,7 @@ def generate_query_string(**kwargs):
     min_magnitude: float | None = kwargs.get('min_magnitude', None)
     max_magnitude: float | None = kwargs.get('max_magnitude', None)
 
-    magnitude = {}
+    magnitude: dict = {}
     if min_magnitude is not None:
         magnitude['$gte'] = min_magnitude
     if max_magnitude is not None:
@@ -191,6 +191,16 @@ def generate_query_string(**kwargs):
         date_range['$lte'] = to_date
     if date_range:
         query_dict['$and'].append({'origin_time': date_range})
+
+    pga: dict = {}
+    min_pga: float | None = kwargs.get('min_pga', None)
+    max_pga: float | None = kwargs.get('max_pga', None)
+    if min_pga is not None:
+        pga['$gte'] = min_pga
+    if max_pga is not None:
+        pga['$lte'] = max_pga
+    if pga:
+        query_dict['$and'].append({'maximum_acceleration': pga})
 
     if not query_dict['$and']:
         del query_dict['$and']
