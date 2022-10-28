@@ -190,7 +190,6 @@ def _parse_direction(line: str) -> str:
     return line.replace('-', '').upper()
 
 
-@jit
 def _parse_value(line: str) -> str:
     matches = re.findall(r'([0-9.]+)', line)
     if len(matches) == 0:
