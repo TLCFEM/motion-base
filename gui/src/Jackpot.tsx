@@ -34,7 +34,7 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
-import {DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
+import {axis_label, DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
 
 const [open, set_open] = createSignal(false)
 const [error_message, set_error_message] = createSignal('')
@@ -142,16 +142,6 @@ function RecordTable({pool}: { pool: Array<Record> }) {
             </TableBody>
         </Table>
     </TableContainer>
-}
-
-const axis_label = (label: string, size: number) => {
-    return {
-        title: {
-            text: label, font: {
-                size: size, color: '#1f78b4'
-            }
-        },
-    }
 }
 
 function clear() {

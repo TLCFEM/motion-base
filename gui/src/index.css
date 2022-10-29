@@ -34,3 +34,7 @@ code {
 #event_map {
     height: 400px;
 }
+
+#process_canvas {
+    height: 600px;
+}

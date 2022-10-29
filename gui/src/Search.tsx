@@ -142,7 +142,6 @@ async function fetch() {
     if (max_mag() > 0 && max_mag() >= min_mag()) url += `&max_magnitude=${max_mag()}`
     if (min_pga() > 0) url += `&min_pga=${min_pga()}`
     if (max_pga() > 0 && max_pga() >= min_pga()) url += `&max_pga=${max_pga()}`
-    console.log(page_size())
     await axios.post(url).then(
         res => {
             let obj = Array<Record>(res.data.result.length)

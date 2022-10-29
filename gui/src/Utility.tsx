@@ -91,3 +91,13 @@ export const StyledTableRow = styled(TableRow)(({theme}) => ({
         border: 0,
     },
 }))
+
+export const axis_label = (label: string, size: number) => {
+    return {
+        title: {
+            text: label, font: {
+                size: size, color: '#1f78b4'
+            }
+        },
+    }
+}

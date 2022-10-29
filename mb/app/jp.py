@@ -127,7 +127,7 @@ async def process_record(
     f1 = min(max(2 * high_cut * interval, 0), 1)
 
     new_record = apply_filter(
-        get_window(filter_type, window_type, filter_length, [f0, f1]),
+        get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
         zero_stuff(upsampling_rate, record))
 
     # noinspection PyTypeChecker
