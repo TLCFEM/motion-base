@@ -13,13 +13,13 @@ import TableContainer from '@suid/material/TableContainer'
 import Paper from '@suid/material/Paper'
 import Table from '@suid/material/Table'
 import TableBody from '@suid/material/TableBody'
-import Box from '@suid/material/Box'
 import TextField from '@suid/material/TextField'
 // @ts-ignore
 import * as ST from '@suid/types'
 import ToggleButton from '@suid/material/ToggleButton'
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
 import SearchIcon from '@suid/icons-material/Search'
+import Stack from "@suid/material/Stack";
 
 const [records, set_records] = createStore<Array<Record>>([]);
 
@@ -163,14 +163,10 @@ function ColorToggleButton() {
 }
 
 function SearchConfig() {
-    return (
-        <Box component='form' sx={{[`& .${TextField}`]: {m: 1, width: '15ch'}, textAlign: 'center',}} noValidate
-             autocomplete='off'>
-            <div>
-                <ColorToggleButton/>
-                <Button variant='contained' id='clear' onClick={fetch}><SearchIcon/></Button>
-            </div>
-            <div>
+    return <>
+        <Grid container item xs={12}>
+            <Stack component='form' spacing={1} noValidate direction='row' alignItems='center' justifyItems='center'
+                   justifyContent='center' autocomplete='off'>
                 <TextField id='min-magnitude' label='Min. Mag.' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_min_mag(event.target.value)
@@ -179,8 +175,6 @@ function SearchConfig() {
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_max_mag(event.target.value)
                            }}/>
-            </div>
-            <div>
                 <TextField id='min-pga' label='Min. PGA' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_min_pga(event.target.value)
@@ -189,31 +183,30 @@ function SearchConfig() {
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_max_pga(event.target.value)
                            }}/>
-            </div>
-            <div>
                 <TextField id='event_lat' label='Event Lat.' type='number'/>
                 <TextField id='event_log' label='Event Log.' type='number'/>
-            </div>
-            <div>
                 <TextField id='station_lat' label='Station Lat.' type='number'/>
                 <TextField id='station_log' label='Station Log.' type='number'/>
-            </div>
-            <div>
+            </Stack>
+        </Grid>
+        <Grid container item xs={12}>
+            <Stack component='form' spacing={1} noValidate direction='row' alignItems='center' justifyItems='center'
+                   justifyContent='center' autocomplete='off'>
                 <TextField id='page_size' label='Records per Page' type='number' defaultValue={20}
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_page_size(event.target.value)
                            }}/>
-            </div>
-        </Box>
-    );
+                <ColorToggleButton/>
+                <Button variant='contained' id='clear' onClick={fetch}><SearchIcon/></Button>
+            </Stack>
+        </Grid>
+    </>;
 }
 
 const SearchPage: Component = () => {
     return <Grid container spacing={1}>
-        <Grid item xs={3}>
-            <SearchConfig/>
-        </Grid>
-        <Grid container item xs={9} spacing={1}>
+        <SearchConfig/>
+        <Grid container item xs={12} spacing={1}>
             <Grid item xs={12}><EventMap/></Grid>
             {records?.length > 0 && <Grid item xs={12}><RecordTable pool={records}/></Grid>}
         </Grid>

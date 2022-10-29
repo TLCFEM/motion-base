@@ -19,7 +19,7 @@ from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 import numpy as np
 import pint
 from beanie import Document, Indexed
-from numba import jit, njit
+from numba import njit
 from pydantic import Field
 from scipy import signal
 
@@ -66,10 +66,9 @@ class Record(Document):
         raise NotImplementedError()
 
     @staticmethod
-    @jit
     def _perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
         fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
-        return 1 / sampling_frequency, fft_magnitude
+        return sampling_frequency / magnitude.size, fft_magnitude
 
     @staticmethod
     @njit

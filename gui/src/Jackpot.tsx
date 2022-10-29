@@ -34,7 +34,17 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
-import {axis_label, DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
+import {
+    axis_label,
+    DefaultMap,
+    GreenIcon,
+    Item,
+    Record,
+    RedIcon,
+    ResponseSpectrum,
+    StyledTableCell,
+    StyledTableRow
+} from './Utility'
 
 const [open, set_open] = createSignal(false)
 const [error_message, set_error_message] = createSignal('')
@@ -162,7 +172,7 @@ async function jackpot() {
         if (normalised()) url += '?normalised=true'
         await axios.get(url).then(res => {
             if (res.status !== 200) return
-            new_record.freq = res.data.data.map((d: Array<number>) => d[0])
+            new_record.period = res.data.data.map((d: Array<number>) => d[0])
             new_record.SD = res.data.data.map((d: Array<number>) => d[1])
             new_record.SV = res.data.data.map((d: Array<number>) => d[2])
             new_record.SA = res.data.data.map((d: Array<number>) => d[3])
@@ -231,79 +241,10 @@ const Waveform: Component = () => {
     return <Item id='canvas'></Item>
 }
 
-const SpectrumSA: Component = () => {
-    createEffect(() => {
-        Plotly.react(document.getElementById('spectrum_sa'),
-            [{x: current_record().freq, y: current_record().SA, type: 'scatter', name: 'SA (5% damping)'}],
-            {
-                autosize: true,
-                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
-                automargin: true,
-                title: {text: 'SA (5% damping)', font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
-                yaxis: Object.assign({}, axis_label('Amplitude (Gal)', 12), {range: [0, Math.max(...current_record().SA) * 1.1]}),
-                showlegend: false,
-                legend: {
-                    x: 1,
-                    xanchor: 'right',
-                    y: 1
-                }
-            }, {responsive: true,})
-    })
-
-    return <Item id='spectrum_sa'></Item>
-}
-
-const SpectrumSV: Component = () => {
-    createEffect(() => {
-        Plotly.react(document.getElementById('spectrum_sv'),
-            [{x: current_record().freq, y: current_record().SV, type: 'scatter', name: 'SV (5% damping)'}],
-            {
-                autosize: true,
-                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
-                automargin: true,
-                title: {text: 'SV (5% damping)', font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
-                yaxis: Object.assign({}, axis_label('Amplitude (cm/s)', 12), {range: [0, Math.max(...current_record().SV) * 1.1]}),
-                showlegend: false,
-                legend: {
-                    x: 1,
-                    xanchor: 'right',
-                    y: 1
-                }
-            }, {responsive: true,})
-    })
-
-    return <Item id='spectrum_sv'></Item>
-}
-
-const SpectrumSD: Component = () => {
-    createEffect(() => {
-        Plotly.react(document.getElementById('spectrum_sd'),
-            [{x: current_record().freq, y: current_record().SD, type: 'scatter', name: 'SD (5% damping)'}],
-            {
-                autosize: true,
-                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
-                automargin: true,
-                title: {text: 'SD (5% damping)', font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, current_record().freq[current_record().freq.length - 1]]}),
-                yaxis: Object.assign({}, axis_label('Amplitude (cm)', 12), {range: [0, Math.max(...current_record().SD) * 1.1]}),
-                showlegend: false,
-                legend: {
-                    x: 1,
-                    xanchor: 'right',
-                    y: 1
-                }
-            }, {responsive: true,})
-    })
-
-    return <Item id='spectrum_sd'></Item>
-}
-
 function download() {
     const record = current_record()
 
-    if (record.freq.length === 0) {
+    if (record.period.length === 0) {
         set_error_message('No data to download.')
         set_open(true)
         return
@@ -312,7 +253,7 @@ function download() {
     const data = new Blob([JSON.stringify({
         'time': waveform()[0],
         'waveform': record.data,
-        'frequency': record.freq,
+        'period': record.period,
         'sa': record.SA,
         'sv': record.SV,
         'sd': record.SD
@@ -380,9 +321,9 @@ const Jackpot: Component = () => {
             <Grid container item xs={11} spacing={1}>
                 <Grid item xs={8}><Waveform/></Grid>
                 <Grid item xs={4}><Epicenter/></Grid>
-                <Grid item xs={4}><SpectrumSA/></Grid>
-                <Grid item xs={4}><SpectrumSV/></Grid>
-                <Grid item xs={4}><SpectrumSD/></Grid>
+                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SA', 'spectrum_sa')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SV', 'spectrum_sv')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SD', 'spectrum_sd')}</Grid>
                 {record_pool?.length > 0 && <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>}
             </Grid>
         </Grid>

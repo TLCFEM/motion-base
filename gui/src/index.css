@@ -36,5 +36,21 @@ code {
 }
 
 #process_canvas {
-    height: 600px;
+    height: 500px;
+}
+
+#sa_canvas {
+    height: 300px;
+}
+
+#sv_canvas {
+    height: 300px;
+}
+
+#sd_canvas {
+    height: 300px;
+}
+
+#spectrum_canvas {
+    height: 300px;
 }
