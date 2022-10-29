@@ -118,20 +118,22 @@ async def process_record(
     if high_cut is None:
         high_cut = 40.
 
+    upsampled_interval = interval / upsampling_rate
+
     if low_cut >= high_cut:
         raise HTTPException(
             HTTPStatus.BAD_REQUEST,
             detail='Low cut frequency should be smaller than high cut frequency.')
 
-    f0 = min(max(2 * low_cut * interval, 0), 1)
-    f1 = min(max(2 * high_cut * interval, 0), 1)
+    f0 = min(max(2 * low_cut * upsampled_interval, 0), 1)
+    f1 = min(max(2 * high_cut * upsampled_interval, 0), 1)
 
     new_record = apply_filter(
         get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
         zero_stuff(upsampling_rate, record))
 
     # noinspection PyTypeChecker
-    return SequenceResponse(**result.dict(), interval=interval / upsampling_rate, data=new_record.tolist())
+    return SequenceResponse(**result.dict(), interval=upsampled_interval, data=new_record.tolist())
 
 
 @router.post('/query', response_model=MetadataListResponse)
