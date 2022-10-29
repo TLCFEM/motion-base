@@ -18,11 +18,13 @@ from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 
 import numpy as np
 import pint
-import pymongo
 from beanie import Document, Indexed
 from numba import jit, njit
 from pydantic import Field
 from scipy import signal
+
+DESCENDING = -1
+GEOSPHERE = '2dsphere'
 
 
 class Record(Document):
@@ -30,17 +32,17 @@ class Record(Document):
     uploaded_by: UUID = Field(default_factory=uuid4)
     file_name: Indexed(str) = None
     sub_category: Indexed(str) = None
-    magnitude: Indexed(float, pymongo.DESCENDING) = None
-    origin_time: Indexed(datetime, pymongo.DESCENDING) = None
-    event_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
+    magnitude: Indexed(float, DESCENDING) = None
+    origin_time: Indexed(datetime, DESCENDING) = None
+    event_location: Indexed(list[float, float], GEOSPHERE) = None
     depth: Indexed(float) = None  # in kilometer
     station_code: str = None
-    station_location: Indexed(list[float, float], pymongo.GEOSPHERE) = None
+    station_location: Indexed(list[float, float], GEOSPHERE) = None
     sampling_frequency: float = None
     sampling_frequency_unit: str = None
     duration: float = None  # in seconds
     direction: Indexed(str) = None
-    maximum_acceleration: Indexed(float, pymongo.DESCENDING) = None  # PGA in Gal
+    maximum_acceleration: Indexed(float, DESCENDING) = None  # PGA in Gal
     raw_data: List[int] = None
     raw_data_unit: str = None
 
