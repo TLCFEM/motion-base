@@ -208,7 +208,10 @@ def _parse_unit(line: str) -> str:
     return matches[0]
 
 
-async def retrieve_single_record(file_id_or_name: str, sub_category: str | None = None) -> NIED:
+async def retrieve_single_record(file_id_or_name: str | UUID, sub_category: str | None = None) -> NIED:
+    if isinstance(file_id_or_name, UUID):
+        return await NIED.find_one(NIED.id == file_id_or_name)
+
     if sub_category is None:
         if not match_uuid(file_id_or_name):
             raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Invalid file ID.')

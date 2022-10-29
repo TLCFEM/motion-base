@@ -23,6 +23,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, U
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse
 from mb.app.utility import User, create_task, generate_query_string, is_active, send_notification
 from mb.record.jp import MetadataNIED, NIED, ParserNIED, retrieve_single_record
+from mb.record.record import apply_filter, filter_regex, get_window, window_regex, zero_stuff
 from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['Japan'])
@@ -78,6 +79,59 @@ async def upload_archive(
     records: list = [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
 
     return {'message': 'successfully uploaded and processed', 'records': list(itertools.chain.from_iterable(records))}
+
+
+@router.post('/process', response_model=SequenceResponse)
+async def process_record(
+        record_id: UUID,
+        upsampling_rate: int | None = Query(None, ge=1),
+        filter_length: int | None = Query(None, ge=8, description='half filter length, default to 8'),
+        filter_type: str | None = Query(
+            None, regex=filter_regex,
+            description='filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`'),
+        window_type: str | None = Query(
+            None, regex=window_regex,
+            description=
+            'window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`'),
+        low_cut: float | None = Query(None, ge=0., description='low cut frequency in Hz, default to 0.05 Hz'),
+        high_cut: float | None = Query(None, ge=0., description='high cut frequency in Hz, default to 40 Hz'),
+):
+    result: NIED = await retrieve_single_record(record_id)
+
+    if not result:
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found.')
+
+    interval, record = result.to_waveform(unit='cm/s/s')
+
+    if upsampling_rate is None or upsampling_rate == 1:
+        # noinspection PyTypeChecker
+        return SequenceResponse(**result.dict(), interval=interval, data=record.tolist())
+
+    if filter_length is None:
+        filter_length = 8
+    if filter_type is None:
+        filter_type = 'bandpass'
+    if window_type is None:
+        window_type = 'nuttall'
+    if low_cut is None:
+        low_cut = .05
+    if high_cut is None:
+        high_cut = 40.
+
+    if low_cut >= high_cut:
+        raise HTTPException(
+            HTTPStatus.BAD_REQUEST,
+            detail='Low cut frequency should be smaller than high cut frequency.')
+
+    f0 = min(max(2 * low_cut * interval, 0), 1)
+    f1 = min(max(2 * high_cut * interval, 0), 1)
+
+    new_record = apply_filter(
+        get_window(filter_type, window_type, filter_length, [f0, f1]),
+        zero_stuff(upsampling_rate, record))
+
+    # noinspection PyTypeChecker
+    return SequenceResponse(**result.dict(), interval=interval / upsampling_rate, data=new_record.tolist())
 
 
 @router.post('/query', response_model=MetadataListResponse)

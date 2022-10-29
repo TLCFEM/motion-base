@@ -85,7 +85,6 @@ def to_unit(quantity: pint.Quantity, unit: pint.Unit):
     return quantity.magnitude
 
 
-@njit
 def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
     return np.convolve(waveform, window, mode='same')
 
@@ -95,6 +94,10 @@ def zero_stuff(ratio: int, waveform: np.ndarray) -> np.ndarray:
     output: np.ndarray = np.zeros(len(waveform) * ratio)
     output[::ratio] = waveform
     return output
+
+
+filter_regex = '^(lowpass|highpass|bandpass|bandstop)$'
+window_regex = '^(flattop|blackmanharris|nuttall|hann|hamming|kaiser|chebwin)$'
 
 
 def get_window(filter_type: str, window_type: str, length: int, cutoff: float | list[float], **kwargs) -> np.ndarray:

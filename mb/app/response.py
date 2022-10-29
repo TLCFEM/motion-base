@@ -20,20 +20,30 @@ from pydantic import BaseModel
 
 
 class MetadataResponse(BaseModel):
+    """
+    The metadata of a record.
+
+    Attributes:
+        file_name: The original name of record file, often contains the station name and the event time.
+        event_location: geographic location of the event. [longitude, latitude]
+        station_location: geographic location of the station. [longitude, latitude]
+        depth: depth of the event, in kilometer.
+        maximum_acceleration: maximum acceleration (PGA) of the record, in cm/s/s.
+    """
     id: UUID
     file_name: str
     sub_category: str
     magnitude: float
     origin_time: datetime
     event_location: list[float, float]
-    depth: float
+    depth: float  # km
     station_code: str
     station_location: list[float, float]
     sampling_frequency: float
     sampling_frequency_unit: str
     duration: float
     direction: str
-    maximum_acceleration: float
+    maximum_acceleration: float  # Gal
 
 
 class SequenceResponse(MetadataResponse):

@@ -29,7 +29,6 @@ def run_app(**kwargs):
     else:
         config['reload'] = True
         config['log_level'] = 'debug'
-        config['debug'] = True
 
     if 'host' in kwargs:
         config['host'] = kwargs['host']

@@ -142,7 +142,10 @@ def _parse_header(lines: List[str]) -> (list, list):
     return int_header, float_header
 
 
-async def retrieve_single_record(file_id_or_name: str) -> NZSM:
+async def retrieve_single_record(file_id_or_name: str | UUID) -> NZSM:
+    if isinstance(file_id_or_name, UUID):
+        return await NZSM.find_one(NZSM.id == file_id_or_name)
+
     if match_uuid(file_id_or_name):
         return await NZSM.find_one(NZSM.id == UUID(file_id_or_name.lower()))
 

@@ -86,6 +86,11 @@ async def test_download_jp(mock_client, data_type, file_name, status):
     response = await mock_client.get(target_url)
     assert response.status_code == status
 
+    data = response.json()
+    if 'id' in data:
+        response = await mock_client.post(f'/jp/process?record_id={data["id"]}&upsampling_rate=2')
+        assert response.status_code == HTTPStatus.OK
+
 
 @pytest.mark.parametrize('data_type', [
     pytest.param('raw', id='raw'),
