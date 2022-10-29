@@ -1,4 +1,4 @@
-FROM node:18 as gui
+FROM node:18-slim as gui
 
 COPY gui /mb/gui
 WORKDIR /mb/gui
