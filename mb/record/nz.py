@@ -84,7 +84,7 @@ class ParserNZSM:
             record.sampling_frequency_unit = str(pint.Unit('Hz'))
             record.raw_data_unit = str(pint.Unit('mm/s/s'))
             record.uploaded_by = user_id
-            record.file_name = os.path.basename(file_name if file_name else file_path)
+            record.file_name = os.path.basename(file_name if file_name else file_path).upper()
             record.sub_category = 'processed' if record.file_name.upper().endswith('.V2A') else 'unprocessed'
             record.set_id(record.file_name + record.direction)
             await record.save()

@@ -62,17 +62,11 @@ export class Record {
     public frequency_interval: number = 0
     public spectrum: Array<number> = Array<number>(0)
 
-    public upsampled_time_interval: number = 0
-    public upsampled_waveform: Array<number> = Array<number>(0)
-
-    public upsampled_frequency_interval: number = 0
-    public upsampled_spectrum: Array<number> = Array<number>(0)
-
     // response spectrum related
     public period: Array<number> = Array<number>(0)
-    public SA: Array<number> = Array<number>(0)
-    public SV: Array<number> = Array<number>(0)
-    public SD: Array<number> = Array<number>(0)
+    public displacement_spectrum: Array<number> = Array<number>(0)
+    public velocity_spectrum: Array<number> = Array<number>(0)
+    public acceleration_spectrum: Array<number> = Array<number>(0)
 
     public constructor(data: any) {
         Object.assign(this, data)
@@ -114,9 +108,18 @@ export const axis_label = (label: string, size: number) => {
     }
 }
 
-export function set_response_spectrum(record: Record, data: Array<Array<number>>) {
-    record.period = data.map((d: Array<number>) => d[0])
-    record.SD = data.map((d: Array<number>) => d[1])
-    record.SV = data.map((d: Array<number>) => d[2])
-    record.SA = data.map((d: Array<number>) => d[3])
+export function extract_waveform(record: Record, name: string) {
+    return {
+        x: Array<number>(record.waveform.length).fill(0).map((_, i) => i * record.time_interval),
+        y: record.waveform,
+        type: 'scattergl', name: name
+    }
+}
+
+export function extract_spectrum(record: Record, name: string) {
+    return {
+        x: Array<number>(record.spectrum.length).fill(0).map((_, i) => i * record.frequency_interval),
+        y: record.spectrum,
+        type: 'scattergl', name: name
+    }
 }

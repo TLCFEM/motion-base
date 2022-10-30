@@ -23,9 +23,12 @@ import numpy as np
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse
+from mb.app.process import processing_record
+from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
+    SequenceSpectrumResponse
 from mb.app.utility import UploadTask, User, create_task, generate_query_string, is_active, send_notification
 from mb.record.nz import MetadataNZSM, NZSM, ParserNZSM, retrieve_single_record
+from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['New Zealand'])
@@ -106,6 +109,40 @@ async def upload_archive(
     records: list = [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
 
     return {'message': 'successfully uploaded and processed', 'records': list(itertools.chain.from_iterable(records))}
+
+
+@router.post('/process', response_model=SequenceSpectrumResponse)
+async def process_record(
+        record_id: UUID,
+        upsampling_rate: int | None = Query(None, ge=1),
+        filter_length: int | None = Query(None, ge=8, description='half filter length, default to 8'),
+        filter_type: str | None = Query(
+            None, regex=filter_regex,
+            description='filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`'),
+        window_type: str | None = Query(
+            None, regex=window_regex,
+            description=
+            'window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`'),
+        low_cut: float | None = Query(None, ge=0., description='low cut frequency in Hz, default to 0.05 Hz'),
+        high_cut: float | None = Query(None, ge=0., description='high cut frequency in Hz, default to 40 Hz'),
+        damping_ratio: float | None = Query(None, ge=0., le=1., description='damping ratio, default to 0.05'),
+        period_end: float | None = Query(None, ge=0., description='maximum period of interest, default to 20 s'),
+        period_step: float | None = Query(None, ge=0., description='period step, default to 0.05 s'),
+        normalised: bool | None = Query(None, description='whether to normalise record, default to False'),
+        with_filter: bool | None = Query(None, description='whether to apply filter, default to True'),
+        with_spectrum: bool | None = Query(None, description='whether to perform DFT, default to False'),
+        with_response_spectrum: bool | None = Query(
+            None, description='whether to perform response spectrum, default to False'),
+):
+    result: NZSM = await retrieve_single_record(record_id)
+
+    if not result:
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found.')
+
+    return processing_record(
+        result, upsampling_rate, filter_length, filter_type, window_type, low_cut, high_cut,
+        damping_ratio, period_end, period_step, normalised,
+        with_filter, with_spectrum, with_response_spectrum)
 
 
 @router.post('/query', response_model=MetadataListResponse)
@@ -206,7 +243,13 @@ async def download_single_random_response_spectrum(
     period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
-    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
+    return ResponseSpectrumResponse(
+        **result.dict(),
+        period=period.tolist(),
+        displacement_spectrum=spectrum[:, 0].tolist(),
+        velocity_spectrum=spectrum[:, 1].tolist(),
+        acceleration_spectrum=spectrum[:, 2].tolist()
+    )
 
 
 @router.get('/raw/{file_id_or_name}', response_model=NZSM)
@@ -276,4 +319,10 @@ async def download_single_response_spectrum(
     period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
-    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
+    return ResponseSpectrumResponse(
+        **result.dict(),
+        period=period.tolist(),
+        displacement_spectrum=spectrum[:, 0].tolist(),
+        velocity_spectrum=spectrum[:, 1].tolist(),
+        acceleration_spectrum=spectrum[:, 2].tolist()
+    )

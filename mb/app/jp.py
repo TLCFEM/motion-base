@@ -20,11 +20,12 @@ from uuid import UUID
 import numpy as np
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
+from mb.app.process import processing_record
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
     SequenceSpectrumResponse
 from mb.app.utility import User, create_task, generate_query_string, is_active, send_notification
 from mb.record.jp import MetadataNIED, NIED, ParserNIED, retrieve_single_record
-from mb.record.record import apply_filter, filter_regex, get_window, window_regex, zero_stuff
+from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
 
 router = APIRouter(tags=['Japan'])
@@ -100,6 +101,7 @@ async def process_record(
         period_end: float | None = Query(None, ge=0., description='maximum period of interest, default to 20 s'),
         period_step: float | None = Query(None, ge=0., description='period step, default to 0.05 s'),
         normalised: bool | None = Query(None, description='whether to normalise record, default to False'),
+        with_filter: bool | None = Query(None, description='whether to apply filter, default to True'),
         with_spectrum: bool | None = Query(None, description='whether to perform DFT, default to False'),
         with_response_spectrum: bool | None = Query(
             None, description='whether to perform response spectrum, default to False'),
@@ -109,63 +111,10 @@ async def process_record(
     if not result:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found.')
 
-    record = SequenceSpectrumResponse(**result.dict())
-
-    if with_spectrum is None:
-        with_spectrum = False
-    if with_response_spectrum is None:
-        with_response_spectrum = False
-
-    if upsampling_rate is None:
-        upsampling_rate = 1
-    if filter_length is None:
-        filter_length = 8
-    if filter_type is None:
-        filter_type = 'bandpass'
-    if window_type is None:
-        window_type = 'nuttall'
-    if low_cut is None:
-        low_cut = .05
-    if high_cut is None:
-        high_cut = 40.
-
-    if low_cut >= high_cut:
-        raise HTTPException(
-            HTTPStatus.BAD_REQUEST,
-            detail='Low cut frequency should be smaller than high cut frequency.')
-
-    if damping_ratio is None:
-        damping_ratio = 0.05
-    if period_end is None:
-        period_end = 20.
-    if period_step is None:
-        period_step = 0.05
-    if normalised is None:
-        normalised = False
-
-    time_interval, waveform = result.to_waveform(normalised=normalised, unit='cm/s/s')
-
-    upsampled_interval = time_interval / upsampling_rate
-
-    f0 = min(max(2 * low_cut * upsampled_interval, 0), 1 - np.finfo(np.float32).eps)
-    f1 = min(max(2 * high_cut * upsampled_interval, f0 + np.finfo(np.float32).eps), 1 - np.finfo(np.float32).eps)
-
-    new_waveform: np.ndarray = apply_filter(
-        get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
-        zero_stuff(upsampling_rate, waveform))
-
-    record.time_interval = upsampled_interval
-    record.waveform = new_waveform.tolist()
-    if with_spectrum:
-        frequency_interval, spectrum = NIED.perform_fft(1 / upsampled_interval, new_waveform)
-        record.frequency_interval = frequency_interval
-        record.spectrum = spectrum.tolist()
-    if with_response_spectrum:
-        period = np.arange(0, period_end + period_step, period_step)
-        spectrum = response_spectrum(damping_ratio, upsampled_interval, new_waveform, period)
-        record.response_spectrum = spectrum.tolist()
-
-    return record
+    return processing_record(
+        result, upsampling_rate, filter_length, filter_type, window_type, low_cut, high_cut,
+        damping_ratio, period_end, period_step, normalised,
+        with_filter, with_spectrum, with_response_spectrum)
 
 
 @router.post('/query', response_model=MetadataListResponse)
@@ -266,7 +215,13 @@ async def download_single_random_response_spectrum(
     period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
-    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
+    return ResponseSpectrumResponse(
+        **result.dict(),
+        period=period.tolist(),
+        displacement_spectrum=spectrum[:, 0].tolist(),
+        velocity_spectrum=spectrum[:, 1].tolist(),
+        acceleration_spectrum=spectrum[:, 2].tolist()
+    )
 
 
 @router.get('/raw/{file_id_or_name}', response_model=NIED)
@@ -348,4 +303,10 @@ async def download_single_response_spectrum(
     period = np.arange(0, period_end + period_step, period_step)
     spectrum = response_spectrum(damping_ratio, interval, record, period)
     # noinspection PyTypeChecker
-    return ResponseSpectrumResponse(**result.dict(), data=spectrum.tolist())
+    return ResponseSpectrumResponse(
+        **result.dict(),
+        period=period.tolist(),
+        displacement_spectrum=spectrum[:, 0].tolist(),
+        velocity_spectrum=spectrum[:, 1].tolist(),
+        acceleration_spectrum=spectrum[:, 2].tolist()
+    )

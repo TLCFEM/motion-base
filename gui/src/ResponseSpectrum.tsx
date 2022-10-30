@@ -9,13 +9,13 @@ export function ResponseSpectrum(record_entry: Record, spectrum_type: string, el
         let target: Array<number> = Array<number>(0)
         let unit: string = ''
         if (spectrum_type === 'SD') {
-            target = record_entry.SD
+            target = record_entry.displacement_spectrum
             unit = 'cm'
         } else if (spectrum_type === 'SV') {
-            target = record_entry.SV
+            target = record_entry.velocity_spectrum
             unit = 'cm/s'
         } else if (spectrum_type === 'SA') {
-            target = record_entry.SA
+            target = record_entry.acceleration_spectrum
             unit = 'Gal'
         }
 

@@ -1,5 +1,5 @@
 import {Component, createEffect, createSignal} from "solid-js"
-import {axis_label, Record, set_response_spectrum} from "./Utility"
+import {axis_label, extract_spectrum, extract_waveform, Record} from "./Utility"
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import Grid from "@suid/material/Grid"
@@ -15,6 +15,7 @@ import {ResponseSpectrum} from "./ResponseSpectrum";
 import Card from "@suid/material/Card";
 
 const [record, set_record] = createSignal<Record>(new Record({}))
+const [processed_record, set_processed_record] = createSignal<Record>(new Record({}))
 
 const [record_id, set_record_id] = createSignal('')
 const [upsampling_rate, set_upsampling_rate] = createSignal(1)
@@ -28,44 +29,23 @@ const [show_spectrum, set_show_spectrum] = createSignal(false)
 const [show_response_spectrum, set_show_response_spectrum] = createSignal(false)
 
 async function fetch() {
-    let url = `/${region()}/waveform/${record_id()}`
-    let new_record: Record = new Record({})
+    let url = `/${region()}/process?record_id=${record_id()}&with_filter=false`
+    if (show_spectrum()) url += `&with_spectrum=true`
+    if (show_response_spectrum()) url += `&with_response_spectrum=true`
     await axios.get(url).then(
-        res => new_record = new Record(res.data)
+        res => set_record(new Record(res.data))
     )
-
-    if (show_spectrum()) {
-        url = `/${region()}/spectrum/${record_id()}`
-        await axios.get(url).then(
-            res => {
-                new_record.frequency_interval = res.data.interval
-                new_record.spectrum = res.data.data
-            }
-        )
-    }
-
-    if (show_response_spectrum()) {
-        url = `/${region()}/response_spectrum/${record_id()}`
-        await axios.get(url).then(
-            res => set_response_spectrum(new_record, res.data.data)
-        )
-    }
 
     url = `/${region()}/process?record_id=${record_id()}`
     if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
     if (filter_length()) url += `&filter_length=${filter_length()}`
     if (high_cut()) url += `&high_cut=${high_cut()}`
     url += '&with_spectrum=true'
+    url += '&with_response_spectrum=true'
+    url += '&with_filter=true'
     await axios.post(url).then(
-        res => {
-            new_record.upsampled_time_interval = res.data.time_interval
-            new_record.upsampled_waveform = res.data.waveform
-            new_record.upsampled_frequency_interval = res.data.frequency_interval
-            new_record.upsampled_spectrum = res.data.spectrum
-        }
+        res => set_processed_record(new Record(res.data))
     )
-
-    set_record(new_record)
 }
 
 function ProcessConfig() {
@@ -95,30 +75,24 @@ function ProcessConfig() {
 
 const RecordCanvas: Component = () => {
     createEffect(() => {
-        const original = {
-            x: Array<number>(record().data.length).fill(0).map((_, i) => i * record().interval),
-            y: record().data,
-            type: 'scattergl', name: 'original'
-        }
-        const processed = {
-            x: Array<number>(record().upsampled_waveform.length).fill(0).map((_, i) => i * record().upsampled_time_interval),
-            y: record().upsampled_waveform,
-            type: 'scattergl', name: 'processed'
-        }
-
-        Plotly.react(document.getElementById('process_canvas'), [original, processed], {
-            autosize: true,
-            automargin: true,
-            title: {text: record().file_name, font: {size: 20},},
-            xaxis: axis_label('Time (s)', 14),
-            yaxis: axis_label('Amplitude (Gal)', 14),
-            showlegend: true,
-            legend: {
-                x: 1,
-                xanchor: 'right',
-                y: 1
-            }
-        }, {responsive: true,})
+        Plotly.react(document.getElementById('process_canvas'),
+            [
+                extract_waveform(record(), 'original'),
+                extract_waveform(processed_record(), 'processed')
+            ],
+            {
+                autosize: true,
+                automargin: true,
+                title: {text: record().file_name, font: {size: 20},},
+                xaxis: axis_label('Time (s)', 14),
+                yaxis: axis_label('Amplitude (Gal)', 14),
+                showlegend: true,
+                legend: {
+                    x: 1,
+                    xanchor: 'right',
+                    y: 1
+                }
+            }, {responsive: true,})
     })
 
     return <Card id='process_canvas'></Card>
@@ -126,19 +100,11 @@ const RecordCanvas: Component = () => {
 
 const SpectrumCanvas: Component = () => {
     createEffect(() => {
-        const target = [
-            {
-                x: Array<number>(record().spectrum.length).fill(0).map((_, i) => i * record().frequency_interval),
-                y: record().spectrum, type: 'scattergl', name: `original`
-            },
-            {
-                x: Array<number>(record().upsampled_spectrum.length).fill(0).map((_, i) => i * record().upsampled_frequency_interval),
-                y: record().upsampled_spectrum, type: 'scattergl', name: `processed`
-            }
-        ]
-
         Plotly.react(document.getElementById('spectrum_canvas'),
-            target,
+            [
+                extract_spectrum(record(), 'original'),
+                extract_spectrum(processed_record(), 'processed'),
+            ],
             {
                 autosize: true,
                 margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},

@@ -34,16 +34,7 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
-import {
-    axis_label,
-    DefaultMap,
-    GreenIcon,
-    Record,
-    RedIcon,
-    set_response_spectrum,
-    StyledTableCell,
-    StyledTableRow
-} from './Utility'
+import {axis_label, DefaultMap, GreenIcon, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
 import {ResponseSpectrum} from "./ResponseSpectrum";
 import Card from "@suid/material/Card";
 
@@ -171,7 +162,10 @@ async function jackpot() {
         url = `/${region_value}/response_spectrum/${new_record.id}`
         if (normalised()) url += '?normalised=true'
         await axios.get(url).then(res => {
-            set_response_spectrum(new_record, res.data.data)
+            new_record.period = res.data.period
+            new_record.displacement_spectrum = res.data.displacement_spectrum
+            new_record.velocity_spectrum = res.data.velocity_spectrum
+            new_record.acceleration_spectrum = res.data.acceleration_spectrum
             set_current_record(new_record)
             set_record_pool([...record_pool, new_record])
         }).catch(err => {
@@ -250,9 +244,9 @@ function download() {
         'time': waveform()[0],
         'waveform': record.data,
         'period': record.period,
-        'sa': record.SA,
-        'sv': record.SV,
-        'sd': record.SD
+        'displacement_spectrum': record.displacement_spectrum,
+        'velocity_spectrum': record.velocity_spectrum,
+        'acceleration_spectrum': record.acceleration_spectrum
     })], {type: 'application/json'})
 
     const url = window.URL.createObjectURL(data)
