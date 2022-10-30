@@ -1,5 +1,5 @@
 import {Component, createEffect, createSignal} from "solid-js"
-import {axis_label, extract_spectrum, extract_waveform, Record} from "./Utility"
+import {axis_label, extract_response_spectrum, extract_spectrum, extract_waveform, Record} from "./Utility"
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import Grid from "@suid/material/Grid"
@@ -32,7 +32,7 @@ async function fetch() {
     let url = `/${region()}/process?record_id=${record_id()}&with_filter=false`
     if (show_spectrum()) url += `&with_spectrum=true`
     if (show_response_spectrum()) url += `&with_response_spectrum=true`
-    await axios.get(url).then(
+    await axios.post(url).then(
         res => set_record(new Record(res.data))
     )
 
@@ -125,17 +125,30 @@ const SpectrumCanvas: Component = () => {
 }
 
 const ProcessPage: Component = () => {
+    const displacement = [
+        extract_response_spectrum(record(), 'original', 'SD'),
+        extract_response_spectrum(processed_record(), 'processed', 'SD')
+    ]
+    const velocity = [
+        extract_response_spectrum(record(), 'original', 'SV'),
+        extract_response_spectrum(processed_record(), 'processed', 'SV')
+    ]
+    const acceleration = [
+        extract_response_spectrum(record(), 'original', 'SA'),
+        extract_response_spectrum(processed_record(), 'processed', 'SA')
+    ]
+
     return <Grid container xs={12} spacing={2}>
         <Grid item xs={12}><ProcessConfig/></Grid>
         <Grid item xs={12}><RecordCanvas/></Grid>
         {(show_spectrum() || show_response_spectrum()) && <Grid container item xs={12} spacing={2}>
             {show_spectrum() && <Grid item xs={show_response_spectrum() ? 3 : 12}><SpectrumCanvas/></Grid>}
             {show_response_spectrum() &&
-                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SA', 'sa_canvas')}</Grid>}
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(displacement, 'SA', 'sa_canvas')}</Grid>}
             {show_response_spectrum() &&
-                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SV', 'sv_canvas')}</Grid>}
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(velocity, 'SV', 'sv_canvas')}</Grid>}
             {show_response_spectrum() &&
-                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SD', 'sd_canvas')}</Grid>}
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(acceleration, 'SD', 'sd_canvas')}</Grid>}
         </Grid>}
     </Grid>
 }

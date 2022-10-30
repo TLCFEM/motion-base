@@ -101,7 +101,7 @@ def processing_record(
     if with_response_spectrum:
         period = np.arange(0, period_end + period_step, period_step)
         spectrum = response_spectrum(damping_ratio, upsampled_interval, new_waveform, period)
-        record.period = period.tolist(),
+        record.period = period.tolist()
         record.displacement_spectrum = spectrum[:, 0].tolist()
         record.velocity_spectrum = spectrum[:, 1].tolist()
         record.acceleration_spectrum = spectrum[:, 2].tolist()

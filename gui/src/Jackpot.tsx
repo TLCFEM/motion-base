@@ -34,7 +34,16 @@ import {createStore} from "solid-js/store"
 import Grid from "@suid/material/Grid"
 import tippy from "tippy.js"
 import CircularProgress from "@suid/material/CircularProgress"
-import {axis_label, DefaultMap, GreenIcon, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
+import {
+    axis_label,
+    DefaultMap,
+    extract_response_spectrum,
+    GreenIcon,
+    Record,
+    RedIcon,
+    StyledTableCell,
+    StyledTableRow
+} from './Utility'
 import {ResponseSpectrum} from "./ResponseSpectrum";
 import Card from "@suid/material/Card";
 
@@ -303,6 +312,16 @@ function RegionGroup() {
 }
 
 const Jackpot: Component = () => {
+    const displacement = [
+        extract_response_spectrum(current_record(), 'original', 'SD')
+    ]
+    const velocity = [
+        extract_response_spectrum(current_record(), 'original', 'SV')
+    ]
+    const acceleration = [
+        extract_response_spectrum(current_record(), 'original', 'SA')
+    ]
+
     return <>
         <Grid container spacing={1}>
             <Grid item xs={1}>
@@ -311,9 +330,9 @@ const Jackpot: Component = () => {
             <Grid container item xs={11} spacing={1}>
                 <Grid item xs={8}><Waveform/></Grid>
                 <Grid item xs={4}><Epicenter/></Grid>
-                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SA', 'spectrum_sa')}</Grid>
-                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SV', 'spectrum_sv')}</Grid>
-                <Grid item xs={4}>{ResponseSpectrum(current_record(), 'SD', 'spectrum_sd')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum(acceleration, 'SA', 'spectrum_sa')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum(velocity, 'SV', 'spectrum_sv')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum(displacement, 'SD', 'spectrum_sd')}</Grid>
                 {record_pool?.length > 0 && <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>}
             </Grid>
         </Grid>

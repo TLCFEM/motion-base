@@ -1,33 +1,25 @@
 import {createEffect} from "solid-js";
-import {axis_label, Record} from "./Utility";
+import {axis_label} from "./Utility";
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import Card from "@suid/material/Card";
 
-export function ResponseSpectrum(record_entry: Record, spectrum_type: string, element_id: string) {
+export function ResponseSpectrum(data: Array<object>, spectrum_type: string, element_id: string) {
     createEffect(() => {
-        let target: Array<number> = Array<number>(0)
         let unit: string = ''
-        if (spectrum_type === 'SD') {
-            target = record_entry.displacement_spectrum
-            unit = 'cm'
-        } else if (spectrum_type === 'SV') {
-            target = record_entry.velocity_spectrum
-            unit = 'cm/s'
-        } else if (spectrum_type === 'SA') {
-            target = record_entry.acceleration_spectrum
-            unit = 'Gal'
-        }
+        if (spectrum_type === 'SD') unit = 'cm'
+        else if (spectrum_type === 'SV') unit = 'cm/s'
+        else if (spectrum_type === 'SA') unit = 'Gal'
 
         Plotly.react(document.getElementById(element_id),
-            [{x: record_entry.period, y: target, type: 'scatter', name: `${spectrum_type} (5% damping)`}],
+            data,
             {
                 autosize: true,
                 margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
                 automargin: true,
                 title: {text: `${spectrum_type} (5% damping)`, font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, record_entry.period[record_entry.period.length - 1]]}),
-                yaxis: Object.assign({}, axis_label(`Amplitude (${unit})`, 12), {range: [0, Math.max(...target) * 1.1]}),
+                xaxis: axis_label('Period (s)', 12),
+                yaxis: axis_label(`Amplitude (${unit})`, 12),
                 showlegend: false,
                 legend: {
                     x: 1,

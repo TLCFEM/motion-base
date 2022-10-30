@@ -116,10 +116,30 @@ export function extract_waveform(record: Record, name: string) {
     }
 }
 
+
 export function extract_spectrum(record: Record, name: string) {
     return {
         x: Array<number>(record.spectrum.length).fill(0).map((_, i) => i * record.frequency_interval),
         y: record.spectrum,
+        type: 'scattergl', name: name
+    }
+}
+
+export function extract_response_spectrum(record: Record, name: string, kind: string) {
+    if (kind === 'SA') return {
+        x: record.period,
+        y: record.acceleration_spectrum,
+        type: 'scattergl', name: name
+    }
+    if (kind === 'SV') return {
+        x: record.period,
+        y: record.velocity_spectrum,
+        type: 'scattergl', name: name
+    }
+
+    return {
+        x: record.period,
+        y: record.displacement_spectrum,
         type: 'scattergl', name: name
     }
 }
