@@ -11,7 +11,7 @@ export function ResponseSpectrum(data: Array<object>, spectrum_type: string, ele
         else if (spectrum_type === 'SV') unit = 'cm/s'
         else if (spectrum_type === 'SA') unit = 'Gal'
 
-        Plotly.react(document.getElementById(element_id),
+        Plotly.newPlot(document.getElementById(element_id),
             data,
             {
                 autosize: true,
@@ -20,7 +20,7 @@ export function ResponseSpectrum(data: Array<object>, spectrum_type: string, ele
                 title: {text: `${spectrum_type} (5% damping)`, font: {size: 14},},
                 xaxis: axis_label('Period (s)', 12),
                 yaxis: axis_label(`Amplitude (${unit})`, 12),
-                showlegend: false,
+                showlegend: true,
                 legend: {
                     x: 1,
                     xanchor: 'right',

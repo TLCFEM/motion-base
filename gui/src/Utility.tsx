@@ -108,38 +108,41 @@ export const axis_label = (label: string, size: number) => {
     }
 }
 
-export function extract_waveform(record: Record, name: string) {
+export function extract_waveform(record: Record | undefined, name: string) {
+    if (!record || record.id === '') return {}
     return {
-        x: Array<number>(record.waveform.length).fill(0).map((_, i) => i * record.time_interval),
+        x: Array<number>(record.waveform?.length).fill(0).map((_, i) => i * record.time_interval),
         y: record.waveform,
-        type: 'scattergl', name: name
+        type: 'scatter', name: name
     }
 }
 
-
-export function extract_spectrum(record: Record, name: string) {
+export function extract_spectrum(record: Record | undefined, name: string) {
+    if (!record || record.id === '') return {}
     return {
-        x: Array<number>(record.spectrum.length).fill(0).map((_, i) => i * record.frequency_interval),
+        x: Array<number>(record.spectrum?.length).fill(0).map((_, i) => i * record.frequency_interval),
         y: record.spectrum,
-        type: 'scattergl', name: name
+        type: 'scatter', name: name
     }
 }
 
-export function extract_response_spectrum(record: Record, name: string, kind: string) {
+export function extract_response_spectrum(record: Record | undefined, name: string, kind: string) {
+    if (!record || record.id === '') return {}
+
     if (kind === 'SA') return {
         x: record.period,
         y: record.acceleration_spectrum,
-        type: 'scattergl', name: name
+        type: 'scatter', name: name
     }
     if (kind === 'SV') return {
         x: record.period,
         y: record.velocity_spectrum,
-        type: 'scattergl', name: name
+        type: 'scatter', name: name
     }
 
     return {
         x: record.period,
         y: record.displacement_spectrum,
-        type: 'scattergl', name: name
+        type: 'scatter', name: name
     }
 }

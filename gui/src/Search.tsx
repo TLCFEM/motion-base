@@ -170,33 +170,33 @@ function SearchConfig() {
         <Grid container item xs={12}>
             <Stack component='form' spacing={1} noValidate direction='row' alignItems='center' justifyItems='center'
                    justifyContent='center' autocomplete='off'>
-                <TextField id='min-magnitude' label='Min. Mag.' type='number'
+                <TextField InputLabelProps={{shrink: true}} id='min-magnitude' label='Min. Mag.' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_min_mag(event.target.value)
                            }}/>
-                <TextField id='max-magnitude' label='Max. Mag.' type='number'
+                <TextField InputLabelProps={{shrink: true}} id='max-magnitude' label='Max. Mag.' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_max_mag(event.target.value)
                            }}/>
-                <TextField id='min-pga' label='Min. PGA' type='number'
+                <TextField InputLabelProps={{shrink: true}} id='min-pga' label='Min. PGA' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_min_pga(event.target.value)
                            }}/>
-                <TextField id='max-pga' label='Max. PGA' type='number'
+                <TextField InputLabelProps={{shrink: true}} id='max-pga' label='Max. PGA' type='number'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_max_pga(event.target.value)
                            }}/>
-                <TextField id='event_lat' label='Event Lat.' type='number'/>
-                <TextField id='event_log' label='Event Log.' type='number'/>
-                <TextField id='station_lat' label='Station Lat.' type='text'
+                <TextField InputLabelProps={{shrink: true}} id='event_lat' label='Event Lat.' type='number'/>
+                <TextField InputLabelProps={{shrink: true}} id='event_log' label='Event Log.' type='number'/>
+                <TextField InputLabelProps={{shrink: true}} id='station_lat' label='Station Lat.' type='text'
                            inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
-                <TextField id='station_log' label='Station Log.' type='text'
+                <TextField InputLabelProps={{shrink: true}} id='station_log' label='Station Log.' type='text'
                            inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
-                <TextField id='event_time_from' label='From' type='datetime-local' InputLabelProps={{shrink: true}}
+                <TextField InputLabelProps={{shrink: true}} id='event_time_from' label='From' type='datetime-local'
                            sx={{width: '360px'}}/>
-                <TextField id='event_time_to' label='To' type='datetime-local' InputLabelProps={{shrink: true}}
+                <TextField InputLabelProps={{shrink: true}} id='event_time_to' label='To' type='datetime-local'
                            sx={{width: '360px'}}/>
-                <TextField id='direction' label='Direction' type='text'
+                <TextField InputLabelProps={{shrink: true}} id='direction' label='Direction' type='text'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_direction(event.target.value)
                            }}/>
@@ -205,10 +205,10 @@ function SearchConfig() {
         <Grid container item xs={12}>
             <Stack component='form' spacing={1} noValidate direction='row' alignItems='center' justifyItems='center'
                    justifyContent='center' autocomplete='off'>
-                <TextField id='page_size' label='Records per Page' type='number' defaultValue={20}
-                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                               set_page_size(event.target.value)
-                           }}/>
+                <TextField InputLabelProps={{shrink: true}} id='page_size' label='Records per Page' type='number'
+                           defaultValue={20} onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                    set_page_size(event.target.value)
+                }}/>
                 <ColorToggleButton/>
                 <Button variant='contained' id='clear' onClick={fetch}><SearchIcon/></Button>
             </Stack>

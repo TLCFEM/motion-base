@@ -73,7 +73,21 @@ def processing_record(
     if normalised is None:
         normalised = False
 
-    record = SequenceSpectrumResponse(**result.dict())
+    record = SequenceSpectrumResponse(**result.dict(), processing_parameters={
+        'upsampling_rate': upsampling_rate,
+        'filter_length': filter_length,
+        'filter_type': filter_type,
+        'window_type': window_type,
+        'low_cut': low_cut,
+        'high_cut': high_cut,
+        'damping_ratio': damping_ratio,
+        'period_end': period_end,
+        'period_step': period_step,
+        'normalised': normalised,
+        'with_filter': with_filter,
+        'with_spectrum': with_spectrum,
+        'with_response_spectrum': with_response_spectrum
+    })
 
     time_interval, waveform = result.to_waveform(normalised=normalised, unit='cm/s/s')
 

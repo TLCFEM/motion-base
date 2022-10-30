@@ -72,14 +72,14 @@ const [waveform, set_waveform] = createSignal([Array<number>(0), Array<number>(0
 const [record_pool, set_record_pool] = createStore<Array<Record>>(Array<Record>(0))
 const [current_record, set_current_record] = createSignal<Record>(new Record({}))
 
-function RecordTableHeader(pool: Array<Record>) {
+function RecordTableHeader(pool: Array<Record>, set_pool: (pool: Array<Record>) => void) {
     const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'PGA', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
     const sort_by_magnitude = () =>
-        set_record_pool(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
+        set_pool(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
 
     const sort_by_time = () =>
-        set_record_pool(pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
+        set_pool(pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
 
     onMount(() => {
         tippy('#table-header-id', {
@@ -142,10 +142,10 @@ function RecordEntry(record_entry: Record) {
     </StyledTableRow>
 }
 
-function RecordTable({pool}: { pool: Array<Record> }) {
+function RecordTable(pool: Array<Record>, set_pool: (pool: Record[]) => void) {
     return <TableContainer component={Paper}>
         <Table sx={{minWidth: 1080}} size="small" aria-label="record-metadata">
-            <RecordTableHeader {...pool}/>
+            {RecordTableHeader(pool, set_pool)}
             <TableBody>
                 <For each={pool}>
                     {(record_entry) => <RecordEntry {...record_entry}/>}
@@ -226,7 +226,7 @@ const Epicenter: Component = () => {
 
 const Waveform: Component = () => {
     createEffect(() => {
-        const trace = {x: waveform()[0], y: waveform()[1], type: 'scattergl', name: waveform()[2]}
+        const trace = {x: waveform()[0], y: waveform()[1], type: 'scatter', name: waveform()[2]}
 
         Plotly.react(document.getElementById('canvas'), [trace], {
             autosize: true,
@@ -268,9 +268,6 @@ function download() {
 }
 
 function RegionGroup() {
-    const handle_change = (event: ST.ChangeEvent<HTMLInputElement>) => set_region(event.target.value)
-    const handle_normalised = () => set_normalised(!normalised())
-
     onMount(() => {
         tippy('#random', {
             arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Get a Random Waveform!',
@@ -296,13 +293,14 @@ function RegionGroup() {
     return <Stack component={Card} spacing={1} justifyContent='center' direction='column' alignItems='center'
                   alignContent='center'>
         <FormControl size='small'>
-            <RadioGroup aria-labelledby='region' name='region' id='region' value={region()} onChange={handle_change}>
+            <RadioGroup aria-labelledby='region' name='region' id='region' value={region()}
+                        onChange={event => set_region(event.target.value)}>
                 <For each={region_set}>
                     {(r) => <FormControlLabel value={r} control={<Radio size='small'/>} label={r.toUpperCase()}/>}
                 </For>
             </RadioGroup>
         </FormControl>
-        <Switch id='normalised' checked={normalised()} onChange={handle_normalised}/>
+        <Switch id='normalised' checked={normalised()} onChange={() => set_normalised(!normalised())}/>
         <Button variant='contained' id='random' onClick={refetch} disabled={data?.loading}>
             {data?.loading ? <CircularProgress color="secondary" size={24}/> : <CasinoIcon/>}
         </Button>
@@ -312,16 +310,6 @@ function RegionGroup() {
 }
 
 const Jackpot: Component = () => {
-    const displacement = [
-        extract_response_spectrum(current_record(), 'original', 'SD')
-    ]
-    const velocity = [
-        extract_response_spectrum(current_record(), 'original', 'SV')
-    ]
-    const acceleration = [
-        extract_response_spectrum(current_record(), 'original', 'SA')
-    ]
-
     return <>
         <Grid container spacing={1}>
             <Grid item xs={1}>
@@ -330,10 +318,16 @@ const Jackpot: Component = () => {
             <Grid container item xs={11} spacing={1}>
                 <Grid item xs={8}><Waveform/></Grid>
                 <Grid item xs={4}><Epicenter/></Grid>
-                <Grid item xs={4}>{ResponseSpectrum(acceleration, 'SA', 'spectrum_sa')}</Grid>
-                <Grid item xs={4}>{ResponseSpectrum(velocity, 'SV', 'spectrum_sv')}</Grid>
-                <Grid item xs={4}>{ResponseSpectrum(displacement, 'SD', 'spectrum_sd')}</Grid>
-                {record_pool?.length > 0 && <Grid item xs={12}><RecordTable pool={record_pool}/></Grid>}
+                <Grid item xs={4}>{ResponseSpectrum([
+                    extract_response_spectrum(current_record(), 'original', 'SA')
+                ], 'SA', 'spectrum_sa')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum([
+                    extract_response_spectrum(current_record(), 'original', 'SV')
+                ], 'SV', 'spectrum_sv')}</Grid>
+                <Grid item xs={4}>{ResponseSpectrum([
+                    extract_response_spectrum(current_record(), 'original', 'SD')
+                ], 'SD', 'spectrum_sd')}</Grid>
+                {record_pool?.length > 0 && <Grid item xs={12}>{RecordTable(record_pool, set_record_pool)}</Grid>}
             </Grid>
         </Grid>
         <ErrorModal/>

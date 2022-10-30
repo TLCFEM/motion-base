@@ -79,6 +79,8 @@ class SequenceSpectrumResponse(MetadataResponse):
     velocity_spectrum: List[float] | None
     acceleration_spectrum: List[float] | None
 
+    processing_parameters: dict | None
+
 
 class MetadataListResponse(BaseModel):
     """

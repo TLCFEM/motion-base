@@ -23,6 +23,7 @@
     "leaflet": "=1.9.2",
     "plotly.js-dist-min": "=2.16.1",
     "solid-js": "=1.5.9",
-    "tippy.js": "=6.3.7"
+    "tippy.js": "=6.3.7",
+    "uuid": "=9.0.0"
   }
 }
