@@ -1,5 +1,5 @@
 import {Component, createEffect, createSignal} from "solid-js"
-import {axis_label, Item, Record, ResponseSpectrum} from "./Utility"
+import {axis_label, Record, set_response_spectrum} from "./Utility"
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import Grid from "@suid/material/Grid"
@@ -11,6 +11,8 @@ import * as ST from '@suid/types'
 import Stack from "@suid/material/Stack"
 import axios from "./API";
 import Switch from "@suid/material/Switch";
+import {ResponseSpectrum} from "./ResponseSpectrum";
+import Card from "@suid/material/Card";
 
 const [record, set_record] = createSignal<Record>(new Record({}))
 
@@ -30,7 +32,9 @@ async function fetch() {
         res => new_record = new Record(res.data)
     )
 
-    url = `/${region()}/process?record_id=${record_id()}&upsampling_rate=${upsampling_rate()}&filter_length=${filter_length()}`
+    url = `/${region()}/process?record_id=${record_id()}`
+    if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
+    if (filter_length()) url += `&filter_length=${filter_length()}`
     await axios.post(url).then(
         res => {
             new_record.upsampled_interval = res.data.interval
@@ -51,12 +55,7 @@ async function fetch() {
     if (show_response_spectrum()) {
         url = `/${region()}/response_spectrum/${record_id()}`
         await axios.get(url).then(
-            res => {
-                new_record.period = res.data.data.map((d: Array<number>) => d[0])
-                new_record.SD = res.data.data.map((d: Array<number>) => d[1])
-                new_record.SV = res.data.data.map((d: Array<number>) => d[2])
-                new_record.SA = res.data.data.map((d: Array<number>) => d[3])
-            }
+            res => set_response_spectrum(new_record, res.data.data)
         )
     }
 
@@ -120,7 +119,7 @@ const RecordCanvas: Component = () => {
         }, {responsive: true,})
     })
 
-    return <Item id='process_canvas'></Item>
+    return <Card id='process_canvas'></Card>
 }
 
 const SpectrumCanvas: Component = () => {
@@ -128,7 +127,7 @@ const SpectrumCanvas: Component = () => {
         Plotly.react(document.getElementById('spectrum_canvas'),
             [{
                 x: Array<number>(record().spectrum.length).fill(0).map((_, i) => i * record().frequency),
-                y: record().spectrum, type: 'scatter', name: `DFT`
+                y: record().spectrum, type: 'scattergl', name: `DFT`
             }],
             {
                 autosize: true,
@@ -146,7 +145,7 @@ const SpectrumCanvas: Component = () => {
             }, {responsive: true,})
     })
 
-    return <Item id='spectrum_canvas'></Item>
+    return <Card id='spectrum_canvas'></Card>
 }
 
 const ProcessPage: Component = () => {

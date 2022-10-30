@@ -3,7 +3,7 @@ import Grid from '@suid/material/Grid'
 import Button from '@suid/material/Button'
 // @ts-ignore
 import L from 'leaflet'
-import {DefaultMap, GreenIcon, Item, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
+import {DefaultMap, GreenIcon, Record, RedIcon, StyledTableCell, StyledTableRow} from './Utility'
 import {createStore} from 'solid-js/store'
 import axios from './API'
 import tippy from 'tippy.js'
@@ -20,6 +20,7 @@ import ToggleButton from '@suid/material/ToggleButton'
 import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
 import SearchIcon from '@suid/icons-material/Search'
 import Stack from "@suid/material/Stack";
+import Card from "@suid/material/Card";
 
 const [records, set_records] = createStore<Array<Record>>([]);
 
@@ -126,7 +127,7 @@ const EventMap: Component = () => {
         map.flyTo([y, x], 6)
     })
 
-    return <Item id='event_map'></Item>
+    return <Card id='event_map'></Card>
 }
 
 const [alignment, set_alignment] = createSignal('jp')
@@ -135,6 +136,7 @@ const [min_mag, set_min_mag] = createSignal(0)
 const [max_mag, set_max_mag] = createSignal(10)
 const [min_pga, set_min_pga] = createSignal(0)
 const [max_pga, set_max_pga] = createSignal(0)
+const [direction, set_direction] = createSignal(null)
 
 async function fetch() {
     let url = `/${alignment()}/query?page_size=${page_size() > 0 ? page_size() : 20}`
@@ -142,6 +144,7 @@ async function fetch() {
     if (max_mag() > 0 && max_mag() >= min_mag()) url += `&max_magnitude=${max_mag()}`
     if (min_pga() > 0) url += `&min_pga=${min_pga()}`
     if (max_pga() > 0 && max_pga() >= min_pga()) url += `&max_pga=${max_pga()}`
+    if (direction()) url += `&direction=${direction()}`
     await axios.post(url).then(
         res => {
             let obj = Array<Record>(res.data.result.length)
@@ -187,6 +190,10 @@ function SearchConfig() {
                 <TextField id='event_log' label='Event Log.' type='number'/>
                 <TextField id='station_lat' label='Station Lat.' type='number'/>
                 <TextField id='station_log' label='Station Log.' type='number'/>
+                <TextField id='direction' label='Direction' type='text'
+                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
+                               set_direction(event.target.value)
+                           }}/>
             </Stack>
         </Grid>
         <Grid container item xs={12}>
@@ -207,8 +214,8 @@ const SearchPage: Component = () => {
     return <Grid container spacing={1}>
         <SearchConfig/>
         <Grid container item xs={12} spacing={1}>
-            <Grid item xs={12}><EventMap/></Grid>
-            {records?.length > 0 && <Grid item xs={12}><RecordTable pool={records}/></Grid>}
+            <Grid item xs={4}><EventMap/></Grid>
+            {records?.length > 0 && <Grid item xs={8}><RecordTable pool={records}/></Grid>}
         </Grid>
     </Grid>
 }

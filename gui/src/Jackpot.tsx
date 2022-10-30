@@ -38,13 +38,14 @@ import {
     axis_label,
     DefaultMap,
     GreenIcon,
-    Item,
     Record,
     RedIcon,
-    ResponseSpectrum,
+    set_response_spectrum,
     StyledTableCell,
     StyledTableRow
 } from './Utility'
+import {ResponseSpectrum} from "./ResponseSpectrum";
+import Card from "@suid/material/Card";
 
 const [open, set_open] = createSignal(false)
 const [error_message, set_error_message] = createSignal('')
@@ -166,16 +167,11 @@ async function jackpot() {
     if (normalised()) url += '?normalised=true'
     let new_record: Record
     await axios.get(url).then(async res => {
-        if (res.status !== 200) return
         new_record = new Record(res.data)
         url = `/${region_value}/response_spectrum/${new_record.id}`
         if (normalised()) url += '?normalised=true'
         await axios.get(url).then(res => {
-            if (res.status !== 200) return
-            new_record.period = res.data.data.map((d: Array<number>) => d[0])
-            new_record.SD = res.data.data.map((d: Array<number>) => d[1])
-            new_record.SV = res.data.data.map((d: Array<number>) => d[2])
-            new_record.SA = res.data.data.map((d: Array<number>) => d[3])
+            set_response_spectrum(new_record, res.data.data)
             set_current_record(new_record)
             set_record_pool([...record_pool, new_record])
         }).catch(err => {
@@ -222,12 +218,12 @@ const Epicenter: Component = () => {
         set_waveform([x, metadata.data, metadata.file_name])
     })
 
-    return <Item id='epicenter'></Item>
+    return <Card id='epicenter'></Card>
 }
 
 const Waveform: Component = () => {
     createEffect(() => {
-        const trace = {x: waveform()[0], y: waveform()[1], type: 'scatter', name: waveform()[2]}
+        const trace = {x: waveform()[0], y: waveform()[1], type: 'scattergl', name: waveform()[2]}
 
         Plotly.react(document.getElementById('canvas'), [trace], {
             autosize: true,
@@ -238,7 +234,7 @@ const Waveform: Component = () => {
         }, {responsive: true,})
     })
 
-    return <Item id='canvas'></Item>
+    return <Card id='canvas'></Card>
 }
 
 function download() {
@@ -294,7 +290,7 @@ function RegionGroup() {
         })
     })
 
-    return <Stack component={Item} spacing={1} justifyContent='center' direction='column' alignItems='center'
+    return <Stack component={Card} spacing={1} justifyContent='center' direction='column' alignItems='center'
                   alignContent='center'>
         <FormControl size='small'>
             <RadioGroup aria-labelledby='region' name='region' id='region' value={region()} onChange={handle_change}>

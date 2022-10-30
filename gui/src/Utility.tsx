@@ -4,9 +4,6 @@ import styled from "@suid/material/styles/styled";
 import Paper from "@suid/material/Paper";
 import TableCell, {tableCellClasses} from "@suid/material/TableCell";
 import TableRow from "@suid/material/TableRow";
-import {createEffect} from "solid-js";
-// @ts-ignore
-import Plotly from 'plotly.js-dist-min'
 
 const LeafIcon = L.Icon.extend({
     options: {
@@ -114,38 +111,9 @@ export const axis_label = (label: string, size: number) => {
     }
 }
 
-export function ResponseSpectrum(record_entry: Record, spectrum_type: string, element_id: string) {
-    createEffect(() => {
-        let target: Array<number> = Array<number>(0)
-        let unit: string = ''
-        if (spectrum_type === 'SD') {
-            target = record_entry.SD
-            unit = 'cm/s/s'
-        } else if (spectrum_type === 'SV') {
-            target = record_entry.SV
-            unit = 'cm/s'
-        } else if (spectrum_type === 'SA') {
-            target = record_entry.SA
-            unit = 'cm'
-        }
-
-        Plotly.react(document.getElementById(element_id),
-            [{x: record_entry.period, y: target, type: 'scatter', name: `${spectrum_type} (5% damping)`}],
-            {
-                autosize: true,
-                margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
-                automargin: true,
-                title: {text: `${spectrum_type} (5% damping)`, font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Period (s)', 12), {range: [0, record_entry.period[record_entry.period.length - 1]]}),
-                yaxis: Object.assign({}, axis_label(`Amplitude (${unit})`, 12), {range: [0, Math.max(...target) * 1.1]}),
-                showlegend: false,
-                legend: {
-                    x: 1,
-                    xanchor: 'right',
-                    y: 1
-                }
-            }, {responsive: true,})
-    })
-
-    return <Item id={element_id}></Item>
+export function set_response_spectrum(record: Record, data: Array<Array<number>>) {
+    record.period = data.map((d: Array<number>) => d[0])
+    record.SD = data.map((d: Array<number>) => d[1])
+    record.SV = data.map((d: Array<number>) => d[2])
+    record.SA = data.map((d: Array<number>) => d[3])
 }
