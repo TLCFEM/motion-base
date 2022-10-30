@@ -20,7 +20,8 @@ from uuid import UUID
 import numpy as np
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
 
-from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse
+from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
+    SequenceSpectrumResponse
 from mb.app.utility import User, create_task, generate_query_string, is_active, send_notification
 from mb.record.jp import MetadataNIED, NIED, ParserNIED, retrieve_single_record
 from mb.record.record import apply_filter, filter_regex, get_window, window_regex, zero_stuff
@@ -81,7 +82,7 @@ async def upload_archive(
     return {'message': 'successfully uploaded and processed', 'records': list(itertools.chain.from_iterable(records))}
 
 
-@router.post('/process', response_model=SequenceResponse)
+@router.post('/process', response_model=SequenceSpectrumResponse)
 async def process_record(
         record_id: UUID,
         upsampling_rate: int | None = Query(None, ge=1),
@@ -95,17 +96,26 @@ async def process_record(
             'window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`'),
         low_cut: float | None = Query(None, ge=0., description='low cut frequency in Hz, default to 0.05 Hz'),
         high_cut: float | None = Query(None, ge=0., description='high cut frequency in Hz, default to 40 Hz'),
+        with_spectrum: bool | None = Query(None, description='whether to perform DFT, default to False'),
 ):
     result: NIED = await retrieve_single_record(record_id)
 
     if not result:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found.')
 
-    interval, record = result.to_waveform(unit='cm/s/s')
+    time_interval, waveform = result.to_waveform(unit='cm/s/s')
+
+    if with_spectrum is None:
+        with_spectrum = False
 
     if upsampling_rate is None or upsampling_rate == 1:
         # noinspection PyTypeChecker
-        return SequenceResponse(**result.dict(), interval=interval, data=record.tolist())
+        record = SequenceSpectrumResponse(**result.dict(), time_interval=time_interval, waveform=waveform.tolist())
+        if with_spectrum:
+            frequency_interval, spectrum = result.to_spectrum(unit='cm/s/s')
+            record.frequency_interval = frequency_interval
+            record.spectrum = spectrum.tolist()
+        return record
 
     if filter_length is None:
         filter_length = 8
@@ -118,7 +128,7 @@ async def process_record(
     if high_cut is None:
         high_cut = 40.
 
-    upsampled_interval = interval / upsampling_rate
+    upsampled_interval = time_interval / upsampling_rate
 
     if low_cut >= high_cut:
         raise HTTPException(
@@ -128,12 +138,17 @@ async def process_record(
     f0 = min(max(2 * low_cut * upsampled_interval, 0), 1)
     f1 = min(max(2 * high_cut * upsampled_interval, 0), 1)
 
-    new_record = apply_filter(
+    new_waveform: np.ndarray = apply_filter(
         get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
-        zero_stuff(upsampling_rate, record))
+        zero_stuff(upsampling_rate, waveform))
 
     # noinspection PyTypeChecker
-    return SequenceResponse(**result.dict(), interval=upsampled_interval, data=new_record.tolist())
+    record = SequenceSpectrumResponse(**result.dict(), time_interval=upsampled_interval, waveform=new_waveform.tolist())
+    if with_spectrum:
+        frequency_interval, spectrum = NIED.perform_fft(1 / upsampled_interval, new_waveform)
+        record.frequency_interval = frequency_interval
+        record.spectrum = spectrum.tolist()
+    return record
 
 
 @router.post('/query', response_model=MetadataListResponse)

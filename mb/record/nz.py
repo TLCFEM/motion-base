@@ -42,7 +42,7 @@ class NZSM(Record):
 
     def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(**kwargs)
-        return self._perform_fft(self.sampling_frequency, waveform)
+        return self.perform_fft(self.sampling_frequency, waveform)
 
 
 class ParserNZSM:

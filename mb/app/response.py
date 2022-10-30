@@ -61,6 +61,18 @@ class ResponseSpectrumResponse(MetadataResponse):
     data: List[List[float]]
 
 
+class SequenceSpectrumResponse(MetadataResponse):
+    """
+    Response represents a record which contains both waveform and response spectrum.
+    """
+    time_interval: float
+    waveform: List[float]
+    frequency_interval: float
+    spectrum: List[float]
+
+    response_spectrum: List[List[float]]
+
+
 class MetadataListResponse(BaseModel):
     """
     A list of IDs of the target records.

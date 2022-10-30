@@ -66,7 +66,7 @@ class Record(Document):
         raise NotImplementedError()
 
     @staticmethod
-    def _perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
+    def perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> Tuple[float, np.ndarray]:
         fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
         return sampling_frequency / magnitude.size, fft_magnitude
 
