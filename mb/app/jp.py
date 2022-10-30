@@ -111,8 +111,6 @@ async def process_record(
 
     record = SequenceSpectrumResponse(**result.dict())
 
-    time_interval, waveform = result.to_waveform(unit='cm/s/s')
-
     if with_spectrum is None:
         with_spectrum = False
     if with_response_spectrum is None:
@@ -145,10 +143,12 @@ async def process_record(
     if normalised is None:
         normalised = False
 
+    time_interval, waveform = result.to_waveform(normalised=normalised, unit='cm/s/s')
+
     upsampled_interval = time_interval / upsampling_rate
 
-    f0 = min(max(2 * low_cut * upsampled_interval, 0), 1)
-    f1 = min(max(2 * high_cut * upsampled_interval, 0), 1)
+    f0 = min(max(2 * low_cut * upsampled_interval, 0), 1 - np.finfo(np.float32).eps)
+    f1 = min(max(2 * high_cut * upsampled_interval, f0 + np.finfo(np.float32).eps), 1 - np.finfo(np.float32).eps)
 
     new_waveform: np.ndarray = apply_filter(
         get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
