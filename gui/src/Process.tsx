@@ -55,10 +55,13 @@ async function fetch() {
     if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
     if (filter_length()) url += `&filter_length=${filter_length()}`
     if (high_cut()) url += `&high_cut=${high_cut()}`
+    url += '&with_spectrum=true'
     await axios.post(url).then(
         res => {
             new_record.upsampled_time_interval = res.data.time_interval
             new_record.upsampled_waveform = res.data.waveform
+            new_record.upsampled_frequency_interval = res.data.frequency_interval
+            new_record.upsampled_spectrum = res.data.spectrum
         }
     )
 
@@ -123,11 +126,19 @@ const RecordCanvas: Component = () => {
 
 const SpectrumCanvas: Component = () => {
     createEffect(() => {
-        Plotly.react(document.getElementById('spectrum_canvas'),
-            [{
+        const target = [
+            {
                 x: Array<number>(record().spectrum.length).fill(0).map((_, i) => i * record().frequency_interval),
-                y: record().spectrum, type: 'scattergl', name: `DFT`
-            }],
+                y: record().spectrum, type: 'scattergl', name: `original`
+            },
+            {
+                x: Array<number>(record().upsampled_spectrum.length).fill(0).map((_, i) => i * record().upsampled_frequency_interval),
+                y: record().upsampled_spectrum, type: 'scattergl', name: `processed`
+            }
+        ]
+
+        Plotly.react(document.getElementById('spectrum_canvas'),
+            target,
             {
                 autosize: true,
                 margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
@@ -152,10 +163,13 @@ const ProcessPage: Component = () => {
         <Grid item xs={12}><ProcessConfig/></Grid>
         <Grid item xs={12}><RecordCanvas/></Grid>
         {(show_spectrum() || show_response_spectrum()) && <Grid container item xs={12} spacing={2}>
-            {show_spectrum() && <Grid item xs={3}><SpectrumCanvas/></Grid>}
-            {show_response_spectrum() && <Grid item xs={3}>{ResponseSpectrum(record(), 'SA', 'sa_canvas')}</Grid>}
-            {show_response_spectrum() && <Grid item xs={3}>{ResponseSpectrum(record(), 'SV', 'sv_canvas')}</Grid>}
-            {show_response_spectrum() && <Grid item xs={3}>{ResponseSpectrum(record(), 'SD', 'sd_canvas')}</Grid>}
+            {show_spectrum() && <Grid item xs={show_response_spectrum() ? 3 : 12}><SpectrumCanvas/></Grid>}
+            {show_response_spectrum() &&
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SA', 'sa_canvas')}</Grid>}
+            {show_response_spectrum() &&
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SV', 'sv_canvas')}</Grid>}
+            {show_response_spectrum() &&
+                <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum(record(), 'SD', 'sd_canvas')}</Grid>}
         </Grid>}
     </Grid>
 }

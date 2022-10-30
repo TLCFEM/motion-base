@@ -96,7 +96,13 @@ async def process_record(
             'window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`'),
         low_cut: float | None = Query(None, ge=0., description='low cut frequency in Hz, default to 0.05 Hz'),
         high_cut: float | None = Query(None, ge=0., description='high cut frequency in Hz, default to 40 Hz'),
+        damping_ratio: float | None = Query(None, ge=0., le=1., description='damping ratio, default to 0.05'),
+        period_end: float | None = Query(None, ge=0., description='maximum period of interest, default to 20 s'),
+        period_step: float | None = Query(None, ge=0., description='period step, default to 0.05 s'),
+        normalised: bool | None = Query(None, description='whether to normalise record, default to False'),
         with_spectrum: bool | None = Query(None, description='whether to perform DFT, default to False'),
+        with_response_spectrum: bool | None = Query(
+            None, description='whether to perform response spectrum, default to False'),
 ):
     result: NIED = await retrieve_single_record(record_id)
 
@@ -109,6 +115,8 @@ async def process_record(
 
     if with_spectrum is None:
         with_spectrum = False
+    if with_response_spectrum is None:
+        with_response_spectrum = False
 
     if upsampling_rate is None:
         upsampling_rate = 1
@@ -128,6 +136,15 @@ async def process_record(
             HTTPStatus.BAD_REQUEST,
             detail='Low cut frequency should be smaller than high cut frequency.')
 
+    if damping_ratio is None:
+        damping_ratio = 0.05
+    if period_end is None:
+        period_end = 20.
+    if period_step is None:
+        period_step = 0.05
+    if normalised is None:
+        normalised = False
+
     upsampled_interval = time_interval / upsampling_rate
 
     f0 = min(max(2 * low_cut * upsampled_interval, 0), 1)
@@ -143,6 +160,11 @@ async def process_record(
         frequency_interval, spectrum = NIED.perform_fft(1 / upsampled_interval, new_waveform)
         record.frequency_interval = frequency_interval
         record.spectrum = spectrum.tolist()
+    if with_response_spectrum:
+        period = np.arange(0, period_end + period_step, period_step)
+        spectrum = response_spectrum(damping_ratio, upsampled_interval, new_waveform, period)
+        record.response_spectrum = spectrum.tolist()
+
     return record
 
 
