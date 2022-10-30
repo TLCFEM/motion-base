@@ -110,15 +110,8 @@ async def process_record(
     if with_spectrum is None:
         with_spectrum = False
 
-    if upsampling_rate is None or upsampling_rate == 1:
-        record.time_interval = time_interval
-        record.waveform = waveform.tolist()
-        if with_spectrum:
-            frequency_interval, spectrum = result.to_spectrum(unit='cm/s/s')
-            record.frequency_interval = frequency_interval
-            record.spectrum = spectrum.tolist()
-        return record
-
+    if upsampling_rate is None:
+        upsampling_rate = 1
     if filter_length is None:
         filter_length = 8
     if filter_type is None:

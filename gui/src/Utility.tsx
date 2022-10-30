@@ -56,13 +56,16 @@ export class Record {
     public interval: number = 0
     public data: Array<number> = Array<number>(0)
 
-    public frequency: number = 0
+    public time_interval: number = 0
+    public waveform: Array<number> = Array<number>(0)
+
+    public frequency_interval: number = 0
     public spectrum: Array<number> = Array<number>(0)
 
-    public upsampled_interval: number = 0
-    public upsampled_data: Array<number> = Array<number>(0)
+    public upsampled_time_interval: number = 0
+    public upsampled_waveform: Array<number> = Array<number>(0)
 
-    public upsampled_frequency: number = 0
+    public upsampled_frequency_interval: number = 0
     public upsampled_spectrum: Array<number> = Array<number>(0)
 
     // response spectrum related

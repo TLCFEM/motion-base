@@ -188,8 +188,14 @@ function SearchConfig() {
                            }}/>
                 <TextField id='event_lat' label='Event Lat.' type='number'/>
                 <TextField id='event_log' label='Event Log.' type='number'/>
-                <TextField id='station_lat' label='Station Lat.' type='number'/>
-                <TextField id='station_log' label='Station Log.' type='number'/>
+                <TextField id='station_lat' label='Station Lat.' type='text'
+                           inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
+                <TextField id='station_log' label='Station Log.' type='text'
+                           inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
+                <TextField id='event_time_from' label='From' type='datetime-local' InputLabelProps={{shrink: true}}
+                           sx={{width: '360px'}}/>
+                <TextField id='event_time_to' label='To' type='datetime-local' InputLabelProps={{shrink: true}}
+                           sx={{width: '360px'}}/>
                 <TextField id='direction' label='Direction' type='text'
                            onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
                                set_direction(event.target.value)

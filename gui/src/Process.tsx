@@ -17,10 +17,12 @@ import Card from "@suid/material/Card";
 const [record, set_record] = createSignal<Record>(new Record({}))
 
 const [record_id, set_record_id] = createSignal('')
-const [upsampling_rate, set_upsampling_rate] = createSignal(2)
-const [filter_length, set_filter_length] = createSignal(8)
+const [upsampling_rate, set_upsampling_rate] = createSignal(1)
+const [filter_length, set_filter_length] = createSignal(32)
 const [filter_type, set_filter_type] = createSignal('bandpass')
 const [region, set_region] = createSignal('jp')
+const [low_cut, set_low_cut] = createSignal(0.1)
+const [high_cut, set_high_cut] = createSignal(10)
 
 const [show_spectrum, set_show_spectrum] = createSignal(false)
 const [show_response_spectrum, set_show_response_spectrum] = createSignal(false)
@@ -32,21 +34,11 @@ async function fetch() {
         res => new_record = new Record(res.data)
     )
 
-    url = `/${region()}/process?record_id=${record_id()}`
-    if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
-    if (filter_length()) url += `&filter_length=${filter_length()}`
-    await axios.post(url).then(
-        res => {
-            new_record.upsampled_interval = res.data.interval
-            new_record.upsampled_data = res.data.data
-        }
-    )
-
     if (show_spectrum()) {
         url = `/${region()}/spectrum/${record_id()}`
         await axios.get(url).then(
             res => {
-                new_record.frequency = res.data.interval
+                new_record.frequency_interval = res.data.interval
                 new_record.spectrum = res.data.data
             }
         )
@@ -59,31 +51,38 @@ async function fetch() {
         )
     }
 
+    url = `/${region()}/process?record_id=${record_id()}`
+    if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
+    if (filter_length()) url += `&filter_length=${filter_length()}`
+    if (high_cut()) url += `&high_cut=${high_cut()}`
+    await axios.post(url).then(
+        res => {
+            new_record.upsampled_time_interval = res.data.time_interval
+            new_record.upsampled_waveform = res.data.waveform
+        }
+    )
+
     set_record(new_record)
 }
 
 function ProcessConfig() {
     return <Stack component='form' noValidate alignContent='center' justifyContent='center' alignItems='center'
                   direction='row' spacing={2} autocomplete='off'>
-        <TextField id='record-id' label='Record ID' type='text'
-                   onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                       set_record_id(event.target.value)
-                   }}/>
-        <TextField id='upsampling_rate' label='Upsampling Ratio' type='number'
-                   onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                       set_upsampling_rate(event.target.value)
-                   }}/>
-        <TextField id='filter_length' label='Filter Length' type='number'
-                   onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                       set_filter_length(event.target.value)
-                   }}/>
-        <TextField id='filter-type' label='Filter Type' type='text'
-                   onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                       set_filter_type(event.target.value)
-                   }}/>
+        <TextField id='record-id' label='Record ID' type='text' value={record_id()} sx={{width: '400px'}}
+                   onChange={(event) => (set_record_id(event.target.value))}/>
+        <TextField id='filter_length' label='Filter Length' type='number' value={filter_length()}
+                   onChange={(event) => (set_filter_length(Number(event.target.value)))}/>
+        <TextField id='filter-type' label='Filter Type' type='text' value={filter_type()}
+                   onChange={(event) => (set_filter_type(event.target.value))}/>
         <TextField id='window-type' label='Window Type' type='text'/>
-        <TextField id='low-cut' label='Low Cutoff' type='number'/>
-        <TextField id='high-cut' label='High Cutoff' type='number'/>
+        <TextField id='upload-file' label='File' type='file' InputLabelProps={{shrink: true}}/>
+        <TextField id='upsampling_rate' label='Upsampling Ratio' type='number' value={upsampling_rate()}
+                   onChange={(event) => (set_upsampling_rate(Number(event.target.value)))}/>
+        <TextField id='low-cut' label='Low Cutoff' type='text' sx={{width: '150px'}}
+                   inputProps={{inputMode: 'numeric', pattern: '[0-9]*\.[0-9]*'}}
+                   onChange={(event) => set_low_cut(Number(event.target.value))}/>
+        <TextField id='high-cut' label='High Cutoff' type='text' value={high_cut()} sx={{width: '150px'}}
+                   onChange={(event) => set_high_cut(Number(event.target.value))}/>
         <Button variant='contained' id='process' onClick={fetch}><SearchIcon/></Button>
         <Switch id='show_spectrum' checked={show_spectrum()} onChange={() => set_show_spectrum(!show_spectrum())}/>
         <Switch id='show_response_spectrum' checked={show_response_spectrum()}
@@ -99,8 +98,8 @@ const RecordCanvas: Component = () => {
             type: 'scattergl', name: 'original'
         }
         const processed = {
-            x: Array<number>(record().upsampled_data.length).fill(0).map((_, i) => i * record().upsampled_interval),
-            y: record().upsampled_data,
+            x: Array<number>(record().upsampled_waveform.length).fill(0).map((_, i) => i * record().upsampled_time_interval),
+            y: record().upsampled_waveform,
             type: 'scattergl', name: 'processed'
         }
 
@@ -126,7 +125,7 @@ const SpectrumCanvas: Component = () => {
     createEffect(() => {
         Plotly.react(document.getElementById('spectrum_canvas'),
             [{
-                x: Array<number>(record().spectrum.length).fill(0).map((_, i) => i * record().frequency),
+                x: Array<number>(record().spectrum.length).fill(0).map((_, i) => i * record().frequency_interval),
                 y: record().spectrum, type: 'scattergl', name: `DFT`
             }],
             {
@@ -134,7 +133,7 @@ const SpectrumCanvas: Component = () => {
                 margin: {l: 60, r: 60, b: 60, t: 60, pad: 0},
                 automargin: true,
                 title: {text: `DFT`, font: {size: 14},},
-                xaxis: Object.assign({}, axis_label('Frequency (Hz)', 12), {range: [0, record().spectrum.length * record().frequency]}),
+                xaxis: Object.assign({}, axis_label('Frequency (Hz)', 12), {range: [0, record().spectrum.length * record().frequency_interval]}),
                 yaxis: Object.assign({}, axis_label('Amplitude (Gal)', 12), {range: [0, Math.max(...record().spectrum) * 1.1]}),
                 showlegend: false,
                 legend: {

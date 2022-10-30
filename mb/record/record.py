@@ -92,6 +92,8 @@ def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
 
 @njit
 def zero_stuff(ratio: int, waveform: np.ndarray) -> np.ndarray:
+    if ratio == 1:
+        return waveform
     output: np.ndarray = np.zeros(len(waveform) * ratio)
     output[::ratio] = waveform
     return output
