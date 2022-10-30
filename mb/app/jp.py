@@ -103,14 +103,16 @@ async def process_record(
     if not result:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found.')
 
+    record = SequenceSpectrumResponse(**result.dict())
+
     time_interval, waveform = result.to_waveform(unit='cm/s/s')
 
     if with_spectrum is None:
         with_spectrum = False
 
     if upsampling_rate is None or upsampling_rate == 1:
-        # noinspection PyTypeChecker
-        record = SequenceSpectrumResponse(**result.dict(), time_interval=time_interval, waveform=waveform.tolist())
+        record.time_interval = time_interval
+        record.waveform = waveform.tolist()
         if with_spectrum:
             frequency_interval, spectrum = result.to_spectrum(unit='cm/s/s')
             record.frequency_interval = frequency_interval
@@ -128,12 +130,12 @@ async def process_record(
     if high_cut is None:
         high_cut = 40.
 
-    upsampled_interval = time_interval / upsampling_rate
-
     if low_cut >= high_cut:
         raise HTTPException(
             HTTPStatus.BAD_REQUEST,
             detail='Low cut frequency should be smaller than high cut frequency.')
+
+    upsampled_interval = time_interval / upsampling_rate
 
     f0 = min(max(2 * low_cut * upsampled_interval, 0), 1)
     f1 = min(max(2 * high_cut * upsampled_interval, 0), 1)
@@ -142,8 +144,8 @@ async def process_record(
         get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
         zero_stuff(upsampling_rate, waveform))
 
-    # noinspection PyTypeChecker
-    record = SequenceSpectrumResponse(**result.dict(), time_interval=upsampled_interval, waveform=new_waveform.tolist())
+    record.time_interval = upsampled_interval
+    record.waveform = new_waveform.tolist()
     if with_spectrum:
         frequency_interval, spectrum = NIED.perform_fft(1 / upsampled_interval, new_waveform)
         record.frequency_interval = frequency_interval

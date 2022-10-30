@@ -56,11 +56,11 @@ export class Record {
     public interval: number = 0
     public data: Array<number> = Array<number>(0)
 
-    public upsampled_interval: number = 0
-    public upsampled_data: Array<number> = Array<number>(0)
-
     public frequency: number = 0
     public spectrum: Array<number> = Array<number>(0)
+
+    public upsampled_interval: number = 0
+    public upsampled_data: Array<number> = Array<number>(0)
 
     public upsampled_frequency: number = 0
     public upsampled_spectrum: Array<number> = Array<number>(0)
