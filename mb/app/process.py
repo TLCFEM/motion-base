@@ -98,7 +98,7 @@ def processing_record(
         f1 = min(max(2 * high_cut * upsampled_interval, f0 + np.finfo(np.float32).eps), 1 - np.finfo(np.float32).eps)
 
         freq_list: float | list[float]
-        if filter_type == 'bandpass' or filter_type == 'bandstop':
+        if filter_type in ('bandpass', 'bandstop'):
             freq_list = [f0, f1]
         elif filter_type == 'lowpass':
             freq_list = f1

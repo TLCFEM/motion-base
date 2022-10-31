@@ -49,7 +49,7 @@ class MBClient:
             return
 
         result = await self.client.post(
-            f'/token',
+            '/token',
             data={'username': self.username, 'password': self.password},
             headers={'Content-Type': 'application/x-www-form-urlencoded'})
         if result.status_code != HTTPStatus.OK:
