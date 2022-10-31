@@ -83,7 +83,11 @@ function RecordTableHeader(pool: Array<Record>, set_pool: (pool: Array<Record>) 
 
     onMount(() => {
         tippy('#table-header-id', {
-            arrow: true, animation: 'scale', inertia: true, theme: 'translucent', content: 'Click Target ID to Replot!',
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Click Target ID to Replot! ID Copied!',
         })
 
         tippy('#table-header-mw', {
@@ -123,6 +127,7 @@ function RecordEntry(record_entry: Record) {
         for (let i = 0; i < record_pool.length; i++)
             if (record_pool[i].id == event.target.innerText) {
                 set_current_record(record_pool[i])
+                navigator.clipboard.writeText(record_pool[i].id).then()
                 break
             }
     }

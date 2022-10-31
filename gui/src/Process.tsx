@@ -26,6 +26,7 @@ const [region, set_region] = createSignal('jp')
 const [low_cut, set_low_cut] = createSignal(0.1)
 const [high_cut, set_high_cut] = createSignal(10)
 
+const [show_waveform, set_show_waveform] = createSignal(true)
 const [show_spectrum, set_show_spectrum] = createSignal(false)
 const [show_response_spectrum, set_show_response_spectrum] = createSignal(false)
 
@@ -41,9 +42,10 @@ async function fetch() {
     )
 
     url = `/${region()}/process?record_id=${record_id()}`
-    url += '&with_filter=true'
+    url += `&with_filter=${filter_type() !== '' ? 'true' : 'false'}`
     if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
     if (filter_length()) url += `&filter_length=${filter_length()}`
+    if (low_cut()) url += `&low_cut=${low_cut()}`
     if (high_cut()) url += `&high_cut=${high_cut()}`
     if (show_spectrum()) url += '&with_spectrum=true'
     if (show_response_spectrum()) url += '&with_response_spectrum=true'
@@ -106,7 +108,7 @@ const FilterType = () => {
             animation: 'scale',
             inertia: true,
             theme: 'translucent',
-            content: 'Any of lowpass, highpass, bandpass or bandstop.',
+            content: 'Any of lowpass, highpass, bandpass, bandstop, or empty to disable filtering.',
         })
     })
 
@@ -115,7 +117,7 @@ const FilterType = () => {
     const handleChange = (event: any) => {
         const re: RegExp = /^(lowpass|highpass|bandpass|bandstop)$/
         const value = event.target.value.toLowerCase()
-        set_error(!value.match(re))
+        if (value !== '') set_error(!value.match(re))
         set_filter_type(value)
     }
 
@@ -271,6 +273,34 @@ const SpectrumCanvas = () => {
 }
 
 const ProcessPage: Component = () => {
+    onMount(() => {
+        tippy('#show_waveform', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Show Waveform!',
+        })
+
+        tippy('#show_spectrum', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Show Spectrum!',
+        })
+
+        tippy('#show_response_spectrum', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'Show Response Spectrum!',
+        })
+    })
+
+    const response_spectrum_width = () => show_waveform() ? show_spectrum() ? 3 : 4 : 4
+
     return <Grid container xs={12} spacing={2}>
         <Grid item xs={12}>
             <Stack component='form' alignContent='center' justifyContent='center' alignItems='center'
@@ -285,33 +315,35 @@ const ProcessPage: Component = () => {
                 <Button variant='contained' id='process' onClick={fetch}>
                     <SearchIcon/>
                 </Button>
+                <Switch id='show_waveform' checked={show_waveform()}
+                        onChange={() => set_show_waveform(!show_waveform())}/>
                 <Switch id='show_spectrum' checked={show_spectrum()}
                         onChange={() => set_show_spectrum(!show_spectrum())}/>
                 <Switch id='show_response_spectrum' checked={show_response_spectrum()}
                         onChange={() => set_show_response_spectrum(!show_response_spectrum())}/>
             </Stack>
         </Grid>
-        <Grid item xs={12}><MainCanvas/></Grid>
+        {show_waveform() ? <Grid item xs={12}><MainCanvas/></Grid> : null}
         <Grid container item xs={12} spacing={2}>
             {show_spectrum()
-                ? <Grid item xs={show_response_spectrum() ? 3 : 12}>
+                ? <Grid item xs={show_waveform() ? show_response_spectrum() ? 3 : 12 : 12}>
                     <SpectrumCanvas/>
                 </Grid>
                 : null}
             {show_response_spectrum()
-                ? <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum([
+                ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
                     extract_response_spectrum(original_record(), 'original', 'SA'),
                     extract_response_spectrum(processed_record(), 'processed', 'SA')
                 ], 'SA', 'sa_canvas')}</Grid>
                 : null}
             {show_response_spectrum()
-                ? <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum([
+                ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
                     extract_response_spectrum(original_record(), 'original', 'SV'),
                     extract_response_spectrum(processed_record(), 'processed', 'SV')
                 ], 'SV', 'sv_canvas')}</Grid>
                 : null}
             {show_response_spectrum()
-                ? <Grid item xs={show_spectrum() ? 3 : 4}>{ResponseSpectrum([
+                ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
                     extract_response_spectrum(original_record(), 'original', 'SD'),
                     extract_response_spectrum(processed_record(), 'processed', 'SD')
                 ], 'SD', 'sd_canvas')}</Grid>

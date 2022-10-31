@@ -25,7 +25,7 @@ import Card from "@suid/material/Card";
 const [records, set_records] = createStore<Array<Record>>([]);
 
 function RecordTableHeader(pool: Array<Record>) {
-    const table_header: Array<string> = ['ID', 'Category', 'Mw', 'Event Time', 'Depth', 'PGA', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
+    const table_header: Array<string> = ['ID', 'File Name', 'Category', 'Mw', 'Event Time', 'Depth', 'PGA', 'Station', 'Sampling Freq.', 'Duration', 'Direction']
 
     const sort_by_magnitude = () =>
         set_records(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
@@ -67,6 +67,7 @@ function RecordEntry(record_entry: Record) {
 
     return <StyledTableRow>
         <StyledTableCell component='th' scope='row'>{record_entry.id}</StyledTableCell>
+        <StyledTableCell>{record_entry.file_name}</StyledTableCell>
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
@@ -136,6 +137,10 @@ const [min_mag, set_min_mag] = createSignal(0)
 const [max_mag, set_max_mag] = createSignal(10)
 const [min_pga, set_min_pga] = createSignal(0)
 const [max_pga, set_max_pga] = createSignal(0)
+const [event_lat, set_event_lat] = createSignal(0)
+const [event_log, set_event_log] = createSignal(0)
+const [station_lat, set_station_lat] = createSignal(0)
+const [station_log, set_station_log] = createSignal(0)
 const [direction, set_direction] = createSignal(null)
 
 async function fetch() {
@@ -165,33 +170,208 @@ function ColorToggleButton() {
     );
 }
 
+const MinMag = () => {
+    onMount(() => {
+        tippy('#min-magnitude', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The minimum magnitude of interest.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_min_mag(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='min-magnitude' label='Min. Mag.' type='text'
+                      value={min_mag()} error={error()} onChange={handleChange}/>
+}
+
+const MaxMag = () => {
+    onMount(() => {
+        tippy('#max-magnitude', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The maximum magnitude of interest.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_max_mag(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='max-magnitude' label='Max. Mag.' type='text'
+                      value={max_mag()} error={error()} onChange={handleChange}/>
+}
+
+
+const MinAcc = () => {
+    onMount(() => {
+        tippy('#min-pga', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The minimum PGA of interest.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_min_pga(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='min-pga' label='Min. PGA' type='text'
+                      value={min_pga()} error={error()} onChange={handleChange}/>
+}
+
+const MaxAcc = () => {
+    onMount(() => {
+        tippy('#max-pga', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The maximum PGA of interest.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_max_pga(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='max-pga' label='Max. PGA' type='text'
+                      value={max_pga()} error={error()} onChange={handleChange}/>
+}
+
+const EventLat = () => {
+    onMount(() => {
+        tippy('#event-lat', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The approximate latitude of the event.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^-?\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_event_lat(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='event-lat' label='Event Lat.' type='text'
+                      value={event_lat()} error={error()} onChange={handleChange}/>
+}
+
+
+const EventLog = () => {
+    onMount(() => {
+        tippy('#event-log', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The approximate longitude of the event.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^-?\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_event_log(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='event-log' label='Event Log.' type='text'
+                      value={event_log()} error={error()} onChange={handleChange}/>
+}
+
+const StationLat = () => {
+    onMount(() => {
+        tippy('#station-lat', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The approximate latitude of the station.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^-?\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_station_lat(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='station-lat' label='Station Lat.' type='text'
+                      value={station_lat()} error={error()} onChange={handleChange}/>
+}
+
+
+const StationLog = () => {
+    onMount(() => {
+        tippy('#station-log', {
+            arrow: true,
+            animation: 'scale',
+            inertia: true,
+            theme: 'translucent',
+            content: 'The approximate longitude of the station.',
+        })
+    })
+
+    const [error, set_error] = createSignal(false)
+
+    const handleChange = (event: any) => {
+        const re: RegExp = /^-?\d+(\.\d{1,2})?$/
+        const value = event.target.value
+        set_error(!value.match(re))
+        set_station_log(value)
+    }
+
+    return <TextField InputLabelProps={{shrink: true}} id='station-log' label='Station Log.' type='text'
+                      value={station_log()} error={error()} onChange={handleChange}/>
+}
+
 function SearchConfig() {
     return <>
         <Grid container item xs={12}>
             <Stack component='form' spacing={1} noValidate direction='row' alignItems='center' justifyItems='center'
                    justifyContent='center' autocomplete='off'>
-                <TextField InputLabelProps={{shrink: true}} id='min-magnitude' label='Min. Mag.' type='number'
-                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                               set_min_mag(event.target.value)
-                           }}/>
-                <TextField InputLabelProps={{shrink: true}} id='max-magnitude' label='Max. Mag.' type='number'
-                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                               set_max_mag(event.target.value)
-                           }}/>
-                <TextField InputLabelProps={{shrink: true}} id='min-pga' label='Min. PGA' type='number'
-                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                               set_min_pga(event.target.value)
-                           }}/>
-                <TextField InputLabelProps={{shrink: true}} id='max-pga' label='Max. PGA' type='number'
-                           onChange={(event: ST.ChangeEvent<HTMLInputElement>) => {
-                               set_max_pga(event.target.value)
-                           }}/>
-                <TextField InputLabelProps={{shrink: true}} id='event_lat' label='Event Lat.' type='number'/>
-                <TextField InputLabelProps={{shrink: true}} id='event_log' label='Event Log.' type='number'/>
-                <TextField InputLabelProps={{shrink: true}} id='station_lat' label='Station Lat.' type='text'
-                           inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
-                <TextField InputLabelProps={{shrink: true}} id='station_log' label='Station Log.' type='text'
-                           inputProps={{inputMode: 'numeric', pattern: '-?[0-9]*\.[0-9]*'}}/>
+                <MinMag/><MaxMag/><MinAcc/><MaxAcc/>
+                <EventLat/><EventLog/><StationLat/><StationLog/>
                 <TextField InputLabelProps={{shrink: true}} id='event_time_from' label='From' type='datetime-local'
                            sx={{width: '360px'}}/>
                 <TextField InputLabelProps={{shrink: true}} id='event_time_to' label='To' type='datetime-local'
@@ -220,8 +400,8 @@ const SearchPage: Component = () => {
     return <Grid container spacing={1}>
         <SearchConfig/>
         <Grid container item xs={12} spacing={1}>
-            <Grid item xs={4}><EventMap/></Grid>
-            {records?.length > 0 && <Grid item xs={8}><RecordTable pool={records}/></Grid>}
+            <Grid item xs={12}><EventMap/></Grid>
+            {records?.length > 0 && <Grid item xs={12}><RecordTable pool={records}/></Grid>}
         </Grid>
     </Grid>
 }

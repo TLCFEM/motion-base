@@ -94,11 +94,22 @@ def processing_record(
     if with_filter:
         upsampled_interval = time_interval / upsampling_rate
 
-        f0 = min(max(2 * low_cut * upsampled_interval, 0), 1 - np.finfo(np.float32).eps)
+        f0 = min(max(2 * low_cut * upsampled_interval, np.finfo(np.float32).eps), 1 - np.finfo(np.float32).eps)
         f1 = min(max(2 * high_cut * upsampled_interval, f0 + np.finfo(np.float32).eps), 1 - np.finfo(np.float32).eps)
 
+        freq_list: float | list[float]
+        if filter_type == 'bandpass' or filter_type == 'bandstop':
+            freq_list = [f0, f1]
+        elif filter_type == 'lowpass':
+            freq_list = f1
+        elif filter_type == 'highpass':
+            freq_list = f0
+        else:
+            raise HTTPException(
+                HTTPStatus.BAD_REQUEST,
+                detail='Filter type should be one of bandpass, bandstop, lowpass and highpass.')
         new_waveform: np.ndarray = apply_filter(
-            get_window(filter_type, window_type, filter_length, [f0, f1], ratio=upsampling_rate),
+            get_window(filter_type, window_type, filter_length, freq_list, ratio=upsampling_rate),
             zero_stuff(upsampling_rate, waveform))
     else:
         upsampled_interval = time_interval
