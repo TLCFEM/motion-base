@@ -14,10 +14,12 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from __future__ import annotations
 
+import os.path
 from http import HTTPStatus
 
 import anyio
 import httpx
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 
 from mb.record.record import Record
 
@@ -27,7 +29,7 @@ class MBClient:
         self.host_url = host_url if host_url else 'http://localhost:8000'
         self.username = username
         self.password = password
-        self.token: str | None = None
+        self.auth: OAuth2ResourceOwnerPasswordCredentials | None = None
 
         if self.username and self.password:
             self.client = httpx.AsyncClient(base_url=self.host_url, auth=(self.username, self.password), **kwargs)
@@ -48,13 +50,11 @@ class MBClient:
         if not self.username or not self.password:
             return
 
-        result = await self.client.post(
-            '/token',
-            data={'username': self.username, 'password': self.password},
-            headers={'Content-Type': 'application/x-www-form-urlencoded'})
-        if result.status_code != HTTPStatus.OK:
-            raise RuntimeError('Login failed.')
-        self.token = result.json()['access_token']
+        self.auth = OAuth2ResourceOwnerPasswordCredentials(
+            f'{self.host_url}/token',
+            username=self.username,
+            password=self.password,
+        )
 
     async def jackpot(self, region: str) -> Record:
         if region not in ('jp', 'nz'):
@@ -66,12 +66,28 @@ class MBClient:
 
         return result.json()
 
+    async def upload(self, region: str, path: str):
+        if not self.auth:
+            await self.login()
+
+        if path.endswith('.tar.gz'):
+            with open(path, 'rb') as file:
+                result = await self.client.post(
+                    f'/{region}/upload?wait_for_result=false',
+                    files={'archives': (os.path.basename(path), file, 'multipart/form-data')},
+                    auth=self.auth)
+                if result.status_code != HTTPStatus.ACCEPTED:
+                    raise RuntimeError('Failed to upload.')
+
+        return result.json()
+
 
 async def main():
     async with MBClient('http://localhost:8000', 'admin', 'admin') as client:
         await client.login()
-        jp_result = await client.jackpot('jp')
-        print(jp_result)
+        await client.jackpot('jp')
+        upload_result = await client.upload('jp', '/home/theodore/Downloads/20050816114600.knt.tar.gz')
+        print(upload_result)
 
 
 if __name__ == '__main__':
