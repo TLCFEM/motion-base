@@ -20,6 +20,7 @@ from http import HTTPStatus
 import anyio
 import httpx
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
+from rich.console import Console
 
 from mb.record.record import Record
 
@@ -29,12 +30,20 @@ class MBClient:
         self.host_url = host_url if host_url else 'http://localhost:8000'
         self.username = username
         self.password = password
-        self.auth: OAuth2ResourceOwnerPasswordCredentials | None = None
+        self.auth: OAuth2ResourceOwnerPasswordCredentials | None = OAuth2ResourceOwnerPasswordCredentials(
+            f'{self.host_url}/token',
+            username=self.username,
+            password=self.password,
+        ) if self.username and self.password else None
 
-        if self.username and self.password:
-            self.client = httpx.AsyncClient(base_url=self.host_url, auth=(self.username, self.password), **kwargs)
-        else:
-            self.client = httpx.AsyncClient(base_url=self.host_url, **kwargs)
+        self.console = Console()
+
+        kwargs['base_url'] = self.host_url
+        kwargs['timeout'] = 60
+
+        self.client = httpx.AsyncClient(**kwargs)
+        self.semaphore = anyio.Semaphore(10)
+        self.tasks: list[str] = []
 
     async def __aenter__(self) -> MBClient:
         result = await self.client.get('/alive')
@@ -46,15 +55,8 @@ class MBClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.client.aclose()
 
-    async def login(self):
-        if not self.username or not self.password:
-            return
-
-        self.auth = OAuth2ResourceOwnerPasswordCredentials(
-            f'{self.host_url}/token',
-            username=self.username,
-            password=self.password,
-        )
+    def print(self, *args, **kwargs):
+        self.console.print(*args, **kwargs)
 
     async def jackpot(self, region: str) -> Record:
         if region not in ('jp', 'nz'):
@@ -67,10 +69,21 @@ class MBClient:
         return result.json()
 
     async def upload(self, region: str, path: str):
-        if not self.auth:
-            await self.login()
+        if os.path.isdir(path):
+            file_list: list[str] = []
+            for root, dirs, files in os.walk(path):
+                file_list.extend(os.path.join(root, file) for file in files if file.endswith('.tar.gz'))
 
-        if path.endswith('.tar.gz'):
+            async with anyio.create_task_group() as tg:
+                for file in file_list:
+                    tg.start_soon(self.upload, region, file)
+
+            return
+
+        if not path.endswith('.tar.gz'):
+            return
+
+        async with self.semaphore:
             with open(path, 'rb') as file:
                 result = await self.client.post(
                     f'/{region}/upload?wait_for_result=false',
@@ -79,15 +92,30 @@ class MBClient:
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError('Failed to upload.')
 
-        return result.json()
+            self.print(f'Successfully uploaded file {path}.')
+            self.tasks.extend(result.json()['task_id'])
+
+    async def task_status(self, task_id: str):
+        result = await self.client.get(f'/task/status/{task_id}')
+        if result.status_code != HTTPStatus.OK:
+            return
+
+        response = result.json()
+        self.print(f'{task_id}: {response["current_size"]}/{response["total_size"]}')
+
+    async def status(self):
+        async with anyio.create_task_group() as tg:
+            for task_id in self.tasks:
+                tg.start_soon(self.task_status, task_id)
 
 
 async def main():
     async with MBClient('http://localhost:8000', 'admin', 'admin') as client:
-        await client.login()
         await client.jackpot('jp')
-        upload_result = await client.upload('jp', '/home/theodore/Downloads/20050816114600.knt.tar.gz')
-        print(upload_result)
+        await client.upload('jp', '/home/theodore/Downloads/ESR')
+        await client.status()
+        await anyio.sleep(10)
+        await client.status()
 
 
 if __name__ == '__main__':
