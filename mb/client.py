@@ -179,16 +179,17 @@ class MBClient:
         if not path.endswith('.tar.gz'):
             return
 
+        base_name = os.path.basename(path)
         async with self.semaphore:
             with open(path, 'rb') as file:
                 result = await self.client.post(
                     f'/{region}/upload?wait_for_result=false',
-                    files={'archives': (os.path.basename(path), file, 'multipart/form-data')},
+                    files={'archives': (base_name, file, 'multipart/form-data')},
                     auth=self.auth)
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError('Failed to upload.')
 
-            self.print(f'Successfully uploaded file {path}.')
+            self.print(f'Successfully uploaded file [green]{base_name}[/].')
             self.tasks[result.json()['task_id']] = 0
 
     async def task_status(self, task_id: str):
