@@ -139,6 +139,9 @@ class MBClient:
         self.semaphore = anyio.Semaphore(10)
         self.tasks: dict[str, float] = {}
 
+        self.upload_size = 0
+        self.current_size = 0
+
     async def __aenter__(self) -> MBClient:
         result = await self.client.get('/alive')
         if result.status_code != HTTPStatus.OK:
@@ -164,14 +167,13 @@ class MBClient:
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
-            def file_list():
-                for root, _, files in os.walk(path):
-                    for f in files:
-                        if f.endswith('.tar.gz'):
-                            yield os.path.join(root, f)
-
+            file_list: list[str] = []
+            for root, _, files in os.walk(path):
+                file_list.extend(os.path.join(root, f) for f in files if f.endswith('.tar.gz'))
+            self.upload_size = len(file_list)
+            self.current_size = 0
             async with anyio.create_task_group() as tg:
-                for file in track(file_list(), description='Uploading...'):
+                for file in file_list:
                     tg.start_soon(self.upload, region, file)
 
             return
@@ -188,9 +190,11 @@ class MBClient:
                     auth=self.auth)
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError('Failed to upload.')
-
-            self.print(f'Successfully uploaded file [green]{base_name}[/].')
-            self.tasks[result.json()['task_id']] = 0
+            self.current_size += 1
+            self.print(
+                f'Successfully uploaded file [green]{base_name}[/]. [[red]{self.current_size}/{self.upload_size}[/]].')
+            for task_id in result.json()['task_id']:
+                self.tasks[task_id] = 0
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f'/task/status/{task_id}')
@@ -199,13 +203,12 @@ class MBClient:
             return
 
         response = result.json()
-        self.tasks[task_id] = response['current_size'] / response['total_size']
+        self.tasks[task_id] = response['current_size'] / max(1, response['total_size'])
         self.print(f'{task_id}: {self.tasks[task_id]:.2%}')
 
     async def status(self):
-        async with anyio.create_task_group() as tg:
-            for task_id in self.tasks:
-                tg.start_soon(self.task_status, task_id)
+        for task_id in track(list(self.tasks.keys()), description='Checking status...', console=self.console):
+            await self.task_status(task_id)
 
 
 async def main():
@@ -213,10 +216,10 @@ async def main():
         result = await client.jackpot('jp')
         fig = result.plot_response_spectrum()
         fig.show()
-        # await client.upload('jp', '/home/theodore/Downloads/ESR')
-        # await client.status()
-        # await anyio.sleep(10)
-        # await client.status()
+        await client.upload('jp', '/home/theodore/Downloads/ESR')
+        await client.status()
+        await anyio.sleep(10)
+        await client.status()
 
 
 if __name__ == '__main__':
