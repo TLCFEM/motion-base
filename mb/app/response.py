@@ -30,6 +30,8 @@ class MetadataResponse(BaseModel):
         depth: depth of the event, in kilometer.
         maximum_acceleration: maximum acceleration (PGA) of the record, in cm/s/s.
     """
+    endpoint: str
+
     id: UUID
     file_name: str
     sub_category: str
@@ -64,6 +66,22 @@ class ResponseSpectrumResponse(MetadataResponse):
     acceleration_spectrum: List[float]
 
 
+class ProcessConfig(BaseModel):
+    upsampling_rate: float
+    filter_length: int
+    filter_type: str
+    window_type: str
+    low_cut: float
+    high_cut: float
+    damping_ratio: float
+    period_end: float
+    period_step: float
+    normalised: bool
+    with_filter: bool
+    with_spectrum: bool
+    with_response_spectrum: bool
+
+
 class SequenceSpectrumResponse(MetadataResponse):
     """
     Response represents a record which contains both waveform and response spectrum.
@@ -79,7 +97,7 @@ class SequenceSpectrumResponse(MetadataResponse):
     velocity_spectrum: List[float] | None
     acceleration_spectrum: List[float] | None
 
-    processing_parameters: dict | None
+    processing_parameters: ProcessConfig | None
 
 
 class MetadataListResponse(BaseModel):

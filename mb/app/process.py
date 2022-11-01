@@ -17,7 +17,7 @@ from http import HTTPStatus
 import numpy as np
 from fastapi import HTTPException
 
-from mb.app.response import SequenceSpectrumResponse
+from mb.app.response import ProcessConfig, SequenceSpectrumResponse
 from mb.record.jp import NIED
 from mb.record.record import Record, apply_filter, get_window, zero_stuff
 from mb.record.response_spectrum import response_spectrum
@@ -73,21 +73,24 @@ def processing_record(
     if normalised is None:
         normalised = False
 
-    record = SequenceSpectrumResponse(**result.dict(), processing_parameters={
-        'upsampling_rate': upsampling_rate,
-        'filter_length': filter_length,
-        'filter_type': filter_type,
-        'window_type': window_type,
-        'low_cut': low_cut,
-        'high_cut': high_cut,
-        'damping_ratio': damping_ratio,
-        'period_end': period_end,
-        'period_step': period_step,
-        'normalised': normalised,
-        'with_filter': with_filter,
-        'with_spectrum': with_spectrum,
-        'with_response_spectrum': with_response_spectrum
-    })
+    record = SequenceSpectrumResponse(
+        **result.dict(),
+        endpoint='/process',
+        processing_parameters=ProcessConfig(**{
+            'upsampling_rate': upsampling_rate,
+            'filter_length': filter_length,
+            'filter_type': filter_type,
+            'window_type': window_type,
+            'low_cut': low_cut,
+            'high_cut': high_cut,
+            'damping_ratio': damping_ratio,
+            'period_end': period_end,
+            'period_step': period_step,
+            'normalised': normalised,
+            'with_filter': with_filter,
+            'with_spectrum': with_spectrum,
+            'with_response_spectrum': with_response_spectrum
+        }))
 
     time_interval, waveform = result.to_waveform(normalised=normalised, unit='cm/s/s')
 

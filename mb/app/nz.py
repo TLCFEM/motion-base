@@ -213,7 +213,11 @@ async def download_single_random_waveform(normalised: bool = False):
 
     interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
     # noinspection PyTypeChecker
-    return SequenceResponse(**result.dict(), interval=interval, data=record.tolist())
+    return SequenceResponse(
+        **result.dict(),
+        endpoint='/waveform/jackpot',
+        interval=interval,
+        data=record.tolist())
 
 
 @router.get('/spectrum/jackpot', response_model=SequenceResponse)
@@ -225,7 +229,10 @@ async def download_single_random_spectrum():
 
     frequency, record = result.to_spectrum(unit='cm/s/s')
     # noinspection PyTypeChecker
-    return SequenceResponse(**result.dict(), interval=frequency, data=record.tolist())
+    return SequenceResponse(
+        **result.dict(),
+        endpoint='/spectrum/jackpot',
+        interval=frequency, data=record.tolist())
 
 
 @router.get('/response_spectrum/jackpot', response_model=ResponseSpectrumResponse)
@@ -245,6 +252,7 @@ async def download_single_random_response_spectrum(
     # noinspection PyTypeChecker
     return ResponseSpectrumResponse(
         **result.dict(),
+        endpoint='/response_spectrum/jackpot',
         period=period.tolist(),
         displacement_spectrum=spectrum[:, 0].tolist(),
         velocity_spectrum=spectrum[:, 1].tolist(),
@@ -280,7 +288,11 @@ async def download_single_waveform(file_id_or_name: str, normalised: bool = Fals
     if result:
         interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
         # noinspection PyTypeChecker
-        return SequenceResponse(**result.dict(), interval=interval, data=record.tolist())
+        return SequenceResponse(
+            **result.dict(),
+            endpoint=f'/waveform/{file_id_or_name}',
+            interval=interval,
+            data=record.tolist())
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -298,7 +310,11 @@ async def download_single_spectrum(file_id_or_name: str):
     if result:
         frequency, record = result.to_spectrum(unit='cm/s/s')
         # noinspection PyTypeChecker
-        return SequenceResponse(**result.dict(), interval=frequency, data=record.tolist())
+        return SequenceResponse(
+            **result.dict(),
+            endpoint=f'/spectrum/{file_id_or_name}',
+            interval=frequency,
+            data=record.tolist())
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail='Record not found')
 
@@ -321,6 +337,7 @@ async def download_single_response_spectrum(
     # noinspection PyTypeChecker
     return ResponseSpectrumResponse(
         **result.dict(),
+        endpoint=f'/response_spectrum/{file_id_or_name}',
         period=period.tolist(),
         displacement_spectrum=spectrum[:, 0].tolist(),
         velocity_spectrum=spectrum[:, 1].tolist(),

@@ -19,10 +19,45 @@ from http import HTTPStatus
 
 import anyio
 import httpx
+import matplotlib.pyplot as plt
+import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
 
-from mb.record.record import Record
+from mb.app.response import SequenceSpectrumResponse
+
+
+class MBRecord(SequenceSpectrumResponse):
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
+        if 'waveform' in self.endpoint:
+            self.time_interval = kwargs.get('interval', None)
+            self.waveform = kwargs.get('data', None)
+        elif 'spectrum' in self.endpoint:
+            self.frequency_interval = kwargs.get('interval', None)
+            self.spectrum = kwargs.get('data', None)
+
+    def plot_waveform(self):
+        fig = plt.figure()
+        plt.plot(
+            np.arange(0, self.time_interval * len(self.waveform), self.time_interval),
+            self.waveform)
+        plt.xlabel('Time (s)')
+        plt.ylabel('Acceleration (Gal)')
+        plt.title(self.file_name)
+        fig.tight_layout()
+        return fig
+
+    def plot_spectrum(self):
+        fig = plt.figure()
+        plt.plot(
+            np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval),
+            self.spectrum)
+        plt.xlabel('Frequency (Hz)')
+        plt.ylabel('Acceleration Magnitude (Gal)')
+        plt.title(self.file_name)
+        fig.tight_layout()
+        return fig
 
 
 class MBClient:
@@ -58,7 +93,7 @@ class MBClient:
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
 
-    async def jackpot(self, region: str) -> Record:
+    async def jackpot(self, region: str) -> MBRecord:
         if region not in ('jp', 'nz'):
             raise ValueError('Region not supported.')
 
@@ -66,7 +101,7 @@ class MBClient:
         if result.status_code != HTTPStatus.OK:
             raise RuntimeError('Failed to get jackpot.')
 
-        return result.json()
+        return MBRecord(**result.json())
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
@@ -111,11 +146,13 @@ class MBClient:
 
 async def main():
     async with MBClient('http://localhost:8000', 'admin', 'admin') as client:
-        await client.jackpot('jp')
-        await client.upload('jp', '/home/theodore/Downloads/ESR')
-        await client.status()
-        await anyio.sleep(10)
-        await client.status()
+        result = await client.jackpot('jp')
+        fig = result.plot_waveform()
+        fig.show()
+        # await client.upload('jp', '/home/theodore/Downloads/ESR')
+        # await client.status()
+        # await anyio.sleep(10)
+        # await client.status()
 
 
 if __name__ == '__main__':
