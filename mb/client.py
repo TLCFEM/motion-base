@@ -136,7 +136,7 @@ class MBClient:
 
         self.client = httpx.AsyncClient(**kwargs)
         self.semaphore = anyio.Semaphore(10)
-        self.tasks: list[str] = []
+        self.tasks: dict[str, float] = {}
 
     async def __aenter__(self) -> MBClient:
         result = await self.client.get('/alive')
@@ -188,19 +188,21 @@ class MBClient:
                     raise RuntimeError('Failed to upload.')
 
             self.print(f'Successfully uploaded file {path}.')
-            self.tasks.extend(result.json()['task_id'])
+            self.tasks[result.json()['task_id']] = 0
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f'/task/status/{task_id}')
         if result.status_code != HTTPStatus.OK:
+            del self.tasks[task_id]
             return
 
         response = result.json()
-        self.print(f'{task_id}: {response["current_size"]}/{response["total_size"]}')
+        self.tasks[task_id] = response['current_size'] / response['total_size']
+        self.print(f'{task_id}: {self.tasks[task_id]:.2%}')
 
     async def status(self):
         async with anyio.create_task_group() as tg:
-            for task_id in self.tasks:
+            for task_id in self.tasks.keys():
                 tg.start_soon(self.task_status, task_id)
 
 
