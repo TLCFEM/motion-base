@@ -25,6 +25,8 @@ from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
 
 from mb.app.response import SequenceSpectrumResponse
+from mb.record.record import apply_filter, zero_stuff
+from mb.record.response_spectrum import response_spectrum
 
 
 class MBRecord(SequenceSpectrumResponse):
@@ -36,6 +38,12 @@ class MBRecord(SequenceSpectrumResponse):
         elif 'spectrum' in self.endpoint:
             self.frequency_interval = kwargs.get('interval', None)
             self.spectrum = kwargs.get('data', None)
+
+    def filter(self, window, upsampling: int = 1):
+        new_waveform: np.ndarray = apply_filter(window * upsampling, zero_stuff(upsampling, self.waveform))
+        self.time_interval /= upsampling
+        # noinspection PyTypeChecker
+        self.waveform = new_waveform.tolist()
 
     def plot_waveform(self):
         fig = plt.figure()
@@ -49,6 +57,9 @@ class MBRecord(SequenceSpectrumResponse):
         return fig
 
     def plot_spectrum(self):
+        if self.frequency_interval is None or self.spectrum is None:
+            self.to_spectrum()
+
         fig = plt.figure()
         plt.plot(
             np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval),
@@ -58,6 +69,53 @@ class MBRecord(SequenceSpectrumResponse):
         plt.title(self.file_name)
         fig.tight_layout()
         return fig
+
+    def plot_response_spectrum(self):
+        if None in (self.period, self.displacement_spectrum, self.velocity_spectrum, self.acceleration_spectrum):
+            self.to_response_spectrum(0.05, np.arange(0, 10, 0.01))
+
+        fig = plt.figure()
+        fig.add_subplot(311)
+        plt.plot(self.period, self.displacement_spectrum)
+        plt.xlabel('Period (s)')
+        plt.ylabel('SD')
+        fig.add_subplot(312)
+        plt.plot(self.period, self.velocity_spectrum)
+        plt.xlabel('Period (s)')
+        plt.ylabel('SV')
+        fig.add_subplot(313)
+        plt.plot(self.period, self.acceleration_spectrum)
+        plt.xlabel('Period (s)')
+        plt.ylabel('SA')
+        fig.tight_layout()
+        return fig
+
+    def to_spectrum(self):
+        if self.time_interval is None or self.waveform is None:
+            raise RuntimeError('Cannot convert to spectrum.')
+
+        self.frequency_interval = 1 / (self.time_interval * len(self.waveform))
+        self.spectrum = 2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
+
+    def to_response_spectrum(self, damping_ratio: float, period: list[float] | np.ndarray):
+        if isinstance(period, np.ndarray):
+            # noinspection PyTypeChecker
+            self.period = period.tolist()
+            spectra = response_spectrum(
+                damping_ratio,
+                self.time_interval,
+                np.array(self.waveform),
+                period)
+        else:
+            self.period = period
+            spectra = response_spectrum(
+                damping_ratio,
+                self.time_interval,
+                np.array(self.waveform),
+                np.array(self.period))
+        self.displacement_spectrum = spectra[:, 0]
+        self.velocity_spectrum = spectra[:, 1]
+        self.acceleration_spectrum = spectra[:, 2]
 
 
 class MBClient:
@@ -147,7 +205,7 @@ class MBClient:
 async def main():
     async with MBClient('http://localhost:8000', 'admin', 'admin') as client:
         result = await client.jackpot('jp')
-        fig = result.plot_waveform()
+        fig = result.plot_response_spectrum()
         fig.show()
         # await client.upload('jp', '/home/theodore/Downloads/ESR')
         # await client.status()
