@@ -23,6 +23,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
+from rich.progress import track
 
 from mb.app.response import SequenceSpectrumResponse
 from mb.record.record import apply_filter, zero_stuff
@@ -170,7 +171,7 @@ class MBClient:
                             yield os.path.join(root, f)
 
             async with anyio.create_task_group() as tg:
-                for file in file_list():
+                for file in track(file_list(), description='Uploading...'):
                     tg.start_soon(self.upload, region, file)
 
             return
@@ -202,7 +203,7 @@ class MBClient:
 
     async def status(self):
         async with anyio.create_task_group() as tg:
-            for task_id in self.tasks.keys():
+            for task_id in self.tasks:
                 tg.start_soon(self.task_status, task_id)
 
 
