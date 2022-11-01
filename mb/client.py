@@ -163,12 +163,14 @@ class MBClient:
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
-            file_list: list[str] = []
-            for root, _, files in os.walk(path):
-                file_list.extend(os.path.join(root, file) for file in files if file.endswith('.tar.gz'))
+            def file_list():
+                for root, _, files in os.walk(path):
+                    for f in files:
+                        if f.endswith('.tar.gz'):
+                            yield os.path.join(root, f)
 
             async with anyio.create_task_group() as tg:
-                for file in file_list:
+                for file in file_list():
                     tg.start_soon(self.upload, region, file)
 
             return
