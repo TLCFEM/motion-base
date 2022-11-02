@@ -141,7 +141,11 @@ class MBClient:
         self.tasks: dict[str, float] = {}
 
         self.upload_size = 0
-        self.current_size = 0
+        self.download_size = 0
+        self.current_upload_size = 0
+        self.current_download_size = 0
+
+        self.download_pool: list = []
 
     async def __aenter__(self) -> MBClient:
         result = await self.client.get('/alive')
@@ -156,28 +160,28 @@ class MBClient:
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
 
-    async def jackpot(self, region: str) -> MBRecord:
-        if region not in ('jp', 'nz'):
-            raise ValueError('Region not supported.')
-
-        result = await self.client.get(f'/{region}/waveform/jackpot')
-        if result.status_code != HTTPStatus.OK:
-            raise RuntimeError('Failed to get jackpot.')
-
-        return MBRecord(**result.json())
-
     async def download(self, record_id: str | uuid | list[str | uuid], normalised: bool = False):
-        if not isinstance(record_id, list):
-            record_id = [record_id]
+        if isinstance(record_id, list):
+            self.download_pool = []
+            self.download_size = len(record_id)
+            self.current_download_size = 0
+            async with anyio.create_task_group() as tg:
+                for r in record_id:
+                    tg.start_soon(self.download, r, normalised)
 
-        result = await self.client.post(
-            f'/waveform?normalised={"true" if normalised else "false"}',
-            json=record_id,
-            auth=self.auth)
-        if result.status_code != HTTPStatus.OK:
-            raise RuntimeError('Failed to download waveform.')
+        async with self.semaphore:
+            self.current_download_size += 1
+            result = await self.client.post(
+                f'/waveform?normalised={"true" if normalised else "false"}',
+                json=[str(record_id)])
+            if result.status_code != HTTPStatus.OK:
+                return
 
-        return [MBRecord(**record) for record in result.json()['records']]
+            record = MBRecord(**result.json()[0])
+            self.download_pool.append(record)
+            self.print(
+                f'Successfully downloaded file [green]{record.file_name}[/]. '
+                f'[[red]{self.current_download_size}/{self.download_size}[/]].')
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
@@ -185,7 +189,7 @@ class MBClient:
             for root, _, files in os.walk(path):
                 file_list.extend(os.path.join(root, f) for f in files if f.endswith('.tar.gz'))
             self.upload_size = len(file_list)
-            self.current_size = 0
+            self.current_upload_size = 0
             async with anyio.create_task_group() as tg:
                 for file in file_list:
                     tg.start_soon(self.upload, region, file)
@@ -204,11 +208,25 @@ class MBClient:
                     auth=self.auth)
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError('Failed to upload.')
-            self.current_size += 1
+            self.current_upload_size += 1
             self.print(
-                f'Successfully uploaded file [green]{base_name}[/]. [[red]{self.current_size}/{self.upload_size}[/]].')
+                f'Successfully uploaded file [green]{base_name}[/]. '
+                f'[[red]{self.current_upload_size}/{self.upload_size}[/]].')
             for task_id in result.json()['task_id']:
                 self.tasks[task_id] = 0
+
+    async def jackpot(self, region: str) -> MBRecord:
+        if region not in ('jp', 'nz'):
+            raise ValueError('Region not supported.')
+
+        result = await self.client.get(f'/{region}/waveform/jackpot')
+        if result.status_code != HTTPStatus.OK:
+            raise RuntimeError('Failed to get jackpot.')
+
+        return MBRecord(**result.json())
+
+    async def search(self, **kwargs):
+        pass
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f'/task/status/{task_id}')
