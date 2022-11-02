@@ -18,7 +18,7 @@ from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException
+from fastapi import BackgroundTasks, Depends, FastAPI, HTTPException, Query
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
@@ -26,6 +26,8 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
+from mb.app.response import ListSequenceResponse
+from mb.app.universal import retrieve_record
 from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
     create_superuser, create_task, create_token, is_active
 from mb.utility.config import init_mongo
@@ -106,3 +108,18 @@ async def for_test_only(tasks: BackgroundTasks):
     task_id = await create_task()
     tasks.add_task(async_task, task_id)
     return {'task_id': task_id}
+
+
+@app.post('/waveform', response_model=ListSequenceResponse)
+async def download_multiple_waveform(
+        record_ids: list[UUID],
+        normalised: bool = Query(default=False)
+):
+    """
+    Retrieve raw accelerograph waveform.
+    """
+    tasks = [retrieve_record(record_id, normalised) for record_id in record_ids]
+    results = await asyncio.gather(*tasks)
+
+    # noinspection PyTypeChecker
+    return ListSequenceResponse(records=[result for result in results if result is not None])

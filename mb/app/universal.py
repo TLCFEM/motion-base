@@ -12,13 +12,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import asyncio
 import uuid
 
-from fastapi import Query
-
-from mb.app.main import app
-from mb.app.response import ListSequenceResponse, SequenceResponse
+from mb.app.response import SequenceResponse
 from mb.record.jp import NIED
 from mb.record.nz import NZSM
 
@@ -39,18 +35,3 @@ async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceRes
         endpoint=f'/waveform/{record_id}',
         interval=interval,
         data=record.tolist())
-
-
-@app.get('/waveform/{file_id_or_name}', response_model=ListSequenceResponse)
-async def download_single_waveform(
-        record_ids: list[uuid.UUID],
-        normalised: bool = Query(default=False)
-):
-    """
-    Retrieve raw accelerograph waveform.
-    """
-    tasks = [retrieve_record(record_id, normalised) for record_id in record_ids]
-    results = await asyncio.gather(*tasks)
-
-    # noinspection PyTypeChecker
-    return ListSequenceResponse(records=[result for result in results if result is not None])

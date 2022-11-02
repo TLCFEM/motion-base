@@ -166,8 +166,18 @@ class MBClient:
 
         return MBRecord(**result.json())
 
-    async def download(self, record_id: str | uuid):
-        pass
+    async def download(self, record_id: str | uuid | list[str | uuid], normalised: bool = False):
+        if not isinstance(record_id, list):
+            record_id = [record_id]
+
+        result = await self.client.post(
+            f'/waveform?normalised={"true" if normalised else "false"}',
+            json=record_id,
+            auth=self.auth)
+        if result.status_code != HTTPStatus.OK:
+            raise RuntimeError('Failed to download waveform.')
+
+        return [MBRecord(**record) for record in result.json()['records']]
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
@@ -220,10 +230,11 @@ async def main():
         result = await client.jackpot('jp')
         fig = result.plot_response_spectrum()
         fig.show()
-        await client.upload('jp', '/home/theodore/Downloads/ESR')
-        await client.status()
-        await anyio.sleep(10)
-        await client.status()
+        # await client.upload('jp', '/home/theodore/Downloads/ESR')
+        # await client.status()
+        # await anyio.sleep(10)
+        # await client.status()
+        await client.download('54e431f2-860a-50d0-9ec8-242bb65a434f')
 
 
 if __name__ == '__main__':
