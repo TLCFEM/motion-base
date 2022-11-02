@@ -56,6 +56,13 @@ class SequenceResponse(MetadataResponse):
     data: List[float]
 
 
+class ListSequenceResponse(BaseModel):
+    """
+    Response represents a record which can be either waveform or spectrum.
+    """
+    records: List[SequenceResponse]
+
+
 class ResponseSpectrumResponse(MetadataResponse):
     """
     Response represents a record that is a response spectrum.

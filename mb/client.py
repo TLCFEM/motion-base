@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import os.path
+import uuid
 from http import HTTPStatus
 
 import anyio
@@ -164,6 +165,9 @@ class MBClient:
             raise RuntimeError('Failed to get jackpot.')
 
         return MBRecord(**result.json())
+
+    async def download(self, record_id: str | uuid):
+        pass
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
