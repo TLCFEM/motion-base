@@ -15,9 +15,8 @@
 import uuid
 
 from mb.app.response import SequenceResponse
-from mb.record.jp import NIED
-from mb.record.nz import NZSM
-from mb.record.record import MetadataRecord, Record
+from mb.record.jp import MetadataNIED, NIED
+from mb.record.nz import MetadataNZSM, NZSM
 
 
 async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceResponse | None:
@@ -40,10 +39,9 @@ async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceRes
 
 def query_database(query_dict: dict, page_size: int, page_number: int, region: str):
     if region == 'jp':
-        result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
-    elif region == 'nz':
-        result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
-    else:
-        result = Record.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+        return NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNIED)
 
-    return result
+    if region == 'nz':
+        return NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM)
+
+    raise NotImplementedError()

@@ -150,7 +150,6 @@ async def process_record(
 async def query_records(
         min_magnitude: float | None = Query(default=None, ge=0, le=10),
         max_magnitude: float | None = Query(default=None, ge=0, le=10),
-        sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
         event_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
         station_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
         max_event_distance: float | None = Query(
@@ -172,7 +171,6 @@ async def query_records(
     query_dict: dict = generate_query_string(
         min_magnitude=min_magnitude,
         max_magnitude=max_magnitude,
-        sub_category=sub_category,
         event_location=event_location,
         station_location=station_location,
         max_event_distance=max_event_distance,
