@@ -17,6 +17,7 @@ import uuid
 from mb.app.response import SequenceResponse
 from mb.record.jp import NIED
 from mb.record.nz import NZSM
+from mb.record.record import MetadataRecord, Record
 
 
 async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceResponse | None:
@@ -35,3 +36,14 @@ async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceRes
         endpoint=f'/waveform/{record_id}',
         interval=interval,
         data=record.tolist())
+
+
+def query_database(query_dict: dict, page_size: int, page_number: int, region: str):
+    if region == 'jp':
+        result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+    elif region == 'nz':
+        result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+    else:
+        result = Record.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+
+    return result

@@ -26,10 +26,6 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 
-from mb.record.jp import NIED
-from mb.record.nz import NZSM
-from mb.record.record import MetadataRecord, Record
-
 
 class CredentialException(HTTPException):
     def __init__(self):
@@ -224,14 +220,3 @@ def generate_query_string(**kwargs):
         del query_dict['$and']
 
     return query_dict
-
-
-def query_database(query_dict: dict, page_size: int, page_number: int, region: str):
-    if region == 'jp':
-        result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
-    elif region == 'nz':
-        result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
-    else:
-        result = Record.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
-
-    return result

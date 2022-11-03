@@ -23,7 +23,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, U
 from mb.app.process import processing_record
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
     SequenceSpectrumResponse
-from mb.app.utility import User, create_task, generate_query_string, is_active, query_database, send_notification
+from mb.app.universal import query_database
+from mb.app.utility import User, create_task, generate_query_string, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
 from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
