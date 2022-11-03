@@ -26,8 +26,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, U
 from mb.app.process import processing_record
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
     SequenceSpectrumResponse
-from mb.app.utility import UploadTask, User, create_task, generate_query_string, is_active, send_notification
-from mb.record.nz import MetadataNZSM, NZSM, ParserNZSM, retrieve_single_record
+from mb.app.utility import UploadTask, User, create_task, generate_query_string, is_active, query_database, \
+    send_notification
+from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
 from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
 
@@ -149,9 +150,13 @@ async def process_record(
 async def query_records(
         min_magnitude: float | None = Query(default=None, ge=0, le=10),
         max_magnitude: float | None = Query(default=None, ge=0, le=10),
-        sub_category: str | None = Query(default=None, regex='^(un)?processed$'),
+        sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
         event_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
         station_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
+        max_event_distance: float | None = Query(
+            default=None, ge=0, description='maximum distance from the given location in km'),
+        max_station_distance: float | None = Query(
+            default=None, ge=0, description='maximum distance from the given location in km'),
         from_date: datetime | None = Query(default=None),
         to_date: datetime | None = Query(default=None),
         min_pga: float | None = Query(default=None),
@@ -170,6 +175,8 @@ async def query_records(
         sub_category=sub_category,
         event_location=event_location,
         station_location=station_location,
+        max_event_distance=max_event_distance,
+        max_station_distance=max_station_distance,
         from_date=from_date,
         to_date=to_date,
         min_pga=min_pga,
@@ -183,7 +190,7 @@ async def query_records(
     if page_number is None:
         page_number = 0
 
-    result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM)
+    result = query_database(query_dict, page_size, page_number, 'nz')
     if result:
         return MetadataListResponse(
             query=query_dict,

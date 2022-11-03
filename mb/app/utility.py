@@ -26,6 +26,10 @@ from jose import JWTError, jwt
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 
+from mb.record.jp import NIED
+from mb.record.nz import NZSM
+from mb.record.record import MetadataRecord, Record
+
 
 class CredentialException(HTTPException):
     def __init__(self):
@@ -175,12 +179,18 @@ def generate_query_string(**kwargs):
         query_dict['$and'].append({'sub_category': sub_category.lower()})
 
     event_location: list | None = kwargs.get('event_location', None)
+    max_event_distance: float | None = kwargs.get('max_event_distance', None)
     if event_location is not None:
         query_dict['event_location'] = {'$nearSphere': event_location}
+        if max_event_distance is not None:
+            query_dict['event_location']['$maxDistance'] = max_event_distance / 6371
 
     station_location: list | None = kwargs.get('station_location', None)
+    max_station_distance: float | None = kwargs.get('max_station_distance', None)
     if station_location is not None:
         query_dict['station_location'] = {'$nearSphere': station_location}
+        if max_station_distance is not None:
+            query_dict['station_location']['$maxDistance'] = max_station_distance / 6371
 
     from_date: datetime | None = kwargs.get('from_date', None)
     to_date: datetime | None = kwargs.get('to_date', None)
@@ -214,3 +224,14 @@ def generate_query_string(**kwargs):
         del query_dict['$and']
 
     return query_dict
+
+
+def query_database(query_dict: dict, page_size: int, page_number: int, region: str):
+    if region == 'jp':
+        result = NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+    elif region == 'nz':
+        result = NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+    else:
+        result = Record.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataRecord)
+
+    return result

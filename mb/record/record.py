@@ -126,3 +126,8 @@ def get_window(filter_type: str, window_type: str, length: int, cutoff: float | 
     bin_num = 2 * length + 1
 
     return signal.firwin(bin_num, cutoff, window=window, pass_zero=filter_type) * kwargs.get('ratio', 1)
+
+
+class MetadataRecord(Record):
+    class Settings:
+        projection = {'raw_data': False}
