@@ -107,3 +107,14 @@ async def test_download_nz(mock_client, data_type, file_name, status):
         target_url += '?normalised=true'
     response = await mock_client.get(target_url)
     assert response.status_code == status
+
+
+@pytest.mark.parametrize('collection_type', [
+    pytest.param('jp', id='jp'),
+    pytest.param('nz', id='nz'),
+    pytest.param('', id='all')
+])
+async def test_download_nz(mock_client, collection_type):
+    target_url = f'/{collection_type}/query' if collection_type != '' else '/query'
+    response = await mock_client.post(target_url)
+    assert response.status_code == HTTPStatus.OK
