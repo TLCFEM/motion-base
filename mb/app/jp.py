@@ -162,11 +162,11 @@ async def query_records(
     if page_number is None:
         page_number = 0
 
-    result, counter = query_database(query_dict, page_size, page_number, 'jp')
+    result, counter = await query_database(query_dict, page_size, page_number, 'jp')
     if result:
         return MetadataListResponse(
             query=query_dict, total=counter,
-            result=[MetadataResponse(**record.dict(), endpoint='/jp/query') async for record in result])
+            result=[MetadataResponse(**r.dict(), endpoint='/jp/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
 

@@ -37,7 +37,7 @@ async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceRes
         data=record.tolist())
 
 
-def query_database(query_dict: dict, page_size: int, page_number: int, region: str | None = None):
+async def query_database(query_dict: dict, page_size: int, page_number: int, region: str | None = None):
     counter = 0
     result = []
     if region == 'jp' or region is None:

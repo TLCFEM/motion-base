@@ -169,7 +169,7 @@ async def query_records(
     if page_number is None:
         page_number = 0
 
-    result, counter = query_database(query_dict, page_size, page_number)
+    result, counter = await query_database(query_dict, page_size, page_number)
     if result:
         return MetadataListResponse(
             query=query_dict, total=counter,
