@@ -220,3 +220,21 @@ def generate_query_string(**kwargs):
         del query_dict['$and']
 
     return query_dict
+
+
+class QueryConfig(BaseModel):
+    min_magnitude: float | None = None
+    max_magnitude: float | None = None
+    sub_category: str | None = None
+    event_location: list | None = None
+    station_location: list | None = None
+    max_event_distance: float | None = None
+    max_station_distance: float | None = None
+    from_date: datetime | None = None
+    to_date: datetime | None = None
+    min_pga: float | None = None
+    max_pga: float | None = None
+    event_name: str | None = None
+    direction: str | None = None
+    page_size: int
+    page_number: int

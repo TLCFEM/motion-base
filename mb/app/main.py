@@ -28,7 +28,8 @@ from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
 from mb.app.response import ListSequenceResponse, MetadataListResponse, MetadataResponse
 from mb.app.universal import query_database, retrieve_record
-from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
+from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, QueryConfig, Token, UploadTask, User, UserInformation, \
+    authenticate_user, \
     create_superuser, create_task, create_token, generate_query_string, is_active
 from mb.utility.config import init_mongo
 
@@ -172,7 +173,21 @@ async def query_records(
     result, counter = await query_database(query_dict, page_size, page_number)
     if result:
         return MetadataListResponse(
-            query=query_dict, total=counter,
+            query=QueryConfig(**query_dict, page_size=page_size, page_number=page_number), total=counter,
+            result=[MetadataResponse(**r.dict(), endpoint='/query') for record in result async for r in record])
+
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
+
+
+@app.post('/query', response_model=MetadataListResponse)
+async def query_records_direct(query: QueryConfig):
+    """
+    Query records from the database.
+    """
+    result, counter = await query_database(query.dict(), query.page_size, query.page_number)
+    if result:
+        return MetadataListResponse(
+            query=query, total=counter,
             result=[MetadataResponse(**r.dict(), endpoint='/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')

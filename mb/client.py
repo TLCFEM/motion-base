@@ -49,9 +49,8 @@ class MBRecord(SequenceSpectrumResponse):
 
     def plot_waveform(self):
         fig = plt.figure()
-        plt.plot(
-            np.arange(0, self.time_interval * len(self.waveform), self.time_interval),
-            self.waveform)
+        x_axis = np.arange(0, self.time_interval * len(self.waveform), self.time_interval)
+        plt.plot(x_axis, self.waveform)
         plt.xlabel('Time (s)')
         plt.ylabel('Acceleration (Gal)')
         plt.title(self.file_name)
@@ -63,9 +62,8 @@ class MBRecord(SequenceSpectrumResponse):
             self.to_spectrum()
 
         fig = plt.figure()
-        plt.plot(
-            np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval),
-            self.spectrum)
+        x_axis = np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval)
+        plt.plot(x_axis, self.spectrum)
         plt.xlabel('Frequency (Hz)')
         plt.ylabel('Acceleration Magnitude (Gal)')
         plt.title(self.file_name)
@@ -134,7 +132,8 @@ class MBClient:
         self.console = Console()
 
         kwargs['base_url'] = self.host_url
-        kwargs['timeout'] = 60
+        if 'timeout' not in kwargs:
+            kwargs['timeout'] = 60
 
         self.client = httpx.AsyncClient(**kwargs)
         self.semaphore = anyio.Semaphore(10)
@@ -172,7 +171,7 @@ class MBClient:
         async with self.semaphore:
             self.current_download_size += 1
             result = await self.client.post(
-                f'/waveform?normalised={"true" if normalised else "false"}',
+                f'/waveform?normalised={str(normalised).lower()}',
                 json=[str(record_id)])
             if result.status_code != HTTPStatus.OK:
                 return
@@ -215,13 +214,14 @@ class MBClient:
             for task_id in result.json()['task_id']:
                 self.tasks[task_id] = 0
 
-    async def jackpot(self, region: str) -> MBRecord:
+    async def jackpot(self, region: str) -> MBRecord | None:
         if region not in ('jp', 'nz'):
             raise ValueError('Region not supported.')
 
         result = await self.client.get(f'/{region}/waveform/jackpot')
         if result.status_code != HTTPStatus.OK:
-            raise RuntimeError('Failed to get jackpot.')
+            self.print('[red]Failed to get jackpot waveform.[/]')
+            return None
 
         return MBRecord(**result.json())
 

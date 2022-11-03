@@ -27,7 +27,8 @@ from mb.app.process import processing_record
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
     SequenceSpectrumResponse
 from mb.app.universal import query_database
-from mb.app.utility import UploadTask, User, create_task, generate_query_string, is_active, send_notification
+from mb.app.utility import QueryConfig, UploadTask, User, create_task, generate_query_string, is_active, \
+    send_notification
 from mb.record.nz import NZSM, ParserNZSM, retrieve_single_record
 from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
@@ -191,7 +192,7 @@ async def query_records(
     result, counter = await query_database(query_dict, page_size, page_number, 'nz')
     if result:
         return MetadataListResponse(
-            query=query_dict, total=counter,
+            query=QueryConfig(**query_dict, page_size=page_size, page_number=page_number), total=counter,
             result=[MetadataResponse(**r.dict(), endpoint='/nz/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
