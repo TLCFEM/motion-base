@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
-from datetime import timedelta
+from datetime import datetime, timedelta
 from http import HTTPStatus
 from uuid import UUID
 
@@ -26,10 +26,10 @@ from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.jp import router as jp_router
 from mb.app.nz import router as nz_router
-from mb.app.response import ListSequenceResponse
-from mb.app.universal import retrieve_record
+from mb.app.response import ListSequenceResponse, MetadataListResponse, MetadataResponse
+from mb.app.universal import query_database, retrieve_record
 from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User, UserInformation, authenticate_user, \
-    create_superuser, create_task, create_token, is_active
+    create_superuser, create_task, create_token, generate_query_string, is_active
 from mb.utility.config import init_mongo
 
 app = FastAPI(
@@ -123,3 +123,56 @@ async def download_multiple_waveform(
 
     # noinspection PyTypeChecker
     return ListSequenceResponse(records=[result for result in results if result is not None])
+
+
+@app.post('/query', response_model=MetadataListResponse)
+async def query_records(
+        min_magnitude: float | None = Query(default=None, ge=0, le=10),
+        max_magnitude: float | None = Query(default=None, ge=0, le=10),
+        sub_category: str | None = Query(default=None),
+        event_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
+        station_location: list[float, float] | None = Query(default=None, min_items=2, max_items=2),
+        max_event_distance: float | None = Query(
+            default=None, ge=0, description='maximum distance from the given location in km'),
+        max_station_distance: float | None = Query(
+            default=None, ge=0, description='maximum distance from the given location in km'),
+        from_date: datetime | None = Query(default=None),
+        to_date: datetime | None = Query(default=None),
+        min_pga: float | None = Query(default=None),
+        max_pga: float | None = Query(default=None),
+        event_name: str | None = Query(default=None),
+        direction: str | None = Query(default=None),
+        page_size: int | None = Query(default=None, ge=1, le=1000),
+        page_number: int | None = Query(default=None, ge=0)
+):
+    """
+    Query records from the database.
+    """
+    query_dict: dict = generate_query_string(
+        min_magnitude=min_magnitude,
+        max_magnitude=max_magnitude,
+        sub_category=sub_category,
+        event_location=event_location,
+        station_location=station_location,
+        max_event_distance=max_event_distance,
+        max_station_distance=max_station_distance,
+        from_date=from_date,
+        to_date=to_date,
+        min_pga=min_pga,
+        max_pga=max_pga,
+        event_name=event_name,
+        direction=direction,
+    )
+
+    if page_size is None:
+        page_size = 10
+    if page_number is None:
+        page_number = 0
+
+    result, counter = query_database(query_dict, page_size, page_number)
+    if result:
+        return MetadataListResponse(
+            query=query_dict, total=counter,
+            result=[MetadataResponse(**r.dict(), endpoint='/query') for record in result async for r in record])
+
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')

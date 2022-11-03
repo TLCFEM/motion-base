@@ -37,11 +37,15 @@ async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceRes
         data=record.tolist())
 
 
-def query_database(query_dict: dict, page_size: int, page_number: int, region: str):
-    if region == 'jp':
-        return NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNIED)
+def query_database(query_dict: dict, page_size: int, page_number: int, region: str | None = None):
+    counter = 0
+    result = []
+    if region == 'jp' or region is None:
+        counter += await NIED.find(query_dict).count()
+        result.append(NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNIED))
 
-    if region == 'nz':
-        return NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM)
+    if region == 'nz' or region is None:
+        counter += await NZSM.find(query_dict).count()
+        result.append(NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM))
 
-    raise NotImplementedError()
+    return result, counter

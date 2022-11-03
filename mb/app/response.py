@@ -113,4 +113,5 @@ class MetadataListResponse(BaseModel):
     One can later use the ID to retrieve the record.
     """
     query: dict
+    total: int
     result: list[MetadataResponse]
