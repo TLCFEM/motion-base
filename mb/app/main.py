@@ -173,7 +173,7 @@ async def query_records(
     result, counter = await query_database(query_dict, page_size, page_number)
     if result:
         return MetadataListResponse(
-            query=QueryConfig(**query_dict, page_size=page_size, page_number=page_number), total=counter,
+            query=query_dict, total=counter,
             result=[MetadataResponse(**r.dict(), endpoint='/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')
@@ -184,10 +184,13 @@ async def query_records_direct(query: QueryConfig):
     """
     Query records from the database.
     """
-    result, counter = await query_database(query.dict(), query.page_size, query.page_number)
+
+    query_dict: dict = generate_query_string(**query.dict())
+
+    result, counter = await query_database(query_dict, query.page_size, query.page_number)
     if result:
         return MetadataListResponse(
-            query=query, total=counter,
+            query=query_dict, total=counter,
             result=[MetadataResponse(**r.dict(), endpoint='/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')

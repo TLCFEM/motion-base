@@ -18,8 +18,6 @@ from uuid import UUID
 
 from pydantic import BaseModel
 
-from mb.app.utility import QueryConfig
-
 
 class MetadataResponse(BaseModel):
     """
@@ -114,6 +112,6 @@ class MetadataListResponse(BaseModel):
     A list of IDs of the target records.
     One can later use the ID to retrieve the record.
     """
-    query: QueryConfig
+    query: dict
     total: int
     result: list[MetadataResponse]
