@@ -187,7 +187,7 @@ async def query_records_direct(query: QueryConfig):
 
     query_dict: dict = generate_query_string(**query.dict())
 
-    result, counter = await query_database(query_dict, query.page_size, query.page_number)
+    result, counter = await query_database(query_dict, query.page_size, query.page_number, query.region)
     if result:
         return MetadataListResponse(
             query=query_dict, total=counter,

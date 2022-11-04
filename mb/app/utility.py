@@ -223,6 +223,7 @@ def generate_query_string(**kwargs):
 
 
 class QueryConfig(BaseModel):
+    region: str | None = None
     min_magnitude: float | None = None
     max_magnitude: float | None = None
     sub_category: str | None = None
