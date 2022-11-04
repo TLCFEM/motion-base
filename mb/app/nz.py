@@ -207,7 +207,7 @@ async def query_records(
     if query.page_number is None:
         query.page_number = 0
 
-    result, counter = await query_database(query.generate_query_string(), page_size, page_number, 'nz')
+    result, counter = await query_database(query.generate_query_string(), query.page_size, query.page_number, 'nz')
     if result:
         return MetadataListResponse(
             query=query.dict(), total=counter,
