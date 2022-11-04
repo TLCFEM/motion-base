@@ -18,13 +18,13 @@ from http import HTTPStatus
 from uuid import UUID
 
 import numpy as np
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Query, UploadFile
+from fastapi import APIRouter, BackgroundTasks, Body, Depends, HTTPException, Query, UploadFile
 
 from mb.app.process import processing_record
 from mb.app.response import MetadataListResponse, MetadataResponse, ResponseSpectrumResponse, SequenceResponse, \
     SequenceSpectrumResponse
 from mb.app.universal import query_database
-from mb.app.utility import User, create_task, generate_query_string, is_active, send_notification
+from mb.app.utility import QueryConfig, User, create_task, is_active, send_notification
 from mb.record.jp import NIED, ParserNIED, retrieve_single_record
 from mb.record.record import filter_regex, window_regex
 from mb.record.response_spectrum import response_spectrum
@@ -120,6 +120,7 @@ async def process_record(
 
 @router.post('/query', response_model=MetadataListResponse)
 async def query_records(
+        query: QueryConfig | None = Body(default=None),
         min_magnitude: float | None = Query(default=None, ge=0, le=10),
         max_magnitude: float | None = Query(default=None, ge=0, le=10),
         sub_category: str | None = Query(default=None, regex='^(knt|kik)$'),
@@ -141,31 +142,44 @@ async def query_records(
     """
     Query records from the database.
     """
-    query_dict: dict = generate_query_string(
-        min_magnitude=min_magnitude,
-        max_magnitude=max_magnitude,
-        sub_category=sub_category,
-        event_location=event_location,
-        station_location=station_location,
-        max_event_distance=max_event_distance,
-        max_station_distance=max_station_distance,
-        from_date=from_date,
-        to_date=to_date,
-        min_pga=min_pga,
-        max_pga=max_pga,
-        event_name=event_name,
-        direction=direction,
-    )
+    if query is None:
+        query = QueryConfig()
 
-    if page_size is None:
-        page_size = 10
-    if page_number is None:
-        page_number = 0
+    if min_magnitude is not None:
+        query.min_magnitude = min_magnitude
+    if max_magnitude is not None:
+        query.max_magnitude = max_magnitude
+    if sub_category is not None:
+        query.sub_category = sub_category
+    if event_location is not None:
+        query.event_location = event_location
+    if station_location is not None:
+        query.station_location = station_location
+    if max_event_distance is not None:
+        query.max_event_distance = max_event_distance
+    if max_station_distance is not None:
+        query.max_station_distance = max_station_distance
+    if from_date is not None:
+        query.from_date = from_date
+    if to_date is not None:
+        query.to_date = to_date
+    if min_pga is not None:
+        query.min_pga = min_pga
+    if max_pga is not None:
+        query.max_pga = max_pga
+    if event_name is not None:
+        query.event_name = event_name
+    if direction is not None:
+        query.direction = direction
+    if page_size is not None:
+        query.page_size = page_size
+    if page_number is not None:
+        query.page_number = page_number
 
-    result, counter = await query_database(query_dict, page_size, page_number, 'jp')
+    result, counter = await query_database(query.generate_query_string(), query.page_size, query.page_number, 'jp')
     if result:
         return MetadataListResponse(
-            query=query_dict, total=counter,
+            query=query.dict(), total=counter,
             result=[MetadataResponse(**r.dict(), endpoint='/jp/query') for record in result async for r in record])
 
     raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found')

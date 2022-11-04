@@ -156,72 +156,6 @@ def match_uuid(uuid_string: str):
     return uuid_regex.match(uuid_string) is not None
 
 
-def generate_query_string(**kwargs):
-    query_dict: dict = {'$and': []}
-
-    min_magnitude: float | None = kwargs.get('min_magnitude', None)
-    max_magnitude: float | None = kwargs.get('max_magnitude', None)
-
-    magnitude: dict = {}
-    if min_magnitude is not None:
-        magnitude['$gte'] = min_magnitude
-    if max_magnitude is not None:
-        magnitude['$lte'] = max_magnitude
-    if magnitude:
-        query_dict['$and'].append({'magnitude': magnitude})
-
-    sub_category: str | None = kwargs.get('sub_category', None)
-    if sub_category is not None:
-        query_dict['$and'].append({'sub_category': sub_category.lower()})
-
-    event_location: list | None = kwargs.get('event_location', None)
-    max_event_distance: float | None = kwargs.get('max_event_distance', None)
-    if event_location is not None:
-        query_dict['event_location'] = {'$nearSphere': event_location}
-        if max_event_distance is not None:
-            query_dict['event_location']['$maxDistance'] = max_event_distance / 6371
-
-    station_location: list | None = kwargs.get('station_location', None)
-    max_station_distance: float | None = kwargs.get('max_station_distance', None)
-    if station_location is not None:
-        query_dict['station_location'] = {'$nearSphere': station_location}
-        if max_station_distance is not None:
-            query_dict['station_location']['$maxDistance'] = max_station_distance / 6371
-
-    from_date: datetime | None = kwargs.get('from_date', None)
-    to_date: datetime | None = kwargs.get('to_date', None)
-    date_range: dict = {}
-    if from_date is not None:
-        date_range['$gte'] = from_date
-    if to_date is not None:
-        date_range['$lte'] = to_date
-    if date_range:
-        query_dict['$and'].append({'origin_time': date_range})
-
-    pga: dict = {}
-    min_pga: float | None = kwargs.get('min_pga', None)
-    max_pga: float | None = kwargs.get('max_pga', None)
-    if min_pga is not None:
-        pga['$gte'] = min_pga
-    if max_pga is not None:
-        pga['$lte'] = max_pga
-    if pga:
-        query_dict['$and'].append({'maximum_acceleration': pga})
-
-    direction = kwargs.get('direction', None)
-    if direction is not None:
-        query_dict['$and'].append({'direction': {'$regex': direction, '$options': 'i'}})
-
-    event_name = kwargs.get('event_name', None)
-    if event_name is not None:
-        query_dict['$and'].append({'file_name': {'$regex': event_name, '$options': 'i'}})
-
-    if not query_dict['$and']:
-        del query_dict['$and']
-
-    return query_dict
-
-
 class QueryConfig(BaseModel):
     region: str | None = None
     min_magnitude: float | None = None
@@ -237,5 +171,56 @@ class QueryConfig(BaseModel):
     max_pga: float | None = None
     event_name: str | None = None
     direction: str | None = None
-    page_size: int
-    page_number: int
+    page_size: int = 10
+    page_number: int = 0
+
+    def generate_query_string(self) -> dict:
+        query_dict: dict = {'$and': []}
+
+        magnitude: dict = {}
+        if self.min_magnitude is not None:
+            magnitude['$gte'] = self.min_magnitude
+        if self.max_magnitude is not None:
+            magnitude['$lte'] = self.max_magnitude
+        if magnitude:
+            query_dict['$and'].append({'magnitude': magnitude})
+
+        if self.sub_category is not None:
+            query_dict['$and'].append({'sub_category': self.sub_category.lower()})
+
+        if self.event_location is not None:
+            query_dict['event_location'] = {'$nearSphere': self.event_location}
+            if self.max_event_distance is not None:
+                query_dict['event_location']['$maxDistance'] = self.max_event_distance / 6371
+
+        if self.station_location is not None:
+            query_dict['station_location'] = {'$nearSphere': self.station_location}
+            if self.max_station_distance is not None:
+                query_dict['station_location']['$maxDistance'] = self.max_station_distance / 6371
+
+        date_range: dict = {}
+        if self.from_date is not None:
+            date_range['$gte'] = self.from_date
+        if self.to_date is not None:
+            date_range['$lte'] = self.to_date
+        if date_range:
+            query_dict['$and'].append({'origin_time': date_range})
+
+        pga: dict = {}
+        if self.min_pga is not None:
+            pga['$gte'] = self.min_pga
+        if self.max_pga is not None:
+            pga['$lte'] = self.max_pga
+        if pga:
+            query_dict['$and'].append({'maximum_acceleration': pga})
+
+        if self.direction is not None:
+            query_dict['$and'].append({'direction': {'$regex': self.direction, '$options': 'i'}})
+
+        if self.event_name is not None:
+            query_dict['$and'].append({'file_name': {'$regex': self.event_name, '$options': 'i'}})
+
+        if not query_dict['$and']:
+            del query_dict['$and']
+
+        return query_dict

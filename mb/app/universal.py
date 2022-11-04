@@ -41,11 +41,13 @@ async def query_database(query_dict: dict, page_size: int, page_number: int, reg
     counter = 0
     result = []
     if region == 'jp' or region is None:
-        counter += await NIED.find(query_dict).count()
-        result.append(NIED.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNIED))
+        find_result = NIED.find(query_dict)
+        counter += await find_result.count()
+        result.append(find_result.skip(page_number * page_size).limit(page_size).project(MetadataNIED))
 
     if region == 'nz' or region is None:
-        counter += await NZSM.find(query_dict).count()
-        result.append(NZSM.find(query_dict).skip(page_number * page_size).limit(page_size).project(MetadataNZSM))
+        find_result = NZSM.find(query_dict)
+        counter += await find_result.count()
+        result.append(find_result.skip(page_number * page_size).limit(page_size).project(MetadataNZSM))
 
     return result, counter
