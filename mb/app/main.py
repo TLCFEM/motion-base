@@ -184,6 +184,11 @@ async def query_records(
     if page_number is not None:
         query.page_number = page_number
 
+    if query.page_size is None:
+        query.page_size = 10
+    if query.page_number is None:
+        query.page_number = 0
+
     result, counter = await query_database(query.generate_query_string(), query.page_size, query.page_number)
     if result:
         return MetadataListResponse(
