@@ -27,6 +27,7 @@ from rich.console import Console
 from rich.progress import track
 
 from mb.app.response import SequenceSpectrumResponse
+from mb.app.utility import QueryConfig
 from mb.record.record import apply_filter, zero_stuff
 from mb.record.response_spectrum import response_spectrum
 
@@ -117,6 +118,9 @@ class MBRecord(SequenceSpectrumResponse):
         self.velocity_spectrum = spectra[:, 1]
         self.acceleration_spectrum = spectra[:, 2]
 
+    def print(self):
+        Console().print(self)
+
 
 class MBClient:
     def __init__(self, host_url: str | None = None, username: str | None = None, password: str | None = None, **kwargs):
@@ -168,6 +172,8 @@ class MBClient:
                 for r in record_id:
                     tg.start_soon(self.download, r, normalised)
 
+            return
+
         async with self.semaphore:
             self.current_download_size += 1
             result = await self.client.post(
@@ -176,11 +182,11 @@ class MBClient:
             if result.status_code != HTTPStatus.OK:
                 return
 
-            record = MBRecord(**result.json()[0])
+            record = MBRecord(**result.json()['records'][0])
             self.download_pool.append(record)
             self.print(
                 f'Successfully downloaded file [green]{record.file_name}[/]. '
-                f'[[red]{self.current_download_size}/{self.download_size}[/]].')
+                f'[[red]{self.current_download_size}/1[/]].')
 
     async def upload(self, region: str, path: str):
         if os.path.isdir(path):
@@ -225,8 +231,13 @@ class MBClient:
 
         return MBRecord(**result.json())
 
-    async def search(self, **kwargs):
-        pass
+    async def search(self, query: QueryConfig) -> list[MBRecord] | None:
+        result = await self.client.post('/query', json=query.dict())
+        if result.status_code != HTTPStatus.OK:
+            self.print('[red]Failed to perform query.[/]')
+            return None
+
+        return [MBRecord(**r) for r in result.json()['result']]
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f'/task/status/{task_id}')
@@ -253,6 +264,9 @@ async def main():
         # await anyio.sleep(10)
         # await client.status()
         await client.download('54e431f2-860a-50d0-9ec8-242bb65a434f')
+        result = await client.search(QueryConfig())
+        for r in result:
+            r.print()
 
 
 if __name__ == '__main__':

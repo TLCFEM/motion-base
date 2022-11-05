@@ -21,6 +21,7 @@ import ToggleButtonGroup from '@suid/material/ToggleButtonGroup'
 import SearchIcon from '@suid/icons-material/Search'
 import Stack from "@suid/material/Stack";
 import Card from "@suid/material/Card";
+import Switch from "@suid/material/Switch";
 
 const [records, set_records] = createStore<Array<Record>>([]);
 
@@ -108,24 +109,39 @@ const EventMap: Component = () => {
         let x: number = 0
         let y: number = 0
 
+        let event_loc: Set<number> = new Set()
+        let station_loc: Set<number> = new Set()
+
         records.forEach((record: Record) => {
-            const event_marker = L.marker(record.event_location.slice().reverse(), {icon: GreenIcon}).addTo(marker_layer)
-            const station_marker = L.marker(record.station_location.slice().reverse(), {icon: RedIcon}).addTo(marker_layer)
-            event_marker.bindPopup(record.id)
-            station_marker.bindPopup(record.id)
-            x += record.event_location[0] + record.station_location[0]
-            y += record.event_location[1] + record.station_location[1]
+            const t_event_loc = record.event_location.slice().reverse()
+            const t_hash = t_event_loc[0] * t_event_loc[1]
+            if (!event_loc.has(t_hash)) {
+                event_loc.add(t_event_loc[0] * t_event_loc[1])
+                const event_marker = L.marker(t_event_loc, {icon: GreenIcon}).addTo(marker_layer)
+                event_marker.bindPopup('Event')
+                x += t_event_loc[0]
+                y += t_event_loc[1]
+            }
+            if (show_station()) {
+                const t_station_loc = record.station_location.slice().reverse()
+                const t_hash = t_station_loc[0] * t_station_loc[1]
+                if (!station_loc.has(t_hash)) {
+                    station_loc.add(t_hash)
+                    const station_marker = L.marker(t_station_loc, {icon: RedIcon}).addTo(marker_layer)
+                    station_marker.bindPopup('Station')
+                }
+            }
         })
 
         if (records.length > 0) {
-            x /= 2 * records.length
-            y /= 2 * records.length
+            x /= event_loc.size
+            y /= event_loc.size
         } else {
-            x = 13.4247317
-            y = 52.5068441
+            x = 52.5068441
+            y = 13.4247317
         }
 
-        map.flyTo([y, x], 6)
+        map.flyTo([x, y], 6)
     })
 
     return <Card id='event_map'></Card>
@@ -142,9 +158,11 @@ const [event_log, set_event_log] = createSignal(0)
 const [station_lat, set_station_lat] = createSignal(0)
 const [station_log, set_station_log] = createSignal(0)
 const [direction, set_direction] = createSignal(null)
+const [show_station, set_show_station] = createSignal(false)
 
 async function fetch() {
-    let url = `/${alignment()}/query?page_size=${page_size() > 0 ? page_size() : 20}`
+    let url = alignment() ? `/${alignment()}/query` : `/query`
+    url += `?page_size=${page_size() > 0 ? page_size() : 20}`
     if (min_mag() > 0) url += `&min_magnitude=${min_mag()}`
     if (max_mag() > 0 && max_mag() >= min_mag()) url += `&max_magnitude=${max_mag()}`
     if (min_pga() > 0) url += `&min_pga=${min_pga()}`
@@ -163,6 +181,7 @@ function ColorToggleButton() {
     return (
         <ToggleButtonGroup color='primary' value={alignment()} exclusive onChange={(event, new_alignment) => {
             set_alignment(new_alignment);
+            console.log(alignment())
         }}>
             <ToggleButton value='jp'>Japan</ToggleButton>
             <ToggleButton value='nz'>New Zealand</ToggleButton>
@@ -391,6 +410,8 @@ function SearchConfig() {
                 }}/>
                 <ColorToggleButton/>
                 <Button variant='contained' id='clear' onClick={fetch}><SearchIcon/></Button>
+                <Switch id='show_station_location' checked={show_station()}
+                        onChange={() => set_show_station(!show_station())}/>
             </Stack>
         </Grid>
     </>;
