@@ -71,6 +71,45 @@ export class Record {
     public constructor(data: any) {
         Object.assign(this, data)
     }
+
+    public extract_waveform(name: string) {
+        if (this.id === '') return {}
+        return {
+            x: Array<number>(this.waveform?.length).fill(0).map((_, i) => i * this.time_interval),
+            y: this.waveform,
+            type: 'scatter', name: name
+        }
+    }
+
+    public extract_spectrum(name: string) {
+        if (this.id === '') return {}
+        return {
+            x: Array<number>(this.spectrum?.length).fill(0).map((_, i) => i * this.frequency_interval),
+            y: this.spectrum,
+            type: 'scatter', name: name
+        }
+    }
+
+    public extract_response_spectrum(name: string, kind: string) {
+        if (this.id === '') return {}
+
+        if (kind === 'SA') return {
+            x: this.period,
+            y: this.acceleration_spectrum,
+            type: 'scatter', name: name
+        }
+        if (kind === 'SV') return {
+            x: this.period,
+            y: this.velocity_spectrum,
+            type: 'scatter', name: name
+        }
+
+        return {
+            x: this.period,
+            y: this.displacement_spectrum,
+            type: 'scatter', name: name
+        }
+    }
 }
 
 export const Item = styled(Paper)(({theme}) => ({

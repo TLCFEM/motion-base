@@ -1,5 +1,5 @@
 import {Component, createEffect, createSignal, onMount} from "solid-js"
-import {axis_label, extract_response_spectrum, extract_spectrum, extract_waveform, Record} from "./Utility"
+import {axis_label, Record} from "./Utility"
 // @ts-ignore
 import Plotly from 'plotly.js-dist-min'
 import Grid from "@suid/material/Grid"
@@ -225,8 +225,8 @@ const MainCanvas = () => {
     createEffect(() => {
         Plotly.react(document.getElementById('main_canvas'),
             [
-                extract_waveform(original_record(), 'original'),
-                extract_waveform(processed_record(), 'processed')
+                original_record().extract_waveform('original'),
+                processed_record().extract_waveform('processed')
             ],
             {
                 autosize: true,
@@ -250,8 +250,8 @@ const SpectrumCanvas = () => {
     createEffect(() => {
         Plotly.react(document.getElementById('spectrum_canvas'),
             [
-                extract_spectrum(original_record(), 'original'),
-                extract_spectrum(processed_record(), 'processed'),
+                original_record().extract_spectrum('original'),
+                processed_record().extract_spectrum('processed'),
             ],
             {
                 autosize: true,
@@ -332,20 +332,20 @@ const ProcessPage: Component = () => {
                 : null}
             {show_response_spectrum()
                 ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
-                    extract_response_spectrum(original_record(), 'original', 'SA'),
-                    extract_response_spectrum(processed_record(), 'processed', 'SA')
+                    original_record().extract_response_spectrum('original', 'SA'),
+                    processed_record().extract_response_spectrum('processed', 'SA')
                 ], 'SA', 'sa_canvas')}</Grid>
                 : null}
             {show_response_spectrum()
                 ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
-                    extract_response_spectrum(original_record(), 'original', 'SV'),
-                    extract_response_spectrum(processed_record(), 'processed', 'SV')
+                    original_record().extract_response_spectrum('original', 'SV'),
+                    processed_record().extract_response_spectrum('processed', 'SV')
                 ], 'SV', 'sv_canvas')}</Grid>
                 : null}
             {show_response_spectrum()
                 ? <Grid item xs={response_spectrum_width()}>{ResponseSpectrum([
-                    extract_response_spectrum(original_record(), 'original', 'SD'),
-                    extract_response_spectrum(processed_record(), 'processed', 'SD')
+                    original_record().extract_response_spectrum('original', 'SD'),
+                    processed_record().extract_response_spectrum('processed', 'SD')
                 ], 'SD', 'sd_canvas')}</Grid>
                 : null}
         </Grid>
