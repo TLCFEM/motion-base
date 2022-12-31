@@ -51,7 +51,7 @@ class Token(BaseModel):
     token_type: str
 
 
-class UserInformation(BaseModel):
+class UserInformation(Document):
     username: str
     email: str
     last_name: str
@@ -60,13 +60,13 @@ class UserInformation(BaseModel):
     can_delete: bool
 
 
-class User(Document):
+class User(UserInformation):
     id: UUID = Field(default=None)
     hashed_password: str
     disabled: bool
 
-    def __init__(self, *args, **kwargs):
-        super().__init__(*args, **kwargs)
+    def __init__(self, *args, **data):
+        super().__init__(*args, **data)
         self.id = uuid5(NAMESPACE_OID, self.username)
 
 
