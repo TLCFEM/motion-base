@@ -31,55 +31,55 @@ class MetadataResponse(BaseModel):
         depth: depth of the event, in kilometer.
         maximum_acceleration: maximum acceleration (PGA) of the record, in cm/s/s.
     """
-    endpoint: str
+    endpoint: str = Field(...)
 
-    id: UUID
-    file_name: str | None
-    category: str | None
-    region: str | None
-    uploaded_by: UUID | None
+    id: UUID = Field(...)
+    file_name: str | None = Field(...)
+    category: str | None = Field(...)
+    region: str | None = Field(...)
+    uploaded_by: UUID | None = Field(...)
 
-    magnitude: float | None
-    maximum_acceleration: float | None
+    magnitude: float | None = Field(...)
+    maximum_acceleration: float | None = Field(...)
 
-    event_time: datetime | None
-    event_location: list[float, float] | None
-    depth: float | None
+    event_time: datetime | None = Field(...)
+    event_location: list[float, float] | None = Field(...)
+    depth: float | None = Field(...)
 
-    station_code: str | None
-    station_location: list[float, float] | None
-    station_elevation: float | None
-    station_elevation_unit: str | None
-    record_time: datetime | None
+    station_code: str | None = Field(...)
+    station_location: list[float, float] | None = Field(...)
+    station_elevation: float | None = Field(...)
+    station_elevation_unit: str | None = Field(...)
+    record_time: datetime | None = Field(...)
 
-    sampling_frequency: float | None
-    sampling_frequency_unit: str | None
-    duration: float | None
-    direction: str | None
-    scale_factor: float | None
+    sampling_frequency: float | None = Field(...)
+    sampling_frequency_unit: str | None = Field(...)
+    duration: float | None = Field(...)
+    direction: str | None = Field(...)
+    scale_factor: float | None = Field(...)
 
 
 class ListMetadataResponse(BaseModel):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    records: list[MetadataResponse]
+    records: list[MetadataResponse] = Field(...)
 
 
 class RecordResponse(MetadataResponse):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    time_interval: float | None
-    waveform: list[float] | None
+    time_interval: float | None = Field(...)
+    waveform: list[float] | None = Field(...)
 
-    frequency_interval: float | None
-    spectrum: list[float] | None
+    frequency_interval: float | None = Field(...)
+    spectrum: list[float] | None = Field(...)
 
-    period: list[float] | None
-    displacement_spectrum: list[float] | None
-    velocity_spectrum: list[float] | None
-    acceleration_spectrum: list[float] | None
+    period: list[float] | None = Field(...)
+    displacement_spectrum: list[float] | None = Field(...)
+    velocity_spectrum: list[float] | None = Field(...)
+    acceleration_spectrum: list[float] | None = Field(...)
 
 
 class ListRecordResponse(BaseModel):
