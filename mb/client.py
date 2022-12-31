@@ -210,11 +210,8 @@ class MBClient:
             for task_id in result.json()['task_id']:
                 self.tasks[task_id] = 0
 
-    async def jackpot(self, region: str) -> MBRecord | None:
-        if region not in ('jp', 'nz'):
-            raise ValueError('Region not supported.')
-
-        result = await self.client.get(f'/{region}/waveform/jackpot')
+    async def jackpot(self) -> MBRecord | None:
+        result = await self.client.get('/waveform/jackpot')
         if result.status_code != HTTPStatus.OK:
             self.print('[red]Failed to get jackpot waveform.[/]')
             return None
@@ -246,7 +243,7 @@ class MBClient:
 
 async def main():
     async with MBClient('http://localhost:8000', 'admin', 'admin') as client:
-        result = await client.jackpot('jp')
+        result = await client.jackpot()
         fig = result.plot_response_spectrum()
         fig.show()
         # await client.upload('jp', '/home/theodore/Downloads/ESR')

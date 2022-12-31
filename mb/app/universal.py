@@ -24,7 +24,5 @@ async def retrieve_record(record_id: UUID):
 
 async def query_database(query: QueryConfig):
     find_result = Record.find(query.generate_query_string())
-    counter = await find_result.count()
-    result = find_result.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
 
-    return result, counter
+    return find_result.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)

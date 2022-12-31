@@ -160,7 +160,7 @@ async def query_records(query_config: QueryConfig = Body(...)):
     """
     Query records from the database.
     """
-    result, counter = await query_database(query_config)
+    result = await query_database(query_config)
 
     if not result:
         raise HTTPException(HTTPStatus.NO_CONTENT, detail='No records found.')
