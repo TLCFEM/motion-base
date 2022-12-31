@@ -67,5 +67,5 @@ async def test_jackpot(mock_client, data_type):
 
 
 async def test_download_nz(mock_client):
-    response = await mock_client.post('/query')
+    response = await mock_client.post('/query', json={})
     assert response.status_code == HTTPStatus.OK

@@ -31,7 +31,7 @@ class MetadataResponse(BaseModel):
         depth: depth of the event, in kilometer.
         maximum_acceleration: maximum acceleration (PGA) of the record, in cm/s/s.
     """
-    endpoint: str = Field(...)
+    endpoint: str = Field(None)
 
     id: UUID = Field(...)
     file_name: str | None = Field(...)
