@@ -50,7 +50,7 @@ class ParserNIED:
             raise ValueError('Need archive name if archive is provided as a BinaryIO.')
 
         name_string = archive_name if archive_name is not None else archive_obj
-        sub_category = 'knt' if 'knt' in name_string else 'kik'
+        category = 'knt' if 'knt' in name_string else 'kik'
 
         kwargs = dict(mode='r:gz')
         if isinstance(archive_obj, str):
@@ -79,7 +79,7 @@ class ParserNIED:
                     record = await ParserNIED.parse_file(target)
                     record.uploaded_by = user_id
                     record.file_name = os.path.basename(f.name)
-                    record.sub_category = sub_category
+                    record.category = category
                     await record.save()
                     records.append(record.file_name)
                 except Exception as e:
@@ -206,7 +206,7 @@ class ParserNZSM:
             record.station_code = matches[3]
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path).upper()
-            record.sub_category = 'processed' if record.file_name.endswith('.V2A') else 'unprocessed'
+            record.category = 'processed' if record.file_name.endswith('.V2A') else 'unprocessed'
             await record.save()
             record_names.append(record.file_name)
 
@@ -235,7 +235,7 @@ class ParserNZSM:
         a_samples = int_header[33]
         a_lines = ceil(a_samples / 10)
         record.raw_data = [
-            int(NZSM.FTI * float(v)) for line in lines[offset:offset + a_lines] for v in ParserNZSM._split(line)
+            int(record.FTI * float(v)) for line in lines[offset:offset + a_lines] for v in ParserNZSM._split(line)
         ]
 
         return record

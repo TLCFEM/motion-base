@@ -40,7 +40,7 @@ export function DefaultMap(container: string, centre: number[]) {
 export class Record {
     public id: string = ''
     public file_name: string = ''
-    public sub_category: string = ''
+    public category: string = ''
     public magnitude: number = 0
     public event_time: string = ''
     public event_location: Array<number> = [13.4247317, 52.5068441]

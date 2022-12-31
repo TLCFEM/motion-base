@@ -118,7 +118,7 @@ class QueryConfig(BaseModel):
     region: str = Field(None)
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
-    sub_category: str = Field(None)
+    category: str = Field(None)
     event_location: list[float, float] = Field(None, min_items=2, max_items=2)
     station_location: list[float, float] = Field(None, min_items=2, max_items=2)
     max_event_distance: float = Field(None, ge=0)
@@ -146,8 +146,8 @@ class QueryConfig(BaseModel):
         if magnitude:
             query_dict['$and'].append({'magnitude': magnitude})
 
-        if self.sub_category is not None:
-            query_dict['$and'].append({'sub_category': self.sub_category.lower()})
+        if self.category is not None:
+            query_dict['$and'].append({'category': self.category.lower()})
 
         if self.event_location is not None:
             query_dict['event_location'] = {'$nearSphere': self.event_location}

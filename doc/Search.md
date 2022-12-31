@@ -17,10 +17,10 @@ Query a specific region, e.g., `region=jp`. If not specified, all regions will b
 
 The minimum and maximum magnitude of the records of interest.
 
-### `sub_category`
+### `category`
 
-The sub-category of the records of interest. Some databases have sub-categories. The Japanese database NIED, for
-example, has two sub-categories: `knt` and `kik`. In this case, `sub_category=knt` will query the records of the KNT
+The category of the records of interest. Some databases have categories. The Japanese database NIED, for
+example, has two categories: `knt` and `kik`. In this case, `category=knt` will query the records of the KNT
 network.
 
 ### `event_location` and `station_location`

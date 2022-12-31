@@ -69,7 +69,7 @@ function RecordEntry(record_entry: Record) {
     return <StyledTableRow>
         <StyledTableCell component='th' scope='row'>{record_entry.id}</StyledTableCell>
         <StyledTableCell>{record_entry.file_name}</StyledTableCell>
-        <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
+        <StyledTableCell>{record_entry.category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
         <StyledTableCell>{convert_time(record_entry.event_time)}</StyledTableCell>
         <StyledTableCell>{record_entry.depth} km</StyledTableCell>

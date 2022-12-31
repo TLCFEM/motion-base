@@ -125,6 +125,6 @@ class NZSM(Record):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.region = 'nz'
-        self.scale_factor = 1 / NZSM.FTI
+        self.scale_factor = 1 / self.FTI
         self.sampling_frequency_unit = str(pint.Unit('Hz'))
         self.raw_data_unit = str(pint.Unit('mm/s/s'))
