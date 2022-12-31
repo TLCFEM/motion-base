@@ -26,22 +26,12 @@ from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
 from rich.progress import track
 
-from mb.app.response import SequenceSpectrumResponse
-from mb.app.utility import QueryConfig
-from mb.record.record import apply_filter, zero_stuff
+from mb.app.response import QueryConfig, RecordResponse
 from mb.record.response_spectrum import response_spectrum
+from mb.record.utility import apply_filter, zero_stuff
 
 
-class MBRecord(SequenceSpectrumResponse):
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-        if 'waveform' in self.endpoint:
-            self.time_interval = kwargs.get('interval', None)
-            self.waveform = kwargs.get('data', None)
-        elif 'spectrum' in self.endpoint:
-            self.frequency_interval = kwargs.get('interval', None)
-            self.spectrum = kwargs.get('data', None)
-
+class MBRecord(RecordResponse):
     def filter(self, window, upsampling: int = 1):
         new_waveform: np.ndarray = apply_filter(window * upsampling, zero_stuff(upsampling, self.waveform))
         self.time_interval /= upsampling

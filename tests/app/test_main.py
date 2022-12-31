@@ -56,62 +56,17 @@ async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, sta
         assert response.status_code == status
 
 
-@pytest.mark.parametrize('collection_type', [
-    pytest.param('jp', id='jp'),
-    pytest.param('nz', id='nz')
-])
 @pytest.mark.parametrize('data_type', [
     pytest.param('raw', id='raw'),
     pytest.param('waveform', id='waveform'),
     pytest.param('spectrum', id='spectrum')
 ])
-async def test_jackpot(mock_client, data_type, collection_type):
-    response = await mock_client.get(f'/{collection_type}/{data_type}/jackpot')
+async def test_jackpot(mock_client, data_type):
+    response = await mock_client.get(f'/{data_type}/jackpot')
     assert response.status_code == HTTPStatus.OK
 
 
-@pytest.mark.parametrize('data_type', [
-    pytest.param('raw', id='raw'),
-    pytest.param('waveform', id='waveform'),
-    pytest.param('spectrum', id='spectrum')
-])
-@pytest.mark.parametrize('file_name,status', [
-    pytest.param('NIG0190412201728.EW', HTTPStatus.OK, id='correct-name'),
-    pytest.param('random-wrong-name-does-not-exist', HTTPStatus.NOT_FOUND, id='wrong-name')
-])
-async def test_download_jp(mock_client, data_type, file_name, status):
-    target_url = f'/jp/{data_type}/{file_name}?sub_category=knt'
-    if data_type == 'waveform':
-        target_url += '&normalised=true'
-    response = await mock_client.get(target_url)
-    assert response.status_code == status
-
-    data = response.json()
-    if 'id' in data:
-        response = await mock_client.post(f'/jp/process?record_id={data["id"]}&upsampling_rate=2')
-        assert response.status_code == HTTPStatus.OK
-
-
-@pytest.mark.parametrize('data_type', [
-    pytest.param('raw', id='raw'),
-    pytest.param('waveform', id='waveform'),
-    pytest.param('spectrum', id='spectrum')
-])
-@pytest.mark.parametrize('file_name,status', [
-    pytest.param('20030821_121249_BDCS.V2A', HTTPStatus.OK, id='correct-name'),
-    pytest.param('random-wrong-name-does-not-exist', HTTPStatus.NOT_FOUND, id='wrong-name')
-])
-async def test_download_nz(mock_client, data_type, file_name, status):
-    target_url = f'/nz/{data_type}/{file_name}'
-    if data_type == 'waveform':
-        target_url += '?normalised=true'
-    response = await mock_client.get(target_url)
-    assert response.status_code == status
-
-
 @pytest.mark.parametrize('collection_type', [
-    pytest.param('jp', id='jp'),
-    pytest.param('nz', id='nz'),
     pytest.param('', id='all')
 ])
 async def test_download_nz(mock_client, collection_type):

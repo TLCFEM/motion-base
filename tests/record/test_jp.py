@@ -17,7 +17,7 @@ from uuid import uuid4
 
 import pytest
 
-from mb.record.jp import ParserNIED
+from mb.record.parser import ParserNIED
 
 
 @pytest.mark.parametrize('file_path', ['data/SZO0039901271027.NS'])

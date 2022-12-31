@@ -34,22 +34,30 @@ const [original_record, set_original_record] = createSignal<Record>(new Record({
 const [processed_record, set_processed_record] = createSignal<Record>(new Record({}))
 
 async function fetch() {
-    let url = `/${region()}/process?record_id=${record_id()}&with_filter=false`
-    if (show_spectrum()) url += `&with_spectrum=true`
-    if (show_response_spectrum()) url += `&with_response_spectrum=true`
-    await axios.post(url).then(
+    const url = `/process?record_id=${record_id()}`
+    let query_data = {with_filter: false}
+    // @ts-ignore
+    if (show_spectrum()) query_data['with_spectrum'] = true
+    // @ts-ignore
+    if (show_response_spectrum()) query_data['with_response_spectrum'] = true
+    await axios.post(url, query_data).then(
         res => set_original_record(new Record(res.data))
     )
 
-    url = `/${region()}/process?record_id=${record_id()}`
-    url += `&with_filter=${filter_type() !== '' ? 'true' : 'false'}`
-    if (upsampling_rate()) url += `&upsampling_rate=${upsampling_rate()}`
-    if (filter_length()) url += `&filter_length=${filter_length()}`
-    if (low_cut()) url += `&low_cut=${low_cut()}`
-    if (high_cut()) url += `&high_cut=${high_cut()}`
-    if (show_spectrum()) url += '&with_spectrum=true'
-    if (show_response_spectrum()) url += '&with_response_spectrum=true'
-    await axios.post(url).then(
+    query_data.with_filter = filter_type() !== ''
+    // @ts-ignore
+    if (upsampling_rate()) query_data['ratio'] = upsampling_rate()
+    // @ts-ignore
+    if (filter_length()) query_data['filter_length'] = filter_length()
+    // @ts-ignore
+    if (low_cut()) query_data['low_cut'] = low_cut()
+    // @ts-ignore
+    if (high_cut()) query_data['high_cut'] = high_cut()
+    // @ts-ignore
+    if (show_spectrum()) query_data['with_spectrum'] = true
+    // @ts-ignore
+    if (show_response_spectrum()) query_data['with_response_spectrum'] = true
+    await axios.post(url, query_data).then(
         res => set_processed_record(new Record(res.data))
     )
 }

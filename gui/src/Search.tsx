@@ -32,7 +32,7 @@ function RecordTableHeader(pool: Array<Record>) {
         set_records(pool.slice().sort((a, b) => b.magnitude - a.magnitude))
 
     const sort_by_time = () =>
-        set_records(pool.slice().sort((a, b) => new Date(b.origin_time).getTime() - new Date(a.origin_time).getTime()))
+        set_records(pool.slice().sort((a, b) => new Date(b.event_time).getTime() - new Date(a.event_time).getTime()))
 
     onMount(() => {
         tippy('#table-header-mw', {
@@ -71,7 +71,7 @@ function RecordEntry(record_entry: Record) {
         <StyledTableCell>{record_entry.file_name}</StyledTableCell>
         <StyledTableCell>{record_entry.sub_category}</StyledTableCell>
         <StyledTableCell>{record_entry.magnitude.toFixed(2)}</StyledTableCell>
-        <StyledTableCell>{convert_time(record_entry.origin_time)}</StyledTableCell>
+        <StyledTableCell>{convert_time(record_entry.event_time)}</StyledTableCell>
         <StyledTableCell>{record_entry.depth} km</StyledTableCell>
         <StyledTableCell>{Math.abs(record_entry.maximum_acceleration).toFixed(1)}</StyledTableCell>
         <StyledTableCell>{record_entry.station_code}</StyledTableCell>
@@ -87,7 +87,7 @@ function RecordTable({pool}: { pool: Array<Record> }) {
             <RecordTableHeader {...pool}/>
             <TableBody>
                 <For each={pool}>
-                    {(record_entry) => <RecordEntry {...record_entry}/>}
+                    {(record_entry) => RecordEntry(record_entry)}
                 </For>
             </TableBody>
         </Table>

@@ -13,10 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
-from typing import List
 from uuid import UUID
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from mb.record.utility import filter_regex, window_regex
 
 
 class MetadataResponse(BaseModel):
@@ -33,85 +34,154 @@ class MetadataResponse(BaseModel):
     endpoint: str
 
     id: UUID
-    file_name: str
-    sub_category: str
-    magnitude: float
-    origin_time: datetime
-    event_location: list[float, float]
-    depth: float  # km
-    station_code: str
-    station_location: list[float, float]
-    sampling_frequency: float
-    sampling_frequency_unit: str
-    duration: float
-    direction: str
-    maximum_acceleration: float  # Gal
+    file_name: str | None
+    category: str | None
+    region: str | None
+    uploaded_by: UUID | None
+
+    magnitude: float | None
+    maximum_acceleration: float | None
+
+    event_time: datetime | None
+    event_location: list[float, float] | None
+    depth: float | None
+
+    station_code: str | None
+    station_location: list[float, float] | None
+    station_elevation: float | None
+    station_elevation_unit: str | None
+    record_time: datetime | None
+
+    sampling_frequency: float | None
+    sampling_frequency_unit: str | None
+    duration: float | None
+    direction: str | None
+    scale_factor: float | None
 
 
-class SequenceResponse(MetadataResponse):
+class ListMetadataResponse(BaseModel):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    interval: float
-    data: List[float]
+    records: list[MetadataResponse]
 
 
-class ListSequenceResponse(BaseModel):
+class RecordResponse(MetadataResponse):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    records: List[SequenceResponse]
+    time_interval: float | None
+    waveform: list[float] | None
+
+    frequency_interval: float | None
+    spectrum: list[float] | None
+
+    period: list[float] | None
+    displacement_spectrum: list[float] | None
+    velocity_spectrum: list[float] | None
+    acceleration_spectrum: list[float] | None
 
 
-class ResponseSpectrumResponse(MetadataResponse):
+class ListRecordResponse(BaseModel):
     """
-    Response represents a record that is a response spectrum.
+    Response represents a record which can be either waveform or spectrum.
     """
-    period: List[float]
-    displacement_spectrum: List[float]
-    velocity_spectrum: List[float]
-    acceleration_spectrum: List[float]
+    records: list[RecordResponse]
 
 
 class ProcessConfig(BaseModel):
-    upsampling_rate: float
-    filter_length: int
-    filter_type: str
-    window_type: str
-    low_cut: float
-    high_cut: float
-    damping_ratio: float
-    period_end: float
-    period_step: float
-    normalised: bool
-    with_filter: bool
-    with_spectrum: bool
-    with_response_spectrum: bool
+    ratio: int = Field(None, ge=1)
+    filter_length: int = Field(None, ge=8)
+    filter_type: str = Field(
+        'bandpass', regex=filter_regex,
+        description='filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`')
+    window_type: str = Field(
+        'nuttall', regex=window_regex,
+        description=
+        'window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`')
+    low_cut: float = Field(.05, ge=0)
+    high_cut: float = Field(40., ge=0)
+    damping_ratio: float = Field(.05, ge=0, le=1)
+    period_end: float = Field(20., ge=0)
+    period_step: float = Field(.05, ge=0)
+    normalised: bool = Field(False)
+    with_filter: bool = Field(False)
+    with_spectrum: bool = Field(False)
+    with_response_spectrum: bool = Field(False)
 
 
-class SequenceSpectrumResponse(MetadataResponse):
-    """
-    Response represents a record which contains both waveform and response spectrum.
-    """
-    time_interval: float | None
-    waveform: List[float] | None
-
-    frequency_interval: float | None
-    spectrum: List[float] | None
-
-    period: List[float] | None
-    displacement_spectrum: List[float] | None
-    velocity_spectrum: List[float] | None
-    acceleration_spectrum: List[float] | None
-
-    processing_parameters: ProcessConfig | None
+class ProcessedResponse(RecordResponse):
+    process_config: ProcessConfig
 
 
-class MetadataListResponse(BaseModel):
-    """
-    A list of IDs of the target records.
-    One can later use the ID to retrieve the record.
-    """
-    query: dict
-    total: int
-    result: list[MetadataResponse]
+class QueryConfig(BaseModel):
+    region: str = Field(None)
+    min_magnitude: float = Field(None, ge=0, le=10)
+    max_magnitude: float = Field(None, ge=0, le=10)
+    sub_category: str = Field(None)
+    event_location: list[float, float] = Field(None, min_items=2, max_items=2)
+    station_location: list[float, float] = Field(None, min_items=2, max_items=2)
+    max_event_distance: float = Field(None, ge=0)
+    max_station_distance: float = Field(None, ge=0)
+    from_date: datetime = Field(None)
+    to_date: datetime = Field(None)
+    min_pga: float = Field(None)
+    max_pga: float = Field(None)
+    event_name: str = Field(None)
+    direction: str = Field(None)
+    page_size: int = Field(10, ge=1, le=1000)
+    page_number: int = Field(0, ge=0)
+
+    def generate_query_string(self) -> dict:
+        query_dict: dict = {'$and': []}
+
+        if self.region is not None:
+            query_dict['$and'].append({'region': self.region})
+
+        magnitude: dict = {}
+        if self.min_magnitude is not None:
+            magnitude['$gte'] = self.min_magnitude
+        if self.max_magnitude is not None:
+            magnitude['$lte'] = self.max_magnitude
+        if magnitude:
+            query_dict['$and'].append({'magnitude': magnitude})
+
+        if self.sub_category is not None:
+            query_dict['$and'].append({'sub_category': self.sub_category.lower()})
+
+        if self.event_location is not None:
+            query_dict['event_location'] = {'$nearSphere': self.event_location}
+            if self.max_event_distance is not None:
+                query_dict['event_location']['$maxDistance'] = self.max_event_distance / 6371
+
+        if self.station_location is not None:
+            query_dict['station_location'] = {'$nearSphere': self.station_location}
+            if self.max_station_distance is not None:
+                query_dict['station_location']['$maxDistance'] = self.max_station_distance / 6371
+
+        date_range: dict = {}
+        if self.from_date is not None:
+            date_range['$gte'] = self.from_date
+        if self.to_date is not None:
+            date_range['$lte'] = self.to_date
+        if date_range:
+            query_dict['$and'].append({'event_time': date_range})
+
+        pga: dict = {}
+        if self.min_pga is not None:
+            pga['$gte'] = self.min_pga
+        if self.max_pga is not None:
+            pga['$lte'] = self.max_pga
+        if pga:
+            query_dict['$and'].append({'maximum_acceleration': pga})
+
+        if self.direction is not None:
+            query_dict['$and'].append({'direction': {'$regex': self.direction, '$options': 'i'}})
+
+        if self.event_name is not None:
+            query_dict['$and'].append({'file_name': {'$regex': self.event_name, '$options': 'i'}})
+
+        if not query_dict['$and']:
+            del query_dict['$and']
+
+        return query_dict

@@ -42,7 +42,7 @@ export class Record {
     public file_name: string = ''
     public sub_category: string = ''
     public magnitude: number = 0
-    public origin_time: string = ''
+    public event_time: string = ''
     public event_location: Array<number> = [13.4247317, 52.5068441]
     public depth: number = 0
     public station_code: string = ''

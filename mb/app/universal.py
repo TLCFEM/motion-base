@@ -12,42 +12,19 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import uuid
+from uuid import UUID
 
-from mb.app.response import SequenceResponse
-from mb.record.jp import MetadataNIED, NIED
-from mb.record.nz import MetadataNZSM, NZSM
-
-
-async def retrieve_record(record_id: uuid.UUID, normalised: bool) -> SequenceResponse | None:
-    result = await NIED.find_one(NIED.id == record_id)
-    if not result:
-        result = await NZSM.find_one(NZSM.id == record_id)
-
-    if not result:
-        return None
-
-    interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
-
-    # noinspection PyTypeChecker
-    return SequenceResponse(
-        **result.dict(),
-        endpoint=f'/waveform/{record_id}',
-        interval=interval,
-        data=record.tolist())
+from mb.app.response import QueryConfig
+from mb.record.record import Record, MetadataRecord
 
 
-async def query_database(query_dict: dict, page_size: int, page_number: int, region: str | None = None):
-    counter = 0
-    result = []
-    if region == 'jp' or region is None:
-        find_result = NIED.find(query_dict)
-        counter += await find_result.count()
-        result.append(find_result.skip(page_number * page_size).limit(page_size).project(MetadataNIED))
+async def retrieve_record(record_id: UUID):
+    return await Record.find_one(Record.id == record_id)
 
-    if region == 'nz' or region is None:
-        find_result = NZSM.find(query_dict)
-        counter += await find_result.count()
-        result.append(find_result.skip(page_number * page_size).limit(page_size).project(MetadataNZSM))
+
+async def query_database(query: QueryConfig):
+    find_result = Record.find(query.generate_query_string())
+    counter = await find_result.count()
+    result = find_result.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
 
     return result, counter
