@@ -111,16 +111,20 @@ async def for_test_only(tasks: BackgroundTasks):
     return {'task_id': task_id}
 
 
+async def get_random_record() -> Record:
+    result: list[Record] = await Record.aggregate([{'$sample': {'size': 1}}], projection_model=Record).to_list()
+    if result:
+        return result[0]
+
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail='Record not found')
+
+
 @app.get('/raw/jackpot', response_model=Record)
 async def download_single_random_raw_record():
     """
     Retrieve a single random record from the database.
     """
-    result: list[Record] = await Record.aggregate([{'$sample': {'size': 1}}]).to_list()
-    if result:
-        return result[0]
-
-    raise HTTPException(HTTPStatus.NO_CONTENT, detail='Record not found')
+    return await get_random_record()
 
 
 @app.get('/waveform/jackpot', response_model=RecordResponse)
@@ -128,7 +132,7 @@ async def download_single_random_waveform(normalised: bool = False):
     """
     Retrieve a single random waveform from the database.
     """
-    result: Record = await download_single_random_raw_record()
+    result: Record = await get_random_record()
 
     interval, record = result.to_waveform(normalised=normalised, unit='cm/s/s')
     # noinspection PyTypeChecker
@@ -144,7 +148,7 @@ async def download_single_random_spectrum():
     """
     Retrieve a single random spectrum from the database.
     """
-    result: Record = await download_single_random_raw_record()
+    result: Record = await get_random_record()
 
     frequency, record = result.to_spectrum()
     # noinspection PyTypeChecker

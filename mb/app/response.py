@@ -63,23 +63,23 @@ class ListMetadataResponse(BaseModel):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    records: list[MetadataResponse] = Field(...)
+    records: list[MetadataResponse] = Field(None)
 
 
 class RecordResponse(MetadataResponse):
     """
     Response represents a record which can be either waveform or spectrum.
     """
-    time_interval: float | None = Field(...)
-    waveform: list[float] | None = Field(...)
+    time_interval: float | None = Field(None)
+    waveform: list[float] | None = Field(None)
 
-    frequency_interval: float | None = Field(...)
-    spectrum: list[float] | None = Field(...)
+    frequency_interval: float | None = Field(None)
+    spectrum: list[float] | None = Field(None)
 
-    period: list[float] | None = Field(...)
-    displacement_spectrum: list[float] | None = Field(...)
-    velocity_spectrum: list[float] | None = Field(...)
-    acceleration_spectrum: list[float] | None = Field(...)
+    period: list[float] | None = Field(None)
+    displacement_spectrum: list[float] | None = Field(None)
+    velocity_spectrum: list[float] | None = Field(None)
+    acceleration_spectrum: list[float] | None = Field(None)
 
 
 class ListRecordResponse(BaseModel):

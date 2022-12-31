@@ -66,10 +66,6 @@ async def test_jackpot(mock_client, data_type):
     assert response.status_code == HTTPStatus.OK
 
 
-@pytest.mark.parametrize('collection_type', [
-    pytest.param('', id='all')
-])
-async def test_download_nz(mock_client, collection_type):
-    target_url = f'/{collection_type}/query' if collection_type != '' else '/query'
-    response = await mock_client.post(target_url)
+async def test_download_nz(mock_client):
+    response = await mock_client.post('/query')
     assert response.status_code == HTTPStatus.OK
