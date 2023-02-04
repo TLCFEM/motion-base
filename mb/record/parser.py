@@ -52,7 +52,7 @@ class ParserNIED:
         name_string = archive_name if archive_name is not None else archive_obj
         category = 'knt' if 'knt' in name_string else 'kik'
 
-        kwargs = dict(mode='r:gz')
+        kwargs: dict = {'mode': 'r:gz'}
         if isinstance(archive_obj, str):
             kwargs['name'] = archive_obj
         else:
