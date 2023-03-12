@@ -12,10 +12,10 @@
   "devDependencies": {
     "typescript": "^4.9.5",
     "vite": "^4.1.1",
-    "vite-plugin-solid": "^2.5.0"
+    "vite-plugin-solid": "^2.6.1"
   },
   "dependencies": {
-    "@solidjs/router": "^0.7.0",
+    "@solidjs/router": "^0.8.0",
     "@suid/icons-material": "^0.5.8",
     "@suid/material": "^0.10.1",
     "@suid/vite-plugin": "^0.1.2",
