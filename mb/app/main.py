@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import asyncio
+from contextlib import asynccontextmanager
 from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
@@ -34,11 +35,19 @@ from mb.app.utility import ACCESS_TOKEN_EXPIRE_MINUTES, Token, UploadTask, User,
 from mb.record.record import Record
 from mb.utility.config import init_mongo
 
+
+@asynccontextmanager
+async def lifespan(fastapi_app: FastAPI):
+    await init_mongo()
+    await create_superuser()
+    yield
+
 app = FastAPI(
     docs_url='/docs', title='Strong Motion Database',
     contact={'name': 'Theodore Chang', 'email': 'tlcfem@gmail.com'},
     description='A database for strong motion records.',
-    license_info={'name': 'GNU General Public License v3.0'}
+    license_info={'name': 'GNU General Public License v3.0'},
+    lifespan=lifespan
 )
 app.include_router(jp_router, prefix='/jp')
 app.include_router(nz_router, prefix='/nz')
@@ -50,12 +59,6 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
-
-
-@app.on_event('startup')
-async def init():
-    await init_mongo()
-    await create_superuser()
 
 
 @app.get('/', response_class=RedirectResponse)

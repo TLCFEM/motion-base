@@ -54,6 +54,7 @@ class Token(BaseModel):
 
 
 class UserInformation(Document):
+    id: UUID = Field(default=None)
     username: str
     email: str
     last_name: str
@@ -61,15 +62,14 @@ class UserInformation(Document):
     can_upload: bool
     can_delete: bool
 
-
-class User(UserInformation):
-    id: UUID = Field(default=None)
-    hashed_password: str
-    disabled: bool
-
     def __init__(self, *args, **data):
         super().__init__(*args, **data)
         self.id = uuid5(NAMESPACE_OID, self.username)
+
+
+class User(UserInformation):
+    hashed_password: str
+    disabled: bool
 
 
 crypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
