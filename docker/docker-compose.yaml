@@ -18,7 +18,7 @@ services:
   mongo-express:
     image: mongo-express
     container_name: mongo-express
-    restart: 'on-failure'
+    restart: 'no'
     depends_on:
       - mongo
     ports:
