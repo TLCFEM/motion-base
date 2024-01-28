@@ -23,8 +23,7 @@ from uuid import UUID
 import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
-from mb.app.utility import UploadTask, User, create_task, is_active, \
-    send_notification
+from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
 from mb.record.parser import ParserNZSM
 
 router = APIRouter(tags=['New Zealand'])
