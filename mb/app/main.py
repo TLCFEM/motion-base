@@ -37,7 +37,7 @@ from mb.utility.config import init_mongo
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI):  # ignore: unused-argument
+async def lifespan(fastapi_app: FastAPI):  # pylint: disable=unused-argument
     await init_mongo()
     await create_superuser()
     yield
