@@ -28,15 +28,12 @@ from mb.record.utility import apply_filter, get_window, zero_stuff, perform_fft
 def processing_record(result: Record, process_config: ProcessConfig):
     if process_config.low_cut >= process_config.high_cut:
         raise HTTPException(
-            HTTPStatus.BAD_REQUEST,
-            detail='Low cut frequency should be smaller than high cut frequency.')
+            HTTPStatus.BAD_REQUEST, detail="Low cut frequency should be smaller than high cut frequency."
+        )
 
-    record = ProcessedResponse(
-        **result.dict(),
-        endpoint='/process',
-        process_config=process_config)
+    record = ProcessedResponse(**result.dict(), endpoint="/process", process_config=process_config)
 
-    time_interval, waveform = result.to_waveform(normalised=process_config.normalised, unit='cm/s/s')
+    time_interval, waveform = result.to_waveform(normalised=process_config.normalised, unit="cm/s/s")
 
     if process_config.with_filter:
         new_interval = time_interval / process_config.ratio
@@ -47,24 +44,26 @@ def processing_record(result: Record, process_config: ProcessConfig):
         f1 = min(max(2 * process_config.high_cut * new_interval, f0 + float_eps), 1 - float_eps)
 
         freq_list: float | list[float]
-        if process_config.filter_type in ('bandpass', 'bandstop'):
+        if process_config.filter_type in ("bandpass", "bandstop"):
             freq_list = [f0, f1]
-        elif process_config.filter_type == 'lowpass':
+        elif process_config.filter_type == "lowpass":
             freq_list = f1
-        elif process_config.filter_type == 'highpass':
+        elif process_config.filter_type == "highpass":
             freq_list = f0
         else:
             raise HTTPException(
-                HTTPStatus.BAD_REQUEST,
-                detail='Filter type should be one of bandpass, bandstop, lowpass and highpass.')
+                HTTPStatus.BAD_REQUEST, detail="Filter type should be one of bandpass, bandstop, lowpass and highpass."
+            )
         new_waveform: np.ndarray = apply_filter(
             get_window(
                 process_config.filter_type,
                 process_config.window_type,
                 process_config.filter_length,
                 freq_list,
-                ratio=process_config.ratio),
-            zero_stuff(process_config.ratio, waveform))
+                ratio=process_config.ratio,
+            ),
+            zero_stuff(process_config.ratio, waveform),
+        )
     else:
         new_interval = time_interval
         new_waveform = waveform

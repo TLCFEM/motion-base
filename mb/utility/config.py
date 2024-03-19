@@ -24,15 +24,15 @@ from mb.record.record import Record
 
 
 def mongo_uri():
-    if not load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), '.env')):
-        raise RuntimeError('No .env file found')
-    username: str = os.getenv('MONGO_USERNAME')
-    password: str = os.getenv('MONGO_PASSWORD')
-    host: str = os.getenv('MONGO_HOST')
-    port: str = os.getenv('MONGO_PORT')
-    return f'mongodb://{username}:{password}@{host}:{port}/'
+    if not load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")):
+        raise RuntimeError("No .env file found")
+    username: str = os.getenv("MONGO_USERNAME")
+    password: str = os.getenv("MONGO_PASSWORD")
+    host: str = os.getenv("MONGO_HOST")
+    port: str = os.getenv("MONGO_PORT")
+    return f"mongodb://{username}:{password}@{host}:{port}/"
 
 
 async def init_mongo():
     client = AsyncIOMotorClient(mongo_uri())
-    await init_beanie(database=client['StrongMotion'], document_models=[Record, User, UploadTask])
+    await init_beanie(database=client["StrongMotion"], document_models=[Record, User, UploadTask])

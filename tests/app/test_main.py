@@ -19,53 +19,54 @@ import pytest
 
 
 async def test_alive(mock_client):
-    response = await mock_client.get('/alive')
+    response = await mock_client.get("/alive")
     assert response.status_code == 200
-    assert response.json() == {'message': 'I\'m alive!'}
+    assert response.json() == {"message": "I'm alive!"}
 
 
-@pytest.mark.parametrize('file_name,status', [
-    pytest.param('jp_test.knt.tar.gz', HTTPStatus.ACCEPTED, id='correct-name'),
-    pytest.param('wrong_name', HTTPStatus.ACCEPTED, id='wrong-name')
-])
-@pytest.mark.parametrize('if_wait', [
-    pytest.param('true', id='wait-for-result'),
-    pytest.param('false', id='no-wait')
-])
+@pytest.mark.parametrize(
+    "file_name,status",
+    [
+        pytest.param("jp_test.knt.tar.gz", HTTPStatus.ACCEPTED, id="correct-name"),
+        pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
+    ],
+)
+@pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
 async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
-    with open(os.path.join(pwd, 'data/jp_test.knt.tar.gz'), 'rb') as file:
-        files = {'archives': (file_name, file, "multipart/form-data")}
+    with open(os.path.join(pwd, "data/jp_test.knt.tar.gz"), "rb") as file:
+        files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
-            f'/jp/upload?wait_for_result={if_wait}', files=files, headers=mock_header)
+            f"/jp/upload?wait_for_result={if_wait}", files=files, headers=mock_header
+        )
         assert response.status_code == status
 
 
-@pytest.mark.parametrize('file_name,status', [
-    pytest.param('nz_test.tar.gz', HTTPStatus.ACCEPTED, id='correct-name'),
-    pytest.param('wrong_name', HTTPStatus.ACCEPTED, id='wrong-name')
-])
-@pytest.mark.parametrize('if_wait', [
-    pytest.param('true', id='wait-for-result'),
-    pytest.param('false', id='no-wait')
-])
+@pytest.mark.parametrize(
+    "file_name,status",
+    [
+        pytest.param("nz_test.tar.gz", HTTPStatus.ACCEPTED, id="correct-name"),
+        pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
+    ],
+)
+@pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
 async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
-    with open(os.path.join(pwd, 'data/nz_test.tar.gz'), 'rb') as file:
-        files = {'archives': (file_name, file, "multipart/form-data")}
+    with open(os.path.join(pwd, "data/nz_test.tar.gz"), "rb") as file:
+        files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
-            f'/nz/upload?wait_for_result={if_wait}', files=files, headers=mock_header)
+            f"/nz/upload?wait_for_result={if_wait}", files=files, headers=mock_header
+        )
         assert response.status_code == status
 
 
-@pytest.mark.parametrize('data_type', [
-    pytest.param('raw', id='raw'),
-    pytest.param('waveform', id='waveform'),
-    pytest.param('spectrum', id='spectrum')
-])
+@pytest.mark.parametrize(
+    "data_type",
+    [pytest.param("raw", id="raw"), pytest.param("waveform", id="waveform"), pytest.param("spectrum", id="spectrum")],
+)
 async def test_jackpot(mock_client, data_type):
-    response = await mock_client.get(f'/{data_type}/jackpot')
+    response = await mock_client.get(f"/{data_type}/jackpot")
     assert response.status_code == HTTPStatus.OK
 
 
 async def test_download_nz(mock_client):
-    response = await mock_client.post('/query', json={})
+    response = await mock_client.post("/query", json={})
     assert response.status_code == HTTPStatus.OK

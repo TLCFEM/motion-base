@@ -20,22 +20,24 @@ from numba import float64
 from numba.experimental import jitclass
 
 
-@jitclass([
-    ('omega', float64),
-    ('zeta', float64),
-    ('alpha', float64),
-    ('beta', float64),
-    ('gamma', float64),
-    ('a', float64),
-    ('b', float64),
-    ('c', float64),
-])
+@jitclass(
+    [
+        ("omega", float64),
+        ("zeta", float64),
+        ("alpha", float64),
+        ("beta", float64),
+        ("gamma", float64),
+        ("a", float64),
+        ("b", float64),
+        ("c", float64),
+    ]
+)
 class Oscillator:
     def __init__(self, o: float, z: float):
         self.omega: float = o
         self.zeta: float = z
         self.alpha: float = self.omega * self.zeta
-        self.beta: float = self.omega * np.sqrt(1 - self.zeta ** 2)
+        self.beta: float = self.omega * np.sqrt(1 - self.zeta**2)
         self.gamma: float = 0
         self.a: float = 0
         self.b: float = 0
@@ -54,9 +56,9 @@ class Oscillator:
 
         self.a = exp_term * np.sin(self.beta * interval) / self.beta
         self.b = 2 * exp_term * np.cos(self.beta * interval)
-        self.c = exp_term ** 2
+        self.c = exp_term**2
 
-        self.gamma = (1 - self.b + self.c) / self.a / interval / self.omega ** 2
+        self.gamma = (1 - self.b + self.c) / self.a / interval / self.omega**2
 
     def populate(self, motion: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         displacement: np.ndarray = np.zeros_like(motion, dtype=np.float64)
@@ -89,10 +91,13 @@ class Oscillator:
 
         displacement, velocity, acceleration = self.populate(motion)
 
-        return np.array([
-            self.amplitude(displacement) * self.factor * interval,
-            self.amplitude(velocity) * self.factor,
-            self.amplitude(acceleration * self.factor / interval + motion)])
+        return np.array(
+            [
+                self.amplitude(displacement) * self.factor * interval,
+                self.amplitude(velocity) * self.factor,
+                self.amplitude(acceleration * self.factor / interval + motion),
+            ]
+        )
 
 
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
@@ -102,8 +107,7 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 
-    spectrum = np.array(Parallel(n_jobs=os.cpu_count(), prefer='threads')(
-        delayed(compute_task)(p) for p in period))
+    spectrum = np.array(Parallel(n_jobs=os.cpu_count(), prefer="threads")(delayed(compute_task)(p) for p in period))
 
     return spectrum
 

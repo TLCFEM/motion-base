@@ -26,7 +26,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from mb.app.utility import UploadTask, User, create_task, is_active, send_notification
 from mb.record.parser import ParserNZSM
 
-router = APIRouter(tags=['New Zealand'])
+router = APIRouter(tags=["New Zealand"])
 
 _logger = structlog.get_logger(__name__)
 
@@ -37,21 +37,21 @@ async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_
         task = await UploadTask.find_one(UploadTask.id == task_id)
 
     records: list = []
-    with tarfile.open(mode='r:gz', fileobj=archive.file) as archive_obj:
+    with tarfile.open(mode="r:gz", fileobj=archive.file) as archive_obj:
         if task:
             task.total_size = len(archive_obj.getnames())
         for f in archive_obj:
             if task:
                 task.current_size += 1
                 await task.save()
-            if not f.name.endswith('.V2A'):
+            if not f.name.endswith(".V2A"):
                 continue
             target = archive_obj.extractfile(f)
             if target:
                 try:
                     records.extend(await ParserNZSM.parse_archive(target, user_id, os.path.basename(f.name)))
                 except Exception as e:
-                    _logger.critical('Failed to parse.', file_name=f.name, exe_info=e)
+                    _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
 
     if task:
         await task.delete()
@@ -61,24 +61,22 @@ async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_
 
 async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
     records: list = await _parse_archive_in_background(archive, user_id, task_id)
-    mail_body = 'The following records are parsed:\n'
-    mail_body += '\n'.join([f'{record}' for record in records])
-    mail = {'body': mail_body}
+    mail_body = "The following records are parsed:\n"
+    mail_body += "\n".join([f"{record}" for record in records])
+    mail = {"body": mail_body}
     await send_notification(mail)
 
 
-@router.post('/upload', status_code=HTTPStatus.ACCEPTED)
+@router.post("/upload", status_code=HTTPStatus.ACCEPTED)
 async def upload_archive(
-        archives: list[UploadFile],
-        tasks: BackgroundTasks,
-        user: User = Depends(is_active),
-        wait_for_result: bool = False):
+    archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
+):
     if not user.can_upload:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail='User is not allowed to upload.')
+        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
     valid_archives: list[UploadFile] = []
     for archive in archives:
-        if archive.filename.endswith('.tar.gz'):
+        if archive.filename.endswith(".tar.gz"):
             valid_archives.append(archive)
 
     if not wait_for_result:
@@ -88,11 +86,8 @@ async def upload_archive(
             tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
             task_id_pool.append(task_id)
 
-        return {
-            'message': 'successfully uploaded and will be processed in the background',
-            'task_id': task_id_pool
-        }
+        return {"message": "successfully uploaded and will be processed in the background", "task_id": task_id_pool}
 
     records: list = [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
 
-    return {'message': 'successfully uploaded and processed', 'records': list(itertools.chain.from_iterable(records))}
+    return {"message": "successfully uploaded and processed", "records": list(itertools.chain.from_iterable(records))}

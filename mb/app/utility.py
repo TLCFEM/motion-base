@@ -23,6 +23,7 @@ from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
+
 # noinspection PyPackageRequirements
 from jose import JWTError, jwt
 from passlib.context import CryptContext
@@ -33,8 +34,8 @@ class CredentialException(HTTPException):
     def __init__(self):
         super().__init__(
             HTTPStatus.UNAUTHORIZED,
-            detail='Could not validate credentials',
-            headers={'WWW-Authenticate': 'Bearer'},
+            detail="Could not validate credentials",
+            headers={"WWW-Authenticate": "Bearer"},
         )
 
 
@@ -72,19 +73,19 @@ class User(UserInformation):
     disabled: bool
 
 
-crypt_context = CryptContext(schemes=['bcrypt'], deprecated='auto')
+crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
 async def create_superuser():
     await User(
-        username=os.getenv('SUPERUSER_USERNAME'),
-        email=os.getenv('SUPERUSER_EMAIL'),
-        first_name=os.getenv('SUPERUSER_FIRST_NAME'),
-        last_name=os.getenv('SUPERUSER_LAST_NAME'),
-        hashed_password=crypt_context.hash(os.getenv('SUPERUSER_PASSWORD')),
+        username=os.getenv("SUPERUSER_USERNAME"),
+        email=os.getenv("SUPERUSER_EMAIL"),
+        first_name=os.getenv("SUPERUSER_FIRST_NAME"),
+        last_name=os.getenv("SUPERUSER_LAST_NAME"),
+        hashed_password=crypt_context.hash(os.getenv("SUPERUSER_PASSWORD")),
         disabled=False,
         can_upload=True,
-        can_delete=True
+        can_delete=True,
     ).save()
 
 
@@ -95,23 +96,23 @@ async def authenticate_user(username: str, password: str):
     return user
 
 
-OAUTH2 = OAuth2PasswordBearer(tokenUrl='token')
+OAUTH2 = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = os.getenv('SECRET_KEY')
-ALGORITHM = os.getenv('ALGORITHM', 'HS256')
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv('ACCESS_TOKEN_EXPIRE_MINUTES', '30'))
+SECRET_KEY = os.getenv("SECRET_KEY")
+ALGORITHM = os.getenv("ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
 
 
 def create_token(data: dict, expires_delta: timedelta | None = None):
     to_encode = data.copy()
-    to_encode.update({'exp': datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))})
+    to_encode.update({"exp": datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))})
     return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
 
 
 async def current_user(token: str = Depends(OAUTH2)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
-        username: str = payload.get('sub')
+        username: str = payload.get("sub")
         if username is None:
             raise CredentialException()
     except JWTError as e:
@@ -124,7 +125,7 @@ async def current_user(token: str = Depends(OAUTH2)):
 
 async def is_active(user: User = Depends(current_user)):
     if user.disabled:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail='Inactive user')
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Inactive user")
     return user
 
 
@@ -140,5 +141,5 @@ async def create_task():
 
 
 def match_uuid(uuid_string: str):
-    uuid_regex = re.compile(r'[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}')
+    uuid_regex = re.compile(r"[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}")
     return uuid_regex.match(uuid_string) is not None

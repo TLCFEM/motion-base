@@ -23,24 +23,24 @@ import mb.app.main
 
 def run_app(**kwargs):
     config = {}
-    if 'workers' in kwargs and kwargs['workers'] > 1:
-        config['workers'] = kwargs['workers']
-        config['log_level'] = 'info'
+    if "workers" in kwargs and kwargs["workers"] > 1:
+        config["workers"] = kwargs["workers"]
+        config["log_level"] = "info"
     else:
-        config['reload'] = True
-        config['log_level'] = 'debug'
+        config["reload"] = True
+        config["log_level"] = "debug"
 
-    if 'host' in kwargs:
-        config['host'] = kwargs['host']
+    if "host" in kwargs:
+        config["host"] = kwargs["host"]
 
-    if not load_dotenv(os.path.join(os.path.dirname(__file__), '.env')):
-        raise RuntimeError('No .env file found')
+    if not load_dotenv(os.path.join(os.path.dirname(__file__), ".env")):
+        raise RuntimeError("No .env file found")
 
-    uvicorn.run('mb.app.main:app', **config)
+    uvicorn.run("mb.app.main:app", **config)
 
 
 @click.command()
-@click.option('--workers', default=1, help='Number of workers.')
+@click.option("--workers", default=1, help="Number of workers.")
 def run(workers: int = 1):
     if workers > 1:
         run_app(workers=workers)
@@ -48,5 +48,5 @@ def run(workers: int = 1):
         run_app()
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     run()

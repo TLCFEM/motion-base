@@ -24,68 +24,52 @@ from pydantic import Field
 from mb.record.utility import normalise, convert_to, perform_fft
 
 DESCENDING = -1
-GEOSPHERE = '2dsphere'
+GEOSPHERE = "2dsphere"
 
 
 class MetadataRecord(Document):
     id: UUID = Field(default_factory=uuid4)
 
-    file_name: Indexed(str) = Field(
-        None, description='The original file name of the record.')
-    category: Indexed(str) = Field(
-        None, description='The category of the record.')
-    region: Indexed(str) = Field(
-        None, description='The region of the record.')
-    uploaded_by: UUID = Field(
-        None, description='The user who uploaded the record.')
+    file_name: Indexed(str) = Field(None, description="The original file name of the record.")
+    category: Indexed(str) = Field(None, description="The category of the record.")
+    region: Indexed(str) = Field(None, description="The region of the record.")
+    uploaded_by: UUID = Field(None, description="The user who uploaded the record.")
 
-    magnitude: Indexed(float, DESCENDING) = Field(
-        None, description='The magnitude of the record.')
-    maximum_acceleration: Indexed(float, DESCENDING) = Field(
-        None, description='PGA in Gal.')
+    magnitude: Indexed(float, DESCENDING) = Field(None, description="The magnitude of the record.")
+    maximum_acceleration: Indexed(float, DESCENDING) = Field(None, description="PGA in Gal.")
 
-    event_time: Indexed(datetime, DESCENDING) = Field(
-        None, description='The origin time of the record.')
+    event_time: Indexed(datetime, DESCENDING) = Field(None, description="The origin time of the record.")
     event_location: Indexed(list[float, float], GEOSPHERE) = Field(
-        None, description='The geolocation of the earthquake event.')
-    depth: Indexed(float) = Field(
-        None, description='The depth of the earthquake event in kilometer.')
+        None, description="The geolocation of the earthquake event."
+    )
+    depth: Indexed(float) = Field(None, description="The depth of the earthquake event in kilometer.")
 
-    station_code: str = Field(
-        None, description='The code of the station recording the record.')
+    station_code: str = Field(None, description="The code of the station recording the record.")
     station_location: Indexed(list[float, float], GEOSPHERE) = Field(
-        None, description='The geolocation of the station recording the record.')
-    station_elevation: float = Field(
-        None, description='The elevation of the station recording the record.')
+        None, description="The geolocation of the station recording the record."
+    )
+    station_elevation: float = Field(None, description="The elevation of the station recording the record.")
     station_elevation_unit: str = Field(
-        None, description='The unit of the elevation of the station recording the record.')
-    record_time: datetime = Field(
-        None, description='The time the record was recorded.')
+        None, description="The unit of the elevation of the station recording the record."
+    )
+    record_time: datetime = Field(None, description="The time the record was recorded.")
 
-    sampling_frequency: float = Field(
-        None, description='The sampling frequency of the record.')
-    sampling_frequency_unit: str = Field(
-        None, description='The unit of the sampling frequency of the record.')
-    duration: float = Field(
-        None, description='The duration of the record in seconds.')
-    direction: Indexed(str) = Field(
-        None, description='The direction of the record.')
-    scale_factor: float = Field(
-        None, description='The scale factor of the record.')
+    sampling_frequency: float = Field(None, description="The sampling frequency of the record.")
+    sampling_frequency_unit: str = Field(None, description="The unit of the sampling frequency of the record.")
+    duration: float = Field(None, description="The duration of the record in seconds.")
+    direction: Indexed(str) = Field(None, description="The direction of the record.")
+    scale_factor: float = Field(None, description="The scale factor of the record.")
 
     async def save(self, *args, **kwargs):
         if self.id is None:
-            self.id = uuid5(NAMESPACE_OID, f'{self.file_name}{self.category}{self.region}')
+            self.id = uuid5(NAMESPACE_OID, f"{self.file_name}{self.category}{self.region}")
         return await super().save(*args, **kwargs)
 
 
 class Record(MetadataRecord):
-    raw_data: list[int] = Field(
-        None, description='The raw acceleration data of the record.')
-    raw_data_unit: str = Field(
-        None, description='The unit of the raw acceleration data of the record.')
-    offset: float = Field(
-        0, description='The offset of the record.')
+    raw_data: list[int] = Field(None, description="The raw acceleration data of the record.")
+    raw_data_unit: str = Field(None, description="The unit of the raw acceleration data of the record.")
+    offset: float = Field(0, description="The offset of the record.")
 
     def to_raw_waveform(self) -> Tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data
@@ -94,13 +78,13 @@ class Record(MetadataRecord):
         sampling_interval: float = 1 / self.sampling_frequency
 
         numpy_array: np.ndarray = np.array(self.raw_data, dtype=float) + self.offset
-        normalised: bool = kwargs.get('normalised', False)
+        normalised: bool = kwargs.get("normalised", False)
         if normalised:
             numpy_array = normalise(numpy_array)
             unit = None
         else:
             numpy_array *= self.scale_factor
-            unit = kwargs.get('unit', None)
+            unit = kwargs.get("unit", None)
 
         return sampling_interval, convert_to(pint.Quantity(numpy_array, self.raw_data_unit), unit)
 
@@ -112,7 +96,7 @@ class Record(MetadataRecord):
 class NIED(Record):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.region = 'jp'
+        self.region = "jp"
 
     async def save(self, *args, **kwargs):
         self.offset = -sum(self.raw_data) / len(self.raw_data)
@@ -124,7 +108,7 @@ class NZSM(Record):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self.region = 'nz'
+        self.region = "nz"
         self.scale_factor = 1 / self.FTI
-        self.sampling_frequency_unit = str(pint.Unit('Hz'))
-        self.raw_data_unit = str(pint.Unit('mm/s/s'))
+        self.sampling_frequency_unit = str(pint.Unit("Hz"))
+        self.raw_data_unit = str(pint.Unit("mm/s/s"))

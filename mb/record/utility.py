@@ -38,7 +38,7 @@ def convert_to(quantity: pint.Quantity, unit: pint.Unit):
 
 
 def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
-    return np.convolve(waveform, window, mode='same')
+    return np.convolve(waveform, window, mode="same")
 
 
 @njit
@@ -50,30 +50,30 @@ def zero_stuff(ratio: int, waveform: np.ndarray | list[float]) -> np.ndarray:
     return output
 
 
-filter_regex = '^(lowpass|highpass|bandpass|bandstop)$'
-window_regex = '^(flattop|blackmanharris|nuttall|hann|hamming|kaiser|chebwin)$'
+filter_regex = "^(lowpass|highpass|bandpass|bandstop)$"
+window_regex = "^(flattop|blackmanharris|nuttall|hann|hamming|kaiser|chebwin)$"
 
 
 def get_window(filter_type: str, window_type: str, length: int, cutoff: float | list[float], **kwargs) -> np.ndarray:
-    if window_type == 'flattop':
-        window = ('flattop',)
-    elif window_type == 'blackmanharris':
-        window = ('blackmanharris',)
-    elif window_type == 'nuttall':
-        window = ('nuttall',)
-    elif window_type == 'hann':
-        window = ('hann',)
-    elif window_type == 'hamming':
-        window = ('hamming',)
-    elif window_type == 'kaiser':
-        beta = kwargs.get('beta', 9)
-        window = ('kaiser', beta)
-    elif window_type == 'chebwin':
-        at = kwargs.get('at', 80)
-        window = ('chebwin', at)
+    if window_type == "flattop":
+        window = ("flattop",)
+    elif window_type == "blackmanharris":
+        window = ("blackmanharris",)
+    elif window_type == "nuttall":
+        window = ("nuttall",)
+    elif window_type == "hann":
+        window = ("hann",)
+    elif window_type == "hamming":
+        window = ("hamming",)
+    elif window_type == "kaiser":
+        beta = kwargs.get("beta", 9)
+        window = ("kaiser", beta)
+    elif window_type == "chebwin":
+        at = kwargs.get("at", 80)
+        window = ("chebwin", at)
     else:
-        raise ValueError(f'Unknown window type: {window_type}')
+        raise ValueError(f"Unknown window type: {window_type}")
 
     bin_num = 2 * length + 1
 
-    return signal.firwin(bin_num, cutoff, window=window, pass_zero=filter_type) * kwargs.get('ratio', 1)
+    return signal.firwin(bin_num, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)

@@ -16,32 +16,9 @@
 
 from setuptools import find_packages, setup
 
-
-def install():
-    major = 0
-    minor = 0
-    patch = 0
-
-    with open('requirements.txt') as f:
-        required = f.read().splitlines()
-
-    setup(
-        name='motion-base',
-        version=f'{major}.{minor}.{patch}',
-        package_dir={
-            '': './'
-        },
-        packages=[f'mb.{pkg}' for pkg in find_packages('./mb')] + ['mb'],
-        description='A strong motion database',
-        author='Theodore Chang',
-        author_email='tlcfem@gmail.com',
-        install_requires=required,
-        entry_points={
-            'console_scripts': [
-                'mb = mb:run'
-            ]}
-    )
-
-
-if __name__ == '__main__':
-    install()
+setup(
+    version="0.0.0",
+    package_dir={"": "./"},
+    packages=[f"mb.{pkg}" for pkg in find_packages("./mb")] + ["mb"],
+    entry_points={"console_scripts": ["mb = mb:run"]},
+)
