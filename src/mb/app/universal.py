@@ -14,8 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from uuid import UUID
 
-from mb.app.response import QueryConfig
-from mb.record.record import Record, MetadataRecord
+from .response import QueryConfig
+from ..record.record import Record, MetadataRecord
 
 
 async def retrieve_record(record_id: UUID):

@@ -19,10 +19,10 @@ from http import HTTPStatus
 import numpy as np
 from fastapi import HTTPException
 
-from mb.app.response import ProcessConfig, ProcessedResponse
-from mb.record.record import Record
-from mb.record.response_spectrum import response_spectrum
-from mb.record.utility import apply_filter, get_window, zero_stuff, perform_fft
+from .response import ProcessConfig, ProcessedResponse
+from ..record.record import Record
+from ..record.response_spectrum import response_spectrum
+from ..record.utility import apply_filter, get_window, zero_stuff, perform_fft
 
 
 def processing_record(result: Record, process_config: ProcessConfig):

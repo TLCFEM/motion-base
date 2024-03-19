@@ -3,6 +3,6 @@ venv
 *.egg-info
 __pycache__
 build
-mb/app/dist
+src/mb/app/dist
 mp/gui/dist
 

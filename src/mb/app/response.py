@@ -19,7 +19,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Field
 
-from mb.record.utility import filter_regex, window_regex
+from ..record.utility import filter_regex, window_regex
 
 
 class MetadataResponse(BaseModel):

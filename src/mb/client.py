@@ -26,9 +26,9 @@ from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
 from rich.progress import track
 
-from mb.app.response import QueryConfig, RecordResponse
-from mb.record.response_spectrum import response_spectrum
-from mb.record.utility import apply_filter, zero_stuff
+from .app.response import QueryConfig, RecordResponse
+from .record.response_spectrum import response_spectrum
+from .record.utility import apply_filter, zero_stuff
 
 
 class MBRecord(RecordResponse):

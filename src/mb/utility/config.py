@@ -19,8 +19,8 @@ from beanie import init_beanie
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
-from mb.app.utility import UploadTask, User
-from mb.record.record import Record
+from ..app.utility import UploadTask, User
+from ..record.record import Record
 
 
 def mongo_uri():

@@ -18,8 +18,6 @@ import click
 import uvicorn
 from dotenv import load_dotenv
 
-import mb.app.main
-
 
 def run_app(**kwargs):
     config = {}

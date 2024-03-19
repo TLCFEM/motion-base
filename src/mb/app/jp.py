@@ -20,8 +20,8 @@ from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
-from mb.app.utility import User, create_task, is_active, send_notification
-from mb.record.parser import ParserNIED
+from .utility import User, create_task, is_active, send_notification
+from ..record.parser import ParserNIED
 
 router = APIRouter(tags=["Japan"])
 

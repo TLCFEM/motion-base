@@ -26,8 +26,8 @@ import aiofiles
 import pint
 import structlog
 
-from mb.app.utility import UploadTask
-from mb.record.record import NIED, NZSM
+from .record import NIED, NZSM
+from ..app.utility import UploadTask
 
 _logger = structlog.get_logger(__name__)
 

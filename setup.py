@@ -12,13 +12,11 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+from datetime import datetime
 
-
-from setuptools import find_packages, setup
+from setuptools import setup
 
 setup(
-    version="0.0.0",
-    package_dir={"": "./"},
-    packages=[f"mb.{pkg}" for pkg in find_packages("./mb")] + ["mb"],
+    version=datetime.now().strftime("%y%m%d%H"),
     entry_points={"console_scripts": ["mb = mb:run"]},
 )

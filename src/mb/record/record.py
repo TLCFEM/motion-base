@@ -21,7 +21,7 @@ import pint
 from beanie import Document, Indexed
 from pydantic import Field
 
-from mb.record.utility import normalise, convert_to, perform_fft
+from .utility import normalise, convert_to, perform_fft
 
 DESCENDING = -1
 GEOSPHERE = "2dsphere"

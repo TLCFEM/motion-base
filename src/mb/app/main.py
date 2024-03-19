@@ -25,12 +25,13 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from mb.app.jp import router as jp_router
-from mb.app.nz import router as nz_router
-from mb.app.process import processing_record
-from mb.app.response import ProcessConfig, ListMetadataResponse, QueryConfig, ProcessedResponse, RecordResponse
-from mb.app.universal import query_database, retrieve_record
-from mb.app.utility import (
+from src.mb.utility.config import init_mongo
+from .jp import router as jp_router
+from .nz import router as nz_router
+from .process import processing_record
+from .response import ProcessConfig, ListMetadataResponse, QueryConfig, ProcessedResponse, RecordResponse
+from .universal import query_database, retrieve_record
+from .utility import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     Token,
     UploadTask,
@@ -42,8 +43,7 @@ from mb.app.utility import (
     create_token,
     is_active,
 )
-from mb.record.record import Record
-from mb.utility.config import init_mongo
+from ..record.record import Record
 
 
 @asynccontextmanager
