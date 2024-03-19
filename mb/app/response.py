@@ -104,7 +104,7 @@ class ProcessConfig(BaseModel):
     window_type: str = Field(
         "nuttall",
         regex=window_regex,
-        description="window type, any of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`",
+        description="any window type of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`",
     )
     low_cut: float = Field(0.05, ge=0)
     high_cut: float = Field(40.0, ge=0)
