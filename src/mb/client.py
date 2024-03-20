@@ -26,9 +26,9 @@ from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from rich.console import Console
 from rich.progress import track
 
-from .app.response import QueryConfig, RecordResponse
-from .record.response_spectrum import response_spectrum
-from .record.utility import apply_filter, zero_stuff
+from mb.app.response import QueryConfig, RecordResponse
+from mb.record.response_spectrum import response_spectrum
+from mb.record.utility import apply_filter, zero_stuff
 
 
 class MBRecord(RecordResponse):
@@ -98,9 +98,9 @@ class MBRecord(RecordResponse):
             spectra = response_spectrum(
                 damping_ratio, self.time_interval, np.array(self.waveform), np.array(self.period)
             )
-        self.displacement_spectrum = spectra[:, 0]
-        self.velocity_spectrum = spectra[:, 1]
-        self.acceleration_spectrum = spectra[:, 2]
+        self.displacement_spectrum = spectra[:, 0].tolist()
+        self.velocity_spectrum = spectra[:, 1].tolist()
+        self.acceleration_spectrum = spectra[:, 2].tolist()
 
     def print(self):
         Console().print(self)
@@ -223,7 +223,7 @@ class MBClient:
             self.print("[red]Failed to perform query.[/]")
             return None
 
-        return [MBRecord(**r) for r in result.json()["result"]]
+        return [MBRecord(**r) for r in result.json()["records"]]
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f"/task/status/{task_id}")
@@ -249,7 +249,7 @@ async def main():
         # await client.status()
         # await anyio.sleep(10)
         # await client.status()
-        await client.download("54e431f2-860a-50d0-9ec8-242bb65a434f")
+        await client.download("fb0e7337-cd32-49ff-966d-1d43c3f1c635")
         result = await client.search(QueryConfig())
         for r in result:
             r.print()

@@ -104,8 +104,7 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
     def compute_task(p):
         if p == 0:
             return np.array([0, 0, Oscillator.amplitude(motion)])
-        oscillator = Oscillator(2 * np.pi / p, damping_ratio)
-        return oscillator.compute_maximum_response(interval, motion)
+        return Oscillator(2 * np.pi / p, damping_ratio).compute_maximum_response(interval, motion)
 
     return np.array(Parallel(n_jobs=os.cpu_count(), prefer="threads")(delayed(compute_task)(p) for p in period))
 
