@@ -42,9 +42,9 @@ class MBRecord(RecordResponse):
         fig = plt.figure()
         x_axis = np.arange(0, self.time_interval * len(self.waveform), self.time_interval)
         plt.plot(x_axis, self.waveform)
+        plt.title(f"{self.id}")
         plt.xlabel("Time (s)")
         plt.ylabel("Acceleration (Gal)")
-        plt.title(self.file_name)
         fig.tight_layout()
         return fig
 
@@ -55,9 +55,9 @@ class MBRecord(RecordResponse):
         fig = plt.figure()
         x_axis = np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval)
         plt.plot(x_axis, self.spectrum)
+        plt.title(f"{self.id}")
         plt.xlabel("Frequency (Hz)")
         plt.ylabel("Acceleration Magnitude (Gal)")
-        plt.title(self.file_name)
         fig.tight_layout()
         return fig
 
@@ -67,6 +67,7 @@ class MBRecord(RecordResponse):
 
         fig = plt.figure()
         fig.add_subplot(311)
+        plt.title(f"{self.id}")
         plt.plot(self.period, self.displacement_spectrum)
         plt.xlabel("Period (s)")
         plt.ylabel("SD")
@@ -242,17 +243,18 @@ class MBClient:
 
 async def main():
     async with MBClient("http://localhost:8000", "admin", "admin") as client:
-        result = await client.jackpot()
-        fig = result.plot_response_spectrum()
-        fig.show()
+        for _ in range(5):
+            result = await client.jackpot()
+            fig = result.plot_spectrum()
+            fig.show()
         # await client.upload('jp', '/home/theodore/Downloads/ESR')
         # await client.status()
         # await anyio.sleep(10)
         # await client.status()
-        await client.download("fb0e7337-cd32-49ff-966d-1d43c3f1c635")
-        result = await client.search(QueryConfig())
-        for r in result:
-            r.print()
+        # await client.download("fb0e7337-cd32-49ff-966d-1d43c3f1c635")
+        # result = await client.search(QueryConfig())
+        # for r in result:
+        #     r.print()
 
 
 if __name__ == "__main__":
