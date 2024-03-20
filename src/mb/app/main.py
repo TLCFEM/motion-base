@@ -25,7 +25,6 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from src.mb.utility.config import init_mongo
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import processing_record
@@ -44,6 +43,7 @@ from .utility import (
     is_active,
 )
 from ..record.record import Record
+from ..utility.config import init_mongo
 
 
 @asynccontextmanager

@@ -38,7 +38,7 @@ def processing_record(result: Record, process_config: ProcessConfig):
     if process_config.with_filter:
         new_interval = time_interval / process_config.ratio
 
-        float_eps = np.finfo(np.float32).eps
+        float_eps = float(np.finfo(np.float32).eps)
 
         f0 = min(max(2 * process_config.low_cut * new_interval, float_eps), 1 - float_eps)
         f1 = min(max(2 * process_config.high_cut * new_interval, f0 + float_eps), 1 - float_eps)

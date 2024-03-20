@@ -34,7 +34,7 @@ class CredentialException(HTTPException):
     def __init__(self):
         super().__init__(
             HTTPStatus.UNAUTHORIZED,
-            detail="Could not validate credentials",
+            detail="Could not validate credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -140,6 +140,8 @@ async def create_task():
     return task.id
 
 
+uuid_regex = re.compile(r"[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}")
+
+
 def match_uuid(uuid_string: str):
-    uuid_regex = re.compile(r"[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}")
     return uuid_regex.match(uuid_string) is not None
