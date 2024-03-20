@@ -1,6 +1,6 @@
 FROM node:18-slim as gui
 
-COPY ../gui /mb/gui
+COPY gui /mb/gui
 WORKDIR /mb/gui
 
 RUN sed -i 's/127.0.0.1/0.0.0.0/g' /mb/gui/src/index.tsx

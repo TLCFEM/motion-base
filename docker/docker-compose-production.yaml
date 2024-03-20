@@ -23,14 +23,14 @@ services:
       - mongo
     ports:
       - '8000:8000'
-  motion-base-front:
-    image: motion-base-front
-    container_name: motion-base-front
-    restart: 'no'
-    depends_on:
-      - mongo
-    ports:
-      - '4173:4173'
+#  motion-base-front:
+#    image: motion-base-front
+#    container_name: motion-base-front
+#    restart: 'no'
+#    depends_on:
+#      - mongo
+#    ports:
+#      - '4173:4173'
 
 volumes:
   motion_mongo:

@@ -100,10 +100,12 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    access_token = create_token(
-        data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+    return Token(
+        access_token=create_token(
+            data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
+        ),
+        token_type="bearer",
     )
-    return {"access_token": access_token, "token_type": "bearer"}
 
 
 @app.get("/whoami", tags=["account"], response_model=UserInformation)
@@ -179,7 +181,11 @@ async def query_records(query_config: QueryConfig = Body(...)):
     if not result:
         raise HTTPException(HTTPStatus.NO_CONTENT, detail="No records found.")
 
-    return ListMetadataResponse(records=await result.to_list())
+    response = ListMetadataResponse(records=await result.to_list())
+    for item in response.records:
+        item.endpoint = "/query"
+
+    return response
 
 
 @app.post("/process", response_model=ProcessedResponse)
