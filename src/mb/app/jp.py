@@ -20,6 +20,7 @@ from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
+from .response import UploadResponse
 from .utility import User, create_task, is_active, send_notification
 from ..record.parser import ParserNIED
 
@@ -27,10 +28,9 @@ router = APIRouter(tags=["Japan"])
 
 
 async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
-    records: list = await ParserNIED.parse_archive(
+    return await ParserNIED.parse_archive(
         archive_obj=archive.file, user_id=user_id, archive_name=archive.filename, task_id=task_id
     )
-    return records
 
 
 async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
@@ -41,7 +41,7 @@ async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, 
     await send_notification(mail)
 
 
-@router.post("/upload", status_code=HTTPStatus.ACCEPTED)
+@router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
 async def upload_archive(
     archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
 ):
@@ -63,8 +63,15 @@ async def upload_archive(
             tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
             task_id_pool.append(task_id)
 
-        return {"message": "successfully uploaded and will be processed in the background", "task_id": task_id_pool}
+        return UploadResponse(
+            message="Successfully uploaded and will be processed in the background.", task_ids=task_id_pool
+        )
 
-    records: list = [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
-
-    return {"message": "successfully uploaded and processed", "records": list(itertools.chain.from_iterable(records))}
+    return UploadResponse(
+        message="Successfully uploaded and processed.",
+        records=list(
+            itertools.chain.from_iterable(
+                [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
+            )
+        ),
+    )

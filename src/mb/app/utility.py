@@ -42,6 +42,7 @@ class CredentialException(HTTPException):
 class UploadTask(Document):
     id: UUID = Field(default_factory=uuid4)
     create_time: datetime = Field(default_factory=datetime.now)
+    pid: int = 0
     total_size: int = 0
     current_size: int = 0
 
@@ -92,9 +93,7 @@ async def create_superuser():
 
 async def authenticate_user(username: str, password: str):
     user = await User.find_one(User.username == username)
-    if not user or not crypt_context.verify(password, user.hashed_password):
-        return False
-    return user
+    return user if user and crypt_context.verify(password, user.hashed_password) else False
 
 
 OAUTH2 = OAuth2PasswordBearer(tokenUrl="token")
@@ -118,8 +117,7 @@ async def current_user(token: str = Depends(OAUTH2)):
             raise CredentialException()
     except JWTError as e:
         raise CredentialException() from e
-    user = await User.find_one(User.username == username)
-    if user is None:
+    if (user := await User.find_one(User.username == username)) is None:
         raise CredentialException()
     return user
 

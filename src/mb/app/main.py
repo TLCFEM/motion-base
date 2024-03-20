@@ -28,8 +28,14 @@ from fastapi.security import OAuth2PasswordRequestForm
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import processing_record
-from .response import ProcessConfig, ListMetadataResponse, QueryConfig, ProcessedResponse, RecordResponse
-from .universal import query_database, retrieve_record
+from .response import (
+    ProcessConfig,
+    ListMetadataResponse,
+    QueryConfig,
+    ProcessedResponse,
+    RecordResponse,
+    RawRecordResponse,
+)
 from .utility import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
     Token,
@@ -42,7 +48,7 @@ from .utility import (
     create_token,
     is_active,
 )
-from ..record.record import Record
+from ..record.record import Record, MetadataRecord
 from ..utility.config import init_mongo
 
 
@@ -85,16 +91,14 @@ async def alive():
 
 @app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTask)
 async def get_task_status(task_id: UUID) -> UploadTask:
-    task = await UploadTask.find_one(UploadTask.id == task_id)
-    if task is None:
+    if (task := await UploadTask.find_one(UploadTask.id == task_id)) is None:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished.")
     return task
 
 
 @app.post("/token", tags=["account"], response_model=Token)
 async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    user = await authenticate_user(form_data.username, form_data.password)
-    if not user:
+    if not (user := await authenticate_user(form_data.username, form_data.password)):
         raise HTTPException(
             HTTPStatus.UNAUTHORIZED,
             detail="Incorrect username or password",
@@ -115,8 +119,7 @@ async def retrieve_myself(user: User = Depends(is_active)):
 
 async def async_task(task_id: UUID):
     await asyncio.sleep(10)
-    task = await UploadTask.find_one(UploadTask.id == task_id)
-    if task:
+    if task := await UploadTask.find_one(UploadTask.id == task_id):
         await task.delete()
 
 
@@ -135,12 +138,13 @@ async def get_random_record() -> Record:
     raise HTTPException(HTTPStatus.NO_CONTENT, detail="Record not found.")
 
 
-@app.get("/raw/jackpot", response_model=Record)
+@app.get("/raw/jackpot", response_model=RawRecordResponse)
 async def download_single_random_raw_record():
     """
     Retrieve a single random record from the database.
     """
-    return await get_random_record()
+    result: Record = await get_random_record()
+    return RawRecordResponse(**result.dict(), endpoint="/raw/jackpot")
 
 
 @app.get("/waveform/jackpot", response_model=RecordResponse)
@@ -172,27 +176,29 @@ async def download_single_random_spectrum():
 
 
 @app.post("/query", response_model=ListMetadataResponse)
-async def query_records(query_config: QueryConfig = Body(...)):
+async def query_records(query: QueryConfig = Body(...)):
     """
     Query records from the database.
     """
-    result = await query_database(query_config)
-
-    if not result:
+    if not (
+            result := (
+                    Record.find(query.generate_query_string())
+                            .skip(query.page_number * query.page_size)
+                            .limit(query.page_size)
+                            .project(MetadataRecord)
+            )
+    ):
         raise HTTPException(HTTPStatus.NO_CONTENT, detail="No records found.")
 
-    response = ListMetadataResponse(records=await result.to_list())
+    response: ListMetadataResponse = ListMetadataResponse(records=await result.to_list())
     for item in response.records:
         item.endpoint = "/query"
-
     return response
 
 
 @app.post("/process", response_model=ProcessedResponse)
 async def process_record(record_id: UUID, process_config: ProcessConfig = Body(...)):
-    result = await retrieve_record(record_id)
+    if result := await Record.find_one(Record.id == record_id):
+        return processing_record(result, process_config)
 
-    if not result:
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")
-
-    return processing_record(result, process_config)
+    raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")

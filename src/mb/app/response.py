@@ -70,6 +70,16 @@ class ListMetadataResponse(BaseModel):
     records: list[MetadataResponse] = Field(None)
 
 
+class RawRecordResponse(MetadataResponse):
+    """
+    Response represents a record which can be either waveform or spectrum.
+    """
+
+    raw_data: list[int] | None = Field(None)
+    raw_data_unit: str | None = Field(None)
+    offset: float | None = Field(None)
+
+
 class RecordResponse(MetadataResponse):
     """
     Response represents a record which can be either waveform or spectrum.
@@ -119,6 +129,12 @@ class ProcessConfig(BaseModel):
 
 class ProcessedResponse(RecordResponse):
     process_config: ProcessConfig
+
+
+class UploadResponse(BaseModel):
+    message: str
+    task_ids: list | None = Field(None)
+    records: list | None = Field(None)
 
 
 class QueryConfig(BaseModel):

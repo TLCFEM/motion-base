@@ -64,6 +64,7 @@ class ParserNIED:
         records = []
         with tarfile.open(**kwargs) as archive:
             if task:
+                task.pid = os.getpid()
                 task.total_size = len(archive.getnames())
             for f in archive:
                 if task:
