@@ -19,7 +19,7 @@ import re
 import tarfile
 from datetime import datetime
 from math import ceil
-from typing import BinaryIO, IO, Tuple
+from typing import BinaryIO, IO
 from uuid import UUID
 
 import aiofiles
@@ -249,7 +249,7 @@ class ParserNZSM:
             yield line[i : i + size]
 
     @staticmethod
-    def _parse_header(lines: list[str]) -> Tuple[list, list]:
+    def _parse_header(lines: list[str]) -> tuple[list, list]:
         int_header = [int(v) for line in lines[16:20] for v in ParserNZSM._split(line)]
         float_header = [float(v) for line in lines[20:26] for v in ParserNZSM._split(line)]
         return int_header, float_header

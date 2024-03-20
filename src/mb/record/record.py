@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
-from typing import Tuple
 from uuid import UUID, uuid4, NAMESPACE_OID, uuid5
 
 import numpy as np
@@ -71,10 +70,10 @@ class Record(MetadataRecord):
     raw_data_unit: str = Field(None, description="The unit of the raw acceleration data of the record.")
     offset: float = Field(0, description="The offset of the record.")
 
-    def to_raw_waveform(self) -> Tuple[float, list]:
+    def to_raw_waveform(self) -> tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data
 
-    def to_waveform(self, **kwargs) -> Tuple[float, np.ndarray]:
+    def to_waveform(self, **kwargs) -> tuple[float, np.ndarray]:
         sampling_interval: float = 1 / self.sampling_frequency
 
         numpy_array: np.ndarray = np.array(self.raw_data, dtype=float) + self.offset
@@ -88,7 +87,7 @@ class Record(MetadataRecord):
 
         return sampling_interval, convert_to(pint.Quantity(numpy_array, self.raw_data_unit), unit)
 
-    def to_spectrum(self, **kwargs) -> Tuple[float, np.ndarray]:
+    def to_spectrum(self, **kwargs) -> tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(**kwargs)
         return perform_fft(self.sampling_frequency, waveform)
 
