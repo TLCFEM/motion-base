@@ -41,6 +41,7 @@ class CredentialException(HTTPException):
 
 class UploadTask(Document):
     id: UUID = Field(default_factory=uuid4)
+    create_time: datetime = Field(default_factory=datetime.now)
     total_size: int = 0
     current_size: int = 0
 
