@@ -15,12 +15,15 @@
 import os
 
 import click
+import structlog
 import uvicorn
 from dotenv import load_dotenv
 
+_logger = structlog.get_logger(__name__)
+
 
 def run_app(**kwargs):
-    config = {}
+    config: dict = {}
     if "workers" in kwargs and kwargs["workers"] > 1:
         config["workers"] = kwargs["workers"]
         config["log_level"] = "info"
@@ -31,8 +34,10 @@ def run_app(**kwargs):
     if "host" in kwargs:
         config["host"] = kwargs["host"]
 
-    if not load_dotenv(os.path.join(os.path.dirname(__file__), ".env")):
-        raise RuntimeError("No .env file found.")
+    if load_dotenv(os.path.join(os.path.dirname(__file__), ".env")):
+        _logger.info("Using .env file.")
+    else:
+        _logger.info("No .env file found.")
 
     uvicorn.run("mb.app.main:app", **config)
 

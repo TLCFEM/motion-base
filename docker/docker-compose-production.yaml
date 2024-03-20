@@ -23,6 +23,19 @@ services:
       - mongo
     ports:
       - '8000:8000'
+    environment:
+      SECRET_KEY: ${SECRET_KEY}
+      ALGORITHM: ${ALGORITHM}
+      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
+      SUPERUSER_USERNAME: ${SUPERUSER_USERNAME}
+      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL}
+      SUPERUSER_FIRST_NAME: ${SUPERUSER_FIRST_NAME}
+      SUPERUSER_LAST_NAME: ${SUPERUSER_LAST_NAME}
+      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
+      MONGO_HOST: ${MONGO_HOST}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
 #  motion-base-front:
 #    image: motion-base-front
 #    container_name: motion-base-front

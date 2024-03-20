@@ -16,7 +16,6 @@
 import os
 
 from beanie import init_beanie
-from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from ..app.utility import UploadTask, User
@@ -24,12 +23,13 @@ from ..record.record import Record
 
 
 def mongo_uri():
-    if not load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")):
-        raise RuntimeError("No .env file found.")
     username: str = os.getenv("MONGO_USERNAME")
     password: str = os.getenv("MONGO_PASSWORD")
     host: str = os.getenv("MONGO_HOST")
     port: str = os.getenv("MONGO_PORT")
+    if username is None or password is None or host is None or port is None:
+        raise RuntimeError("Missing mongo related environment variables.")
+
     return f"mongodb://{username}:{password}@{host}:{port}/"
 
 
