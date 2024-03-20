@@ -30,7 +30,7 @@ dependencies = [
     "joblib",
     "matplotlib",
     "numba",
-    "passlib[bcrypt]",
+    "passlib",
     "Pint",
     "pydantic<2",
     "python-dotenv",

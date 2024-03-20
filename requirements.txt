@@ -7,7 +7,6 @@
 aiofiles==23.2.1          # via motion-base (pyproject.toml)
 anyio==3.7.1              # via fastapi, httpx, starlette
 astroid==3.1.0            # via pylint
-bcrypt==4.1.2             # via passlib
 beanie==1.25.0            # via motion-base (pyproject.toml)
 black==24.3.0             # via motion-base (pyproject.toml)
 certifi==2024.2.2         # via httpcore, httpx
@@ -42,7 +41,7 @@ mypy-extensions==1.0.0    # via black
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
 packaging==24.0           # via black, matplotlib, pytest
-passlib[bcrypt]==1.7.4    # via motion-base (pyproject.toml)
+passlib==1.7.4            # via motion-base (pyproject.toml)
 pathspec==0.12.1          # via black
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)

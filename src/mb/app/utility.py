@@ -73,7 +73,7 @@ class User(UserInformation):
     disabled: bool
 
 
-crypt_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
+crypt_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 
 async def create_superuser():
