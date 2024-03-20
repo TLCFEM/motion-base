@@ -31,7 +31,7 @@ import plotlylogo from './assets/plotly.svg'
 import leaflletlogo from './assets/leaflet.svg'
 import Jackpot from "./Jackpot"
 import Container from "@suid/material/Container"
-import {Navigate, Route, Routes} from '@solidjs/router'
+import { Navigate, Route } from '@solidjs/router'
 import ProcessPage from "./Process"
 import SearchPage from "./Search"
 import axios from "axios";
@@ -121,14 +121,14 @@ const App: Component = () => {
             </Typography>
             <ButtonStack/>
         </Toolbar></AppBar>
-        <Box>
-            <Routes>
-                <Route path='/' element={<Navigate href={({navigate, location}) => '/jackpot'}/>}/>
-                <Route path='/jackpot' component={Jackpot}/>
-                <Route path='/search' component={SearchPage}/>
-                <Route path='/process' component={ProcessPage}/>
-            </Routes>
-        </Box>
+        {/*<Box>*/}
+        {/*    <Routes>*/}
+        {/*        /!*<Route path='/' element={<Navigate href={({navigate, location}) => '/jackpot'}/>}/>*!/*/}
+        {/*        <Route path='/jackpot' component={Jackpot}/>*/}
+        {/*        <Route path='/search' component={SearchPage}/>*/}
+        {/*        <Route path='/process' component={ProcessPage}/>*/}
+        {/*    </Routes>*/}
+        {/*</Box>*/}
         <AboutModal/>
     </Container>
 }

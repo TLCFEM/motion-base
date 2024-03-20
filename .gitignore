@@ -1,8 +1,5 @@
-venv
+.venv
 .idea
 *.egg-info
 __pycache__
 build
-src/mb/app/dist
-mp/gui/dist
-
