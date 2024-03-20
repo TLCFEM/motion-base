@@ -1,7 +1,11 @@
-from locust import HttpUser, task
+from locust import task, FastHttpUser
 
 
-class HelloWorldUser(HttpUser):
+class HelloWorldUser(FastHttpUser):
     @task
-    def hello_world(self):
+    def raw(self):
         self.client.get("/raw/jackpot")
+
+    @task
+    def waveform(self):
+        self.client.get("/waveform/jackpot")
