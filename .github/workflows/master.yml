@@ -27,7 +27,7 @@ jobs:
           mongodb-db: StrongMotion
       - name: Lint
         run: |
-          pylint mb
+          pylint src
       - name: Test
         run: |
           pytest --cov .
