@@ -1,11 +1,17 @@
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { jackpot, SeismicRecord } from "./API";
-import { Card, CardContent, Paper, Typography } from "@suid/material";
-import L, { LatLng, LatLngExpression } from "leaflet";
+import { Button, Card, CardContent, Paper, Typography } from "@suid/material";
+import L, { LatLng } from "leaflet";
+import earthquake from "./assets/earthquake.svg";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
 
-jackpot().then((r) => setData(r));
+function load_once() { // load on
+    // e
+    jackpot().then((r) => setData(r));
+}
+
+load_once();
 
 interface ItemProps {
     label: string;
@@ -47,37 +53,28 @@ const MetadataCard: Component = () => {
     );
 };
 
-const LeafIcon = L.Icon.extend({
-    options: {
-        iconSize: [38, 95],
-        shadowSize: [50, 64],
-        iconAnchor: [22, 94],
-        shadowAnchor: [4, 62],
-        popupAnchor: [-3, -76],
-    },
-});
-
 export function DefaultMap(container: string, centre: LatLng) {
     const map: L.Map = L.map(container).setView(centre, 6);
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 19,
-        // attribution: "© OpenStreetMap",
+        attribution: "© OpenStreetMap"
     }).addTo(map);
     return map;
 }
 
-// @ts-ignore
-const greenIcon = new LeafIcon({
-    iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-green.png",
+
+const LeafIcon = L.Icon.extend({
+    options: {
+        iconSize: [50, 50],
+        iconAnchor: [25, 25],
+        popupAnchor: [0, -20]
+    }
 });
+
 // @ts-ignore
-const redIcon = new LeafIcon({
-    iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-red.png",
-});
-// @ts-ignore
-const orangeIcon = new LeafIcon({
-    iconUrl: "https://leafletjs.com/examples/custom-icons/leaf-orange.png",
+const epicenterIcon = new LeafIcon({
+    iconUrl: earthquake
 });
 
 const Epicenter: Component = () => {
@@ -86,48 +83,46 @@ const Epicenter: Component = () => {
     let station_marker: L.Marker;
 
     onMount(() => {
-        const event_location = new LatLng(0, 0);
-        const station_location = new LatLng(0, 0);
+        const event_location = new LatLng(13.4247317, 52.5068441);
+        const station_location = new LatLng(13.4247317, 52.5068441);
 
         map = DefaultMap("epicenter", event_location);
 
-        event_marker = L.marker(event_location, { icon: greenIcon }).addTo(map);
-        station_marker = L.marker(station_location, { icon: greenIcon }).addTo(
-            map,
-        );
-
-        event_marker.bindPopup("Event");
-        station_marker.bindPopup("Station");
+        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(map);
+        station_marker = L.marker(station_location).addTo(map);
     });
 
     createEffect(() => {
-        const metadata = data();
+        const current_record = data();
 
         const event_location = new LatLng(
-            metadata.event_location[1],
-            metadata.event_location[0],
+            current_record.event_location[1],
+            current_record.event_location[0]
         );
         const station_location = new LatLng(
-            metadata.station_location[1],
-            metadata.station_location[0],
+            current_record.station_location[1],
+            current_record.station_location[0]
         );
         map.flyTo(event_location, 6);
 
         event_marker.setLatLng(event_location);
         station_marker.setLatLng(station_location);
+
+        event_marker.bindPopup("Event Location: " + event_marker.getLatLng().toString());
+        station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
     });
 
-    return <div id="epicenter" />;
+    return <Card id="epicenter" />;
 };
 
 const App: Component = () => {
-    // return (
-    //     <>
-    //         <MetadataCard />
-    //         <Epicenter />
-    //     </>
-    // );
-    return <Epicenter />;
+    return (
+        <>
+            <MetadataCard />
+            <Button onClick={() => load_once()}>Reload</Button>
+            <Epicenter />
+        </>
+    );
 };
 
 export default App;

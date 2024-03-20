@@ -48,12 +48,12 @@ export class SeismicRecord {
         if (data?.event_location) {
             this.event_location = data?.event_location;
         } else {
-            this.event_location = [0, 0];
+            this.event_location = [13.4247317, 52.5068441];
         }
         if (data?.station_location) {
             this.station_location = data?.station_location;
         } else {
-            this.station_location = [0, 0];
+            this.station_location = [13.4247317, 52.5068441];
         }
     }
 }
