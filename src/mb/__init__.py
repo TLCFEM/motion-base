@@ -12,14 +12,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-import os
 
 import click
-import structlog
 import uvicorn
-from dotenv import load_dotenv
-
-_logger = structlog.get_logger(__name__)
 
 
 def run_app(**kwargs):
@@ -33,11 +28,6 @@ def run_app(**kwargs):
 
     if "host" in kwargs:
         config["host"] = kwargs["host"]
-
-    if load_dotenv(os.path.join(os.path.dirname(__file__), ".env")):
-        _logger.info("Using .env file.")
-    else:
-        _logger.info("No .env file found.")
 
     uvicorn.run("mb.app.main:app", **config)
 
