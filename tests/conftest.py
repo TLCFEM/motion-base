@@ -15,6 +15,7 @@
 import os.path
 
 import pytest
+from dotenv import load_dotenv
 from httpx import AsyncClient
 
 from mb.app.main import app
@@ -24,6 +25,7 @@ from mb.utility.config import init_mongo
 
 @pytest.fixture(scope="function", autouse=True)
 async def mongo_connection():
+    load_dotenv(os.path.join(os.path.dirname(__file__), "../docker/.env"))
     await init_mongo()
 
 

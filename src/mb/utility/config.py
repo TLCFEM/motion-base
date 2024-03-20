@@ -15,23 +15,14 @@
 
 import os
 
-import structlog
 from beanie import init_beanie
-from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from ..app.utility import UploadTask, User
 from ..record.record import Record
 
-_logger = structlog.get_logger(__name__)
-
 
 def mongo_uri():
-    if load_dotenv(os.path.join(os.path.dirname(os.path.dirname(__file__)), ".env")):
-        _logger.info("Using .env file.")
-    else:
-        _logger.info("No .env file found.")
-
     username: str = os.getenv("MONGO_USERNAME")
     password: str = os.getenv("MONGO_PASSWORD")
     host: str = os.getenv("MONGO_HOST")

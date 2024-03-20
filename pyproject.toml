@@ -45,6 +45,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "black",
+    "locust",
     "pylint",
     "pytest-asyncio",
     "pytest-cov",
