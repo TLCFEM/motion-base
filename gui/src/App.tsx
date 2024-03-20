@@ -81,80 +81,53 @@ const orangeIcon = new LeafIcon({
 });
 
 const Epicenter: Component = () => {
-    onMount(() => {
-        const map = L.map("epicenter").setView([51.505, -0.09], 13);
-
-        const tiles = L.tileLayer(
-            "https://tile.openstreetmap.org/{z}/{x}/{y}.png",
-            {
-                maxZoom: 19,
-                attribution:
-                    '&copy; <a href="http://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            },
-        ).addTo(map);
-
-        const marker = L.marker([51.5, -0.09]).addTo(map);
-
-        const circle = L.circle([51.508, -0.11], {
-            color: "red",
-            fillColor: "#f03",
-            fillOpacity: 0.5,
-            radius: 500,
-        }).addTo(map);
-
-        const polygon = L.polygon([
-            [51.509, -0.08],
-            [51.503, -0.06],
-            [51.51, -0.047],
-        ]).addTo(map);
-    });
-
-    // let map: L.Map;
-    // let event_marker: L.Marker;
-    // let station_marker: L.Marker;
+    let map: L.Map;
+    let event_marker: L.Marker;
+    let station_marker: L.Marker;
 
     onMount(() => {
-        // const event_location = new LatLng(0, 0);
-        // const station_location = new LatLng(0, 0);
-        //
-        // map = DefaultMap("epicenter", event_location);
-        //
-        // event_marker = L.marker(event_location, { icon: greenIcon }).addTo(map);
-        // station_marker = L.marker(station_location, { icon: greenIcon }).addTo(
-        //     map,
-        // );
-        //
-        // event_marker.bindPopup("Event");
-        // station_marker.bindPopup("Station");
+        const event_location = new LatLng(0, 0);
+        const station_location = new LatLng(0, 0);
+
+        map = DefaultMap("epicenter", event_location);
+
+        event_marker = L.marker(event_location, { icon: greenIcon }).addTo(map);
+        station_marker = L.marker(station_location, { icon: greenIcon }).addTo(
+            map,
+        );
+
+        event_marker.bindPopup("Event");
+        station_marker.bindPopup("Station");
     });
 
-    // createEffect(() => {
-    //     const metadata = data();
-    //
-    //     const event_location = new LatLng(
-    //         metadata.event_location[1],
-    //         metadata.event_location[0],
-    //     );
-    //     const station_location = new LatLng(
-    //         metadata.station_location[1],
-    //         metadata.station_location[0],
-    //     );
-    //     map.flyTo(event_location, 6);
-    //
-    //     event_marker.setLatLng(event_location);
-    //     station_marker.setLatLng(station_location);
-    // });
+    createEffect(() => {
+        const metadata = data();
 
-    return <Paper id="epicenter"></Paper>;
+        const event_location = new LatLng(
+            metadata.event_location[1],
+            metadata.event_location[0],
+        );
+        const station_location = new LatLng(
+            metadata.station_location[1],
+            metadata.station_location[0],
+        );
+        map.flyTo(event_location, 6);
+
+        event_marker.setLatLng(event_location);
+        station_marker.setLatLng(station_location);
+    });
+
+    return <div id="epicenter" />;
 };
 
 const App: Component = () => {
-    return (
-        <>
-            <Epicenter />
-            <MetadataCard />
-        </>
-    );
+    // return (
+    //     <>
+    //         <MetadataCard />
+    //         <Epicenter />
+    //     </>
+    // );
+    return <Epicenter />;
 };
 
 export default App;
