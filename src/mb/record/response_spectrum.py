@@ -107,9 +107,7 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         oscillator = Oscillator(2 * np.pi / p, damping_ratio)
         return oscillator.compute_maximum_response(interval, motion)
 
-    spectrum = np.array(Parallel(n_jobs=os.cpu_count(), prefer="threads")(delayed(compute_task)(p) for p in period))
-
-    return spectrum
+    return np.array(Parallel(n_jobs=os.cpu_count(), prefer="threads")(delayed(compute_task)(p) for p in period))
 
 
 def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:

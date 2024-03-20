@@ -125,7 +125,7 @@ async def current_user(token: str = Depends(OAUTH2)):
 
 async def is_active(user: User = Depends(current_user)):
     if user.disabled:
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Inactive user")
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Inactive user.")
     return user
 
 

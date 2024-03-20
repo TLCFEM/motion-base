@@ -130,7 +130,7 @@ async def get_random_record() -> Record:
     if result:
         return result[0]
 
-    raise HTTPException(HTTPStatus.NO_CONTENT, detail="Record not found")
+    raise HTTPException(HTTPStatus.NO_CONTENT, detail="Record not found.")
 
 
 @app.get("/raw/jackpot", response_model=Record)

@@ -33,7 +33,7 @@ def normalise(magnitude: np.ndarray) -> np.ndarray:
     return magnitude
 
 
-def convert_to(quantity: pint.Quantity, unit: pint.Unit):
+def convert_to(quantity: pint.Quantity, unit: pint.Unit | None):
     return quantity.to(unit).magnitude if unit else quantity.magnitude
 
 
@@ -66,14 +66,10 @@ def get_window(filter_type: str, window_type: str, length: int, cutoff: float | 
     elif window_type == "hamming":
         window = ("hamming",)
     elif window_type == "kaiser":
-        beta = kwargs.get("beta", 9)
-        window = ("kaiser", beta)
+        window = ("kaiser", kwargs.get("beta", 9))
     elif window_type == "chebwin":
-        at = kwargs.get("at", 80)
-        window = ("chebwin", at)
+        window = ("chebwin", kwargs.get("at", 80))
     else:
-        raise ValueError(f"Unknown window type: {window_type}")
+        raise ValueError(f"Unknown window type: {window_type}.")
 
-    bin_num = 2 * length + 1
-
-    return signal.firwin(bin_num, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)
+    return signal.firwin(2 * length + 1, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)

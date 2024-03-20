@@ -125,9 +125,9 @@ class ParserNIED:
     def _parse_unit(line: str) -> str:
         matches = re.findall(r"\(([^)]+)\)", line)
         if len(matches) == 0:
-            raise ValueError(f"No unit found in line: {line}")
+            raise ValueError(f"No unit found in line: {line}.")
         if len(matches) > 1:
-            raise ValueError(f"Multiple units found in line: {line}")
+            raise ValueError(f"Multiple units found in line: {line}.")
 
         return matches[0]
 
@@ -156,9 +156,9 @@ class ParserNIED:
     def _parse_value(line: str) -> str:
         matches = re.findall(r"([0-9.]+)", line)
         if len(matches) == 0:
-            raise ValueError(f"No value found in line: {line}")
+            raise ValueError(f"No value found in line: {line}.")
         if len(matches) > 1:
-            raise ValueError(f"Multiple values found in line: {line}")
+            raise ValueError(f"Multiple values found in line: {line}.")
         return matches[0]
 
 
@@ -166,9 +166,7 @@ class ParserNZSM:
     @staticmethod
     def validate_file(file_path: str):
         lower_path = file_path.lower()
-        if lower_path.endswith(".v2a"):
-            return
-        if lower_path.endswith(".v1a"):
+        if lower_path.endswith((".v2a", ".v1a")):
             return
 
         raise ValueError("NZSM archive file should be a V2A/V1A file.")
