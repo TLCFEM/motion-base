@@ -1,6 +1,6 @@
 import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
-import { DefaultMap } from "./Map";
+import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import {
     Button,
     Card,
@@ -215,17 +215,20 @@ const Overview: Component = () => {
         map.on("moveend", update_location);
     });
 
-    let laglon_map = new Map<number, L.Marker>();
+    let station_map = new Map<number, L.Marker>();
+    let event_map = new Map<number, L.Marker>();
 
     createEffect(() => {
-        for (const marker of laglon_map.values()) marker.remove();
-        laglon_map.clear();
+        for (const marker of station_map.values()) marker.remove();
+        station_map.clear();
+        for (const marker of event_map.values()) marker.remove();
+        event_map.clear();
 
         for (const record of records()) {
-            const key = record.station_location[0] * record.station_location[1];
+            let key = record.station_location[0] * record.station_location[1];
 
-            if (laglon_map.has(key)) {
-                const marker = laglon_map.get(key);
+            if (station_map.has(key)) {
+                const marker = station_map.get(key);
 
                 marker?.bindPopup(
                     `${marker?.getPopup()?.getContent()}</br>${record.id}`,
@@ -236,10 +239,32 @@ const Overview: Component = () => {
                         record.station_location[1],
                         record.station_location[0],
                     ),
+                    { icon: stationIcon },
                 ).addTo(map);
 
                 marker.bindPopup(record.id);
-                laglon_map.set(key, marker);
+                station_map.set(key, marker);
+            }
+
+            key = record.event_location[0] * record.event_location[1];
+
+            if (event_map.has(key)) {
+                const marker = event_map.get(key);
+
+                marker?.bindPopup(
+                    `${marker?.getPopup()?.getContent()}</br>${record.id}`,
+                );
+            } else {
+                const marker = L.marker(
+                    new LatLng(
+                        record.event_location[1],
+                        record.event_location[0],
+                    ),
+                    { icon: epicenterIcon },
+                ).addTo(map);
+
+                marker.bindPopup(record.id);
+                event_map.set(key, marker);
             }
         }
     });
