@@ -2,6 +2,7 @@ import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { jackpot_waveform, SeismicRecord } from "./API";
 import { Box, Button, Card, CardActions, CardContent, Grid, Typography } from "@suid/material";
 import L, { LatLng } from "leaflet";
+import "leaflet/dist/leaflet.css";
 import { DefaultMap, epicenterIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
 
