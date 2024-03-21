@@ -1,10 +1,13 @@
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { jackpot_waveform, SeismicRecord } from "./API";
-import { Box, Button, Card, CardActions, CardContent, Grid, Typography } from "@suid/material";
+import { Box, Button, Card, CardActions, CardContent, Grid, Popover, Typography } from "@suid/material";
 import L, { LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { DefaultMap, epicenterIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+import "tippy.js/animations/scale.css";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
 
@@ -15,8 +18,16 @@ function load_once() {
 load_once();
 
 interface ItemProps {
+    tooltip?: string;
     label: string;
     value: string | number;
+}
+
+function distance_between(a: number[], b: number[]) {
+    const event_location = new LatLng(a[1], a[0]);
+    const station_location = new LatLng(b[1], b[0]);
+
+    return event_location.distanceTo(station_location);
 }
 
 const MetadataCard: Component = () => {
@@ -33,29 +44,41 @@ const MetadataCard: Component = () => {
             { label: "PGA (Gal, cm/s^2)", value: data().maximum_acceleration },
             { label: `Sampling Frequency (${data().sampling_frequency_unit})`, value: data().sampling_frequency },
             { label: "Event Time", value: data().event_time.toUTCString() },
-            { label: "Record Time", value: data().record_time.toUTCString() }
+            { label: "Record Time", value: data().record_time.toUTCString() },
+            {
+                tooltip: "Distance between event and station locations over the delay between event and record times.",
+                label: "Approximated Speed (km/s)",
+                value: (distance_between(data().event_location, data().station_location) / (data().record_time.getTime() - data().event_time.getTime())).toFixed(2)
+            }
         ]);
     });
 
-    return (
-        <Card>
-            <CardContent>
-                {metadata().map((item) => (
-                    <>
-                        <Typography color="text.secondary" variant="subtitle2">
-                            {item.label}
-                        </Typography>
-                        <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                            {item.value}
-                        </Typography>
-                    </>
-                ))}
-            </CardContent>
-            <CardActions sx={{ justifyContent: "flex-end" }}>
-                <Button variant="contained" onClick={() => load_once()}>Next</Button>
-            </CardActions>
-        </Card>
-    );
+    onMount(() => {
+        tippy(`#btn-next`, {
+            content: "Get another random record from the database.",
+            animation: "scale",
+            theme: "translucent"
+        });
+    });
+
+    return <Card sx={{ border: "1px solid darkgrey", height: "96vh", display: "flex", flexDirection: "column" }}>
+        <CardContent sx={{ flexGrow: 1 }}>
+            {metadata().map((item) => (
+                <>
+                    <Typography color="text.secondary" variant="subtitle2"
+                                id={item.label.toLowerCase().replace(new RegExp("[\s\(\)/]", "g"), "_")}>
+                        {item.label}
+                    </Typography>
+                    <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                        {item.value}
+                    </Typography>
+                </>
+            ))}
+        </CardContent>
+        <CardActions sx={{ justifyContent: "flex-end" }}>
+            <Button id="btn-next" variant="contained" onClick={() => load_once()}>Next</Button>
+        </CardActions>
+    </Card>;
 };
 
 const Epicenter: Component = () => {
@@ -99,7 +122,9 @@ const Epicenter: Component = () => {
         );
     });
 
-    return <Card id="epicenter" sx={{ height: 500 }} />;
+    return <Card sx={{ border: "1px solid darkgrey", height: "96vh" }}>
+        <CardContent id="epicenter" sx={{ height: "100%" }} />
+    </Card>;
 };
 
 const Waveform: Component = () => {
@@ -136,19 +161,21 @@ const Waveform: Component = () => {
         ).then();
     });
 
-    return <Card id="canvas" sx={{ height: 500 }}></Card>;
+    return <Card sx={{ border: "1px solid darkgrey", height: "96vh" }}>
+        <CardContent id="canvas" sx={{ height: "100%" }} />
+    </Card>;
 };
 
 const App: Component = () => {
-    return <Box sx={{ marginLeft: 4, marginRight: 4, marginTop: 4 }}>
+    return <Box sx={{ marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh" }}>
         <Grid container spacing={1}>
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12} md={2}>
                 <MetadataCard />
             </Grid>
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12} md={5}>
                 <Epicenter />
             </Grid>
-            <Grid item xs={12} md={12}>
+            <Grid item xs={12} md={5}>
                 <Waveform />
             </Grid>
         </Grid>
