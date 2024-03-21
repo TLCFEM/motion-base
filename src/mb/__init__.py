@@ -23,9 +23,19 @@ _logger = structlog.get_logger(__name__)
 
 
 def run_app(**kwargs):
+    if load_dotenv(os.path.join(os.path.dirname(__file__), "../../docker/.env")):
+        _logger.info("Using .env file.")
+    else:
+        _logger.info("No .env file found.")
+
+    workers = os.getenv("WORKERS", None)
+    if workers is None:
+        workers = kwargs.get("workers", 1)
+
     config: dict = {}
-    if "workers" in kwargs and kwargs["workers"] > 1:
-        config["workers"] = kwargs["workers"]
+
+    if workers > 1:
+        config["workers"] = workers
         config["log_level"] = "info"
     else:
         config["reload"] = True
@@ -33,11 +43,6 @@ def run_app(**kwargs):
 
     if "host" in kwargs:
         config["host"] = kwargs["host"]
-
-    if load_dotenv(os.path.join(os.path.dirname(__file__), "../../docker/.env")):
-        _logger.info("Using .env file.")
-    else:
-        _logger.info("No .env file found.")
 
     uvicorn.run("mb.app.main:app", **config)
 
