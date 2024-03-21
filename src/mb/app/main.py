@@ -73,6 +73,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
+    allow_methods=["*"],
 )
 
 
@@ -180,8 +181,6 @@ async def query_records(query: QueryConfig = Body(...)):
 
     filtered = Record.find(query.generate_query_string())
     result = filtered.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
-    if not result:
-        raise HTTPException(HTTPStatus.NO_CONTENT, detail="No records found.")
 
     response: ListMetadataResponse = ListMetadataResponse(records=await result.to_list())
     for item in response.records:

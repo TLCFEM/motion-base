@@ -173,14 +173,16 @@ class QueryConfig(BaseModel):
             query_dict["$and"].append({"category": self.category.lower()})
 
         if self.event_location is not None:
-            query_dict["event_location"] = {"$nearSphere": self.event_location}
+            coordinates = [self.event_location, 100 / 6378.1]
             if self.max_event_distance is not None:
-                query_dict["event_location"]["$maxDistance"] = self.max_event_distance / 6371
+                coordinates[1] = self.max_event_distance / 6378.1 / 1000
+            query_dict["event_location"] = {"$geoWithin": {"$centerSphere": coordinates}}
 
         if self.station_location is not None:
-            query_dict["station_location"] = {"$nearSphere": self.station_location}
+            coordinates = [self.station_location, 100 / 6378.1]
             if self.max_station_distance is not None:
-                query_dict["station_location"]["$maxDistance"] = self.max_station_distance / 6371
+                coordinates[1] = self.max_station_distance / 6378.1 / 1000
+            query_dict["station_location"] = {"$geoWithin": {"$centerSphere": coordinates}}
 
         date_range: dict = {}
         if self.from_date is not None:

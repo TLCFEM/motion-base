@@ -61,3 +61,40 @@ export class SeismicRecord {
 export async function jackpot_waveform() {
     return new SeismicRecord((await axios.get("/waveform/jackpot")).data);
 }
+
+export class QueryConfig {
+    public min_magnitude: number | undefined;
+    public max_magnitude: number | undefined;
+    public event_location: number[] | undefined;
+
+    public station_location: number[] | undefined;
+
+    public max_event_distance: number | undefined;
+    public max_station_distance: number | undefined;
+    public from_date: Date | undefined;
+    public to_date: Date | undefined;
+    public min_pga: number | undefined;
+    public max_pga: number | undefined;
+    public event_name: string | undefined;
+    public direction: string | undefined;
+    public page_size: number | undefined;
+    public page_number: number | undefined;
+}
+
+interface QueryResponse {
+    records: SeismicRecord[];
+}
+
+export async function query(config: QueryConfig) {
+    return (
+        await axios.post<QueryResponse>(
+            "/query",
+            JSON.stringify(config, (_, value) =>
+                value === null || value === undefined ? undefined : value,
+            ),
+            {
+                headers: { "Content-Type": "application/json" },
+            },
+        )
+    ).data.records;
+}
