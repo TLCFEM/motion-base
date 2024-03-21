@@ -30,18 +30,18 @@ services:
       SUPERUSER_FIRST_NAME: ${SUPERUSER_FIRST_NAME}
       SUPERUSER_LAST_NAME: ${SUPERUSER_LAST_NAME}
       SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
-      MONGO_HOST: ${MONGO_HOST}
+      MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-#  motion-base-front:
-#    image: motion-base-front
-#    container_name: motion-base-front
-#    restart: 'no'
-#    depends_on:
-#      - mongo
-#    ports:
-#      - '4173:4173'
+  motion-base-front:
+    image: motion-base-front
+    container_name: motion-base-front
+    restart: 'no'
+    depends_on:
+      - mongo
+    ports:
+      - '4173:4173'
 
 volumes:
   motion_mongo:

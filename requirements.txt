@@ -21,8 +21,9 @@ coverage[toml]==7.4.4     # via pytest-cov
 cryptography==42.0.5      # via python-jose
 cycler==0.12.1            # via matplotlib
 dill==0.3.8               # via pylint
-dnspython==2.6.1          # via pymongo
+dnspython==2.6.1          # via email-validator, pymongo
 ecdsa==0.18.0             # via python-jose
+email-validator==2.1.1    # via motion-base (pyproject.toml)
 fastapi==0.105.0          # via motion-base (pyproject.toml)
 flask==3.0.2              # via flask-cors, flask-login, locust
 flask-cors==4.0.0         # via locust
@@ -35,7 +36,7 @@ h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.4           # via httpx
 httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
-idna==3.6                 # via anyio, httpx, requests
+idna==3.6                 # via anyio, email-validator, httpx, requests
 iniconfig==2.0.0          # via pytest
 isort==5.13.2             # via pylint
 itsdangerous==2.1.2       # via flask

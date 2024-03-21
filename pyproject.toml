@@ -24,6 +24,7 @@ classifiers = [
 dependencies = [
     "aiofiles",
     "beanie",
+    "email-validator",
     "fastapi==0.105.0",
     "httpx",
     "httpx-auth",
