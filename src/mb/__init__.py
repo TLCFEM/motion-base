@@ -32,6 +32,8 @@ def run_app(**kwargs):
     if workers is None:
         workers = kwargs.get("workers", 1)
 
+    workers = int(workers)
+
     config: dict = {}
 
     if workers > 1:
