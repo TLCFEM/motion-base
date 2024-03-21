@@ -68,16 +68,32 @@ const Overview: Component = () => {
         map.on("moveend", update_location);
     });
 
+    let laglon_map = new Map<number, L.Marker>();
+
     createEffect(() => {
-        // remove all markers
+        for (const marker of laglon_map.values()) marker.remove();
+        laglon_map.clear();
 
         for (const record of records()) {
-            L.marker(
-                new LatLng(
-                    record.station_location[1],
-                    record.station_location[0],
-                ),
-            ).addTo(map);
+            const key = record.station_location[0] * record.station_location[1];
+
+            if (laglon_map.has(key)) {
+                const marker = laglon_map.get(key);
+
+                marker?.bindPopup(
+                    `${marker?.getPopup()?.getContent()}</br>${record.id}`,
+                );
+            } else {
+                const marker = L.marker(
+                    new LatLng(
+                        record.station_location[1],
+                        record.station_location[0],
+                    ),
+                ).addTo(map);
+
+                marker.bindPopup(record.id);
+                laglon_map.set(key, marker);
+            }
         }
     });
 

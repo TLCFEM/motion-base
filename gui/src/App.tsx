@@ -2,6 +2,7 @@ import { Component } from "solid-js";
 import { AppBar, Box, Grid, Toolbar } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
+import Overview from "./Query";
 
 const App: Component = () => {
     return (
@@ -17,7 +18,8 @@ const App: Component = () => {
                         </Toolbar>
                     </AppBar>
                 </Grid>
-                <Jackpot />
+                {/*<Jackpot />*/}
+                <Overview />
             </Grid>
         </Box>
     );
