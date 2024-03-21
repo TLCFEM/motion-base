@@ -1,4 +1,10 @@
 import L, { LatLng } from "leaflet";
+import "leaflet/dist/leaflet.css";
+import "leaflet/dist/images/layers.png";
+import "leaflet/dist/images/layers-2x.png";
+import "leaflet/dist/images/marker-icon-2x.png";
+import marker from "leaflet/dist/images/marker-icon.png";
+import shadow from "leaflet/dist/images/marker-shadow.png";
 import earthquake from "./assets/earthquake.svg";
 
 export function DefaultMap(container: string, centre: LatLng) {
@@ -24,5 +30,12 @@ const LeafIcon = L.Icon.extend({
 // @ts-ignore
 export const epicenterIcon = new LeafIcon({
     iconUrl: earthquake
+});
+
+
+// @ts-ignore
+export const stationIcon = L.icon({
+    iconUrl: marker,
+    shadowUrl: shadow
 });
 

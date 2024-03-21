@@ -12,13 +12,13 @@ import {
     Typography
 } from "@suid/material";
 import L, { LatLng } from "leaflet";
-import "leaflet/dist/leaflet.css";
-import { DefaultMap, epicenterIcon } from "./Map";
+import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import AboutModal from "./About";
+
 
 const [data, setData] = createSignal(new SeismicRecord({}));
 const [bounds, setBounds] = createSignal(L.latLngBounds(new LatLng(0, 0), new LatLng(0, 0)));
@@ -109,7 +109,7 @@ const Epicenter: Component = () => {
         event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
             map
         );
-        station_marker = L.marker(station_location).addTo(map);
+        station_marker = L.marker(station_location, { icon: stationIcon }).addTo(map);
     });
 
     createEffect(() => {

@@ -1,14 +1,14 @@
 import { Box, Button, Link, Modal, Stack, Typography } from "@suid/material";
 import useTheme from "@suid/material/styles/useTheme";
 import { createSignal } from "solid-js";
-import mongodb from "./assets/mongodb.svg";
-import fastapi from "./assets/fastapi.svg";
-import beanie from "./assets/beanie.svg";
-import solid from "./assets/solid.svg";
-import tippylogo from "./assets/tippy.svg";
-import plotlylogo from "./assets/plotly.svg";
-import leaflletlogo from "./assets/leaflet.svg";
-import logo from "./assets/logo.svg";
+import mongodb_logo from "./assets/mongodb.svg";
+import fastapi_logo from "./assets/fastapi.svg";
+import beanie_logo from "./assets/beanie.svg";
+import solid_logo from "./assets/solid.svg";
+import tippy_logo from "./assets/tippy.svg";
+import plotly_logo from "./assets/plotly.svg";
+import leafllet_logo from "./assets/leaflet.svg";
+import mb_logo from "./assets/logo.svg";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
@@ -37,7 +37,7 @@ export default function AboutModal() {
                 }}
             >
                 <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
-                    <img src={logo} alt="logo" height="50px" />
+                    <img src={mb_logo} alt="logo" height="50px" />
                     <Typography variant="h4" sx={{ p: 1 }}>
                         About
                     </Typography>
@@ -66,15 +66,15 @@ export default function AboutModal() {
                     Built with
                 </Typography>
                 <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                    <img src={mongodb} alt="mongodb" height="40px" />
-                    <img src={fastapi} alt="fastapi" height="40px" />
-                    <img src={solid} alt="solid" height="40px" />
+                    <img src={mongodb_logo} alt="mongodb" height="40px" />
+                    <img src={fastapi_logo} alt="fastapi" height="40px" />
+                    <img src={solid_logo} alt="solid" height="40px" />
                 </Stack>
                 <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                    <img src={beanie} alt="beanie" height="40px" />
-                    <img src={leaflletlogo} alt="leaflet" height="40px" />
-                    <img src={plotlylogo} alt="plotly" height="40px" />
-                    <img src={tippylogo} alt="tippy" height="40px" />
+                    <img src={beanie_logo} alt="beanie" height="40px" />
+                    <img src={leafllet_logo} alt="leaflet" height="40px" />
+                    <img src={plotly_logo} alt="plotly" height="40px" />
+                    <img src={tippy_logo} alt="tippy" height="40px" />
                 </Stack>
             </Box>
         </Modal>

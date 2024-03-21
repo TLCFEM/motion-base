@@ -1,4 +1,4 @@
-FROM node:20-slim as gui
+FROM node:20-slim as build
 
 COPY gui /mb/gui
 WORKDIR /mb/gui
@@ -7,4 +7,12 @@ RUN sed -i 's/127.0.0.1/138.68.94.46/g' src/API.tsx
 
 RUN npm install -g pnpm && pnpm install && pnpm build
 
-CMD ["pnpm", "serve", "--host"]
+FROM node:20-slim as gui
+
+COPY --from=build /mb/gui/dist /mb/gui/dist
+
+WORKDIR /mb/gui
+
+RUN npm install -g serve
+
+CMD ["npx", "serve", "-n", "-s", "dist", "-l", "4173"]
