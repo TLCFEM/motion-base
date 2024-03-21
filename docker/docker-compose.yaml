@@ -1,30 +1,30 @@
 services:
-  mongo:
+  dev-mongo:
     image: mongo
     container_name: mongo
     restart: 'no'
     ports:
       - '27017:27017'
     environment:
-      MONGO_INITDB_ROOT_USERNAME: test
-      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
       MONGO_INITDB_DATABASE: StrongMotion
       MONGO_DATA_DIR: /data/db
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
-  mongo-express:
+  dev-mongo-express:
     image: mongo-express
     container_name: mongo-express
     restart: 'no'
     depends_on:
-      - mongo
+      - dev-mongo
     ports:
       - '8081:8081'
     environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: test
-      ME_CONFIG_MONGODB_ADMINPASSWORD: password
-      ME_CONFIG_MONGODB_URL: mongodb://test:password@mongo:27017/
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@dev-mongo:27017/
 
 volumes:
   motion_mongo:
