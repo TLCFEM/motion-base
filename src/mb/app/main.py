@@ -20,7 +20,6 @@ from http import HTTPStatus
 from uuid import UUID
 
 from fastapi import BackgroundTasks, Body, Depends, FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
@@ -70,13 +69,6 @@ app = FastAPI(
 app.include_router(jp_router, prefix="/jp")
 app.include_router(nz_router, prefix="/nz")
 app.add_middleware(GZipMiddleware, minimum_size=1024)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
 
 
 @app.get("/", response_class=RedirectResponse)

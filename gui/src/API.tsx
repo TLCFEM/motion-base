@@ -1,7 +1,8 @@
 import axios from "axios";
 
-axios.defaults.baseURL = 'http://127.0.0.1:8000'
-axios.defaults.headers["Access-Control-Allow-Origin"] = "*";
+const BACKEND_URL = process.env.BACKEND_URL
+
+axios.defaults.baseURL = BACKEND_URL ? BACKEND_URL : 'http://127.0.0.1:8000'
 
 export class SeismicRecord {
     public endpoint: string = "";

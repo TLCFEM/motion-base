@@ -43,6 +43,8 @@ services:
       - motion-base-back
     ports:
       - '4173:4173'
+    environment:
+      BACKEND_URL: 'http://138.68.94.46:8000/'
 
 volumes:
   motion_mongo:

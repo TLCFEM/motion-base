@@ -15,4 +15,4 @@ WORKDIR /mb
 
 COPY --from=dependency /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages
 
-CMD ["python3", "mb_runner.py", "workers", "4", "host", "0.0.0.0"]
+CMD ["python3", "mb_runner.py", "host", "0.0.0.0"]
