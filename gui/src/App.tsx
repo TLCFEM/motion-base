@@ -1,20 +1,6 @@
-import {
-    Component,
-    createEffect,
-    createSignal,
-    onCleanup,
-    onMount,
-} from "solid-js";
+import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { jackpot_waveform, SeismicRecord } from "./API";
-import {
-    Box,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    Grid,
-    Typography,
-} from "@suid/material";
+import { Box, Button, Card, CardActions, CardContent, Grid, Typography } from "@suid/material";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
@@ -83,7 +69,7 @@ const Epicenter: Component = () => {
         map = DefaultMap("epicenter", event_location);
 
         event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
-            map,
+            map
         );
         station_marker = L.marker(station_location).addTo(map);
     });
@@ -93,11 +79,11 @@ const Epicenter: Component = () => {
 
         const event_location = new LatLng(
             current_record.event_location[1],
-            current_record.event_location[0],
+            current_record.event_location[0]
         );
         const station_location = new LatLng(
             current_record.station_location[1],
-            current_record.station_location[0],
+            current_record.station_location[0]
         );
         map.flyTo(event_location, 6);
 
@@ -105,14 +91,14 @@ const Epicenter: Component = () => {
         station_marker.setLatLng(station_location);
 
         event_marker.bindPopup(
-            "Event Location: " + event_marker.getLatLng().toString(),
+            "Event Location: " + event_marker.getLatLng().toString()
         );
         station_marker.bindPopup(
-            "Station Location: " + station_marker.getLatLng().toString(),
+            "Station Location: " + station_marker.getLatLng().toString()
         );
     });
 
-    return <Card id="epicenter" sx={{ minHeight: 500 }} />;
+    return <Card id="epicenter" sx={{ height: 500 }} />;
 };
 
 const Waveform: Component = () => {
@@ -129,58 +115,43 @@ const Waveform: Component = () => {
                     y: record.waveform,
                     type: "scatter",
                     mode: "lines",
-                    name: record.id,
-                },
+                    name: record.id
+                }
             ],
             {
                 title: record.file_name,
                 xaxis: {
                     title: "Time (s)",
+                    autorange: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
+                    autorange: true,
+                    automargin: true
                 },
-                autosize: true,
-            },
+                autosize: true
+            }, { autosizable: true, responsive: true }
         ).then();
     });
 
-    onMount(() => {
-        const resizePlot = () => {
-            Plotly.relayout("canvas", {
-                "xaxis.autorange": true,
-                "yaxis.autorange": true,
-            }).then();
-        };
-
-        window.addEventListener("resize", resizePlot);
-
-        onCleanup(() => {
-            window.removeEventListener("resize", resizePlot);
-        });
-    });
-
-    return <Card id="canvas" sx={{ height: 600 }}></Card>;
+    return <Card id="canvas" sx={{ height: 500 }}></Card>;
 };
 
 const App: Component = () => {
-    return (
-        <Box sx={{ marginLeft: 4, marginRight: 4, marginTop: 4 }}>
-            <Grid container spacing={1} sx={{ marginBottom: 1 }}>
-                <Grid item xs={12} md={3}>
-                    <MetadataCard />
-                </Grid>
-                <Grid item xs={12} md={9}>
-                    <Epicenter />
-                </Grid>
+    return <Box sx={{ marginLeft: 4, marginRight: 4, marginTop: 4 }}>
+        <Grid container spacing={1}>
+            <Grid item xs={12} md={12}>
+                <MetadataCard />
             </Grid>
-            <Grid container spacing={1}>
-                <Grid item xs={12} md={12}>
-                    <Waveform />
-                </Grid>
+            <Grid item xs={12} md={12}>
+                <Epicenter />
             </Grid>
-        </Box>
-    );
+            <Grid item xs={12} md={12}>
+                <Waveform />
+            </Grid>
+        </Grid>
+    </Box>;
 };
 
 export default App;
