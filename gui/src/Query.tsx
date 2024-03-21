@@ -81,7 +81,7 @@ const Settings: Component = () => {
                     }
                 />
                 <TextField
-                    label="Min PGA"
+                    label="Min PGA (Gal)"
                     type="number"
                     value={config().min_pga}
                     onChange={(_, value) =>
@@ -92,7 +92,7 @@ const Settings: Component = () => {
                     }
                 />
                 <TextField
-                    label="Max PGA"
+                    label="Max PGA (Gal)"
                     type="number"
                     value={config().max_pga}
                     onChange={(_, value) =>
@@ -113,7 +113,7 @@ const Settings: Component = () => {
 const BasicTable: Component = () => {
     return (
         <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
-            <TableContainer>
+            <TableContainer sx={{ maxHeight: "100%", overflow: "auto" }}>
                 <Table stickyHeader>
                     <TableHead>
                         <TableRow>
@@ -126,6 +126,7 @@ const BasicTable: Component = () => {
                             <TableCell align="right">Depth (km)</TableCell>
                             <TableCell align="right">Duration (s)</TableCell>
                             <TableCell align="right">Event Time</TableCell>
+                            <TableCell align="right">Station</TableCell>
                         </TableRow>
                     </TableHead>
                     <TableBody>
@@ -156,6 +157,9 @@ const BasicTable: Component = () => {
                                     </TableCell>
                                     <TableCell align="right">
                                         {row.event_time.toUTCString()}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {row.station_code.toUpperCase()}
                                     </TableCell>
                                 </TableRow>
                             )}

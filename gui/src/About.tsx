@@ -16,7 +16,7 @@ export default function AboutModal() {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} color="inherit">
+            <Button onClick={() => setOpen(true)} variant="contained">
                 About
             </Button>
             <Modal
