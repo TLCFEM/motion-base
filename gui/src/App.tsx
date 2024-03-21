@@ -1,14 +1,28 @@
-import { Component, createEffect, createSignal, onMount } from "solid-js";
-import { jackpot, SeismicRecord } from "./API";
-import { Button, Card, CardContent, Paper, Typography } from "@suid/material";
+import {
+    Component,
+    createEffect,
+    createSignal,
+    onCleanup,
+    onMount,
+} from "solid-js";
+import { jackpot_waveform, SeismicRecord } from "./API";
+import {
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Grid,
+    Typography,
+} from "@suid/material";
 import L, { LatLng } from "leaflet";
-import earthquake from "./assets/earthquake.svg";
+import { DefaultMap, epicenterIcon } from "./Map";
+import Plotly from "plotly.js-dist-min";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
 
-function load_once() { // load on
-    // e
-    jackpot().then((r) => setData(r));
+function load_once() {
+    jackpot_waveform().then((r) => setData(r));
 }
 
 load_once();
@@ -18,64 +32,40 @@ interface ItemProps {
     value: string | number;
 }
 
-const MetadataItem = ({ label, value }: ItemProps) => {
-    return (
-        <>
-            <Typography color="text.secondary" variant="subtitle2">
-                {label}
-            </Typography>
-            <Typography variant="body2"> {value} </Typography>
-        </>
-    );
-};
-const [metadata, setMetadata] = createSignal<Array<ItemProps>>([]);
-
-createEffect(() => {
-    setMetadata([
-        { label: "ID", value: data().id },
-        { label: "File Name", value: data().file_name },
-        { label: "Region", value: data().region.toUpperCase() },
-        { label: "Magnitude", value: data().magnitude },
-        { label: "PGA", value: data().maximum_acceleration },
-        { label: "Event Time", value: data().event_time.toUTCString() },
-    ]);
-});
-
 const MetadataCard: Component = () => {
+    const [metadata, setMetadata] = createSignal<Array<ItemProps>>([]);
+
+    createEffect(() => {
+        setMetadata([
+            { label: "ID", value: data().id },
+            { label: "File Name", value: data().file_name },
+            { label: "Region", value: data().region.toUpperCase() },
+            { label: "Magnitude", value: data().magnitude },
+            { label: "PGA (Gal, cm/s^2)", value: data().maximum_acceleration },
+            { label: "Event Time", value: data().event_time.toUTCString() },
+        ]);
+    });
+
     return (
-        <Card sx={{ minWidth: 200, maxWidth: 400 }}>
+        <Card sx={{ height: 500 }}>
             <CardContent>
                 {metadata().map((item) => (
-                    <MetadataItem label={item.label} value={item.value} />
+                    <>
+                        <Typography color="text.secondary" variant="subtitle2">
+                            {item.label}
+                        </Typography>
+                        <Typography variant="body2" sx={{ marginBottom: 1 }}>
+                            {item.value}
+                        </Typography>
+                    </>
                 ))}
             </CardContent>
+            <CardActions sx={{ justifyContent: "flex-end" }}>
+                <Button onClick={() => load_once()}>Next</Button>
+            </CardActions>
         </Card>
     );
 };
-
-export function DefaultMap(container: string, centre: LatLng) {
-    const map: L.Map = L.map(container).setView(centre, 6);
-
-    L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        maxZoom: 19,
-        attribution: "© OpenStreetMap"
-    }).addTo(map);
-    return map;
-}
-
-
-const LeafIcon = L.Icon.extend({
-    options: {
-        iconSize: [50, 50],
-        iconAnchor: [25, 25],
-        popupAnchor: [0, -20]
-    }
-});
-
-// @ts-ignore
-const epicenterIcon = new LeafIcon({
-    iconUrl: earthquake
-});
 
 const Epicenter: Component = () => {
     let map: L.Map;
@@ -88,7 +78,9 @@ const Epicenter: Component = () => {
 
         map = DefaultMap("epicenter", event_location);
 
-        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(map);
+        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
+            map,
+        );
         station_marker = L.marker(station_location).addTo(map);
     });
 
@@ -97,31 +89,93 @@ const Epicenter: Component = () => {
 
         const event_location = new LatLng(
             current_record.event_location[1],
-            current_record.event_location[0]
+            current_record.event_location[0],
         );
         const station_location = new LatLng(
             current_record.station_location[1],
-            current_record.station_location[0]
+            current_record.station_location[0],
         );
         map.flyTo(event_location, 6);
 
         event_marker.setLatLng(event_location);
         station_marker.setLatLng(station_location);
 
-        event_marker.bindPopup("Event Location: " + event_marker.getLatLng().toString());
-        station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
+        event_marker.bindPopup(
+            "Event Location: " + event_marker.getLatLng().toString(),
+        );
+        station_marker.bindPopup(
+            "Station Location: " + station_marker.getLatLng().toString(),
+        );
     });
 
-    return <Card id="epicenter" />;
+    return <Card id="epicenter" sx={{ height: 500 }} />;
+};
+
+const Waveform: Component = () => {
+    createEffect(() => {
+        const record = data();
+
+        Plotly.newPlot(
+            "canvas",
+            [
+                {
+                    x: Array<number>(record.waveform.length)
+                        .fill(0)
+                        .map((_, i) => i * record.time_interval),
+                    y: record.waveform,
+                    type: "scatter",
+                    mode: "lines",
+                    name: record.id,
+                },
+            ],
+            {
+                title: record.file_name,
+                xaxis: {
+                    title: "Time (s)",
+                },
+                yaxis: {
+                    title: "Acceleration (cm/s^2)",
+                },
+                autosize: true,
+            },
+        ).then();
+    });
+
+    onMount(() => {
+        const resizePlot = () => {
+            Plotly.relayout("canvas", {
+                "xaxis.autorange": true,
+                "yaxis.autorange": true,
+            }).then();
+        };
+
+        window.addEventListener("resize", resizePlot);
+
+        onCleanup(() => {
+            window.removeEventListener("resize", resizePlot);
+        });
+    });
+
+    return <Card id="canvas" sx={{ height: 800 }}></Card>;
 };
 
 const App: Component = () => {
     return (
-        <>
-            <MetadataCard />
-            <Button onClick={() => load_once()}>Reload</Button>
-            <Epicenter />
-        </>
+        <Box>
+            <Grid container spacing={1} sx={{ marginBottom: 1 }}>
+                <Grid item xs={4} md={2}>
+                    <MetadataCard />
+                </Grid>
+                <Grid item xs={8} md={10}>
+                    <Epicenter />
+                </Grid>
+            </Grid>
+            <Grid container spacing={1}>
+                <Grid item xs={12} md={12}>
+                    <Waveform />
+                </Grid>
+            </Grid>
+        </Box>
     );
 };
 

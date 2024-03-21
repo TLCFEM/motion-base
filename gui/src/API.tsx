@@ -58,6 +58,6 @@ export class SeismicRecord {
     }
 }
 
-export async function jackpot() {
+export async function jackpot_waveform() {
     return new SeismicRecord((await axios.get("/waveform/jackpot")).data);
 }
