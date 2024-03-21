@@ -96,5 +96,5 @@ export async function query(config: QueryConfig) {
                 headers: { "Content-Type": "application/json" },
             },
         )
-    ).data.records;
+    ).data.records.map((record) => new SeismicRecord(record));
 }

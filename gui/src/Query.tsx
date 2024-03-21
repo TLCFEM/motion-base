@@ -1,8 +1,23 @@
-import { Component, createEffect, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
 import { DefaultMap } from "./Map";
-import { Button, Card, CardContent, Grid } from "@suid/material";
+import {
+    Button,
+    Card,
+    CardContent,
+    Grid,
+    Table,
+    TableBody,
+    TableCell,
+    TableContainer,
+    TableHead,
+    TableRow,
+    TextField,
+} from "@suid/material";
 import { query, QueryConfig, SeismicRecord } from "./API";
+import tippy from "tippy.js";
+import "tippy.js/dist/tippy.css";
+import "tippy.js/animations/scale.css";
 
 const [config, setConfig] = createSignal<QueryConfig>(new QueryConfig());
 const [records, setRecords] = createSignal<SeismicRecord[]>(
@@ -14,16 +29,144 @@ async function fetch() {
 }
 
 const Settings: Component = () => {
+    onMount(() => {
+        tippy(`#btn-search`, {
+            content: "Search for records.",
+            animation: "scale",
+        });
+    });
+
     return (
-        <Grid item xs={12} md={12}>
-            <Card>
-                <CardContent>
-                    <Button onClick={fetch}>Show</Button>
-                </CardContent>
-            </Card>
-        </Grid>
+        <Card>
+            <CardContent
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignContent: "center",
+                    gap: "1rem",
+                }}
+            >
+                <TextField
+                    label="Page Size"
+                    type="number"
+                    value={config().page_size}
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            page_size: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <TextField
+                    label="Min Magnitude"
+                    type="number"
+                    value={config().min_magnitude}
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            min_magnitude: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <TextField
+                    label="Max Magnitude"
+                    type="number"
+                    value={config().max_magnitude}
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            max_magnitude: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <TextField
+                    label="Min PGA"
+                    type="number"
+                    value={config().min_pga}
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            min_pga: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <TextField
+                    label="Max PGA"
+                    type="number"
+                    value={config().max_pga}
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            max_pga: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <Button onClick={fetch} id="btn-search" variant="contained">
+                    Search
+                </Button>
+            </CardContent>
+        </Card>
     );
 };
+
+const BasicTable: Component = () => {
+    return (
+        <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
+            <TableContainer>
+                <Table stickyHeader>
+                    <TableHead>
+                        <TableRow>
+                            <TableCell>ID</TableCell>
+                            <TableCell>File Name</TableCell>
+                            <TableCell align="right">Magnitude</TableCell>
+                            <TableCell align="right">
+                                PGA (Gal, cm/s^2)
+                            </TableCell>
+                            <TableCell align="right">Depth (km)</TableCell>
+                            <TableCell align="right">Duration (s)</TableCell>
+                            <TableCell align="right">Event Time</TableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        <For each={records()}>
+                            {(row) => (
+                                <TableRow
+                                    sx={{
+                                        "&:last-child td, &:last-child th": {
+                                            border: 0,
+                                        },
+                                    }}
+                                >
+                                    <TableCell component="th" scope="row">
+                                        {row.id}
+                                    </TableCell>
+                                    <TableCell>{row.file_name}</TableCell>
+                                    <TableCell align="right">
+                                        {row.magnitude}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {row.maximum_acceleration}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {row.depth}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {row.duration}
+                                    </TableCell>
+                                    <TableCell align="right">
+                                        {row.event_time.toUTCString()}
+                                    </TableCell>
+                                </TableRow>
+                            )}
+                        </For>
+                    </TableBody>
+                </Table>
+            </TableContainer>
+        </Card>
+    );
+};
+
 const Overview: Component = () => {
     let map: L.Map;
 
@@ -61,7 +204,7 @@ const Overview: Component = () => {
     };
 
     onMount(() => {
-        map = DefaultMap("overview", new LatLng(13.4247317, 52.5068441));
+        map = DefaultMap("overview", new LatLng(35.652832, 139.839478));
 
         update_location();
 
@@ -99,11 +242,16 @@ const Overview: Component = () => {
 
     return (
         <>
-            <Settings />
-            <Grid item xs={12} md={8}>
-                <Card sx={{ border: "1px solid darkgrey", height: "90vh" }}>
+            <Grid item xs={12} md={12}>
+                <Settings />
+            </Grid>
+            <Grid item xs={12} md={5}>
+                <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
                     <CardContent id="overview" sx={{ height: "100%" }} />
                 </Card>
+            </Grid>
+            <Grid item xs={12} md={7}>
+                <BasicTable />
             </Grid>
         </>
     );

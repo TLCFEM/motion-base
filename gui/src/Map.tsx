@@ -12,30 +12,27 @@ export function DefaultMap(container: string, centre: LatLng) {
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 15,
-        attribution: "OpenStreetMap"
+        attribution: "OpenStreetMap",
     }).addTo(map);
 
     return map;
 }
 
-
 const LeafIcon = L.Icon.extend({
     options: {
         iconSize: [50, 50],
         iconAnchor: [25, 25],
-        popupAnchor: [0, -20]
-    }
+        popupAnchor: [0, -20],
+    },
 });
 
 // @ts-ignore
 export const epicenterIcon = new LeafIcon({
-    iconUrl: earthquake
+    iconUrl: earthquake,
 });
-
 
 // @ts-ignore
 export const stationIcon = L.icon({
     iconUrl: marker,
-    shadowUrl: shadow
+    shadowUrl: shadow,
 });
-
