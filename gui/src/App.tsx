@@ -1,6 +1,16 @@
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import { jackpot_waveform, SeismicRecord } from "./API";
-import { Box, Button, Card, CardActions, CardContent, Grid, Popover, Typography } from "@suid/material";
+import {
+    AppBar,
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Grid,
+    Toolbar,
+    Typography
+} from "@suid/material";
 import L, { LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import { DefaultMap, epicenterIcon } from "./Map";
@@ -8,8 +18,10 @@ import Plotly from "plotly.js-dist-min";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
+import AboutModal from "./About";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
+const [bounds, setBounds] = createSignal(L.latLngBounds(new LatLng(0, 0), new LatLng(0, 0)));
 
 function load_once() {
     jackpot_waveform().then((r) => setData(r));
@@ -61,7 +73,7 @@ const MetadataCard: Component = () => {
         });
     });
 
-    return <Card sx={{ border: "1px solid darkgrey", height: "96vh", display: "flex", flexDirection: "column" }}>
+    return <Card sx={{ border: "1px solid darkgrey", height: "90vh", display: "flex", flexDirection: "column" }}>
         <CardContent sx={{ flexGrow: 1 }}>
             {metadata().map((item) => (
                 <>
@@ -91,6 +103,8 @@ const Epicenter: Component = () => {
         const station_location = new LatLng(13.4247317, 52.5068441);
 
         map = DefaultMap("epicenter", event_location);
+
+        map.on("moveend", () => setBounds(map.getBounds()));
 
         event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
             map
@@ -122,7 +136,7 @@ const Epicenter: Component = () => {
         );
     });
 
-    return <Card sx={{ border: "1px solid darkgrey", height: "96vh" }}>
+    return <Card sx={{ border: "1px solid darkgrey", height: "90vh" }}>
         <CardContent id="epicenter" sx={{ height: "100%" }} />
     </Card>;
 };
@@ -161,7 +175,7 @@ const Waveform: Component = () => {
         ).then();
     });
 
-    return <Card sx={{ border: "1px solid darkgrey", height: "96vh" }}>
+    return <Card sx={{ border: "1px solid darkgrey", height: "90vh" }}>
         <CardContent id="canvas" sx={{ height: "100%" }} />
     </Card>;
 };
@@ -169,6 +183,13 @@ const Waveform: Component = () => {
 const App: Component = () => {
     return <Box sx={{ marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh" }}>
         <Grid container spacing={1}>
+            <Grid item xs={12} md={12}>
+                <AppBar position="static">
+                    <Toolbar variant="dense" sx={{ justifyContent: "flex-end" }}>
+                        <AboutModal />
+                    </Toolbar>
+                </AppBar>
+            </Grid>
             <Grid item xs={12} md={2}>
                 <MetadataCard />
             </Grid>
