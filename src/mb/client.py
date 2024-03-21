@@ -207,7 +207,7 @@ class MBClient:
                 f"Successfully uploaded file [green]{base_name}[/]. "
                 f"[[red]{self.current_upload_size}/{self.upload_size}[/]]."
             )
-            for task_id in result.json()["task_id"]:
+            for task_id in result.json()["task_ids"]:
                 self.tasks[task_id] = 0
 
     async def jackpot(self) -> MBRecord | None:
@@ -237,8 +237,10 @@ class MBClient:
         self.print(f"{task_id}: {self.tasks[task_id]:.2%}")
 
     async def status(self):
-        for task_id in track(list(self.tasks.keys()), description="Checking status...", console=self.console):
-            await self.task_status(task_id)
+        while self.tasks:
+            for task_id in track(list(self.tasks.keys()), description="Checking status...", console=self.console):
+                await self.task_status(task_id)
+            await anyio.sleep(2)
 
 
 async def main():
