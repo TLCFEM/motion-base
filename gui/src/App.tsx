@@ -40,14 +40,18 @@ const MetadataCard: Component = () => {
             { label: "ID", value: data().id },
             { label: "File Name", value: data().file_name },
             { label: "Region", value: data().region.toUpperCase() },
+            { label: "Category", value: data().category.toUpperCase() },
             { label: "Magnitude", value: data().magnitude },
+            { label: "Depth (km)", value: data().depth },
             { label: "PGA (Gal, cm/s^2)", value: data().maximum_acceleration },
+            { label: `Sampling Frequency (${data().sampling_frequency_unit})`, value: data().sampling_frequency },
             { label: "Event Time", value: data().event_time.toUTCString() },
+            { label: "Record Time", value: data().record_time.toUTCString() }
         ]);
     });
 
     return (
-        <Card sx={{ height: 500 }}>
+        <Card>
             <CardContent>
                 {metadata().map((item) => (
                     <>
@@ -61,7 +65,7 @@ const MetadataCard: Component = () => {
                 ))}
             </CardContent>
             <CardActions sx={{ justifyContent: "flex-end" }}>
-                <Button onClick={() => load_once()}>Next</Button>
+                <Button variant="contained" onClick={() => load_once()}>Next</Button>
             </CardActions>
         </Card>
     );
@@ -108,7 +112,7 @@ const Epicenter: Component = () => {
         );
     });
 
-    return <Card id="epicenter" sx={{ height: 500 }} />;
+    return <Card id="epicenter" sx={{ minHeight: 500 }} />;
 };
 
 const Waveform: Component = () => {
@@ -156,17 +160,17 @@ const Waveform: Component = () => {
         });
     });
 
-    return <Card id="canvas" sx={{ height: 800 }}></Card>;
+    return <Card id="canvas" sx={{ height: 600 }}></Card>;
 };
 
 const App: Component = () => {
     return (
-        <Box>
+        <Box sx={{ marginLeft: 4, marginRight: 4, marginTop: 4 }}>
             <Grid container spacing={1} sx={{ marginBottom: 1 }}>
-                <Grid item xs={4} md={2}>
+                <Grid item xs={12} md={3}>
                     <MetadataCard />
                 </Grid>
-                <Grid item xs={8} md={10}>
+                <Grid item xs={12} md={9}>
                     <Epicenter />
                 </Grid>
             </Grid>
