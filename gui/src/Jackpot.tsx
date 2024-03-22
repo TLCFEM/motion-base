@@ -16,9 +16,6 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
-const [bounds, setBounds] = createSignal(
-    L.latLngBounds(new LatLng(0, 0), new LatLng(0, 0)),
-);
 
 function load_once() {
     jackpot_waveform().then((r) => setData(r));
@@ -133,8 +130,6 @@ const Epicenter: Component = () => {
         const station_location = new LatLng(13.4247317, 52.5068441);
 
         map = DefaultMap("epicenter", event_location);
-
-        map.on("moveend", () => setBounds(map.getBounds()));
 
         event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
             map,
