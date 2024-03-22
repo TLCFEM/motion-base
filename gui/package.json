@@ -2,6 +2,7 @@
   "name": "mb-gui",
   "version": "0.0.0",
   "description": "",
+  "type": "module",
   "scripts": {
     "start": "vite",
     "dev": "vite",
