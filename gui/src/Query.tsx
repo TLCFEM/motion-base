@@ -36,7 +36,8 @@ async function fetch() {
 
 function clear() {
     document.querySelectorAll("input").forEach((field) => {
-        field.value = "";
+        field.value = undefined;
+        field.dispatchEvent(new Event("change"));
     });
 
     setConfig(
@@ -73,7 +74,9 @@ const Settings: Component = () => {
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
-                            page_number: value ? Number(value) : undefined,
+                            page_number: value
+                                ? Math.max(Number(value), 0)
+                                : undefined,
                         })
                     }
                     disabled={loading()}
@@ -84,7 +87,9 @@ const Settings: Component = () => {
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
-                            page_size: value ? Number(value) : undefined,
+                            page_size: value
+                                ? Math.max(Math.min(1000, Number(value)), 1)
+                                : undefined,
                         })
                     }
                     disabled={loading()}
@@ -95,7 +100,9 @@ const Settings: Component = () => {
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
-                            min_magnitude: value ? Number(value) : undefined,
+                            min_magnitude: value
+                                ? Math.max(Math.min(10, Number(value)), 0)
+                                : undefined,
                         })
                     }
                     disabled={loading()}
@@ -106,7 +113,9 @@ const Settings: Component = () => {
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
-                            max_magnitude: value ? Number(value) : undefined,
+                            max_magnitude: value
+                                ? Math.max(Math.min(10, Number(value)), 0)
+                                : undefined,
                         })
                     }
                     disabled={loading()}
