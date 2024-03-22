@@ -1,11 +1,19 @@
-import { Component, createEffect, createSignal, onMount } from "solid-js";
-import { jackpot_waveform, SeismicRecord } from "./API";
 import {
+    Component,
+    createEffect,
+    createMemo,
+    createResource,
+    onMount,
+} from "solid-js";
+import { jackpot_waveform } from "./API";
+import {
+    Box,
     Button,
     Card,
     CardActions,
     CardContent,
     Grid,
+    LinearProgress,
     Typography,
 } from "@suid/material";
 import L, { LatLng } from "leaflet";
@@ -15,17 +23,7 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
-const [data, setData] = createSignal(new SeismicRecord({}));
-
-async function load_once() {
-    setData(await jackpot_waveform());
-}
-
-interface ItemProps {
-    tooltip?: string;
-    label: string;
-    value: string | number;
-}
+const [data, { refetch }] = createResource(jackpot_waveform);
 
 function distance_between(a: number[], b: number[]) {
     const event_location = new LatLng(a[1], a[0]);
@@ -35,40 +33,59 @@ function distance_between(a: number[], b: number[]) {
 }
 
 const MetadataCard: Component = () => {
-    const [metadata, setMetadata] = createSignal<Array<ItemProps>>([]);
-
-    createEffect(() => {
-        setMetadata([
-            { label: "ID", value: data().id },
-            { label: "File Name", value: data().file_name },
-            { label: "Region", value: data().region.toUpperCase() },
-            { label: "Category", value: data().category.toUpperCase() },
-            { label: "Magnitude", value: data().magnitude },
-            { label: "Depth (km)", value: data().depth },
-            { label: "PGA (Gal, cm/s^2)", value: Math.abs(data().maximum_acceleration).toFixed(2) },
-            {
-                label: `Sampling Frequency (${data().sampling_frequency_unit})`,
-                value: data().sampling_frequency,
-            },
-            { label: "Event Time", value: data().event_time.toUTCString() },
-            {
-                label: "Record Time",
-                value: data().record_time.getTime() > 0 ? data().record_time.toUTCString() : "---"
-            },
-            {
-                tooltip:
-                    "Distance between event and station locations over the delay between event and record times.",
-                label: "Approximated Speed (km/s)",
-                value: data().record_time.getTime() > 0 ? (
-                    distance_between(
-                        data().event_location,
-                        data().station_location,
-                    ) /
-                    (data().record_time.getTime() - data().event_time.getTime())
-                ).toFixed(2) : "---",
-            },
-        ]);
-    });
+    const metadata = createMemo(() => [
+        { label: "ID", value: data.loading ? "---" : data().id },
+        { label: "File Name", value: data.loading ? "---" : data().file_name },
+        {
+            label: "Region",
+            value: data.loading ? "---" : data().region.toUpperCase(),
+        },
+        {
+            label: "Category",
+            value: data.loading ? "---" : data().category.toUpperCase(),
+        },
+        { label: "Magnitude", value: data.loading ? "---" : data().magnitude },
+        { label: "Depth (km)", value: data.loading ? "---" : data().depth },
+        {
+            label: "PGA (Gal, cm/s^2)",
+            value: data.loading
+                ? "---"
+                : Math.abs(data().maximum_acceleration).toFixed(2),
+        },
+        {
+            label: `Sampling Frequency (${data.loading ? "---" : data().sampling_frequency_unit})`,
+            value: data.loading ? "---" : data().sampling_frequency,
+        },
+        {
+            label: "Event Time",
+            value: data.loading ? "---" : data().event_time.toUTCString(),
+        },
+        {
+            label: "Record Time",
+            value: data.loading
+                ? "---"
+                : data().record_time.getTime() > 0
+                  ? data().record_time.toUTCString()
+                  : "---",
+        },
+        {
+            tooltip:
+                "Distance between event and station locations over the delay between event and record times.",
+            label: "Approximated Speed (km/s)",
+            value: data.loading
+                ? "---"
+                : data().record_time.getTime() > 0
+                  ? (
+                        distance_between(
+                            data().event_location,
+                            data().station_location,
+                        ) /
+                        (data().record_time.getTime() -
+                            data().event_time.getTime())
+                    ).toFixed(2)
+                  : "---",
+        },
+    ]);
 
     onMount(() => {
         tippy(`#btn-next`, {
@@ -105,11 +122,19 @@ const MetadataCard: Component = () => {
                     </>
                 ))}
             </CardContent>
+            <Box sx={{ width: "100%" }}>
+                {data.loading ? (
+                    <LinearProgress />
+                ) : (
+                    <LinearProgress variant="determinate" value={0} />
+                )}
+            </Box>
             <CardActions sx={{ justifyContent: "flex-end" }}>
                 <Button
                     id="btn-next"
                     variant="contained"
-                    onClick={load_once}
+                    onClick={refetch}
+                    disabled={data.loading}
                 >
                     Next
                 </Button>
@@ -138,15 +163,15 @@ const Epicenter: Component = () => {
     });
 
     createEffect(() => {
-        const record = data();
+        if (data.loading) return;
 
         const event_location = new LatLng(
-            record.event_location[1],
-            record.event_location[0],
+            data().event_location[1],
+            data().event_location[0],
         );
         const station_location = new LatLng(
-            record.station_location[1],
-            record.station_location[0],
+            data().station_location[1],
+            data().station_location[0],
         );
         map.flyTo(event_location, 6);
 
@@ -170,23 +195,23 @@ const Epicenter: Component = () => {
 
 const Waveform: Component = () => {
     createEffect(async () => {
-        const record = data();
+        if (data.loading) return;
 
         await Plotly.newPlot(
             "canvas",
             [
                 {
-                    x: Array<number>(record.waveform.length)
+                    x: Array<number>(data().waveform.length)
                         .fill(0)
-                        .map((_, i) => i * record.time_interval),
-                    y: record.waveform,
+                        .map((_, i) => i * data().time_interval),
+                    y: data().waveform,
                     type: "scatter",
                     mode: "lines",
-                    name: record.id,
+                    name: data().id,
                 },
             ],
             {
-                title: record.file_name,
+                title: data().file_name,
                 xaxis: {
                     title: "Time (s)",
                     autorange: true,
@@ -211,7 +236,7 @@ const Waveform: Component = () => {
 };
 
 const Jackpot: Component = () => {
-    onMount(load_once);
+    onMount(refetch);
 
     return (
         <>

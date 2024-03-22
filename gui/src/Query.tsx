@@ -190,7 +190,9 @@ const BasicTable: Component = () => {
                                         {row.magnitude}
                                     </TableCell>
                                     <TableCell align="right">
-                                        {Math.abs(row.maximum_acceleration).toFixed(2)}
+                                        {Math.abs(
+                                            row.maximum_acceleration,
+                                        ).toFixed(2)}
                                     </TableCell>
                                     <TableCell align="right">
                                         {row.depth}
