@@ -2,7 +2,7 @@ import L, { LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
 import "leaflet/dist/images/layers.png";
 import "leaflet/dist/images/layers-2x.png";
-import "leaflet/dist/images/marker-icon-2x.png";
+import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import marker from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
 import earthquake from "./assets/earthquake.svg";
@@ -34,5 +34,11 @@ export const epicenterIcon = new LeafIcon({
 // @ts-ignore
 export const stationIcon = L.icon({
     iconUrl: marker,
+    iconRetinaUrl: markerRetina,
     shadowUrl: shadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41]
 });
