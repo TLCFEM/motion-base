@@ -3,6 +3,7 @@ import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import {
     Button,
+    ButtonGroup,
     Card,
     CardContent,
     Grid,
@@ -139,12 +140,14 @@ const Settings: Component = () => {
                         })
                     }
                 />
-                <Button onClick={fetch} id="btn-search" variant="contained">
-                    Search
-                </Button>
-                <Button onClick={clear} id="btn-clear" variant="contained">
-                    Clear
-                </Button>
+                <ButtonGroup variant="outlined">
+                    <Button onClick={fetch} id="btn-search">
+                        Search
+                    </Button>
+                    <Button onClick={clear} id="btn-clear">
+                        Clear
+                    </Button>
+                </ButtonGroup>
             </CardContent>
         </Card>
     );
@@ -187,7 +190,7 @@ const BasicTable: Component = () => {
                                         {row.magnitude}
                                     </TableCell>
                                     <TableCell align="right">
-                                        {row.maximum_acceleration}
+                                        {row.maximum_acceleration.toFixed(2)}
                                     </TableCell>
                                     <TableCell align="right">
                                         {row.depth}
