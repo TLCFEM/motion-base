@@ -29,6 +29,9 @@ async function fetch() {
 }
 
 const Settings: Component = () => {
+    const [from, setFrom] = createSignal<string>("");
+    const [to, setTo] = createSignal<string>("");
+
     onMount(() => {
         tippy(`#btn-search`, {
             content: "Search for records.",
@@ -101,6 +104,36 @@ const Settings: Component = () => {
                             max_pga: value ? Number(value) : undefined,
                         })
                     }
+                />
+                <TextField
+                    label="From"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={from()}
+                    onChange={(_, value) => {
+                        setFrom(value);
+                        setConfig({
+                            ...config(),
+                            from_date: value
+                                ? new Date(Date.parse(value))
+                                : undefined,
+                        });
+                    }}
+                />
+                <TextField
+                    label="To"
+                    type="date"
+                    InputLabelProps={{ shrink: true }}
+                    value={to()}
+                    onChange={(_, value) => {
+                        setTo(value);
+                        setConfig({
+                            ...config(),
+                            to_date: value
+                                ? new Date(Date.parse(value))
+                                : undefined,
+                        });
+                    }}
                 />
                 <Button onClick={fetch} id="btn-search" variant="contained">
                     Search
