@@ -214,7 +214,7 @@ const BasicTable: Component = () => {
     );
 };
 
-const Overview: Component = () => {
+const QueryDatabase: Component = () => {
     let map: L.Map;
 
     const normalize_longitude = (lon: number) => {
@@ -329,4 +329,4 @@ const Overview: Component = () => {
     );
 };
 
-export default Overview;
+export default QueryDatabase;

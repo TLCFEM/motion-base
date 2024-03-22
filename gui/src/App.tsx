@@ -2,7 +2,7 @@ import { Component, createSignal, Match, onMount, Switch } from "solid-js";
 import { AppBar, Box, Button, Grid, Toolbar } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
-import Overview from "./Query";
+import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -61,7 +61,7 @@ const App: Component = () => {
                         <Jackpot />
                     </Match>
                     <Match when={mode() === "query"}>
-                        <Overview />
+                        <QueryDatabase />
                     </Match>
                 </Switch>
             </Grid>
