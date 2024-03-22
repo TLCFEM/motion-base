@@ -193,11 +193,18 @@ class ParserNZSM:
 
         record_names: list[str] = []
         pattern = re.compile(r"(\d{8})_(\d{6})_([A-Za-z0-9]{3,4})_?")
-        matches = pattern.search(lines[0])
+        if matches := pattern.search(lines[0]):
+            event_time: datetime = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S")
+            station_code: str = matches[3]
+        else:
+            event_time: datetime = datetime.strptime(
+                "".join(x for x in lines[7].strip().split(" ") if x), "%Y%B%d%H%Mut"
+            )
+            station_code = [x for x in lines[1].split(" ") if x][1]
 
         async def _populate_common_fields(record: NZSM):
-            record.event_time = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S")
-            record.station_code = matches[3]
+            record.event_time = event_time
+            record.station_code = station_code
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path).upper()
             record.category = "processed" if record.file_name.endswith(".V2A") else "unprocessed"
