@@ -44,13 +44,14 @@ async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, sta
 @pytest.mark.parametrize(
     "file_name,status",
     [
+        pytest.param("nz_test.zip", HTTPStatus.ACCEPTED, id="zip-file"),
         pytest.param("nz_test.tar.gz", HTTPStatus.ACCEPTED, id="correct-name"),
         pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
     ],
 )
 @pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
 async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
-    with open(os.path.join(pwd, "data/nz_test.tar.gz"), "rb") as file:
+    with open(os.path.join(pwd, f"data/{file_name}" if "zip" in file_name else "data/nz_test.tar.gz"), "rb") as file:
         files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
             f"/nz/upload?wait_for_result={if_wait}", files=files, headers=mock_header

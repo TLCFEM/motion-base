@@ -87,6 +87,11 @@ async def alive():
     return {"message": "I'm alive!"}
 
 
+@app.get("/total", tags=["status"])
+async def total():
+    return {"total": await Record.count()}
+
+
 @app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTask)
 async def get_task_status(task_id: UUID) -> UploadTask:
     if (task := await UploadTask.find_one(UploadTask.id == task_id)) is None:

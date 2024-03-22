@@ -1,13 +1,22 @@
-import { Component, createSignal, Match, onMount, Switch } from "solid-js";
-import { AppBar, Box, Button, Grid, Toolbar } from "@suid/material";
+import {
+    Component,
+    createResource,
+    createSignal,
+    Match,
+    onMount,
+    Switch,
+} from "solid-js";
+import { AppBar, Box, Button, Grid, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
 import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
+import { total_api } from "./API";
 
 const [mode, setMode] = createSignal<"jackpot" | "query">("jackpot");
+const [total] = createResource<number>(total_api);
 
 const App: Component = () => {
     onMount(() => {
@@ -29,15 +38,19 @@ const App: Component = () => {
                 <Grid item xs={12} md={12}>
                     <AppBar position="static" enableColorOnDark>
                         <Toolbar
-                            variant="dense"
+                            // variant="dense"
                             sx={{
                                 display: "flex",
-                                flexDirection: "row",
-                                justifyContent: "flex-end",
+                                alignItems: "center",
                                 alignContent: "center",
                                 gap: "1rem",
                             }}
                         >
+                            <Typography sx={{ flexGrow: 1 }} variant="h5">
+                                {total.loading
+                                    ? "..."
+                                    : `Record Count: ${total().toLocaleString()}.`}
+                            </Typography>
                             <Button
                                 id="btn-jackpot"
                                 onClick={() => setMode("jackpot")}

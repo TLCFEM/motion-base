@@ -5,7 +5,7 @@ import {
     createResource,
     onMount,
 } from "solid-js";
-import { jackpot_waveform } from "./API";
+import { jackpot_waveform_api } from "./API";
 import {
     Box,
     Button,
@@ -23,7 +23,7 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
-const [data, { refetch }] = createResource(jackpot_waveform);
+const [data, { refetch }] = createResource(jackpot_waveform_api);
 
 function distance_between(a: number[], b: number[]) {
     const event_location = new LatLng(a[1], a[0]);

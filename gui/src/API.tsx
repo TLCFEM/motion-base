@@ -58,7 +58,7 @@ export class SeismicRecord {
     }
 }
 
-export async function jackpot_waveform() {
+export async function jackpot_waveform_api() {
     return new SeismicRecord((await axios.get("/waveform/jackpot")).data);
 }
 
@@ -85,7 +85,7 @@ interface QueryResponse {
     records: SeismicRecord[];
 }
 
-export async function query(config: QueryConfig) {
+export async function query_api(config: QueryConfig) {
     return (
         await axios.post<QueryResponse>(
             "/query",
@@ -97,4 +97,12 @@ export async function query(config: QueryConfig) {
             },
         )
     ).data.records.map((record) => new SeismicRecord(record));
+}
+
+interface TotalResponse {
+    total: number;
+}
+
+export async function total_api() {
+    return (await axios.get<TotalResponse>("/total")).data.total;
 }

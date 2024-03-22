@@ -2,11 +2,13 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import {
+    Box,
     Button,
     ButtonGroup,
     Card,
     CardContent,
     Grid,
+    LinearProgress,
     Table,
     TableBody,
     TableCell,
@@ -15,24 +17,35 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
-import { query, QueryConfig, SeismicRecord } from "./API";
+import { query_api, QueryConfig, SeismicRecord } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
 const [config, setConfig] = createSignal<QueryConfig>(new QueryConfig());
+const [loading, setLoading] = createSignal<boolean>(false);
 const [records, setRecords] = createSignal<SeismicRecord[]>(
     [] as SeismicRecord[],
 );
 
 async function fetch() {
-    setRecords(await query(config()));
+    setLoading(true);
+    setRecords(await query_api(config()));
+    setLoading(false);
 }
 
 function clear() {
-    document
-        .querySelectorAll("input")
-        .forEach((element) => (element.value = ""));
+    document.querySelectorAll("input").forEach((field) => {
+        field.value = "";
+    });
+
+    setConfig(
+        Object.assign(new QueryConfig(), {
+            event_location: config().event_location,
+            max_event_distance: config().max_event_distance,
+        }),
+    );
+    setRecords([] as SeismicRecord[]);
 }
 
 const Settings: Component = () => {
@@ -63,6 +76,7 @@ const Settings: Component = () => {
                             page_number: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="Page Size"
@@ -73,6 +87,7 @@ const Settings: Component = () => {
                             page_size: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="Min Magnitude"
@@ -83,6 +98,7 @@ const Settings: Component = () => {
                             min_magnitude: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="Max Magnitude"
@@ -93,6 +109,7 @@ const Settings: Component = () => {
                             max_magnitude: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="Min PGA (Gal)"
@@ -103,6 +120,7 @@ const Settings: Component = () => {
                             min_pga: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="Max PGA (Gal)"
@@ -113,6 +131,7 @@ const Settings: Component = () => {
                             max_pga: value ? Number(value) : undefined,
                         })
                     }
+                    disabled={loading()}
                 />
                 <TextField
                     label="From"
@@ -141,14 +160,25 @@ const Settings: Component = () => {
                     }
                 />
                 <ButtonGroup variant="outlined">
-                    <Button onClick={fetch} id="btn-search">
+                    <Button
+                        onClick={fetch}
+                        id="btn-search"
+                        disabled={loading()}
+                    >
                         Search
                     </Button>
-                    <Button onClick={clear} id="btn-clear">
+                    <Button onClick={clear} id="btn-clear" disabled={loading()}>
                         Clear
                     </Button>
                 </ButtonGroup>
             </CardContent>
+            <Box sx={{ width: "100%" }}>
+                {loading() ? (
+                    <LinearProgress />
+                ) : (
+                    <LinearProgress variant="determinate" value={0} />
+                )}
+            </Box>
         </Card>
     );
 };
