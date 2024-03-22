@@ -50,24 +50,27 @@ const MetadataCard: Component = () => {
             { label: "Category", value: data().category.toUpperCase() },
             { label: "Magnitude", value: data().magnitude },
             { label: "Depth (km)", value: data().depth },
-            { label: "PGA (Gal, cm/s^2)", value: data().maximum_acceleration },
+            { label: "PGA (Gal, cm/s^2)", value: Math.abs(data().maximum_acceleration).toFixed(2) },
             {
                 label: `Sampling Frequency (${data().sampling_frequency_unit})`,
                 value: data().sampling_frequency,
             },
             { label: "Event Time", value: data().event_time.toUTCString() },
-            { label: "Record Time", value: data().record_time.toUTCString() },
+            {
+                label: "Record Time",
+                value: data().record_time.getTime() > 0 ? data().record_time.toUTCString() : "---"
+            },
             {
                 tooltip:
                     "Distance between event and station locations over the delay between event and record times.",
                 label: "Approximated Speed (km/s)",
-                value: (
+                value: data().record_time.getTime() > 0 ? (
                     distance_between(
                         data().event_location,
                         data().station_location,
                     ) /
                     (data().record_time.getTime() - data().event_time.getTime())
-                ).toFixed(2),
+                ).toFixed(2) : "---",
             },
         ]);
     });

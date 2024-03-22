@@ -223,7 +223,7 @@ class ParserNZSM:
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
-        record.maximum_acceleration = pint.Quantity(float_header[35], "mm/s/s").to("Gal").magnitude
+        record.maximum_acceleration = abs(pint.Quantity(float_header[35], "mm/s/s").to("Gal").magnitude)
 
         offset: int = 26
         a_samples = int_header[33]
