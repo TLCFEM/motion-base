@@ -28,10 +28,13 @@ async function fetch() {
     setRecords(await query(config()));
 }
 
-const Settings: Component = () => {
-    const [from, setFrom] = createSignal<string>("");
-    const [to, setTo] = createSignal<string>("");
+function clear() {
+    document
+        .querySelectorAll("input")
+        .forEach((element) => (element.value = ""));
+}
 
+const Settings: Component = () => {
     onMount(() => {
         tippy(`#btn-search`, {
             content: "Search for records.",
@@ -51,9 +54,18 @@ const Settings: Component = () => {
                 }}
             >
                 <TextField
+                    label="Page Number"
+                    type="number"
+                    onChange={(_, value) =>
+                        setConfig({
+                            ...config(),
+                            page_number: value ? Number(value) : undefined,
+                        })
+                    }
+                />
+                <TextField
                     label="Page Size"
                     type="number"
-                    value={config().page_size}
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
@@ -64,7 +76,6 @@ const Settings: Component = () => {
                 <TextField
                     label="Min Magnitude"
                     type="number"
-                    value={config().min_magnitude}
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
@@ -75,7 +86,6 @@ const Settings: Component = () => {
                 <TextField
                     label="Max Magnitude"
                     type="number"
-                    value={config().max_magnitude}
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
@@ -86,7 +96,6 @@ const Settings: Component = () => {
                 <TextField
                     label="Min PGA (Gal)"
                     type="number"
-                    value={config().min_pga}
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
@@ -97,7 +106,6 @@ const Settings: Component = () => {
                 <TextField
                     label="Max PGA (Gal)"
                     type="number"
-                    value={config().max_pga}
                     onChange={(_, value) =>
                         setConfig({
                             ...config(),
@@ -109,34 +117,33 @@ const Settings: Component = () => {
                     label="From"
                     type="date"
                     InputLabelProps={{ shrink: true }}
-                    value={from()}
-                    onChange={(_, value) => {
-                        setFrom(value);
+                    onChange={(_, value) =>
                         setConfig({
                             ...config(),
                             from_date: value
                                 ? new Date(Date.parse(value))
                                 : undefined,
-                        });
-                    }}
+                        })
+                    }
                 />
                 <TextField
                     label="To"
                     type="date"
                     InputLabelProps={{ shrink: true }}
-                    value={to()}
-                    onChange={(_, value) => {
-                        setTo(value);
+                    onChange={(_, value) =>
                         setConfig({
                             ...config(),
                             to_date: value
                                 ? new Date(Date.parse(value))
                                 : undefined,
-                        });
-                    }}
+                        })
+                    }
                 />
                 <Button onClick={fetch} id="btn-search" variant="contained">
                     Search
+                </Button>
+                <Button onClick={clear} id="btn-clear" variant="contained">
+                    Clear
                 </Button>
             </CardContent>
         </Card>
