@@ -17,11 +17,9 @@ import "tippy.js/animations/scale.css";
 
 const [data, setData] = createSignal(new SeismicRecord({}));
 
-function load_once() {
-    jackpot_waveform().then((r) => setData(r));
+async function load_once() {
+    setData(await jackpot_waveform());
 }
-
-load_once();
 
 interface ItemProps {
     tooltip?: string;
@@ -111,7 +109,7 @@ const MetadataCard: Component = () => {
                 <Button
                     id="btn-next"
                     variant="contained"
-                    onClick={() => load_once()}
+                    onClick={load_once}
                 >
                     Next
                 </Button>
@@ -171,10 +169,10 @@ const Epicenter: Component = () => {
 };
 
 const Waveform: Component = () => {
-    createEffect(() => {
+    createEffect(async () => {
         const record = data();
 
-        Plotly.newPlot(
+        await Plotly.newPlot(
             "canvas",
             [
                 {
@@ -202,7 +200,7 @@ const Waveform: Component = () => {
                 autosize: true,
             },
             { autosizable: true, responsive: true },
-        ).then();
+        );
     });
 
     return (
@@ -213,6 +211,8 @@ const Waveform: Component = () => {
 };
 
 const Jackpot: Component = () => {
+    onMount(load_once);
+
     return (
         <>
             <Grid item xs={12} md={2}>
