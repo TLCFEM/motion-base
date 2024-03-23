@@ -35,6 +35,7 @@ from .response import (
     ProcessedResponse,
     RecordResponse,
     RawRecordResponse,
+    PaginationResponse,
 )
 from .utility import (
     ACCESS_TOKEN_EXPIRE_MINUTES,
@@ -53,7 +54,7 @@ from ..utility.config import init_mongo
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI):  # pylint: disable=unused-argument
+async def lifespan(fastapi_app: FastAPI):  # noqa
     await init_mongo()
     await create_superuser()
     yield
@@ -89,7 +90,7 @@ async def alive():
 
 @app.get("/total", tags=["status"])
 async def total():
-    return {"total": await Record.count()}
+    return {"total": await Record.find(Record.magnitude > 0).count()}
 
 
 @app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTask)
@@ -187,7 +188,12 @@ async def query_records(query: QueryConfig = Body(...)):
     filtered = Record.find(query.generate_query_string())
     result = filtered.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
 
-    response: ListMetadataResponse = ListMetadataResponse(records=await result.to_list())
+    response: ListMetadataResponse = ListMetadataResponse(
+        records=await result.to_list(),
+        # pagination=PaginationResponse(
+        #     total=await filtered.count(), page_size=query.page_size, page_number=query.page_number
+        # ),
+    )
     for item in response.records:
         item.endpoint = "/query"
     return response

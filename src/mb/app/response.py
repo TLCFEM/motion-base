@@ -62,14 +62,6 @@ class MetadataResponse(BaseModel):
     scale_factor: float | None = Field(...)
 
 
-class ListMetadataResponse(BaseModel):
-    """
-    Response represents a record which can be either waveform or spectrum.
-    """
-
-    records: list[MetadataResponse] = Field(None)
-
-
 class RawRecordResponse(MetadataResponse):
     """
     Response represents a record which can be either waveform or spectrum.
@@ -97,12 +89,23 @@ class RecordResponse(MetadataResponse):
     acceleration_spectrum: list[float] | None = Field(None)
 
 
-class ListRecordResponse(BaseModel):
+class PaginationResponse(BaseModel):
+    """
+    Pagination response.
+    """
+
+    total: int = Field(...)
+    page_size: int = Field(...)
+    page_number: int = Field(...)
+
+
+class ListMetadataResponse(BaseModel):
     """
     Response represents a record which can be either waveform or spectrum.
     """
 
-    records: list[RecordResponse]
+    records: list[MetadataResponse] = Field(None)
+    pagination: PaginationResponse = Field(None)
 
 
 class ProcessConfig(BaseModel):
