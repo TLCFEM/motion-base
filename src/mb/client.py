@@ -128,8 +128,9 @@ class MBClient:
         if "timeout" not in kwargs:
             kwargs["timeout"] = 60
 
+        self.semaphore = anyio.Semaphore(kwargs.pop("semaphore", 10))
+
         self.client = httpx.AsyncClient(**kwargs)
-        self.semaphore = anyio.Semaphore(10)
         self.tasks: dict[str, float] = {}
 
         self.upload_size = 0
