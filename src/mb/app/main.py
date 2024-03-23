@@ -185,7 +185,7 @@ async def query_records(query: QueryConfig = Body(...)):
     Query records from the database.
     """
 
-    filtered = Record.find(query.generate_query_string()).sort(-Record.magnitude)
+    filtered = Record.find(query.generate_query_string()).sort(-Record.magnitude, -Record.maximum_acceleration)
     result = filtered.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
 
     response: ListMetadataResponse = ListMetadataResponse(

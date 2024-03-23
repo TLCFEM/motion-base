@@ -115,7 +115,7 @@ class ParserNIED:
         record.duration = pint.Quantity(float(lines[11][18:]), ParserNIED._normalise_unit(lines[11])).to("s").magnitude
         record.direction = ParserNIED._parse_direction(lines[12][18:])
         record.scale_factor = float(ParserNIED._strip_unit(lines[13][18:]))
-        record.maximum_acceleration = float(lines[14][18:])
+        record.maximum_acceleration = abs(float(lines[14][18:]))
         record.raw_data_unit = ParserNIED._normalise_unit(lines[14])
 
         record.raw_data = [int(value) for line in lines[17:] for value in line.split()]
