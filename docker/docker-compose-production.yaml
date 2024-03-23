@@ -3,7 +3,6 @@ services:
     image: mongo
     container_name: mongo
     restart: 'no'
-    mem_limit: 5g
     command: --wiredTigerCacheSizeGB 2
     ports:
       - '27017:27017'
