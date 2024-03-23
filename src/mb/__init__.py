@@ -52,7 +52,7 @@ def run_app(**kwargs):
 @click.command()
 @click.option("--workers", default=1, show_default=True, type=int, help="Number of workers.")
 @click.option("--overwrite-env", is_flag=True, help="Overwrite environment variables.")
-def run(workers: int, overwrite_env: bool):
+def run(workers: int = 1, overwrite_env: bool = False):
     params: dict = {}
     if overwrite_env:
         params["overwrite_env"] = overwrite_env
