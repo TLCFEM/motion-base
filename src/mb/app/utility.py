@@ -23,7 +23,6 @@ from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-
 from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
