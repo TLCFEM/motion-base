@@ -54,7 +54,7 @@ from ..utility.config import init_mongo
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI):  # noqa
+async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argument
     await init_mongo()
     await create_superuser()
     yield
@@ -185,14 +185,14 @@ async def query_records(query: QueryConfig = Body(...)):
     Query records from the database.
     """
 
-    filtered = Record.find(query.generate_query_string())
+    filtered = Record.find(query.generate_query_string()).sort(-Record.magnitude)
     result = filtered.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
 
     response: ListMetadataResponse = ListMetadataResponse(
         records=await result.to_list(),
-        # pagination=PaginationResponse(
-        #     total=await filtered.count(), page_size=query.page_size, page_number=query.page_number
-        # ),
+        pagination=PaginationResponse(
+            total=await filtered.count(), page_size=query.page_size, page_number=query.page_number
+        ),
     )
     for item in response.records:
         item.endpoint = "/query"
