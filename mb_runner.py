@@ -26,6 +26,9 @@ if __name__ == "__main__":
         elif sys.argv[index].startswith("h"):
             arg_dict["host"] = sys.argv[index + 1]
             index += 2
+        elif sys.argv[index].startswith("o"):
+            arg_dict["overwrite_env"] = True
+            index += 1
         else:
             index += 1
 

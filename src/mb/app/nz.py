@@ -91,12 +91,24 @@ async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, 
 async def upload_archive(
     archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
 ):
+    """
+    Upload a compressed archive.
+
+    The archive must be gzip-compressed tarball.
+    The zip-compressed archive is not supported due to some technical issues.
+    All files will be checked and those with ".V2A" and/or ".V1A" extensions will be parsed.
+
+    Two modes are supported, one can choose to wait for the result or not.
+    If the result is not waited, the task ID will be returned.
+    Use `/task/status/{task_id}` to check the status of the target task.
+    """
     if not user.can_upload:
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
     valid_archives: list[UploadFile] = []
     for archive in archives:
-        if archive.filename.endswith((".tar.gz", ".zip")):
+        # ".zip" does not work, see: https://github.com/python/cpython/issues/70363
+        if archive.filename.endswith(".tar.gz"):
             valid_archives.append(archive)
 
     if not wait_for_result:

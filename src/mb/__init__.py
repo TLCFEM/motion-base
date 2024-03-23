@@ -29,7 +29,7 @@ def run_app(**kwargs):
         _logger.info("No .env file found.")
 
     workers = os.getenv("WORKERS", None)
-    if workers is None:
+    if workers is None or kwargs.get("overwrite_env", False):
         workers = kwargs.get("workers", 1)
 
     workers = int(workers)
@@ -50,12 +50,16 @@ def run_app(**kwargs):
 
 
 @click.command()
-@click.option("--workers", default=1, help="Number of workers.")
-def run(workers: int = 1):
+@click.option("--workers", default=1, show_default=True, type=int, help="Number of workers.")
+@click.option("--overwrite-env", is_flag=True, help="Overwrite environment variables.")
+def run(workers: int, overwrite_env: bool):
+    params: dict = {}
+    if overwrite_env:
+        params["overwrite_env"] = overwrite_env
     if workers > 1:
-        run_app(workers=workers)
-    else:
-        run_app()
+        params["workers"] = workers
+
+    run_app(**params)
 
 
 if __name__ == "__main__":
