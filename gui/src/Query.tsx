@@ -22,37 +22,63 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
-const [config, setConfig] = createSignal<QueryConfig>(new QueryConfig());
-const [loading, setLoading] = createSignal<boolean>(false);
-const [records, setRecords] = createSignal<SeismicRecord[]>(
-    [] as SeismicRecord[],
-);
+const [eventLocation, setEventLocation] = createSignal<[number, number]>();
+const [maxEventDistance, setMaxEventDistance] = createSignal(0);
 
-async function fetch() {
-    setLoading(true);
-    setRecords(await query_api(config()));
-    setLoading(false);
-}
-
-function clear() {
-    document.querySelectorAll("input").forEach((field) => {
-        field.value = undefined;
-        field.dispatchEvent(new Event("change"));
-    });
-
-    setConfig(
-        Object.assign(new QueryConfig(), {
-            event_location: config().event_location,
-            max_event_distance: config().max_event_distance,
-        }),
-    );
-    setRecords([] as SeismicRecord[]);
-}
+const [records, setRecords] = createSignal([] as SeismicRecord[]);
 
 const Settings: Component = () => {
+    const [loading, setLoading] = createSignal<boolean>(false);
+
+    const [pageSize, setPageSize] = createSignal(0);
+    const [pageNumber, setPageNumber] = createSignal(0);
+    const [minMagnitude, setMinMagnitude] = createSignal(0);
+    const [maxMagnitude, setMaxMagnitude] = createSignal(0);
+    const [minPGA, setMinPGA] = createSignal(0);
+    const [maxPGA, setMaxPGA] = createSignal(0);
+    const [fromDate, setFromDate] = createSignal<Date>(new Date(0));
+    const [toDate, setToDate] = createSignal<Date>(new Date(0));
+
+    async function fetch() {
+        setLoading(true);
+
+        let config = new QueryConfig();
+        if (pageSize() > 0) config.page_size = pageSize();
+        if (pageNumber() > 0) config.page_number = pageNumber();
+        if (minMagnitude() > 0) config.min_magnitude = minMagnitude();
+        if (maxMagnitude() > 0) config.max_magnitude = maxMagnitude();
+        if (minPGA() > 0) config.min_pga = minPGA();
+        if (maxPGA() > 0) config.max_pga = maxPGA();
+        if (fromDate().getTime() > 0) config.from_date = fromDate();
+        if (toDate().getTime() > 0) config.to_date = toDate();
+        if (eventLocation()) config.event_location = eventLocation();
+        if (maxEventDistance() > 0)
+            config.max_event_distance = maxEventDistance();
+
+        setRecords(await query_api(config));
+        setLoading(false);
+    }
+
+    function clear() {
+        setPageSize(0);
+        setPageNumber(0);
+        setMinMagnitude(0);
+        setMaxMagnitude(0);
+        setMinPGA(0);
+        setMaxPGA(0);
+        setFromDate(new Date(0));
+        setToDate(new Date(0));
+
+        // setRecords([] as SeismicRecord[]);
+    }
+
     onMount(() => {
         tippy(`#btn-search`, {
             content: "Search for records.",
+            animation: "scale",
+        });
+        tippy(`#btn-clear`, {
+            content: "Clear searching criteria.",
             animation: "scale",
         });
     });
@@ -71,74 +97,72 @@ const Settings: Component = () => {
                 <TextField
                     label="Page Number"
                     type="number"
+                    value={pageNumber()}
+                    defaultValue={pageNumber()}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            page_number: value
-                                ? Math.max(Number(value), 0)
-                                : undefined,
-                        })
+                        setPageNumber(Math.max(Number(value), 0))
                     }
                     disabled={loading()}
                 />
                 <TextField
                     label="Page Size"
                     type="number"
+                    value={pageSize() > 0 ? pageSize() : ""}
+                    defaultValue={pageSize() > 0 ? pageSize() : ""}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            page_size: value
+                        setPageSize(
+                            value
                                 ? Math.max(Math.min(1000, Number(value)), 1)
-                                : undefined,
-                        })
+                                : 0,
+                        )
                     }
                     disabled={loading()}
                 />
                 <TextField
                     label="Min Magnitude"
                     type="number"
+                    value={minMagnitude() > 0 ? minMagnitude() : ""}
+                    defaultValue={minMagnitude() > 0 ? minMagnitude() : ""}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            min_magnitude: value
+                        setMinMagnitude(
+                            value
                                 ? Math.max(Math.min(10, Number(value)), 0)
-                                : undefined,
-                        })
+                                : 0,
+                        )
                     }
                     disabled={loading()}
                 />
                 <TextField
                     label="Max Magnitude"
                     type="number"
+                    value={maxMagnitude() > 0 ? maxMagnitude() : ""}
+                    defaultValue={maxMagnitude() > 0 ? maxMagnitude() : ""}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            max_magnitude: value
+                        setMaxMagnitude(
+                            value
                                 ? Math.max(Math.min(10, Number(value)), 0)
-                                : undefined,
-                        })
+                                : 0,
+                        )
                     }
                     disabled={loading()}
                 />
                 <TextField
                     label="Min PGA (Gal)"
                     type="number"
+                    value={minPGA() > 0 ? minPGA() : ""}
+                    defaultValue={minPGA() > 0 ? minPGA() : ""}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            min_pga: value ? Number(value) : undefined,
-                        })
+                        setMinPGA(value ? Number(value) : 0)
                     }
                     disabled={loading()}
                 />
                 <TextField
                     label="Max PGA (Gal)"
                     type="number"
+                    value={maxPGA() > 0 ? maxPGA() : ""}
+                    defaultValue={maxPGA() > 0 ? maxPGA() : ""}
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            max_pga: value ? Number(value) : undefined,
-                        })
+                        setMaxPGA(value ? Number(value) : 0)
                     }
                     disabled={loading()}
                 />
@@ -146,26 +170,30 @@ const Settings: Component = () => {
                     label="From"
                     type="date"
                     InputLabelProps={{ shrink: true }}
+                    value={
+                        fromDate().getTime() === 0
+                            ? ""
+                            : fromDate().toISOString().split("T")[0]
+                    }
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            from_date: value
-                                ? new Date(Date.parse(value))
-                                : undefined,
-                        })
+                        setFromDate(
+                            value ? new Date(Date.parse(value)) : new Date(0),
+                        )
                     }
                 />
                 <TextField
                     label="To"
                     type="date"
                     InputLabelProps={{ shrink: true }}
+                    value={
+                        toDate().getTime() === 0
+                            ? ""
+                            : toDate().toISOString().split("T")[0]
+                    }
                     onChange={(_, value) =>
-                        setConfig({
-                            ...config(),
-                            to_date: value
-                                ? new Date(Date.parse(value))
-                                : undefined,
-                        })
+                        setToDate(
+                            value ? new Date(Date.parse(value)) : new Date(0),
+                        )
                     }
                 />
                 <ButtonGroup variant="outlined">
@@ -280,15 +308,14 @@ const QueryDatabase: Component = () => {
 
     const update_location = () => {
         const bound = map.getBounds();
-        setConfig({
-            ...config(),
-            event_location: [
-                normalize_longitude(map.getCenter().lng),
-                normalize_latitude(map.getCenter().lat),
-            ],
-            max_event_distance:
-                bound.getNorthEast().distanceTo(bound.getSouthWest()) / 2,
-        });
+
+        setEventLocation([
+            normalize_longitude(map.getCenter().lng),
+            normalize_latitude(map.getCenter().lat),
+        ]);
+        setMaxEventDistance(
+            bound.getNorthEast().distanceTo(bound.getSouthWest()) / 2,
+        );
     };
 
     onMount(() => {
