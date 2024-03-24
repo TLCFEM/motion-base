@@ -29,8 +29,11 @@ import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import { total_api } from "./API";
+import Process from "./Process";
 
-const [mode, setMode] = createSignal<"jackpot" | "query">("jackpot");
+const [mode, setMode] = createSignal<"jackpot" | "query" | "process">(
+    "jackpot",
+);
 const [total] = createResource<number>(total_api);
 
 const App: Component = () => {
@@ -42,6 +45,11 @@ const App: Component = () => {
         });
         tippy(`#btn-query`, {
             content: "Query the database according to certain criteria.",
+            animation: "scale",
+            theme: "translucent",
+        });
+        tippy(`#btn-process`, {
+            content: "Apply further processing to records.",
             animation: "scale",
             theme: "translucent",
         });
@@ -80,6 +88,13 @@ const App: Component = () => {
                             >
                                 Query
                             </Button>
+                            <Button
+                                id="btn-process"
+                                onClick={() => setMode("process")}
+                                variant="contained"
+                            >
+                                Process
+                            </Button>
                             <AboutModal />
                         </Toolbar>
                     </AppBar>
@@ -90,6 +105,9 @@ const App: Component = () => {
                     </Match>
                     <Match when={mode() === "query"}>
                         <QueryDatabase />
+                    </Match>
+                    <Match when={mode() === "process"}>
+                        <Process />
                     </Match>
                 </Switch>
             </Grid>
