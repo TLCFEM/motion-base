@@ -13,24 +13,34 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-
 from beanie import init_beanie
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from .env import (
+    MONGO_HOST,
+    MONGO_PASSWORD,
+    MONGO_PORT,
+    MONGO_USERNAME,
+    RABBITMQ_HOST,
+    RABBITMQ_PASSWORD,
+    RABBITMQ_USERNAME,
+)
 from ..app.utility import UploadTask, User
 from ..record.record import Record
 
 
+def rabbitmq_uri():
+    if RABBITMQ_USERNAME is None or RABBITMQ_PASSWORD is None or RABBITMQ_HOST is None:
+        raise RuntimeError("Missing rabbitmq related environment variables.")
+
+    return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:5672/vhost"
+
+
 def mongo_uri():
-    username: str = os.getenv("MONGO_USERNAME")
-    password: str = os.getenv("MONGO_PASSWORD")
-    host: str = os.getenv("MONGO_HOST")
-    port: str = os.getenv("MONGO_PORT")
-    if username is None or password is None or host is None or port is None:
+    if MONGO_USERNAME is None or MONGO_PASSWORD is None or MONGO_HOST is None or MONGO_PORT is None:
         raise RuntimeError("Missing mongo related environment variables.")
 
-    return f"mongodb://{username}:{password}@{host}:{port}/"
+    return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
 async def init_mongo():

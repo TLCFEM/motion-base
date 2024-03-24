@@ -13,28 +13,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 
 import click
-import structlog
 import uvicorn
-from dotenv import load_dotenv
 
 from mb.celery import celery
-
-_logger = structlog.get_logger(__name__)
+from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 
 
 def run_app(**kwargs):
-    if load_dotenv(os.path.join(os.path.dirname(__file__), "../../docker/.env")):
-        _logger.info("Using .env file.")
-    else:
-        _logger.info("No .env file found.")
-
     if "celery" in kwargs:
-        celery.start(["worker", "--loglevel=INFO"])
+        celery.start(["worker"])
     else:
-        workers = os.getenv("MB_FASTAPI_WORKERS", "1")
+        workers = MB_FASTAPI_WORKERS
         if kwargs.get("overwrite_env", False) and "workers" in kwargs:
             workers = kwargs["workers"]
 
@@ -49,7 +40,7 @@ def run_app(**kwargs):
             config["reload"] = True
             config["log_level"] = "debug"
 
-        port = os.getenv("MB_PORT", "8000")
+        port = MB_PORT
         if kwargs.get("overwrite_env", False) and "port" in kwargs:
             port = kwargs["port"]
         config["port"] = int(port)

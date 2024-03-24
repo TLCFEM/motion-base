@@ -23,7 +23,7 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .jp import router as jp_router
+from .jp import router as jp_router, parse_archive_via_celery
 from .nz import router as nz_router
 from .process import processing_record
 from .response import (
@@ -114,6 +114,7 @@ async def retrieve_myself(user: User = Depends(is_active)):
 
 @app.get("/test_endpoint", tags=["misc"])
 async def for_test_only():
+    parse_archive_via_celery.delay()
     return {"message": "Test endpoint."}
 
 

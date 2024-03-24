@@ -22,6 +22,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 
 from .response import UploadResponse
 from .utility import User, create_task, is_active, send_notification
+from .. import celery
 from ..record.parser import ParserNIED
 
 router = APIRouter(tags=["Japan"])
@@ -39,6 +40,11 @@ async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, 
     mail_body += "\n".join([f"{record}" for record in records])
     mail = {"body": mail_body}
     await send_notification(mail)
+
+
+@celery.task
+def parse_archive_via_celery():
+    print("Parsing archive via celery.")
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)

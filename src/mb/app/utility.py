@@ -12,9 +12,9 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
 
-import os
 import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
@@ -26,6 +26,17 @@ from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
+
+from mb.utility.env import (
+    MB_ACCESS_TOKEN_EXPIRE_MINUTES,
+    MB_ALGORITHM,
+    MB_SECRET_KEY,
+    MB_SUPERUSER_EMAIL,
+    MB_SUPERUSER_FIRST_NAME,
+    MB_SUPERUSER_LAST_NAME,
+    MB_SUPERUSER_PASSWORD,
+    MB_SUPERUSER_USERNAME,
+)
 
 
 class CredentialException(HTTPException):
@@ -78,11 +89,11 @@ crypt_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 async def create_superuser():
     await User(
-        username=os.getenv("MB_SUPERUSER_USERNAME"),
-        email=os.getenv("MB_SUPERUSER_EMAIL"),
-        first_name=os.getenv("MB_SUPERUSER_FIRST_NAME"),
-        last_name=os.getenv("MB_SUPERUSER_LAST_NAME"),
-        hashed_password=crypt_context.hash(os.getenv("MB_SUPERUSER_PASSWORD")),
+        username=MB_SUPERUSER_USERNAME,
+        email=MB_SUPERUSER_EMAIL,
+        first_name=MB_SUPERUSER_FIRST_NAME,
+        last_name=MB_SUPERUSER_LAST_NAME,
+        hashed_password=crypt_context.hash(MB_SUPERUSER_PASSWORD),
         disabled=False,
         can_upload=True,
         can_delete=True,
@@ -96,20 +107,13 @@ async def authenticate_user(username: str, password: str):
 
 OAUTH2 = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = os.getenv("MB_SECRET_KEY")
-ALGORITHM = os.getenv("MB_ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
-
-# if SECRET_KEY is None:
-#     raise ValueError("No secret key provided.")
-
 
 def create_token(sub: str):
     return Token(
         access_token=jwt.encode(
-            {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)},
-            SECRET_KEY,
-            algorithm=ALGORITHM,
+            {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES)},
+            MB_SECRET_KEY,
+            algorithm=MB_ALGORITHM,
         ),
         token_type="bearer",
     )
@@ -117,7 +121,7 @@ def create_token(sub: str):
 
 async def current_user(token: str = Depends(OAUTH2)):
     try:
-        payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
+        payload = jwt.decode(token, MB_SECRET_KEY, algorithms=[MB_ALGORITHM])
         username: str = payload.get("sub")
         if username is None:
             raise CredentialException()
