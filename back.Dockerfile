@@ -15,4 +15,6 @@ WORKDIR /mb
 
 COPY --from=dependency /usr/local/lib/python3.11/site-packages /usr/local/lib/python3.11/site-packages
 
-CMD ["python3", "mb_runner.py", "host", "0.0.0.0"]
+ENTRYPOINT ["python3", "mb_runner.py"]
+
+CMD ["host", "0.0.0.0"]

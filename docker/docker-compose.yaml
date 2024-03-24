@@ -1,7 +1,7 @@
 services:
   dev-mongo:
     image: mongo
-    container_name: mongo
+    container_name: dev-mongo
     restart: 'no'
     command: --wiredTigerCacheSizeGB 2 --port ${MONGO_PORT}
     ports:
@@ -16,7 +16,7 @@ services:
       - motion_mongoconfig:/data/configdb
   dev-mongo-express:
     image: mongo-express
-    container_name: mongo-express
+    container_name: dev-mongo-express
     restart: 'no'
     depends_on:
       - dev-mongo
@@ -28,7 +28,7 @@ services:
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@dev-mongo:${MONGO_PORT}/
   dev-rabbitmq:
     image: rabbitmq
-    container_name: rabbitmq
+    container_name: dev-rabbitmq
     restart: 'no'
     ports:
       - '5672:5672'
