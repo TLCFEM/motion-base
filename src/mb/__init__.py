@@ -45,6 +45,8 @@ def run_app(**kwargs):
 
     if "host" in kwargs:
         config["host"] = kwargs["host"]
+    if "port" in kwargs:
+        config["port"] = kwargs["port"]
 
     uvicorn.run("mb.app.main:app", **config)
 
