@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onMount, Switch } from "solid-js";
+import { Component, createEffect, createMemo, createSignal, onMount } from "solid-js";
 import tippy from "tippy.js";
 import {
     Alert,
@@ -9,11 +9,14 @@ import {
     Card,
     CardContent,
     Checkbox,
+    FormControl,
     FormControlLabel,
     Grid,
+    InputLabel,
     LinearProgress,
+    MenuItem,
     Modal,
-    Stack,
+    Select,
     TextField,
 } from "@suid/material";
 import { process_api, ProcessConfig, ProcessResponse } from "./API";
@@ -29,6 +32,10 @@ const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
 
 const [lowCut, setLowCut] = createSignal(0);
 const [highCut, setHighCut] = createSignal(0);
+const [ratio, setRatio] = createSignal(0);
+const [filterLength, setFilterLength] = createSignal(0);
+const [filterType, setFilterType] = createSignal("lowpass");
+const [windowType, setWindowType] = createSignal("hann");
 
 const waveform_width = createMemo(() => 12 / (1 + Number(withSpectrum()) + Number(withResponseSpectrum())));
 const spectrum_width = createMemo(() => 12 / (2 + Number(withResponseSpectrum())));
@@ -45,9 +52,13 @@ const Settings: Component = () => {
         setLoading(true);
 
         let config = new ProcessConfig();
-        config.ratio = 2;
+        if (ratio() > 0) config.ratio = ratio();
         if (lowCut() > 0) config.low_cut = lowCut();
         if (highCut() > 0) config.high_cut = highCut();
+        if (filterLength() > 0) config.filter_length = filterLength();
+        config.filter_type = filterType();
+        config.window_type = windowType();
+
         config.with_filter = withFilter();
         config.with_spectrum = withSpectrum();
         config.with_response_spectrum = withResponseSpectrum();
@@ -81,54 +92,63 @@ const Settings: Component = () => {
                     flexDirection: "row",
                     justifyContent: "center",
                     alignContent: "center",
+                    alignItems: "center",
                     gap: "1rem",
                 }}
             >
-                <Stack
-                    sx={{
-                        border: "1px solid darkgrey",
-                    }}
-                >
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={withFilter()}
-                                onChange={(_, value) => {
-                                    setWithFilter(value);
-                                }}
-                            />
-                        }
-                        label="Apply Filter"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={withSpectrum()}
-                                onChange={(_, checked) => {
-                                    setWithSpectrum(checked);
-                                }}
-                            />
-                        }
-                        label="Compute Frequency Spectrum"
-                    />
-                    <FormControlLabel
-                        control={
-                            <Checkbox
-                                checked={withResponseSpectrum()}
-                                onChange={(_, checked) => {
-                                    setWithResponseSpectrum(checked);
-                                }}
-                            />
-                        }
-                        label="Compute Response Spectrum"
-                    />
-                </Stack>
                 <TextField
                     label="ID"
                     value={currentRecord()}
                     defaultValue={currentRecord()}
                     InputProps={{ readOnly: true }}
                     sx={{ width: "36ch" }}
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withFilter()}
+                            onChange={(_, value) => {
+                                setWithFilter(value);
+                            }}
+                        />
+                    }
+                    label="Apply Filter"
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withSpectrum()}
+                            onChange={(_, checked) => {
+                                setWithSpectrum(checked);
+                            }}
+                        />
+                    }
+                    label="Compute Frequency Spectrum"
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withResponseSpectrum()}
+                            onChange={(_, checked) => {
+                                setWithResponseSpectrum(checked);
+                            }}
+                        />
+                    }
+                    label="Compute Response Spectrum"
+                />
+                <TextField
+                    label="Ratio"
+                    type="number"
+                    value={ratio() > 0 ? ratio() : ""}
+                    defaultValue={ratio() > 0 ? ratio() : ""}
+                    onChange={(_, value) => setRatio(Math.max(0, Number(value)))}
+                />
+                <TextField
+                    label="Filter Length"
+                    type="number"
+                    value={filterLength() > 0 ? filterLength() : ""}
+                    defaultValue={filterLength() > 0 ? filterLength() : ""}
+                    onChange={(_, value) => setFilterLength(Math.max(0, Number(value)))}
                 />
                 <TextField
                     label="Low Cut"
@@ -144,6 +164,26 @@ const Settings: Component = () => {
                     defaultValue={highCut() > 0 ? highCut() : ""}
                     onChange={(_, value) => setHighCut(Math.max(0, Number(value)))}
                 />
+                <FormControl>
+                    <InputLabel>Filter Type</InputLabel>
+                    <Select value={filterType()} onChange={(e) => setFilterType(e.target.value)}>
+                        <MenuItem value="lowpass">Lowpass</MenuItem>
+                        <MenuItem value="highpass">Highpass</MenuItem>
+                        <MenuItem value="bandpass">Bandpass</MenuItem>
+                    </Select>
+                </FormControl>
+                <FormControl>
+                    <InputLabel>Window Type</InputLabel>
+                    <Select autoWidth value={windowType()} onChange={(e) => setWindowType(e.target.value)}>
+                        <MenuItem value="flattop">FlatTop</MenuItem>
+                        <MenuItem value="blackmanharris">BlackmanHarris</MenuItem>
+                        <MenuItem value="nuttall">Nuttall</MenuItem>
+                        <MenuItem value="hann">Hann</MenuItem>
+                        <MenuItem value="hamming">Hamming</MenuItem>
+                        <MenuItem value="kaiser">Kaiser</MenuItem>
+                        <MenuItem value="chebwin">ChebWin</MenuItem>
+                    </Select>
+                </FormControl>
                 <ButtonGroup variant="outlined" orientation="vertical">
                     <Button onClick={process} id="btn-process" disabled={loading()}>
                         Process
