@@ -111,9 +111,7 @@ export async function query_api(config: QueryConfig) {
     const response = (
         await axios.post<QueryResponse>(
             "/query",
-            JSON.stringify(config, (_, value) =>
-                value === null || value === undefined ? undefined : value,
-            ),
+            JSON.stringify(config, (_, value) => (value === null || value === undefined ? undefined : value)),
             {
                 headers: { "Content-Type": "application/json" },
             },
@@ -129,4 +127,36 @@ interface TotalResponse {
 
 export async function total_api() {
     return (await axios.get<TotalResponse>("/total")).data.total;
+}
+
+export class ProcessConfig {
+    public ratio: number | undefined;
+    public filter_length: number | undefined;
+    public filter_type: string | undefined;
+    public window_type: string | undefined;
+    public low_cut: number | undefined;
+    public high_cut: number | undefined;
+    public damping_ratio: number | undefined;
+    public period_end: number | undefined;
+    public period_step: number | undefined;
+    public normalised: Boolean | undefined;
+    public with_filter: Boolean | undefined;
+    public with_spectrum: Boolean | undefined;
+    public with_response_spectrum: Boolean | undefined;
+}
+
+export class ProcessResponse extends SeismicRecord {
+    process_config: ProcessConfig;
+}
+
+export async function process_api(record_id: string, config: ProcessConfig) {
+    return (
+        await axios.post<ProcessResponse>(
+            `/process?record_id=${record_id}`,
+            JSON.stringify(config, (_, value) => (value === null || value === undefined ? undefined : value)),
+            {
+                headers: { "Content-Type": "application/json" },
+            },
+        )
+    ).data;
 }

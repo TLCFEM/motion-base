@@ -72,8 +72,7 @@ const Settings: Component = () => {
         if (fromDate().getTime() > 0) config.from_date = fromDate();
         if (toDate().getTime() > 0) config.to_date = toDate();
         if (eventLocation()) config.event_location = eventLocation();
-        if (maxEventDistance() > 0)
-            config.max_event_distance = maxEventDistance();
+        if (maxEventDistance() > 0) config.max_event_distance = maxEventDistance();
 
         try {
             setRecords(await query_api(config));
@@ -117,6 +116,7 @@ const Settings: Component = () => {
                     flexDirection: "row",
                     justifyContent: "center",
                     alignContent: "center",
+                    alignItems: "center",
                     gap: "1rem",
                 }}
             >
@@ -125,9 +125,7 @@ const Settings: Component = () => {
                     type="number"
                     value={pageNumber()}
                     defaultValue={pageNumber()}
-                    onChange={(_, value) =>
-                        setPageNumber(Math.max(Number(value), 0))
-                    }
+                    onChange={(_, value) => setPageNumber(Math.max(Number(value), 0))}
                     disabled={loading()}
                 />
                 <TextField
@@ -135,13 +133,7 @@ const Settings: Component = () => {
                     type="number"
                     value={pageSize() > 0 ? pageSize() : ""}
                     defaultValue={pageSize() > 0 ? pageSize() : ""}
-                    onChange={(_, value) =>
-                        setPageSize(
-                            value
-                                ? Math.max(Math.min(1000, Number(value)), 1)
-                                : 0,
-                        )
-                    }
+                    onChange={(_, value) => setPageSize(value ? Math.max(Math.min(1000, Number(value)), 1) : 0)}
                     disabled={loading()}
                 />
                 <TextField
@@ -149,13 +141,7 @@ const Settings: Component = () => {
                     type="number"
                     value={minMagnitude() > 0 ? minMagnitude() : ""}
                     defaultValue={minMagnitude() > 0 ? minMagnitude() : ""}
-                    onChange={(_, value) =>
-                        setMinMagnitude(
-                            value
-                                ? Math.max(Math.min(10, Number(value)), 0)
-                                : 0,
-                        )
-                    }
+                    onChange={(_, value) => setMinMagnitude(value ? Math.max(Math.min(10, Number(value)), 0) : 0)}
                     disabled={loading()}
                 />
                 <TextField
@@ -163,13 +149,7 @@ const Settings: Component = () => {
                     type="number"
                     value={maxMagnitude() > 0 ? maxMagnitude() : ""}
                     defaultValue={maxMagnitude() > 0 ? maxMagnitude() : ""}
-                    onChange={(_, value) =>
-                        setMaxMagnitude(
-                            value
-                                ? Math.max(Math.min(10, Number(value)), 0)
-                                : 0,
-                        )
-                    }
+                    onChange={(_, value) => setMaxMagnitude(value ? Math.max(Math.min(10, Number(value)), 0) : 0)}
                     disabled={loading()}
                 />
                 <TextField
@@ -177,9 +157,7 @@ const Settings: Component = () => {
                     type="number"
                     value={minPGA() > 0 ? minPGA() : ""}
                     defaultValue={minPGA() > 0 ? minPGA() : ""}
-                    onChange={(_, value) =>
-                        setMinPGA(value ? Number(value) : 0)
-                    }
+                    onChange={(_, value) => setMinPGA(value ? Number(value) : 0)}
                     disabled={loading()}
                 />
                 <TextField
@@ -187,47 +165,29 @@ const Settings: Component = () => {
                     type="number"
                     value={maxPGA() > 0 ? maxPGA() : ""}
                     defaultValue={maxPGA() > 0 ? maxPGA() : ""}
-                    onChange={(_, value) =>
-                        setMaxPGA(value ? Number(value) : 0)
-                    }
+                    onChange={(_, value) => setMaxPGA(value ? Number(value) : 0)}
                     disabled={loading()}
                 />
                 <TextField
                     label="From"
                     type="date"
                     InputLabelProps={{ shrink: true }}
-                    value={
-                        fromDate().getTime() === 0
-                            ? ""
-                            : fromDate().toISOString().split("T")[0]
-                    }
-                    onChange={(_, value) =>
-                        setFromDate(
-                            value ? new Date(Date.parse(value)) : new Date(0),
-                        )
-                    }
+                    value={fromDate().getTime() === 0 ? "" : fromDate().toISOString().split("T")[0]}
+                    onChange={(_, value) => setFromDate(value ? new Date(Date.parse(value)) : new Date(0))}
+                    sx={{ width: "16ch" }}
+                    disabled={loading()}
                 />
                 <TextField
                     label="To"
                     type="date"
                     InputLabelProps={{ shrink: true }}
-                    value={
-                        toDate().getTime() === 0
-                            ? ""
-                            : toDate().toISOString().split("T")[0]
-                    }
-                    onChange={(_, value) =>
-                        setToDate(
-                            value ? new Date(Date.parse(value)) : new Date(0),
-                        )
-                    }
+                    value={toDate().getTime() === 0 ? "" : toDate().toISOString().split("T")[0]}
+                    onChange={(_, value) => setToDate(value ? new Date(Date.parse(value)) : new Date(0))}
+                    sx={{ width: "16ch" }}
+                    disabled={loading()}
                 />
                 <ButtonGroup variant="outlined">
-                    <Button
-                        onClick={fetch}
-                        id="btn-search"
-                        disabled={loading()}
-                    >
+                    <Button onClick={fetch} id="btn-search" disabled={loading()}>
                         Search
                     </Button>
                     <Button onClick={clear} id="btn-clear" disabled={loading()}>
@@ -251,11 +211,7 @@ const Settings: Component = () => {
                 </Modal>
             </CardContent>
             <Box sx={{ width: "100%" }}>
-                {loading() ? (
-                    <LinearProgress />
-                ) : (
-                    <LinearProgress variant="determinate" value={0} />
-                )}
+                {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
             </Box>
         </Card>
     );
@@ -271,9 +227,7 @@ const BasicTable: Component = () => {
                             <TableCell>ID</TableCell>
                             <TableCell>File Name</TableCell>
                             <TableCell align="right">Magnitude</TableCell>
-                            <TableCell align="right">
-                                PGA (Gal, cm/s^2)
-                            </TableCell>
+                            <TableCell align="right">PGA (Gal, cm/s^2)</TableCell>
                             <TableCell align="right">Depth (km)</TableCell>
                             <TableCell align="right">Duration (s)</TableCell>
                             <TableCell align="right">Event Time</TableCell>
@@ -294,26 +248,12 @@ const BasicTable: Component = () => {
                                         {row.id}
                                     </TableCell>
                                     <TableCell>{row.file_name}</TableCell>
-                                    <TableCell align="right">
-                                        {row.magnitude}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {Math.abs(
-                                            row.maximum_acceleration,
-                                        ).toFixed(2)}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {row.depth}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {row.duration}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {row.event_time.toUTCString()}
-                                    </TableCell>
-                                    <TableCell align="right">
-                                        {row.station_code.toUpperCase()}
-                                    </TableCell>
+                                    <TableCell align="right">{row.magnitude}</TableCell>
+                                    <TableCell align="right">{Math.abs(row.maximum_acceleration).toFixed(2)}</TableCell>
+                                    <TableCell align="right">{row.depth}</TableCell>
+                                    <TableCell align="right">{row.duration}</TableCell>
+                                    <TableCell align="right">{row.event_time.toUTCString()}</TableCell>
+                                    <TableCell align="right">{row.station_code.toUpperCase()}</TableCell>
                                 </TableRow>
                             )}
                         </For>
@@ -350,13 +290,8 @@ const QueryDatabase: Component = () => {
     const update_location = () => {
         const bound = map.getBounds();
 
-        setEventLocation([
-            normalize_longitude(map.getCenter().lng),
-            normalize_latitude(map.getCenter().lat),
-        ]);
-        setMaxEventDistance(
-            bound.getNorthEast().distanceTo(bound.getSouthWest()) / 2,
-        );
+        setEventLocation([normalize_longitude(map.getCenter().lng), normalize_latitude(map.getCenter().lat)]);
+        setMaxEventDistance(bound.getNorthEast().distanceTo(bound.getSouthWest()) / 2);
     };
 
     onMount(() => {
@@ -382,17 +317,11 @@ const QueryDatabase: Component = () => {
             if (station_map.has(key)) {
                 const marker = station_map.get(key);
 
-                marker?.bindPopup(
-                    `${marker?.getPopup()?.getContent()}</br>${record.id}`,
-                );
+                marker?.bindPopup(`${marker?.getPopup()?.getContent()}</br>${record.id}`);
             } else {
-                const marker = L.marker(
-                    new LatLng(
-                        record.station_location[1],
-                        record.station_location[0],
-                    ),
-                    { icon: stationIcon },
-                ).addTo(map);
+                const marker = L.marker(new LatLng(record.station_location[1], record.station_location[0]), {
+                    icon: stationIcon,
+                }).addTo(map);
 
                 marker.bindPopup(record.id);
                 station_map.set(key, marker);
@@ -403,17 +332,11 @@ const QueryDatabase: Component = () => {
             if (event_map.has(key)) {
                 const marker = event_map.get(key);
 
-                marker?.bindPopup(
-                    `${marker?.getPopup()?.getContent()}</br>${record.id}`,
-                );
+                marker?.bindPopup(`${marker?.getPopup()?.getContent()}</br>${record.id}`);
             } else {
-                const marker = L.marker(
-                    new LatLng(
-                        record.event_location[1],
-                        record.event_location[0],
-                    ),
-                    { icon: epicenterIcon },
-                ).addTo(map);
+                const marker = L.marker(new LatLng(record.event_location[1], record.event_location[0]), {
+                    icon: epicenterIcon,
+                }).addTo(map);
 
                 marker.bindPopup(record.id);
                 event_map.set(key, marker);

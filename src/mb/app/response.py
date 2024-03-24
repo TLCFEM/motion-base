@@ -109,8 +109,8 @@ class ListMetadataResponse(BaseModel):
 
 
 class ProcessConfig(BaseModel):
-    ratio: int = Field(None, ge=1)
-    filter_length: int = Field(None, ge=8)
+    ratio: int = Field(1, ge=1)
+    filter_length: int = Field(16, ge=8)
     filter_type: str = Field(
         "bandpass", regex=filter_regex, description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`"
     )
