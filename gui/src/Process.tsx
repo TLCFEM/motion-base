@@ -183,7 +183,7 @@ const Settings: Component = () => {
                 />
                 <FormControl sx={{ minWidth: "14ch" }}>
                     <InputLabel>Filter Type</InputLabel>
-                    <Select value={filterType()} onChange={(e) => setFilterType(e.target.value)}>
+                    <Select label="Filter Type" value={filterType()} onChange={(e) => setFilterType(e.target.value)}>
                         <MenuItem value="lowpass">Lowpass</MenuItem>
                         <MenuItem value="highpass">Highpass</MenuItem>
                         <MenuItem value="bandpass">Bandpass</MenuItem>
@@ -191,7 +191,7 @@ const Settings: Component = () => {
                 </FormControl>
                 <FormControl sx={{ minWidth: "18ch" }}>
                     <InputLabel>Window Type</InputLabel>
-                    <Select autoWidth value={windowType()} onChange={(e) => setWindowType(e.target.value)}>
+                    <Select label="Window Type" value={windowType()} onChange={(e) => setWindowType(e.target.value)}>
                         <MenuItem value="flattop">FlatTop</MenuItem>
                         <MenuItem value="blackmanharris">BlackmanHarris</MenuItem>
                         <MenuItem value="nuttall">Nuttall</MenuItem>
