@@ -200,9 +200,9 @@ class ParserNZSM:
             event_time: datetime = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S")
             station_code: str = matches[3]
         else:
-            event_time: datetime = datetime.strptime(
-                "".join(x for x in lines[7].strip().split(" ") if x), "%Y%B%d%H%Mut"
-            )
+            event_string: str = "".join(x for x in lines[7].strip().split(" ") if x)
+            event_format: str = "%Y%B%d%H%Mut" if ":" not in event_string else "%Y%B%d%H:%M:%Sut"
+            event_time: datetime = datetime.strptime(event_string, event_format)
             station_code = [x for x in lines[1].split(" ") if x][1]
 
         async def _populate_common_fields(record: NZSM):
