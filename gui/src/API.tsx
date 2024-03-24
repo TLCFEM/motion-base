@@ -161,7 +161,6 @@ export async function process_api(record_id: string, config: ProcessConfig) {
     ).data;
 }
 
-export const isNumeric = (num: any) =>
-    (typeof num === "number" || (typeof num === "string" && num.trim() !== "")) && !isNaN(num as number);
+export const isNumeric = (value: string) => /^-?\d+(\.\d+)?$/.test(value);
 
 export const ifError = (input: string) => input !== "" && (!isNumeric(input) || Number(input) <= 0);

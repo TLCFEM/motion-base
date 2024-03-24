@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
 import tippy from "tippy.js";
 import {
     Alert,
@@ -280,6 +280,21 @@ const Waveform: Component = () => {
             },
             { autosizable: true, responsive: true },
         );
+    });
+
+    onMount(() => {
+        const resizePlot = () => {
+            Plotly.relayout("time", {
+                "xaxis.autorange": true,
+                "yaxis.autorange": true,
+            }).then();
+        };
+
+        window.addEventListener("resize", resizePlot);
+
+        onCleanup(() => {
+            window.removeEventListener("resize", resizePlot);
+        });
     });
 
     return (
