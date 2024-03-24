@@ -179,7 +179,7 @@ async def download_single_random_spectrum():
     )
 
 
-@app.post("/query/", response_model=ListMetadataResponse)
+@app.post("/query", response_model=ListMetadataResponse)
 async def query_records(query: QueryConfig = Body(...), count_total: bool = False):
     """
     Query records from the database.
