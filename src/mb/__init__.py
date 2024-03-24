@@ -20,6 +20,8 @@ import structlog
 import uvicorn
 from dotenv import load_dotenv
 
+from mb.celery import celery
+
 _logger = structlog.get_logger(__name__)
 
 
@@ -29,30 +31,33 @@ def run_app(**kwargs):
     else:
         _logger.info("No .env file found.")
 
-    workers = os.getenv("MB_FASTAPI_WORKERS", 1)
-    if kwargs.get("overwrite_env", False) and "workers" in kwargs:
-        workers = kwargs["workers"]
-
-    workers = int(workers)
-
-    config: dict = {}
-
-    if workers > 1:
-        config["workers"] = workers
-        config["log_level"] = "info"
+    if "celery" in kwargs:
+        celery.start(["worker", "--loglevel=INFO"])
     else:
-        config["reload"] = True
-        config["log_level"] = "debug"
+        workers = os.getenv("MB_FASTAPI_WORKERS", "1")
+        if kwargs.get("overwrite_env", False) and "workers" in kwargs:
+            workers = kwargs["workers"]
 
-    port = os.getenv("MB_PORT", 8000)
-    if kwargs.get("overwrite_env", False) and "port" in kwargs:
-        port = kwargs["port"]
-    config["port"] = int(port)
+        workers = int(workers)
 
-    if "host" in kwargs:
-        config["host"] = kwargs["host"]
+        config: dict = {}
 
-    uvicorn.run("mb.app.main:app", **config)
+        if workers > 1:
+            config["workers"] = workers
+            config["log_level"] = "info"
+        else:
+            config["reload"] = True
+            config["log_level"] = "debug"
+
+        port = os.getenv("MB_PORT", "8000")
+        if kwargs.get("overwrite_env", False) and "port" in kwargs:
+            port = kwargs["port"]
+        config["port"] = int(port)
+
+        if "host" in kwargs:
+            config["host"] = kwargs["host"]
+
+        uvicorn.run("mb.app.main:app", **config)
 
 
 @click.command()
