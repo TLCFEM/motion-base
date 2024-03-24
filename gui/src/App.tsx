@@ -46,13 +46,15 @@ const App: Component = () => {
         });
     });
 
+    const variant = screen.height <= 1080 ? "dense" : "regular";
+
     return (
         <Box sx={{ marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh" }}>
             <Grid container spacing={1}>
                 <Grid item xs={12} md={12}>
                     <AppBar position="static" enableColorOnDark>
                         <Toolbar
-                            // variant="dense"
+                            variant={variant}
                             sx={{
                                 display: "flex",
                                 alignItems: "center",
