@@ -13,9 +13,21 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createEffect, createMemo, createResource, onMount } from "solid-js";
+import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
 import { jackpot_waveform_api } from "./API";
-import { Box, Button, Card, CardActions, CardContent, Grid, LinearProgress, Paper, Typography } from "@suid/material";
+import {
+    Box,
+    Button,
+    Card,
+    CardActions,
+    CardContent,
+    Checkbox,
+    FormControlLabel,
+    Grid,
+    LinearProgress,
+    Paper,
+    Typography,
+} from "@suid/material";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
@@ -24,6 +36,9 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 
 const [data, { refetch }] = createResource(jackpot_waveform_api);
+
+const [withWaveform, setWithWaveform] = createSignal(true);
+const [withMap, setWithMap] = createSignal(true);
 
 function distance_between(a: number[], b: number[]) {
     const event_location = new LatLng(a[1], a[0]);
@@ -116,7 +131,37 @@ const MetadataCard: Component = () => {
             <Box sx={{ width: "100%" }}>
                 {data.loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
             </Box>
-            <CardActions sx={{ justifyContent: "flex-end" }}>
+            <CardActions
+                sx={{
+                    justifyContent: "flex-end",
+                    alignItems: "center",
+                    alignContent: "center",
+                }}
+            >
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withMap()}
+                            onChange={(_, checked) => {
+                                if (checked || withWaveform()) setWithMap(checked);
+                            }}
+                        />
+                    }
+                    label="Map"
+                    disabled
+                />
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withWaveform()}
+                            onChange={(_, checked) => {
+                                if (checked || withMap()) setWithWaveform(checked);
+                            }}
+                        />
+                    }
+                    label="Waveform"
+                    disabled
+                />
                 <Button id="btn-next" variant="contained" onClick={refetch} disabled={data.loading}>
                     Next
                 </Button>
@@ -205,12 +250,16 @@ const Jackpot: Component = () => {
             <Grid item xs={12} md={2}>
                 <MetadataCard />
             </Grid>
-            <Grid item xs={12} md={5}>
-                <Epicenter />
-            </Grid>
-            <Grid item xs={12} md={5}>
-                <Waveform />
-            </Grid>
+            {withMap() && (
+                <Grid item xs={12} md={5}>
+                    <Epicenter />
+                </Grid>
+            )}
+            {withWaveform() && (
+                <Grid item xs={12} md={5}>
+                    <Waveform />
+                </Grid>
+            )}
         </>
     );
 };

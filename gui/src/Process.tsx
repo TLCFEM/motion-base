@@ -27,6 +27,7 @@ const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessRes
 const [error, setError] = createSignal("");
 const [loading, setLoading] = createSignal(false);
 
+const [withWaveform, setWithWaveform] = createSignal(true);
 const [withFilter, setWithFilter] = createSignal(false);
 const [withSpectrum, setWithSpectrum] = createSignal(false);
 const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
@@ -51,7 +52,7 @@ const resizePlot = () => {
 };
 
 const Settings: Component = () => {
-    const [currentRecord, setCurrentRecord] = createSignal("14064834-afa0-4f52-a5b6-bce03ea6f415");
+    const [currentRecord, setCurrentRecord] = createSignal("");
 
     function clear() {
         setWithFilter(false);
@@ -133,27 +134,15 @@ const Settings: Component = () => {
                     onChange={(_, value) => setCurrentRecord(value)}
                 />
                 <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={withSpectrum()}
-                            onChange={(_, checked) => {
-                                setWithSpectrum(checked);
-                                resizePlot();
-                            }}
-                        />
-                    }
+                    control={<Checkbox checked={withWaveform()} onChange={(_, checked) => setWithWaveform(checked)} />}
+                    label="Show Waveform"
+                />
+                <FormControlLabel
+                    control={<Checkbox checked={withSpectrum()} onChange={(_, checked) => setWithSpectrum(checked)} />}
                     label="Compute Frequency Spectrum"
                 />
                 <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={withFilter()}
-                            onChange={(_, value) => {
-                                setWithFilter(value);
-                                resizePlot();
-                            }}
-                        />
-                    }
+                    control={<Checkbox checked={withFilter()} onChange={(_, value) => setWithFilter(value)} />}
                     label="Apply Filter"
                 />
                 <TextField
@@ -308,7 +297,7 @@ const Waveform: Component = () => {
         );
     });
 
-    return <Paper id="time" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
+    return <Paper id="time" sx={{ border: "1px solid darkgrey", height: "70vh" }} />;
 };
 
 const FrequencySpectrum: Component = () => {
@@ -346,7 +335,7 @@ const FrequencySpectrum: Component = () => {
         );
     });
 
-    return <Paper id="spectrum" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
+    return <Paper id="spectrum" sx={{ border: "1px solid darkgrey", height: "70vh" }} />;
 };
 
 const ResponseSpectrum: Component = () => {
@@ -440,7 +429,7 @@ const ResponseSpectrum: Component = () => {
 
     return (
         <For each={["u_spectrum", "v_spectrum", "a_spectrum"]}>
-            {(item) => <Paper id={item} sx={{ border: "1px solid darkgrey", height: "80vh" }} />}
+            {(item) => <Paper id={item} sx={{ border: "1px solid darkgrey", height: "70vh" }} />}
         </For>
     );
 };
@@ -451,7 +440,7 @@ export default function Process() {
                 <Settings />
             </Grid>
             <Grid item xs={12} md={12} sx={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
-                {processed().waveform && <Waveform />}
+                {withWaveform() && processed().waveform && <Waveform />}
                 {withSpectrum() && processed().spectrum && <FrequencySpectrum />}
                 {withResponseSpectrum() && processed().period && <ResponseSpectrum />}
             </Grid>
