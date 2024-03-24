@@ -13,24 +13,9 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-    Component,
-    createEffect,
-    createMemo,
-    createResource,
-    onMount,
-} from "solid-js";
+import { Component, createEffect, createMemo, createResource, onMount } from "solid-js";
 import { jackpot_waveform_api } from "./API";
-import {
-    Box,
-    Button,
-    Card,
-    CardActions,
-    CardContent,
-    Grid,
-    LinearProgress,
-    Typography,
-} from "@suid/material";
+import { Box, Button, Card, CardActions, CardContent, Grid, LinearProgress, Typography } from "@suid/material";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
@@ -63,9 +48,7 @@ const MetadataCard: Component = () => {
         { label: "Depth (km)", value: data.loading ? "---" : data().depth },
         {
             label: "PGA (Gal, cm/s^2)",
-            value: data.loading
-                ? "---"
-                : Math.abs(data().maximum_acceleration).toFixed(2),
+            value: data.loading ? "---" : Math.abs(data().maximum_acceleration).toFixed(2),
         },
         {
             label: `Sampling Frequency (${data.loading ? "---" : data().sampling_frequency_unit})`,
@@ -77,26 +60,17 @@ const MetadataCard: Component = () => {
         },
         {
             label: "Record Time",
-            value: data.loading
-                ? "---"
-                : data().record_time.getTime() > 0
-                  ? data().record_time.toUTCString()
-                  : "---",
+            value: data.loading ? "---" : data().record_time.getTime() > 0 ? data().record_time.toUTCString() : "---",
         },
         {
-            tooltip:
-                "Distance between event and station locations over the delay between event and record times.",
+            tooltip: "Distance between event and station locations over the delay between event and record times.",
             label: "Approximated Speed (km/s)",
             value: data.loading
                 ? "---"
                 : data().record_time.getTime() > 0
                   ? (
-                        distance_between(
-                            data().event_location,
-                            data().station_location,
-                        ) /
-                        (data().record_time.getTime() -
-                            data().event_time.getTime())
+                        distance_between(data().event_location, data().station_location) /
+                        (data().record_time.getTime() - data().event_time.getTime())
                     ).toFixed(2)
                   : "---",
         },
@@ -125,9 +99,7 @@ const MetadataCard: Component = () => {
                         <Typography
                             color="text.secondary"
                             variant="subtitle2"
-                            id={item.label
-                                .toLowerCase()
-                                .replace(new RegExp("[s()/]", "g"), "_")}
+                            id={item.label.toLowerCase().replace(new RegExp("[s()/]", "g"), "_")}
                         >
                             {item.label}
                         </Typography>
@@ -138,19 +110,10 @@ const MetadataCard: Component = () => {
                 ))}
             </CardContent>
             <Box sx={{ width: "100%" }}>
-                {data.loading ? (
-                    <LinearProgress />
-                ) : (
-                    <LinearProgress variant="determinate" value={0} />
-                )}
+                {data.loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
             </Box>
             <CardActions sx={{ justifyContent: "flex-end" }}>
-                <Button
-                    id="btn-next"
-                    variant="contained"
-                    onClick={refetch}
-                    disabled={data.loading}
-                >
+                <Button id="btn-next" variant="contained" onClick={refetch} disabled={data.loading}>
                     Next
                 </Button>
             </CardActions>
@@ -164,14 +127,12 @@ const Epicenter: Component = () => {
     let station_marker: L.Marker;
 
     onMount(() => {
-        const event_location = new LatLng(13.4247317, 52.5068441);
-        const station_location = new LatLng(13.4247317, 52.5068441);
+        const event_location = new LatLng(52.5068441, 13.4247317);
+        const station_location = new LatLng(52.5068441, 13.4247317);
 
         map = DefaultMap("epicenter", event_location);
 
-        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(
-            map,
-        );
+        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(map);
         station_marker = L.marker(station_location, {
             icon: stationIcon,
         }).addTo(map);
@@ -180,25 +141,15 @@ const Epicenter: Component = () => {
     createEffect(() => {
         if (data.loading) return;
 
-        const event_location = new LatLng(
-            data().event_location[1],
-            data().event_location[0],
-        );
-        const station_location = new LatLng(
-            data().station_location[1],
-            data().station_location[0],
-        );
+        const event_location = new LatLng(data().event_location[1], data().event_location[0]);
+        const station_location = new LatLng(data().station_location[1], data().station_location[0]);
         map.flyTo(event_location, 6);
 
         event_marker.setLatLng(event_location);
         station_marker.setLatLng(station_location);
 
-        event_marker.bindPopup(
-            "Event Location: " + event_marker.getLatLng().toString(),
-        );
-        station_marker.bindPopup(
-            "Station Location: " + station_marker.getLatLng().toString(),
-        );
+        event_marker.bindPopup("Event Location: " + event_marker.getLatLng().toString());
+        station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
     });
 
     return (

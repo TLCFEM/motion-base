@@ -54,31 +54,22 @@ export default function AboutModal() {
                         p: 4,
                     }}
                 >
-                    <Stack
-                        direction="row"
-                        spacing={2}
-                        sx={{ p: 1 }}
-                        alignItems="center"
-                    >
+                    <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
                         <img src={mb_logo} alt="logo" height="50px" />
                         <Typography variant="h4" sx={{ p: 1 }}>
                             About
                         </Typography>
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        This is a demo of the strong motion database. The source
-                        code is available at GitHub.
+                        This is a demo of the strong motion database. The source code is available at GitHub.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         Japan Database
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The data is retrieved from{" "}
-                        <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">
-                            NIED
-                        </Link>
-                        . The data is not processed. Users may want to further
-                        filter the records.
+                        <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>. The data is
+                        not processed. Users may want to further filter the records.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         New Zealand Database
@@ -88,31 +79,18 @@ export default function AboutModal() {
                         <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">
                             New Zealand Strong-Motion
                         </Link>{" "}
-                        database. The selected strong motions are processed
-                        (*.V2A files). The other records (*.V1A files) are not
-                        processed. Users may want to further filter the records.
+                        database. The selected strong motions are processed (*.V2A files). The other records (*.V1A
+                        files) are not processed. Users may want to further filter the records.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         Built with
                     </Typography>
-                    <Stack
-                        direction="row"
-                        spacing={3}
-                        sx={{ p: 1 }}
-                        alignItems="center"
-                        justifyContent="center"
-                    >
+                    <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
                         <img src={mongodb_logo} alt="mongodb" height="40px" />
                         <img src={fastapi_logo} alt="fastapi" height="40px" />
                         <img src={solid_logo} alt="solid" height="40px" />
                     </Stack>
-                    <Stack
-                        direction="row"
-                        spacing={3}
-                        sx={{ p: 1 }}
-                        alignItems="center"
-                        justifyContent="center"
-                    >
+                    <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
                         <img src={beanie_logo} alt="beanie" height="40px" />
                         <img src={leafllet_logo} alt="leaflet" height="40px" />
                         <img src={plotly_logo} alt="plotly" height="40px" />

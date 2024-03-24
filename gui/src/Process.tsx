@@ -37,10 +37,6 @@ const [filterLength, setFilterLength] = createSignal(0);
 const [filterType, setFilterType] = createSignal("lowpass");
 const [windowType, setWindowType] = createSignal("hann");
 
-const waveform_width = createMemo(() => 12 / (1 + Number(withSpectrum()) + Number(withResponseSpectrum())));
-const spectrum_width = createMemo(() => 12 / (2 + Number(withResponseSpectrum())));
-const response_spectrum_width = createMemo(() => 12 / (2 + Number(withSpectrum())));
-
 const Settings: Component = () => {
     const [currentRecord, setCurrentRecord] = createSignal("abf60c4d-ae35-4ec0-b63a-38362891cea7");
 
@@ -101,7 +97,6 @@ const Settings: Component = () => {
                     value={currentRecord()}
                     defaultValue={currentRecord()}
                     InputProps={{ readOnly: true }}
-                    sx={{ width: "36ch" }}
                 />
                 <FormControlLabel
                     control={
@@ -300,6 +295,10 @@ const Spectrum: Component = () => {
 };
 
 export default function Process() {
+    const waveform_width = createMemo(() => 12 / (1 + Number(withSpectrum()) + Number(withResponseSpectrum())));
+    const spectrum_width = createMemo(() => 12 / (2 + Number(withResponseSpectrum())));
+    const response_spectrum_width = createMemo(() => 12 / (2 + Number(withSpectrum())));
+
     return (
         <>
             <Grid item xs={12} md={12}>

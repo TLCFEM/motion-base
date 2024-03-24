@@ -13,14 +13,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {
-    Component,
-    createResource,
-    createSignal,
-    Match,
-    onMount,
-    Switch,
-} from "solid-js";
+import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
 import { AppBar, Box, Button, Grid, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
@@ -31,9 +24,7 @@ import "tippy.js/animations/scale.css";
 import { total_api } from "./API";
 import Process from "./Process";
 
-const [mode, setMode] = createSignal<"jackpot" | "query" | "process">(
-    "jackpot",
-);
+const [mode, setMode] = createSignal<"jackpot" | "query" | "process">("jackpot");
 const [total] = createResource<number>(total_api);
 
 const App: Component = () => {
@@ -70,29 +61,15 @@ const App: Component = () => {
                             }}
                         >
                             <Typography sx={{ flexGrow: 1 }} variant="h5">
-                                {total.loading
-                                    ? "..."
-                                    : `Record Count: ${total().toLocaleString()}.`}
+                                {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
                             </Typography>
-                            <Button
-                                id="btn-jackpot"
-                                onClick={() => setMode("jackpot")}
-                                variant="contained"
-                            >
+                            <Button id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
                                 Jackpot
                             </Button>
-                            <Button
-                                id="btn-query"
-                                onClick={() => setMode("query")}
-                                variant="contained"
-                            >
+                            <Button id="btn-query" onClick={() => setMode("query")} variant="contained">
                                 Query
                             </Button>
-                            <Button
-                                id="btn-process"
-                                onClick={() => setMode("process")}
-                                variant="contained"
-                            >
+                            <Button id="btn-process" onClick={() => setMode("process")} variant="contained">
                                 Process
                             </Button>
                             <AboutModal />
