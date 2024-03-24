@@ -96,12 +96,19 @@ export class QueryConfig {
     public page_number: number | undefined;
 }
 
+class PaginationResponse {
+    public page_number: number;
+    public page_size: number;
+    public total: number;
+}
+
 interface QueryResponse {
     records: SeismicRecord[];
+    pagination: PaginationResponse;
 }
 
 export async function query_api(config: QueryConfig) {
-    return (
+    const response = (
         await axios.post<QueryResponse>(
             "/query",
             JSON.stringify(config, (_, value) =>
@@ -111,7 +118,9 @@ export async function query_api(config: QueryConfig) {
                 headers: { "Content-Type": "application/json" },
             },
         )
-    ).data.records.map((record) => new SeismicRecord(record));
+    ).data;
+
+    return response.records.map((record) => new SeismicRecord(record));
 }
 
 interface TotalResponse {

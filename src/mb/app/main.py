@@ -179,20 +179,46 @@ async def download_single_random_spectrum():
     )
 
 
-@app.post("/query", response_model=ListMetadataResponse)
-async def query_records(query: QueryConfig = Body(...)):
+@app.post("/query/", response_model=ListMetadataResponse)
+async def query_records(query: QueryConfig = Body(...), count_total: bool = False):
     """
     Query records from the database.
+
+    Since the query involves computing the distance between two points, it is slow to count the total number of records.
+    If you do not need the total number of records, set `count_total` to `false`.
+    If you need the total number of records, set `count_total` to `true`.
+    If `count_total` is set to `true`, the total number of records will be returned.
+    The computation depends on whether the query asks to filter by location.
     """
 
-    filtered = Record.find(query.generate_query_string()).sort(-Record.magnitude, -Record.maximum_acceleration)
+    geo, other = query.generate_query_string()
+
+    filtered = Record.find({**geo, **other})
     result = filtered.skip(query.page_number * query.page_size).limit(query.page_size).project(MetadataRecord)
+
+    if not count_total:
+        record_count: int = 0
+    elif not geo:
+        record_count = await filtered.count()
+    else:
+        key: str = "event_location" if "event_location" in geo else "station_location"
+
+        aggregation: dict = {
+            "$geoNear": {
+                "near": geo[key]["$nearSphere"],
+                "key": key,
+                "distanceField": "dist.calculated",
+                "maxDistance": geo[key]["$maxDistance"],
+                "spherical": True,
+            }
+        }
+        if other:
+            aggregation["$geoNear"]["query"] = other
+        record_count = (await Record.aggregate([aggregation, {"$count": "total"}]).to_list())[0]["total"]
 
     response: ListMetadataResponse = ListMetadataResponse(
         records=await result.to_list(),
-        pagination=PaginationResponse(
-            total=await filtered.count(), page_size=query.page_size, page_number=query.page_number
-        ),
+        pagination=PaginationResponse(total=record_count, page_size=query.page_size, page_number=query.page_number),
     )
     for item in response.records:
         item.endpoint = "/query"

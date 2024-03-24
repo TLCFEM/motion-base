@@ -158,11 +158,12 @@ class QueryConfig(BaseModel):
     page_size: int = Field(10, ge=1, le=1000)
     page_number: int = Field(0, ge=0)
 
-    def generate_query_string(self) -> dict:
-        conditions: list = []
+    def generate_query_string(self) -> tuple[dict, dict]:
+        geo_query: dict = {}
+        other_query: dict = {}
 
         if self.region is not None:
-            conditions.append({"region": self.region})
+            other_query["region"] = self.region
 
         magnitude: dict = {}
         if self.min_magnitude is not None:
@@ -170,22 +171,22 @@ class QueryConfig(BaseModel):
         if self.max_magnitude is not None:
             magnitude["$lte"] = self.max_magnitude
         if magnitude:
-            conditions.append({"magnitude": magnitude})
+            other_query["magnitude"] = magnitude
 
         if self.category is not None:
-            conditions.append({"category": self.category.lower()})
+            other_query["category"] = self.category.lower()
 
         if self.event_location is not None:
             geo_json = {"$nearSphere": self.event_location, "$maxDistance": 10 / 6371}
             if self.max_event_distance is not None:
                 geo_json["$maxDistance"] = self.max_event_distance / 6371 / 1000
-            conditions.append({"event_location": geo_json})
+            geo_query["event_location"] = geo_json
 
         if self.station_location is not None:
             geo_json = {"$nearSphere": self.station_location, "$maxDistance": 10 / 6371}
             if self.max_station_distance is not None:
                 geo_json["$maxDistance"] = self.max_station_distance / 6371 / 1000
-            conditions.append({"station_location": geo_json})
+            geo_query["station_location"] = geo_json
 
         date_range: dict = {}
         if self.from_date is not None:
@@ -193,7 +194,7 @@ class QueryConfig(BaseModel):
         if self.to_date is not None:
             date_range["$lte"] = self.to_date
         if date_range:
-            conditions.append({"event_time": date_range})
+            other_query["event_time"] = date_range
 
         pga: dict = {}
         if self.min_pga is not None:
@@ -201,12 +202,12 @@ class QueryConfig(BaseModel):
         if self.max_pga is not None:
             pga["$lte"] = self.max_pga
         if pga:
-            conditions.append({"maximum_acceleration": pga})
+            other_query["maximum_acceleration"] = pga
 
         if self.direction is not None:
-            conditions.append({"direction": {"$regex": self.direction, "$options": "i"}})
+            other_query["direction"] = {"$regex": self.direction, "$options": "i"}
 
         if self.event_name is not None:
-            conditions.append({"file_name": {"$regex": self.event_name, "$options": "i"}})
+            other_query["file_name"] = {"$regex": self.event_name, "$options": "i"}
 
-        return {} if len(conditions) == 0 else {"$and": conditions}
+        return geo_query, other_query
