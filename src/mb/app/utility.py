@@ -78,11 +78,11 @@ crypt_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
 
 async def create_superuser():
     await User(
-        username=os.getenv("SUPERUSER_USERNAME"),
-        email=os.getenv("SUPERUSER_EMAIL"),
-        first_name=os.getenv("SUPERUSER_FIRST_NAME"),
-        last_name=os.getenv("SUPERUSER_LAST_NAME"),
-        hashed_password=crypt_context.hash(os.getenv("SUPERUSER_PASSWORD")),
+        username=os.getenv("MB_SUPERUSER_USERNAME"),
+        email=os.getenv("MB_SUPERUSER_EMAIL"),
+        first_name=os.getenv("MB_SUPERUSER_FIRST_NAME"),
+        last_name=os.getenv("MB_SUPERUSER_LAST_NAME"),
+        hashed_password=crypt_context.hash(os.getenv("MB_SUPERUSER_PASSWORD")),
         disabled=False,
         can_upload=True,
         can_delete=True,
@@ -96,15 +96,23 @@ async def authenticate_user(username: str, password: str):
 
 OAUTH2 = OAuth2PasswordBearer(tokenUrl="token")
 
-SECRET_KEY = os.getenv("SECRET_KEY")
-ALGORITHM = os.getenv("ALGORITHM", "HS256")
-ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+SECRET_KEY = os.getenv("MB_SECRET_KEY")
+ALGORITHM = os.getenv("MB_ALGORITHM", "HS256")
+ACCESS_TOKEN_EXPIRE_MINUTES = int(os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+
+# if SECRET_KEY is None:
+#     raise ValueError("No secret key provided.")
 
 
-def create_token(data: dict, expires_delta: timedelta | None = None):
-    to_encode = data.copy()
-    to_encode.update({"exp": datetime.utcnow() + (expires_delta if expires_delta else timedelta(minutes=15))})
-    return jwt.encode(to_encode, SECRET_KEY, algorithm=ALGORITHM)
+def create_token(sub: str):
+    return Token(
+        access_token=jwt.encode(
+            {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)},
+            SECRET_KEY,
+            algorithm=ALGORITHM,
+        ),
+        token_type="bearer",
+    )
 
 
 async def current_user(token: str = Depends(OAUTH2)):

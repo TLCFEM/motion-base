@@ -5,11 +5,17 @@
 #    pip-compile --annotation-style=line pyproject.toml
 #
 aiofiles==23.2.1          # via motion-base (pyproject.toml)
+amqp==5.2.0               # via kombu
 anyio==3.7.1              # via fastapi, httpx, starlette
 beanie==1.25.0            # via motion-base (pyproject.toml)
+billiard==4.2.0           # via celery
+celery==5.3.6             # via motion-base (pyproject.toml)
 certifi==2024.2.2         # via httpcore, httpx
 cffi==1.16.0              # via cryptography
-click==8.1.7              # via beanie, uvicorn
+click==8.1.7              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
+click-didyoumean==0.3.1   # via celery
+click-plugins==1.1.1      # via celery
+click-repl==0.3.0         # via celery
 contourpy==1.2.0          # via matplotlib
 cryptography==42.0.5      # via python-jose
 cycler==0.12.1            # via matplotlib
@@ -25,6 +31,7 @@ httpx-auth==0.22.0        # via motion-base (pyproject.toml)
 idna==3.6                 # via anyio, email-validator, httpx
 joblib==1.3.2             # via motion-base (pyproject.toml)
 kiwisolver==1.4.5         # via matplotlib
+kombu==5.3.5              # via celery
 lazy-model==0.2.0         # via beanie
 llvmlite==0.42.0          # via numba
 markdown-it-py==3.0.0     # via rich
@@ -37,13 +44,14 @@ packaging==24.0           # via matplotlib
 passlib==1.7.4            # via motion-base (pyproject.toml)
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)
+prompt-toolkit==3.0.43    # via click-repl
 pyasn1==0.5.1             # via python-jose, rsa
 pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
 pymongo==4.6.2            # via motor
 pyparsing==3.1.2          # via matplotlib
-python-dateutil==2.9.0.post0  # via matplotlib
+python-dateutil==2.9.0.post0  # via celery, matplotlib
 python-dotenv==1.0.1      # via motion-base (pyproject.toml)
 python-jose[cryptography]==3.3.0  # via motion-base (pyproject.toml)
 python-multipart==0.0.9   # via motion-base (pyproject.toml)
@@ -56,4 +64,7 @@ starlette==0.27.0         # via fastapi
 structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
+tzdata==2024.1            # via celery
 uvicorn==0.28.1           # via motion-base (pyproject.toml)
+vine==5.1.0               # via amqp, celery, kombu
+wcwidth==0.2.13           # via prompt-toolkit

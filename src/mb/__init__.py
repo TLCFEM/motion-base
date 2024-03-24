@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 
 import click
@@ -28,9 +29,9 @@ def run_app(**kwargs):
     else:
         _logger.info("No .env file found.")
 
-    workers = os.getenv("WORKERS", None)
-    if workers is None or kwargs.get("overwrite_env", False):
-        workers = kwargs.get("workers", 1)
+    workers = os.getenv("MB_FASTAPI_WORKERS", 1)
+    if kwargs.get("overwrite_env", False) and "workers" in kwargs:
+        workers = kwargs["workers"]
 
     workers = int(workers)
 
@@ -43,10 +44,13 @@ def run_app(**kwargs):
         config["reload"] = True
         config["log_level"] = "debug"
 
+    port = os.getenv("MB_PORT", 8000)
+    if kwargs.get("overwrite_env", False) and "port" in kwargs:
+        port = kwargs["port"]
+    config["port"] = int(port)
+
     if "host" in kwargs:
         config["host"] = kwargs["host"]
-    if "port" in kwargs:
-        config["port"] = kwargs["port"]
 
     uvicorn.run("mb.app.main:app", **config)
 

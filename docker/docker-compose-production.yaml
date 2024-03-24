@@ -3,9 +3,9 @@ services:
     image: mongo
     container_name: mongo
     restart: 'no'
-    command: --wiredTigerCacheSizeGB 2
+    command: --wiredTigerCacheSizeGB 2 --port ${MONGO_PORT}
     ports:
-      - '27017:27017'
+      - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
@@ -14,28 +14,41 @@ services:
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
+  rabbitmq:
+    image: rabbitmq
+    container_name: rabbitmq
+    restart: 'no'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
   motion-base-back:
     image: motion-base-back
     container_name: motion-base-back
     restart: 'no'
     depends_on:
       - mongo
+      - rabbitmq
     ports:
-      - '8000:8000'
+      - '${MB_PORT}:${MB_PORT}'
     environment:
-      SECRET_KEY: ${SECRET_KEY}
-      ALGORITHM: ${ALGORITHM}
-      ACCESS_TOKEN_EXPIRE_MINUTES: ${ACCESS_TOKEN_EXPIRE_MINUTES}
-      SUPERUSER_USERNAME: ${SUPERUSER_USERNAME}
-      SUPERUSER_EMAIL: ${SUPERUSER_EMAIL}
-      SUPERUSER_FIRST_NAME: ${SUPERUSER_FIRST_NAME}
-      SUPERUSER_LAST_NAME: ${SUPERUSER_LAST_NAME}
-      SUPERUSER_PASSWORD: ${SUPERUSER_PASSWORD}
+      MB_SECRET_KEY: ${MB_SECRET_KEY}
+      MB_ALGORITHM: ${MB_ALGORITHM}
+      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
+      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
+      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
+      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
+      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
+      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
+      MB_PORT: ${MB_PORT}
+      MB_FASTAPI_WORKERS: 1
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-      WORKERS: 1
   motion-base-front:
     image: motion-base-front
     container_name: motion-base-front

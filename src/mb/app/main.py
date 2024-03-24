@@ -13,13 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import asyncio
 from contextlib import asynccontextmanager
-from datetime import timedelta
 from http import HTTPStatus
 from uuid import UUID
 
-from fastapi import BackgroundTasks, Body, Depends, FastAPI, HTTPException
+from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
@@ -38,14 +36,12 @@ from .response import (
     PaginationResponse,
 )
 from .utility import (
-    ACCESS_TOKEN_EXPIRE_MINUTES,
     Token,
     UploadTask,
     User,
     UserInformation,
     authenticate_user,
     create_superuser,
-    create_task,
     create_token,
     is_active,
 )
@@ -108,12 +104,7 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
             detail="Incorrect username or password",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    return Token(
-        access_token=create_token(
-            data={"sub": user.username}, expires_delta=timedelta(minutes=ACCESS_TOKEN_EXPIRE_MINUTES)
-        ),
-        token_type="bearer",
-    )
+    return create_token(user.username)
 
 
 @app.get("/whoami", tags=["account"], response_model=UserInformation)
@@ -121,17 +112,9 @@ async def retrieve_myself(user: User = Depends(is_active)):
     return UserInformation(**user.dict())
 
 
-async def async_task(task_id: UUID):
-    await asyncio.sleep(10)
-    if task := await UploadTask.find_one(UploadTask.id == task_id):
-        await task.delete()
-
-
-@app.get("/ten_second_delay", tags=["misc"])
-async def for_test_only(tasks: BackgroundTasks):
-    task_id = await create_task()
-    tasks.add_task(async_task, task_id)
-    return {"task_id": task_id}
+@app.get("/test_endpoint", tags=["misc"])
+async def for_test_only():
+    return {"message": "Test endpoint."}
 
 
 async def get_random_record() -> Record:

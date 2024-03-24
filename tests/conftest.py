@@ -23,6 +23,13 @@ from mb.app.utility import User, is_active
 from mb.utility.config import init_mongo
 
 
+@pytest.fixture(scope="session")
+def celery_config():
+    return {
+        "broker_url": "amqp://",
+    }
+
+
 @pytest.fixture(scope="function", autouse=True)
 async def mongo_connection():
     load_dotenv(os.path.join(os.path.dirname(__file__), "../docker/.env"))
