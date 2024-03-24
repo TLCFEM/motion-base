@@ -126,7 +126,12 @@ const Settings: Component = () => {
                     gap: "1rem",
                 }}
             >
-                <TextField label="ID" value={currentRecord()} defaultValue={currentRecord()} />
+                <TextField
+                    label="ID"
+                    value={currentRecord()}
+                    defaultValue={currentRecord()}
+                    onChange={(_, value) => setCurrentRecord(value)}
+                />
                 <FormControlLabel
                     control={
                         <Checkbox

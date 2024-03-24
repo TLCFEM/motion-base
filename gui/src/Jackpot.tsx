@@ -44,6 +44,10 @@ const MetadataCard: Component = () => {
             label: "Category",
             value: data.loading ? "---" : data().category.toUpperCase(),
         },
+        {
+            label: "Direction",
+            value: data.loading ? "---" : data().direction.toUpperCase(),
+        },
         { label: "Magnitude", value: data.loading ? "---" : data().magnitude },
         { label: "Depth (km)", value: data.loading ? "---" : data().depth },
         {
