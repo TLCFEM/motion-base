@@ -15,7 +15,7 @@
 
 import { Component, createEffect, createMemo, createResource, onMount } from "solid-js";
 import { jackpot_waveform_api } from "./API";
-import { Box, Button, Card, CardActions, CardContent, Grid, LinearProgress, Typography } from "@suid/material";
+import { Box, Button, Card, CardActions, CardContent, Grid, LinearProgress, Paper, Typography } from "@suid/material";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
@@ -152,11 +152,7 @@ const Epicenter: Component = () => {
         station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
     });
 
-    return (
-        <Card sx={{ border: "1px solid darkgrey", height: "90vh" }}>
-            <CardContent id="epicenter" sx={{ height: "100%" }} />
-        </Card>
-    );
+    return <Paper id="epicenter" sx={{ border: "1px solid darkgrey", height: "90vh" }} />;
 };
 
 const Waveform: Component = () => {
@@ -194,11 +190,7 @@ const Waveform: Component = () => {
         );
     });
 
-    return (
-        <Card sx={{ border: "1px solid darkgrey", height: "90vh" }}>
-            <CardContent id="canvas" sx={{ height: "100%" }} />
-        </Card>
-    );
+    return <Paper id="canvas" sx={{ border: "1px solid darkgrey", height: "90vh" }} />;
 };
 
 const Jackpot: Component = () => {

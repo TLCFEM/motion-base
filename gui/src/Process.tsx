@@ -1,4 +1,4 @@
-import { Component, createEffect, createMemo, createSignal, onCleanup, onMount } from "solid-js";
+import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import tippy from "tippy.js";
 import {
     Alert,
@@ -16,8 +16,8 @@ import {
     LinearProgress,
     MenuItem,
     Modal,
+    Paper,
     Select,
-    Stack,
     TextField,
 } from "@suid/material";
 import { ifError, isNumeric, process_api, ProcessConfig, ProcessResponse } from "./API";
@@ -54,6 +54,21 @@ const Settings: Component = () => {
     const [currentRecord, setCurrentRecord] = createSignal("14064834-afa0-4f52-a5b6-bce03ea6f415");
 
     function clear() {
+        setWithFilter(false);
+        setWithSpectrum(false);
+        setWithResponseSpectrum(false);
+
+        setLowCut("");
+        setHighCut("");
+        setRatio(0);
+        setFilterLength(0);
+        setFilterType("lowpass");
+        setWindowType("hann");
+
+        setDampingRatio("");
+        setPeriodStep("");
+        setPeriodEnd("");
+
         setProcessed({} as ProcessResponse);
     }
 
@@ -111,12 +126,7 @@ const Settings: Component = () => {
                     gap: "1rem",
                 }}
             >
-                <TextField
-                    label="ID"
-                    value={currentRecord()}
-                    defaultValue={currentRecord()}
-                    InputProps={{ readOnly: true }}
-                />
+                <TextField label="ID" value={currentRecord()} defaultValue={currentRecord()} />
                 <FormControlLabel
                     control={
                         <Checkbox
@@ -171,7 +181,7 @@ const Settings: Component = () => {
                     defaultValue={highCut()}
                     onChange={(_, value) => setHighCut(value)}
                 />
-                <FormControl>
+                <FormControl sx={{ minWidth: "14ch" }}>
                     <InputLabel>Filter Type</InputLabel>
                     <Select value={filterType()} onChange={(e) => setFilterType(e.target.value)}>
                         <MenuItem value="lowpass">Lowpass</MenuItem>
@@ -179,7 +189,7 @@ const Settings: Component = () => {
                         <MenuItem value="bandpass">Bandpass</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl>
+                <FormControl sx={{ minWidth: "18ch" }}>
                     <InputLabel>Window Type</InputLabel>
                     <Select autoWidth value={windowType()} onChange={(e) => setWindowType(e.target.value)}>
                         <MenuItem value="flattop">FlatTop</MenuItem>
@@ -293,11 +303,7 @@ const Waveform: Component = () => {
         );
     });
 
-    return (
-        <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
-            <CardContent id="time" sx={{ height: "100%" }} />
-        </Card>
-    );
+    return <Paper id="time" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
 };
 
 const FrequencySpectrum: Component = () => {
@@ -335,11 +341,7 @@ const FrequencySpectrum: Component = () => {
         );
     });
 
-    return (
-        <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
-            <CardContent id="spectrum" sx={{ height: "100%" }} />
-        </Card>
-    );
+    return <Paper id="spectrum" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
 };
 
 const ResponseSpectrum: Component = () => {
@@ -432,44 +434,22 @@ const ResponseSpectrum: Component = () => {
     });
 
     return (
-        <Stack sx={{ height: "80vh", display: "flex" }}>
-            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
-                <CardContent id="u_spectrum" sx={{ height: "100%" }} />
-            </Card>
-            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
-                <CardContent id="v_spectrum" sx={{ height: "100%" }} />
-            </Card>
-            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
-                <CardContent id="a_spectrum" sx={{ height: "100%" }} />
-            </Card>
-        </Stack>
+        <For each={["u_spectrum", "v_spectrum", "a_spectrum"]}>
+            {(item) => <Paper id={item} sx={{ border: "1px solid darkgrey", height: "80vh" }} />}
+        </For>
     );
 };
 export default function Process() {
-    const waveform_width = createMemo(() => 12 / (1 + Number(withSpectrum()) + Number(withResponseSpectrum())));
-    const spectrum_width = createMemo(() => 12 / (2 + Number(withResponseSpectrum())));
-    const response_spectrum_width = createMemo(() => 12 / (2 + Number(withSpectrum())));
-
     return (
         <>
             <Grid item xs={12} md={12}>
                 <Settings />
             </Grid>
-            {processed().waveform && (
-                <Grid item xs={12} md={waveform_width()}>
-                    <Waveform />
-                </Grid>
-            )}
-            {withSpectrum() && processed().spectrum && (
-                <Grid item xs={12} md={spectrum_width()}>
-                    <FrequencySpectrum />
-                </Grid>
-            )}
-            {withResponseSpectrum() && processed().period && (
-                <Grid item xs={12} md={response_spectrum_width()}>
-                    <ResponseSpectrum />
-                </Grid>
-            )}
+            <Grid item xs={12} md={12} sx={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
+                {processed().waveform && <Waveform />}
+                {withSpectrum() && processed().spectrum && <FrequencySpectrum />}
+                {withResponseSpectrum() && processed().period && <ResponseSpectrum />}
+            </Grid>
         </>
     );
 }

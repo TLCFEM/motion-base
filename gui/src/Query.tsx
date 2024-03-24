@@ -27,6 +27,7 @@ import {
     Grid,
     LinearProgress,
     Modal,
+    Paper,
     Table,
     TableBody,
     TableCell,
@@ -356,9 +357,7 @@ const QueryDatabase: Component = () => {
                 <Settings />
             </Grid>
             <Grid item xs={12} md={5}>
-                <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
-                    <CardContent id="overview" sx={{ height: "100%" }} />
-                </Card>
+                <Paper id="overview" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
             </Grid>
             <Grid item xs={12} md={7}>
                 <BasicTable />
