@@ -62,28 +62,31 @@ class ParserNIED:
             task = await UploadTask.find_one(UploadTask.id == task_id)
 
         records = []
-        with tarfile.open(**kwargs) as archive:
-            if task:
-                task.pid = os.getpid()
-                task.total_size = len(archive.getnames())
-            for f in archive:
+        try:
+            with tarfile.open(**kwargs) as archive:
                 if task:
-                    task.current_size += 1
-                    await task.save()
-                if not f.isfile() or f.name.endswith(".ps.gz"):
-                    continue
-                target = archive.extractfile(f)
-                if not target:
-                    continue
-                try:
-                    record = await ParserNIED.parse_file(target)
-                    record.uploaded_by = user_id
-                    record.file_name = os.path.basename(f.name)
-                    record.category = category
-                    await record.save()
-                    records.append(record.file_name)
-                except Exception as e:
-                    _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
+                    task.pid = os.getpid()
+                    task.total_size = len(archive.getnames())
+                for f in archive:
+                    if task:
+                        task.current_size += 1
+                        await task.save()
+                    if not f.isfile() or f.name.endswith(".ps.gz"):
+                        continue
+                    target = archive.extractfile(f)
+                    if not target:
+                        continue
+                    try:
+                        record = await ParserNIED.parse_file(target)
+                        record.uploaded_by = user_id
+                        record.file_name = os.path.basename(f.name)
+                        record.category = category
+                        await record.save()
+                        records.append(record.file_name)
+                    except Exception as e:
+                        _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
+        except tarfile.ReadError as e:
+            _logger.critical("Failed to open the archive.", exc_info=e)
 
         if task:
             await task.delete()

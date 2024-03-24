@@ -103,7 +103,7 @@ class NIED(Record):
 
 
 class NZSM(Record):
-    FTI: float = 10000
+    FTI: float = 100000
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
