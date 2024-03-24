@@ -17,6 +17,8 @@ import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import {
+    Alert,
+    AlertTitle,
     Box,
     Button,
     ButtonGroup,
@@ -24,6 +26,7 @@ import {
     CardContent,
     Grid,
     LinearProgress,
+    Modal,
     Table,
     TableBody,
     TableCell,
@@ -41,6 +44,8 @@ const [eventLocation, setEventLocation] = createSignal<[number, number]>();
 const [maxEventDistance, setMaxEventDistance] = createSignal(0);
 
 const [records, setRecords] = createSignal([] as SeismicRecord[]);
+
+const [error, setError] = createSignal("");
 
 const Settings: Component = () => {
     const [loading, setLoading] = createSignal<boolean>(false);
@@ -70,7 +75,13 @@ const Settings: Component = () => {
         if (maxEventDistance() > 0)
             config.max_event_distance = maxEventDistance();
 
-        setRecords(await query_api(config));
+        try {
+            setRecords(await query_api(config));
+        } catch (e) {
+            setRecords([]);
+            setError((e as Error).message);
+        }
+
         setLoading(false);
     }
 
@@ -223,6 +234,21 @@ const Settings: Component = () => {
                         Clear
                     </Button>
                 </ButtonGroup>
+                <Modal open={error() !== ""} onClose={() => setError("")}>
+                    <Alert
+                        severity="error"
+                        sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            width: "40%",
+                        }}
+                    >
+                        <AlertTitle>Error</AlertTitle>
+                        {error()}
+                    </Alert>
+                </Modal>
             </CardContent>
             <Box sx={{ width: "100%" }}>
                 {loading() ? (
