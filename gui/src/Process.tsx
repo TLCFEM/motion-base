@@ -42,6 +42,14 @@ const [dampingRatio, setDampingRatio] = createSignal("");
 const [periodStep, setPeriodStep] = createSignal("");
 const [periodEnd, setPeriodEnd] = createSignal("");
 
+const resizePlot = () => {
+    Plotly.relayout("time", {}).then();
+    Plotly.relayout("spectrum", {}).then();
+    Plotly.relayout("a_spectrum", {}).then();
+    Plotly.relayout("v_spectrum", {}).then();
+    Plotly.relayout("u_spectrum", {}).then();
+};
+
 const Settings: Component = () => {
     const [currentRecord, setCurrentRecord] = createSignal("14064834-afa0-4f52-a5b6-bce03ea6f415");
 
@@ -115,6 +123,7 @@ const Settings: Component = () => {
                             checked={withSpectrum()}
                             onChange={(_, checked) => {
                                 setWithSpectrum(checked);
+                                resizePlot();
                             }}
                         />
                     }
@@ -126,6 +135,7 @@ const Settings: Component = () => {
                             checked={withFilter()}
                             onChange={(_, value) => {
                                 setWithFilter(value);
+                                resizePlot();
                             }}
                         />
                     }
@@ -187,6 +197,7 @@ const Settings: Component = () => {
                             checked={withResponseSpectrum()}
                             onChange={(_, checked) => {
                                 setWithResponseSpectrum(checked);
+                                resizePlot();
                             }}
                         />
                     }
@@ -280,21 +291,6 @@ const Waveform: Component = () => {
             },
             { autosizable: true, responsive: true },
         );
-    });
-
-    onMount(() => {
-        const resizePlot = () => {
-            Plotly.relayout("time", {
-                "xaxis.autorange": true,
-                "yaxis.autorange": true,
-            }).then();
-        };
-
-        window.addEventListener("resize", resizePlot);
-
-        onCleanup(() => {
-            window.removeEventListener("resize", resizePlot);
-        });
     });
 
     return (
