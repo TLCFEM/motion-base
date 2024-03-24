@@ -17,9 +17,10 @@ import {
     MenuItem,
     Modal,
     Select,
+    Stack,
     TextField,
 } from "@suid/material";
-import { process_api, ProcessConfig, ProcessResponse } from "./API";
+import { ifError, isNumeric, process_api, ProcessConfig, ProcessResponse } from "./API";
 import Plotly from "plotly.js-dist-min";
 
 const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessResponse);
@@ -30,15 +31,19 @@ const [withFilter, setWithFilter] = createSignal(false);
 const [withSpectrum, setWithSpectrum] = createSignal(false);
 const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
 
-const [lowCut, setLowCut] = createSignal(0);
-const [highCut, setHighCut] = createSignal(0);
+const [lowCut, setLowCut] = createSignal("");
+const [highCut, setHighCut] = createSignal("");
 const [ratio, setRatio] = createSignal(0);
 const [filterLength, setFilterLength] = createSignal(0);
 const [filterType, setFilterType] = createSignal("lowpass");
 const [windowType, setWindowType] = createSignal("hann");
 
+const [dampingRatio, setDampingRatio] = createSignal("");
+const [periodStep, setPeriodStep] = createSignal("");
+const [periodEnd, setPeriodEnd] = createSignal("");
+
 const Settings: Component = () => {
-    const [currentRecord, setCurrentRecord] = createSignal("abf60c4d-ae35-4ec0-b63a-38362891cea7");
+    const [currentRecord, setCurrentRecord] = createSignal("14064834-afa0-4f52-a5b6-bce03ea6f415");
 
     function clear() {
         setProcessed({} as ProcessResponse);
@@ -48,16 +53,21 @@ const Settings: Component = () => {
         setLoading(true);
 
         let config = new ProcessConfig();
+
+        config.with_spectrum = withSpectrum();
+
+        config.with_filter = withFilter();
         if (ratio() > 0) config.ratio = ratio();
-        if (lowCut() > 0) config.low_cut = lowCut();
-        if (highCut() > 0) config.high_cut = highCut();
+        if (isNumeric(lowCut()) && Number(lowCut()) > 0) config.low_cut = Number(lowCut());
+        if (isNumeric(highCut()) && Number(highCut()) > 0) config.high_cut = Number(highCut());
         if (filterLength() > 0) config.filter_length = filterLength();
         config.filter_type = filterType();
         config.window_type = windowType();
 
-        config.with_filter = withFilter();
-        config.with_spectrum = withSpectrum();
         config.with_response_spectrum = withResponseSpectrum();
+        if (isNumeric(dampingRatio()) && Number(dampingRatio()) > 0) config.damping_ratio = Number(dampingRatio());
+        if (isNumeric(periodStep()) && Number(periodStep()) > 0) config.period_step = Number(periodStep());
+        if (isNumeric(periodEnd()) && Number(periodEnd()) > 0) config.period_end = Number(periodEnd());
 
         try {
             setProcessed(await process_api(currentRecord(), config));
@@ -89,6 +99,7 @@ const Settings: Component = () => {
                     justifyContent: "center",
                     alignContent: "center",
                     alignItems: "center",
+                    flexWrap: "wrap",
                     gap: "1rem",
                 }}
             >
@@ -97,17 +108,6 @@ const Settings: Component = () => {
                     value={currentRecord()}
                     defaultValue={currentRecord()}
                     InputProps={{ readOnly: true }}
-                />
-                <FormControlLabel
-                    control={
-                        <Checkbox
-                            checked={withFilter()}
-                            onChange={(_, value) => {
-                                setWithFilter(value);
-                            }}
-                        />
-                    }
-                    label="Apply Filter"
                 />
                 <FormControlLabel
                     control={
@@ -123,41 +123,43 @@ const Settings: Component = () => {
                 <FormControlLabel
                     control={
                         <Checkbox
-                            checked={withResponseSpectrum()}
-                            onChange={(_, checked) => {
-                                setWithResponseSpectrum(checked);
+                            checked={withFilter()}
+                            onChange={(_, value) => {
+                                setWithFilter(value);
                             }}
                         />
                     }
-                    label="Compute Response Spectrum"
+                    label="Apply Filter"
                 />
                 <TextField
-                    label="Ratio"
+                    label="Upsampling Ratio"
                     type="number"
                     value={ratio() > 0 ? ratio() : ""}
                     defaultValue={ratio() > 0 ? ratio() : ""}
-                    onChange={(_, value) => setRatio(Math.max(0, Number(value)))}
+                    onChange={(_, value) => setRatio(Math.max(0, Math.round(Number(value))))}
                 />
                 <TextField
                     label="Filter Length"
                     type="number"
                     value={filterLength() > 0 ? filterLength() : ""}
                     defaultValue={filterLength() > 0 ? filterLength() : ""}
-                    onChange={(_, value) => setFilterLength(Math.max(0, Number(value)))}
+                    onChange={(_, value) => setFilterLength(Math.max(0, Math.round(Number(value))))}
                 />
                 <TextField
+                    error={ifError(lowCut())}
                     label="Low Cut"
                     type="number"
-                    value={lowCut() > 0 ? lowCut() : ""}
-                    defaultValue={lowCut() > 0 ? lowCut() : ""}
-                    onChange={(_, value) => setLowCut(Math.max(0, Number(value)))}
+                    value={lowCut()}
+                    defaultValue={lowCut()}
+                    onChange={(_, value) => setLowCut(value)}
                 />
                 <TextField
+                    error={ifError(highCut())}
                     label="High Cut"
                     type="number"
-                    value={highCut() > 0 ? highCut() : ""}
-                    defaultValue={highCut() > 0 ? highCut() : ""}
-                    onChange={(_, value) => setHighCut(Math.max(0, Number(value)))}
+                    value={highCut()}
+                    defaultValue={highCut()}
+                    onChange={(_, value) => setHighCut(value)}
                 />
                 <FormControl>
                     <InputLabel>Filter Type</InputLabel>
@@ -179,6 +181,41 @@ const Settings: Component = () => {
                         <MenuItem value="chebwin">ChebWin</MenuItem>
                     </Select>
                 </FormControl>
+                <FormControlLabel
+                    control={
+                        <Checkbox
+                            checked={withResponseSpectrum()}
+                            onChange={(_, checked) => {
+                                setWithResponseSpectrum(checked);
+                            }}
+                        />
+                    }
+                    label="Compute Response Spectrum"
+                />
+                <TextField
+                    error={ifError(dampingRatio())}
+                    label="Damping Ratio"
+                    type="number"
+                    value={dampingRatio()}
+                    defaultValue={dampingRatio()}
+                    onChange={(_, value) => setDampingRatio(value)}
+                />
+                <TextField
+                    error={ifError(periodStep())}
+                    label="Period Step"
+                    type="number"
+                    value={periodStep()}
+                    defaultValue={periodStep()}
+                    onChange={(_, value) => setPeriodStep(value)}
+                />
+                <TextField
+                    error={ifError(periodEnd())}
+                    label="Period End"
+                    type="number"
+                    value={periodEnd()}
+                    defaultValue={periodEnd()}
+                    onChange={(_, value) => setPeriodEnd(value)}
+                />
                 <ButtonGroup variant="outlined" orientation="vertical">
                     <Button onClick={process} id="btn-process" disabled={loading()}>
                         Process
@@ -252,7 +289,7 @@ const Waveform: Component = () => {
     );
 };
 
-const Spectrum: Component = () => {
+const FrequencySpectrum: Component = () => {
     createEffect(async () => {
         if (loading()) return;
 
@@ -294,6 +331,109 @@ const Spectrum: Component = () => {
     );
 };
 
+const ResponseSpectrum: Component = () => {
+    createEffect(async () => {
+        if (loading()) return;
+
+        await Plotly.newPlot(
+            "a_spectrum",
+            [
+                {
+                    x: processed().period,
+                    y: processed().acceleration_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: processed().id,
+                },
+            ],
+            {
+                title: processed().file_name,
+                xaxis: {
+                    title: "Period (s)",
+                    autorange: true,
+                    automargin: true,
+                },
+                yaxis: {
+                    title: "Acceleration (cm/s^2)",
+                    autorange: true,
+                    automargin: true,
+                },
+                autosize: true,
+            },
+            { autosizable: true, responsive: true },
+        );
+
+        await Plotly.newPlot(
+            "v_spectrum",
+            [
+                {
+                    x: processed().period,
+                    y: processed().velocity_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: processed().id,
+                },
+            ],
+            {
+                title: processed().file_name,
+                xaxis: {
+                    title: "Period (s)",
+                    autorange: true,
+                    automargin: true,
+                },
+                yaxis: {
+                    title: "Velocity (cm/s)",
+                    autorange: true,
+                    automargin: true,
+                },
+                autosize: true,
+            },
+            { autosizable: true, responsive: true },
+        );
+
+        await Plotly.newPlot(
+            "u_spectrum",
+            [
+                {
+                    x: processed().period,
+                    y: processed().displacement_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: processed().id,
+                },
+            ],
+            {
+                title: processed().file_name,
+                xaxis: {
+                    title: "Period (s)",
+                    autorange: true,
+                    automargin: true,
+                },
+                yaxis: {
+                    title: "Displacement (cm)",
+                    autorange: true,
+                    automargin: true,
+                },
+                autosize: true,
+            },
+            { autosizable: true, responsive: true },
+        );
+    });
+
+    return (
+        <Stack sx={{ height: "80vh", display: "flex" }}>
+            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
+                <CardContent id="u_spectrum" sx={{ height: "100%" }} />
+            </Card>
+            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
+                <CardContent id="v_spectrum" sx={{ height: "100%" }} />
+            </Card>
+            <Card sx={{ border: "1px solid darkgrey", flexGrow: 1 }}>
+                <CardContent id="a_spectrum" sx={{ height: "100%" }} />
+            </Card>
+        </Stack>
+    );
+};
 export default function Process() {
     const waveform_width = createMemo(() => 12 / (1 + Number(withSpectrum()) + Number(withResponseSpectrum())));
     const spectrum_width = createMemo(() => 12 / (2 + Number(withResponseSpectrum())));
@@ -311,7 +451,12 @@ export default function Process() {
             )}
             {withSpectrum() && processed().spectrum && (
                 <Grid item xs={12} md={spectrum_width()}>
-                    <Spectrum />
+                    <FrequencySpectrum />
+                </Grid>
+            )}
+            {withResponseSpectrum() && processed().period && (
+                <Grid item xs={12} md={response_spectrum_width()}>
+                    <ResponseSpectrum />
                 </Grid>
             )}
         </>

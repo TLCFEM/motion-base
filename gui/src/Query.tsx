@@ -35,7 +35,7 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
-import { query_api, QueryConfig, SeismicRecord } from "./API";
+import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -52,10 +52,10 @@ const Settings: Component = () => {
 
     const [pageSize, setPageSize] = createSignal(0);
     const [pageNumber, setPageNumber] = createSignal(0);
-    const [minMagnitude, setMinMagnitude] = createSignal(0);
-    const [maxMagnitude, setMaxMagnitude] = createSignal(0);
-    const [minPGA, setMinPGA] = createSignal(0);
-    const [maxPGA, setMaxPGA] = createSignal(0);
+    const [minMagnitude, setMinMagnitude] = createSignal("");
+    const [maxMagnitude, setMaxMagnitude] = createSignal("");
+    const [minPGA, setMinPGA] = createSignal("");
+    const [maxPGA, setMaxPGA] = createSignal("");
     const [fromDate, setFromDate] = createSignal<Date>(new Date(0));
     const [toDate, setToDate] = createSignal<Date>(new Date(0));
 
@@ -65,10 +65,10 @@ const Settings: Component = () => {
         let config = new QueryConfig();
         if (pageSize() > 0) config.page_size = pageSize();
         if (pageNumber() > 0) config.page_number = pageNumber();
-        if (minMagnitude() > 0) config.min_magnitude = minMagnitude();
-        if (maxMagnitude() > 0) config.max_magnitude = maxMagnitude();
-        if (minPGA() > 0) config.min_pga = minPGA();
-        if (maxPGA() > 0) config.max_pga = maxPGA();
+        if (isNumeric(minMagnitude()) && Number(minMagnitude()) > 0) config.min_magnitude = Number(minMagnitude());
+        if (isNumeric(maxMagnitude()) && Number(maxMagnitude()) > 0) config.max_magnitude = Number(maxMagnitude());
+        if (isNumeric(minPGA()) && Number(minPGA()) > 0) config.min_pga = Number(minPGA());
+        if (isNumeric(maxPGA()) && Number(maxPGA()) > 0) config.max_pga = Number(maxPGA());
         if (fromDate().getTime() > 0) config.from_date = fromDate();
         if (toDate().getTime() > 0) config.to_date = toDate();
         if (eventLocation()) config.event_location = eventLocation();
@@ -87,10 +87,10 @@ const Settings: Component = () => {
     function clear() {
         setPageSize(0);
         setPageNumber(0);
-        setMinMagnitude(0);
-        setMaxMagnitude(0);
-        setMinPGA(0);
-        setMaxPGA(0);
+        setMinMagnitude("");
+        setMaxMagnitude("");
+        setMinPGA("");
+        setMaxPGA("");
         setFromDate(new Date(0));
         setToDate(new Date(0));
 
@@ -125,7 +125,7 @@ const Settings: Component = () => {
                     type="number"
                     value={pageNumber()}
                     defaultValue={pageNumber()}
-                    onChange={(_, value) => setPageNumber(Math.max(Number(value), 0))}
+                    onChange={(_, value) => setPageNumber(Math.max(Math.round(Number(value)), 0))}
                     disabled={loading()}
                 />
                 <TextField
@@ -133,39 +133,45 @@ const Settings: Component = () => {
                     type="number"
                     value={pageSize() > 0 ? pageSize() : ""}
                     defaultValue={pageSize() > 0 ? pageSize() : ""}
-                    onChange={(_, value) => setPageSize(value ? Math.max(Math.min(1000, Number(value)), 1) : 0)}
+                    onChange={(_, value) =>
+                        setPageSize(value ? Math.max(Math.min(1000, Math.round(Number(value))), 1) : 0)
+                    }
                     disabled={loading()}
                 />
                 <TextField
+                    error={ifError(minMagnitude())}
                     label="Min Magnitude"
                     type="number"
-                    value={minMagnitude() > 0 ? minMagnitude() : ""}
-                    defaultValue={minMagnitude() > 0 ? minMagnitude() : ""}
-                    onChange={(_, value) => setMinMagnitude(value ? Math.max(Math.min(10, Number(value)), 0) : 0)}
+                    value={minMagnitude()}
+                    defaultValue={minMagnitude()}
+                    onChange={(_, value) => setMinMagnitude(value)}
                     disabled={loading()}
                 />
                 <TextField
+                    error={ifError(maxMagnitude())}
                     label="Max Magnitude"
                     type="number"
-                    value={maxMagnitude() > 0 ? maxMagnitude() : ""}
-                    defaultValue={maxMagnitude() > 0 ? maxMagnitude() : ""}
-                    onChange={(_, value) => setMaxMagnitude(value ? Math.max(Math.min(10, Number(value)), 0) : 0)}
+                    value={maxMagnitude()}
+                    defaultValue={maxMagnitude()}
+                    onChange={(_, value) => setMaxMagnitude(value)}
                     disabled={loading()}
                 />
                 <TextField
+                    error={ifError(minPGA())}
                     label="Min PGA (Gal)"
                     type="number"
-                    value={minPGA() > 0 ? minPGA() : ""}
-                    defaultValue={minPGA() > 0 ? minPGA() : ""}
-                    onChange={(_, value) => setMinPGA(value ? Number(value) : 0)}
+                    value={minPGA()}
+                    defaultValue={minPGA()}
+                    onChange={(_, value) => setMinPGA(value)}
                     disabled={loading()}
                 />
                 <TextField
+                    error={ifError(maxPGA())}
                     label="Max PGA (Gal)"
                     type="number"
-                    value={maxPGA() > 0 ? maxPGA() : ""}
-                    defaultValue={maxPGA() > 0 ? maxPGA() : ""}
-                    onChange={(_, value) => setMaxPGA(value ? Number(value) : 0)}
+                    value={maxPGA()}
+                    defaultValue={maxPGA()}
+                    onChange={(_, value) => setMaxPGA(value)}
                     disabled={loading()}
                 />
                 <TextField
