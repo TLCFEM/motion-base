@@ -237,14 +237,14 @@ class ParserNZSM:
 
         record.event_time = datetime(
             int_header[0], int_header[1], int_header[2], int_header[3], int_header[4],
-            int_header[5] / 10)
+            int(int_header[5] / 10))
         record.event_location = [float_header[13], -float_header[12]]
         record.depth = int_header[16]
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
 
         record.record_time = datetime(
             int_header[8], int_header[9], int_header[18], int_header[19], int_header[38],
-            int_header[39] / 1000)
+            int(int_header[39] / 1000))
         record.station_location = [float_header[11], -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
