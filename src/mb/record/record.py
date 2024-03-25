@@ -62,11 +62,10 @@ class MetadataRecord(Document):
     scale_factor: float = Field(None, description="The scale factor of the record.")
 
     async def save(self, *args, **kwargs):
-        if self.id is None:
-            token: str = f"{self.file_name}{self.category}{self.region}"
-            if self.last_update_time is not None:
-                token += self.last_update_time.isoformat()
-            self.id = uuid5(NAMESPACE_OID, token)
+        token: str = f"{self.file_name}{self.category}{self.region}"
+        if self.last_update_time is not None:
+            token += self.last_update_time.isoformat()
+        self.id = uuid5(NAMESPACE_OID, token)
         return await super().save(*args, **kwargs)
 
 
