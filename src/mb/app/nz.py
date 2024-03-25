@@ -95,7 +95,8 @@ async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
 async def upload_archive(
-    archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
+        archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active),
+        wait_for_result: bool = False
 ):
     """
     Upload a compressed archive.
