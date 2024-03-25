@@ -16,10 +16,10 @@
 import click
 import uvicorn
 
-from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
-
 
 def run_app(**kwargs):
+    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
+
     workers = MB_FASTAPI_WORKERS
     if kwargs.get("overwrite_env", False) and "workers" in kwargs:
         workers = kwargs["workers"]
