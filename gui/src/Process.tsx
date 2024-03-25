@@ -54,6 +54,17 @@ const resizePlot = () => {
 const Settings: Component = () => {
     const [currentRecord, setCurrentRecord] = createSignal("");
 
+    function download() {
+        if (processed() && processed().id) {
+            const element = document.createElement("a");
+            const file = new Blob([JSON.stringify(processed())], { type: "application/json" });
+            element.href = URL.createObjectURL(file);
+            element.download = `${processed().id}.json`;
+            document.body.appendChild(element); // Required for this to work in FireFox
+            element.click();
+        }
+    }
+
     function clear() {
         setWithFilter(false);
         setWithSpectrum(false);
@@ -110,6 +121,10 @@ const Settings: Component = () => {
         });
         tippy(`#btn-reset`, {
             content: "Clear the current settings.",
+            animation: "scale",
+        });
+        tippy(`#btn-download`, {
+            content: "Download the processed record in json.",
             animation: "scale",
         });
     });
@@ -238,12 +253,15 @@ const Settings: Component = () => {
                     onChange={(_, value) => setPeriodEnd(value)}
                     disabled={!withResponseSpectrum()}
                 />
-                <ButtonGroup variant="outlined" orientation="vertical">
+                <ButtonGroup variant="outlined" orientation="horizontal">
                     <Button onClick={process} id="btn-process" disabled={loading()}>
                         Process
                     </Button>
                     <Button onClick={clear} id="btn-reset" disabled={loading()}>
                         Reset
+                    </Button>
+                    <Button onClick={download} id="btn-download" disabled={loading()}>
+                        Download
                     </Button>
                 </ButtonGroup>
                 <Modal open={error() !== ""} onClose={() => setError("")}>
