@@ -428,7 +428,7 @@ const ResponseSpectrum: Component = () => {
     });
 
     return (
-        <For each={["u_spectrum", "v_spectrum", "a_spectrum"]}>
+        <For each={["a_spectrum", "v_spectrum", "u_spectrum"]}>
             {(item) => <Paper id={item} sx={{ border: "1px solid darkgrey", height: "70vh" }} />}
         </For>
     );

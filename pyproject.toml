@@ -29,7 +29,6 @@ dependencies = [
     "fastapi==0.105.0",
     "httpx",
     "httpx-auth",
-    "joblib",
     "matplotlib",
     "numba",
     "passlib",

@@ -23,7 +23,6 @@ httpcore==1.0.4           # via httpx
 httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
 idna==3.6                 # via anyio, email-validator, httpx
-joblib==1.3.2             # via motion-base (pyproject.toml)
 kiwisolver==1.4.5         # via matplotlib
 lazy-model==0.2.0         # via beanie
 llvmlite==0.42.0          # via numba
