@@ -84,17 +84,17 @@ const MetadataCard: Component<sxProps> = (props) => {
             label: "Last Update Time",
             value: data.loading || data().last_update_time.getTime() === 0 ? "---" : toUTC(data().last_update_time),
         },
-        {
-            tooltip: "Distance between event and station locations over the delay between event and record times.",
-            label: "Approximated Speed (km/s)",
-            value:
-                data.loading || data().record_time.getTime() === 0 || data().event_time.getTime() === 0
-                    ? "---"
-                    : (
-                          distance_between(data().event_location, data().station_location) /
-                          (data().record_time.getTime() - data().event_time.getTime())
-                      ).toFixed(2),
-        },
+        // {
+        //     tooltip: "Distance between event and station locations over the delay between event and record times.",
+        //     label: "Approximated Speed (km/s)",
+        //     value:
+        //         data.loading || data().record_time.getTime() === 0 || data().event_time.getTime() === 0
+        //             ? "---"
+        //             : (
+        //                   distance_between(data().event_location, data().station_location) /
+        //                   (data().record_time.getTime() - data().event_time.getTime())
+        //               ).toFixed(2),
+        // },
     ]);
 
     onMount(() => {

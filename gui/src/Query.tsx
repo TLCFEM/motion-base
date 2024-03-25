@@ -182,7 +182,7 @@ const Settings: Component<sxProps> = (props) => {
                     InputLabelProps={{ shrink: true }}
                     value={fromDate().getTime() === 0 ? "" : fromDate().toISOString().split("T")[0]}
                     onChange={(_, value) => setFromDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                    sx={{ width: "16ch" }}
+                    sx={{ minWidth: "16ch" }}
                     disabled={loading()}
                 />
                 <TextField
@@ -191,10 +191,10 @@ const Settings: Component<sxProps> = (props) => {
                     InputLabelProps={{ shrink: true }}
                     value={toDate().getTime() === 0 ? "" : toDate().toISOString().split("T")[0]}
                     onChange={(_, value) => setToDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                    sx={{ width: "16ch" }}
+                    sx={{ minWidth: "16ch" }}
                     disabled={loading()}
                 />
-                <ButtonGroup variant="outlined">
+                <ButtonGroup variant="outlined" orientation="vertical">
                     <Button onClick={fetch} id="btn-search" disabled={loading()}>
                         Search
                     </Button>
