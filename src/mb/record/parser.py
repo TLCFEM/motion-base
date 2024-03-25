@@ -45,7 +45,7 @@ class ParserNIED:
 
     @staticmethod
     async def parse_archive(
-        archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+            archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -200,27 +200,15 @@ class ParserNZSM:
         assert 3 * num_lines == len(lines), "Number of lines should be a multiple of 3."
 
         record_names: list[str] = []
-        pattern = re.compile(r"(\d{8})_(\d{6})_([A-Za-z0-9]{3,4})_?")
-        if matches := pattern.search(lines[0]):
-            event_time: datetime = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S").replace(
-                tzinfo=ZoneInfo("Pacific/Auckland")
-            )
-            station_code: str = matches[3]
-        else:
-            event_string: str = "".join(x for x in lines[7].strip().split(" ") if x)
-            event_format: str = "%Y%B%d%H%Mut" if ":" not in event_string else "%Y%B%d%H:%M:%Sut"
-            event_time: datetime = datetime.strptime(event_string, event_format)
-            station_code = [x for x in lines[1].split(" ") if x][1]
+        station_code = [x for x in lines[1].split(" ") if x][1]
 
+        last_update_time: datetime | None = None
         if len(last_processed := lines[5].upper().split("PROCESSED")) == 2:
-            last_update_time: datetime | None = datetime.strptime(last_processed[1].strip(), "%Y %B %d").replace(
+            last_update_time = datetime.strptime(last_processed[1].strip(), "%Y %B %d").replace(
                 tzinfo=ZoneInfo("Pacific/Auckland")
             )
-        else:
-            last_update_time = None
 
         async def _populate_common_fields(record: NZSM):
-            record.event_time = event_time
             record.station_code = station_code
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path).upper()
@@ -231,20 +219,32 @@ class ParserNZSM:
             record_names.append(record.file_name)
 
         await _populate_common_fields(ParserNZSM.parse_file(lines[:num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines : 2 * num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines :]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines: 2 * num_lines]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines:]))
 
         return record_names
 
     @staticmethod
     def parse_file(lines: list[str]) -> NZSM:
+        '''
+        Parse file according to the format shown in the following link.
+
+        https://www.geonet.org.nz/data/supplementary/strong_motion_file_formats
+        '''
         record = NZSM()
 
         int_header, float_header = ParserNZSM._parse_header(lines)
 
+        record.event_time = datetime(
+            int_header[0], int_header[1], int_header[2], int_header[3], int_header[4],
+            int_header[5] / 10)
         record.event_location = [float_header[13], -float_header[12]]
         record.depth = int_header[16]
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
+
+        record.record_time = datetime(
+            int_header[8], int_header[9], int_header[18], int_header[19], int_header[38],
+            int_header[39] / 1000)
         record.station_location = [float_header[11], -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
@@ -255,7 +255,8 @@ class ParserNZSM:
         a_samples = int_header[33]
         a_lines = ceil(a_samples / 10)
         record.raw_data = [
-            int(record.FTI * float(v)) for line in lines[offset : offset + a_lines] for v in ParserNZSM._split(line)
+            int(record.FTI * float(v) * float_header[7]) for line in lines[offset: offset + a_lines] for v in
+            ParserNZSM._split(line)
         ]
 
         return record
@@ -272,7 +273,7 @@ class ParserNZSM:
     def _split(line: str, size: int = 8) -> list[str]:
         line = line.replace("\n", "")
         for i in range(0, len(line), size):
-            yield line[i : i + size]
+            yield line[i: i + size]
 
     @staticmethod
     def _parse_header(lines: list[str]) -> tuple[list, list]:
