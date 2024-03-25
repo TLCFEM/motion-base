@@ -166,3 +166,5 @@ export async function process_api(record_id: string, config: ProcessConfig) {
 export const isNumeric = (value: string) => /^[-+]?\d*\.?\d+$/.test(value);
 
 export const ifError = (input: string) => input !== "" && (!isNumeric(input) || Number(input) <= 0);
+
+export const toUTC = (date: Date) => new Date(date.getTime() - date.getTimezoneOffset() * 60000).toUTCString();

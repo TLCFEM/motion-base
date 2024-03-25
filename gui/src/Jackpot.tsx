@@ -14,7 +14,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
-import { jackpot_waveform_api } from "./API";
+import { jackpot_waveform_api, toUTC } from "./API";
 import {
     Box,
     Button,
@@ -75,16 +75,15 @@ const MetadataCard: Component = () => {
         },
         {
             label: "Event Time",
-            value: data.loading || data().event_time.getTime() === 0 ? "---" : data().event_time.toUTCString(),
+            value: data.loading || data().event_time.getTime() === 0 ? "---" : toUTC(data().event_time),
         },
         {
             label: "Record Time",
-            value: data.loading || data().record_time.getTime() === 0 ? "---" : data().record_time.toUTCString(),
+            value: data.loading || data().record_time.getTime() === 0 ? "---" : toUTC(data().record_time),
         },
         {
             label: "Last Update Time",
-            value:
-                data.loading || data().last_update_time.getTime() === 0 ? "---" : data().last_update_time.toUTCString(),
+            value: data.loading || data().last_update_time.getTime() === 0 ? "---" : toUTC(data().last_update_time),
         },
         {
             tooltip: "Distance between event and station locations over the delay between event and record times.",

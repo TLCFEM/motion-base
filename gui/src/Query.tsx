@@ -36,7 +36,7 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
-import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord } from "./API";
+import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord, toUTC } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -259,7 +259,7 @@ const BasicTable: Component = () => {
                                     <TableCell align="right">{Math.abs(row.maximum_acceleration).toFixed(2)}</TableCell>
                                     <TableCell align="right">{row.depth}</TableCell>
                                     <TableCell align="right">{row.duration}</TableCell>
-                                    <TableCell align="right">{row.event_time.toUTCString()}</TableCell>
+                                    <TableCell align="right">{toUTC(row.event_time)}</TableCell>
                                     <TableCell align="right">{row.station_code.toUpperCase()}</TableCell>
                                 </TableRow>
                             )}
