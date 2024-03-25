@@ -26,7 +26,7 @@ from zoneinfo import ZoneInfo  # noqa
 import aiofiles
 import pint
 import structlog
-import tzdata  # noqa
+import tzdata  # noqa # pylint: disable=unused-import
 
 from .record import NIED, NZSM
 from ..app.utility import UploadTask
@@ -45,7 +45,7 @@ class ParserNIED:
 
     @staticmethod
     async def parse_archive(
-            archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -231,8 +231,8 @@ class ParserNZSM:
             record_names.append(record.file_name)
 
         await _populate_common_fields(ParserNZSM.parse_file(lines[:num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines: 2 * num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines:]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines : 2 * num_lines]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines :]))
 
         return record_names
 
@@ -255,7 +255,7 @@ class ParserNZSM:
         a_samples = int_header[33]
         a_lines = ceil(a_samples / 10)
         record.raw_data = [
-            int(record.FTI * float(v)) for line in lines[offset: offset + a_lines] for v in ParserNZSM._split(line)
+            int(record.FTI * float(v)) for line in lines[offset : offset + a_lines] for v in ParserNZSM._split(line)
         ]
 
         return record
@@ -272,7 +272,7 @@ class ParserNZSM:
     def _split(line: str, size: int = 8) -> list[str]:
         line = line.replace("\n", "")
         for i in range(0, len(line), size):
-            yield line[i: i + size]
+            yield line[i : i + size]
 
     @staticmethod
     def _parse_header(lines: list[str]) -> tuple[list, list]:
