@@ -20,11 +20,11 @@ axios.defaults.baseURL = "http://127.0.0.1:8000";
 export class SeismicRecord {
     public endpoint: string = "";
 
-    public id: string = "";
-    public file_name: string = "";
-    public category: string = "";
-    public region: string = "";
-    public uploaded_by: string = "";
+    public id: string = "---";
+    public file_name: string = "---";
+    public category: string = "---";
+    public region: string = "---";
+    public uploaded_by: string = "---";
 
     public magnitude: number = 0;
     public maximum_acceleration: number = 0;
@@ -33,16 +33,16 @@ export class SeismicRecord {
     public event_location: Array<number> = Array<number>(2);
     public depth: number = 0;
 
-    public station_code: string = "";
+    public station_code: string = "---";
     public station_location: Array<number> = Array<number>(2);
     public station_elevation: number = 0;
     public station_elevation_unit: string = "";
     public record_time: Date = new Date(0);
 
     public sampling_frequency: number = 0;
-    public sampling_frequency_unit: string = "";
+    public sampling_frequency_unit: string = "---";
     public duration: number = 0;
-    public direction: string = "";
+    public direction: string = "---";
     public scale_factor: number = 0;
 
     public time_interval: number = 0;
