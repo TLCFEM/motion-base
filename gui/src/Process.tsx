@@ -11,16 +11,16 @@ import {
     Checkbox,
     FormControl,
     FormControlLabel,
-    Grid,
     InputLabel,
     LinearProgress,
     MenuItem,
     Modal,
     Paper,
     Select,
+    Stack,
     TextField,
 } from "@suid/material";
-import { ifError, isNumeric, process_api, ProcessConfig, ProcessResponse } from "./API";
+import { ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
 import Plotly from "plotly.js-dist-min";
 
 const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessResponse);
@@ -51,7 +51,7 @@ const resizePlot = () => {
     Plotly.relayout("u_spectrum", {}).then();
 };
 
-const Settings: Component = () => {
+const Settings: Component<sxProps> = (props) => {
     const [currentRecord, setCurrentRecord] = createSignal("");
 
     function download() {
@@ -133,6 +133,7 @@ const Settings: Component = () => {
         <Card>
             <CardContent
                 sx={{
+                    ...props.sx,
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "center",
@@ -287,7 +288,7 @@ const Settings: Component = () => {
     );
 };
 
-const Waveform: Component = () => {
+const Waveform: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading()) return;
 
@@ -322,10 +323,10 @@ const Waveform: Component = () => {
         );
     });
 
-    return <Paper id="time" sx={{ border: "1px solid darkgrey", height: "70vh" }} />;
+    return <Paper id="time" sx={props.sx} />;
 };
 
-const FrequencySpectrum: Component = () => {
+const FrequencySpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading()) return;
 
@@ -360,10 +361,10 @@ const FrequencySpectrum: Component = () => {
         );
     });
 
-    return <Paper id="spectrum" sx={{ border: "1px solid darkgrey", height: "70vh" }} />;
+    return <Paper id="spectrum" sx={props.sx} />;
 };
 
-const ResponseSpectrum: Component = () => {
+const ResponseSpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading()) return;
 
@@ -452,23 +453,18 @@ const ResponseSpectrum: Component = () => {
         );
     });
 
+    return <For each={["a_spectrum", "v_spectrum", "u_spectrum"]}>{(item) => <Paper id={item} sx={props.sx} />}</For>;
+};
+
+const Process: Component<sxProps> = (props) => {
     return (
-        <For each={["a_spectrum", "v_spectrum", "u_spectrum"]}>
-            {(item) => <Paper id={item} sx={{ border: "1px solid darkgrey", height: "70vh" }} />}
-        </For>
+        <Stack sx={{ gap: "1rem" }}>
+            <Settings sx={props.sx} />
+            {withWaveform() && processed().waveform && <Waveform sx={{ ...props.sx, height: "70vh" }} />}
+            {withSpectrum() && processed().spectrum && <FrequencySpectrum sx={{ ...props.sx, height: "70vh" }} />}
+            {withResponseSpectrum() && processed().period && <ResponseSpectrum sx={{ ...props.sx, height: "70vh" }} />}
+        </Stack>
     );
 };
-export default function Process() {
-    return (
-        <>
-            <Grid item xs={12} md={12}>
-                <Settings />
-            </Grid>
-            <Grid item xs={12} md={12} sx={{ display: "flex", gap: "1rem", flexDirection: "column" }}>
-                {withWaveform() && processed().waveform && <Waveform />}
-                {withSpectrum() && processed().spectrum && <FrequencySpectrum />}
-                {withResponseSpectrum() && processed().period && <ResponseSpectrum />}
-            </Grid>
-        </>
-    );
-}
+
+export default Process;

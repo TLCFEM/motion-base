@@ -14,7 +14,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
-import { jackpot_waveform_api, toUTC } from "./API";
+import { jackpot_waveform_api, sxProps, toUTC } from "./API";
 import {
     Box,
     Button,
@@ -23,7 +23,6 @@ import {
     CardContent,
     Checkbox,
     FormControlLabel,
-    Grid,
     LinearProgress,
     Paper,
     Typography,
@@ -47,7 +46,7 @@ function distance_between(a: number[], b: number[]) {
     return event_location.distanceTo(station_location);
 }
 
-const MetadataCard: Component = () => {
+const MetadataCard: Component<sxProps> = (props) => {
     const metadata = createMemo(() => [
         { label: "ID", value: data.loading ? "---" : data().id },
         { label: "File Name", value: data.loading ? "---" : data().file_name },
@@ -109,8 +108,7 @@ const MetadataCard: Component = () => {
     return (
         <Card
             sx={{
-                border: "1px solid darkgrey",
-                height: "90vh",
+                ...props.sx,
                 display: "flex",
                 flexDirection: "column",
             }}
@@ -173,7 +171,7 @@ const MetadataCard: Component = () => {
     );
 };
 
-const Epicenter: Component = () => {
+const Epicenter: Component<sxProps> = (props) => {
     let map: L.Map;
     let event_marker: L.Marker;
     let station_marker: L.Marker;
@@ -204,10 +202,10 @@ const Epicenter: Component = () => {
         station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
     });
 
-    return <Paper id="epicenter" sx={{ border: "1px solid darkgrey", height: "90vh" }} />;
+    return <Paper id="epicenter" sx={props.sx} />;
 };
 
-const Waveform: Component = () => {
+const Waveform: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (data.loading) return;
 
@@ -242,27 +240,17 @@ const Waveform: Component = () => {
         );
     });
 
-    return <Paper id="canvas" sx={{ border: "1px solid darkgrey", height: "90vh" }} />;
+    return <Paper id="canvas" sx={props.sx} />;
 };
 
-const Jackpot: Component = () => {
+const Jackpot: Component<sxProps> = (props) => {
     onMount(refetch);
 
     return (
         <>
-            <Grid item xs={12} md={2}>
-                <MetadataCard />
-            </Grid>
-            {withMap() && (
-                <Grid item xs={12} md={5}>
-                    <Epicenter />
-                </Grid>
-            )}
-            {withWaveform() && (
-                <Grid item xs={12} md={5}>
-                    <Waveform />
-                </Grid>
-            )}
+            <MetadataCard sx={{ ...props.sx, flexGrow: 1 }} />
+            {withMap() && <Epicenter sx={{ ...props.sx, flexGrow: 30 }} />}
+            {withWaveform() && <Waveform sx={{ ...props.sx, flexGrow: 40 }} />}
         </>
     );
 };

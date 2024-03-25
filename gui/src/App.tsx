@@ -14,7 +14,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
-import { AppBar, Box, Button, Grid, Toolbar, Typography } from "@suid/material";
+import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
 import QueryDatabase from "./Query";
@@ -49,48 +49,53 @@ const App: Component = () => {
     const variant = screen.height <= 1080 ? "dense" : "regular";
 
     return (
-        <Box sx={{ marginLeft: "1vw", marginRight: "1vw", marginTop: "1vh" }}>
-            <Grid container spacing={1}>
-                <Grid item xs={12} md={12}>
-                    <AppBar position="static" enableColorOnDark>
-                        <Toolbar
-                            variant={variant}
-                            sx={{
-                                display: "flex",
-                                alignItems: "center",
-                                alignContent: "center",
-                                gap: "1rem",
-                            }}
-                        >
-                            <Typography sx={{ flexGrow: 1 }} variant="h5">
-                                {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
-                            </Typography>
-                            <Button id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
-                                Jackpot
-                            </Button>
-                            <Button id="btn-query" onClick={() => setMode("query")} variant="contained">
-                                Query
-                            </Button>
-                            <Button id="btn-process" onClick={() => setMode("process")} variant="contained">
-                                Process
-                            </Button>
-                            <AboutModal />
-                        </Toolbar>
-                    </AppBar>
-                </Grid>
+        <Stack
+            sx={{
+                marginLeft: "1vw",
+                marginRight: "1vw",
+                marginTop: "1vh",
+            }}
+            spacing={1}
+        >
+            <AppBar position="static" enableColorOnDark>
+                <Toolbar
+                    variant={variant}
+                    sx={{
+                        display: "flex",
+                        alignItems: "center",
+                        alignContent: "center",
+                        gap: "1rem",
+                    }}
+                >
+                    <Typography sx={{ flexGrow: 1 }} variant="h5">
+                        {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
+                    </Typography>
+                    <Button id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
+                        Jackpot
+                    </Button>
+                    <Button id="btn-query" onClick={() => setMode("query")} variant="contained">
+                        Query
+                    </Button>
+                    <Button id="btn-process" onClick={() => setMode("process")} variant="contained">
+                        Process
+                    </Button>
+                    <AboutModal />
+                </Toolbar>
+            </AppBar>
+            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot />
+                        <Jackpot sx={{ border: "1px solid darkgrey", height: "90vh" }} />
                     </Match>
                     <Match when={mode() === "query"}>
                         <QueryDatabase />
                     </Match>
                     <Match when={mode() === "process"}>
-                        <Process />
+                        <Process sx={{ border: "1px solid darkgrey" }} />
                     </Match>
                 </Switch>
-            </Grid>
-        </Box>
+            </Box>
+        </Stack>
     );
 };
 

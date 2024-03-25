@@ -24,10 +24,10 @@ import {
     ButtonGroup,
     Card,
     CardContent,
-    Grid,
     LinearProgress,
     Modal,
     Paper,
+    Stack,
     Table,
     TableBody,
     TableCell,
@@ -36,7 +36,7 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
-import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord, toUTC } from "./API";
+import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord, sxProps, toUTC } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -48,7 +48,7 @@ const [records, setRecords] = createSignal([] as SeismicRecord[]);
 
 const [error, setError] = createSignal("");
 
-const Settings: Component = () => {
+const Settings: Component<sxProps> = (props) => {
     const [loading, setLoading] = createSignal<boolean>(false);
 
     const [pageSize, setPageSize] = createSignal(0);
@@ -113,6 +113,7 @@ const Settings: Component = () => {
         <Card>
             <CardContent
                 sx={{
+                    ...props.sx,
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "center",
@@ -224,9 +225,9 @@ const Settings: Component = () => {
     );
 };
 
-const BasicTable: Component = () => {
+const BasicTable: Component<sxProps> = (props) => {
     return (
-        <Card sx={{ border: "1px solid darkgrey", height: "80vh" }}>
+        <Card sx={{ ...props.sx }}>
             <TableContainer sx={{ maxHeight: "100%", overflow: "auto" }}>
                 <Table stickyHeader>
                     <TableHead>
@@ -285,12 +286,8 @@ const QueryDatabase: Component = () => {
     };
 
     const normalize_latitude = (lat: number) => {
-        while (lat < -90) {
-            lat += 180;
-        }
-        while (lat > 90) {
-            lat -= 180;
-        }
+        while (lat < -90) lat += 180;
+        while (lat > 90) lat -= 180;
         return lat;
     };
 
@@ -353,15 +350,11 @@ const QueryDatabase: Component = () => {
 
     return (
         <>
-            <Grid item xs={12} md={12}>
-                <Settings />
-            </Grid>
-            <Grid item xs={12} md={5}>
-                <Paper id="overview" sx={{ border: "1px solid darkgrey", height: "80vh" }} />;
-            </Grid>
-            <Grid item xs={12} md={7}>
-                <BasicTable />
-            </Grid>
+            <Paper id="overview" sx={{ border: "1px solid darkgrey", height: "90vh", flexGrow: 1 }} />
+            <Stack sx={{ display: "flex", width: "60%" }} spacing="1rem">
+                <Settings sx={{ border: "1px solid darkgrey" }} />
+                <BasicTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
+            </Stack>
         </>
     );
 };
