@@ -21,10 +21,12 @@ from datetime import datetime
 from math import ceil
 from typing import BinaryIO, IO
 from uuid import UUID
+from zoneinfo import ZoneInfo  # noqa
 
 import aiofiles
 import pint
 import structlog
+import tzdata  # noqa
 
 from .record import NIED, NZSM
 from ..app.utility import UploadTask
@@ -103,8 +105,11 @@ class ParserNIED:
         else:
             lines = [line.decode("utf-8").strip() for line in file_path.readlines()]
 
+        def _parse_date(string: str) -> datetime:
+            return datetime.strptime(string, "%Y/%m/%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Tokyo"))
+
         record = NIED()
-        record.event_time = datetime.strptime(lines[0][18:], "%Y/%m/%d %H:%M:%S")
+        record.event_time = _parse_date(lines[0][18:])
         record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
         record.depth = pint.Quantity(float(lines[3][18:]), ParserNIED._normalise_unit(lines[3])).to("km").magnitude
         record.magnitude = float(lines[4][18:])
@@ -112,7 +117,7 @@ class ParserNIED:
         record.station_location = [float(lines[7][18:]), float(lines[6][18:])]
         record.station_elevation = float(lines[8][18:])
         record.station_elevation_unit = ParserNIED._normalise_unit(lines[8])
-        record.record_time = datetime.strptime(lines[9][18:], "%Y/%m/%d %H:%M:%S")
+        record.record_time = _parse_date(lines[9][18:])
         record.sampling_frequency = float(ParserNIED._parse_value(lines[10][18:]))
         record.sampling_frequency_unit = ParserNIED._normalise_unit(lines[10])
         record.duration = pint.Quantity(float(lines[11][18:]), ParserNIED._normalise_unit(lines[11])).to("s").magnitude
@@ -120,7 +125,7 @@ class ParserNIED:
         record.scale_factor = float(ParserNIED._strip_unit(lines[13][18:]))
         record.maximum_acceleration = abs(float(lines[14][18:]))
         record.raw_data_unit = ParserNIED._normalise_unit(lines[14])
-        record.last_update_time = datetime.strptime(lines[15][18:], "%Y/%m/%d %H:%M:%S")
+        record.last_update_time = _parse_date(lines[15][18:])
 
         record.raw_data = [int(value) for line in lines[17:] for value in line.split()]
 
@@ -197,7 +202,9 @@ class ParserNZSM:
         record_names: list[str] = []
         pattern = re.compile(r"(\d{8})_(\d{6})_([A-Za-z0-9]{3,4})_?")
         if matches := pattern.search(lines[0]):
-            event_time: datetime = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S")
+            event_time: datetime = datetime.strptime(matches[1] + matches[2], "%Y%m%d%H%M%S").replace(
+                tzinfo=ZoneInfo("Pacific/Auckland")
+            )
             station_code: str = matches[3]
         else:
             event_string: str = "".join(x for x in lines[7].strip().split(" ") if x)
@@ -205,8 +212,10 @@ class ParserNZSM:
             event_time: datetime = datetime.strptime(event_string, event_format)
             station_code = [x for x in lines[1].split(" ") if x][1]
 
-        if len(last_processed := lines[5].upper().split('PROCESSED')) == 2:
-            last_update_time: datetime | None = datetime.strptime(last_processed[1].strip(), "%Y %B %d")
+        if len(last_processed := lines[5].upper().split("PROCESSED")) == 2:
+            last_update_time: datetime | None = datetime.strptime(last_processed[1].strip(), "%Y %B %d").replace(
+                tzinfo=ZoneInfo("Pacific/Auckland")
+            )
         else:
             last_update_time = None
 
