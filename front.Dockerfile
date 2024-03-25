@@ -3,7 +3,7 @@ FROM node:20-slim as build
 COPY gui /mb/gui
 WORKDIR /mb/gui
 
-RUN sed -i 's/127.0.0.1/172.104.155.229/g' src/API.tsx
+RUN sed -i 's/127.0.0.1/139.162.162.32/g' src/API.tsx
 
 RUN npm install -g pnpm && pnpm install && pnpm build
 
