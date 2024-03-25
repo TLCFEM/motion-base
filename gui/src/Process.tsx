@@ -151,6 +151,7 @@ const Settings: Component = () => {
                     value={ratio() > 0 ? ratio() : ""}
                     defaultValue={ratio() > 0 ? ratio() : ""}
                     onChange={(_, value) => setRatio(Math.max(0, Math.round(Number(value))))}
+                    disabled={!withFilter()}
                 />
                 <TextField
                     label="Filter Length"
@@ -158,6 +159,7 @@ const Settings: Component = () => {
                     value={filterLength() > 0 ? filterLength() : ""}
                     defaultValue={filterLength() > 0 ? filterLength() : ""}
                     onChange={(_, value) => setFilterLength(Math.max(0, Math.round(Number(value))))}
+                    disabled={!withFilter()}
                 />
                 <TextField
                     error={ifError(lowCut())}
@@ -166,6 +168,7 @@ const Settings: Component = () => {
                     value={lowCut()}
                     defaultValue={lowCut()}
                     onChange={(_, value) => setLowCut(value)}
+                    disabled={!withFilter() || filterType() === "lowpass"}
                 />
                 <TextField
                     error={ifError(highCut())}
@@ -174,8 +177,9 @@ const Settings: Component = () => {
                     value={highCut()}
                     defaultValue={highCut()}
                     onChange={(_, value) => setHighCut(value)}
+                    disabled={!withFilter() || filterType() === "highpass"}
                 />
-                <FormControl sx={{ minWidth: "14ch" }}>
+                <FormControl sx={{ minWidth: "14ch" }} disabled={!withFilter()}>
                     <InputLabel>Filter Type</InputLabel>
                     <Select label="Filter Type" value={filterType()} onChange={(e) => setFilterType(e.target.value)}>
                         <MenuItem value="lowpass">Lowpass</MenuItem>
@@ -183,7 +187,7 @@ const Settings: Component = () => {
                         <MenuItem value="bandpass">Bandpass</MenuItem>
                     </Select>
                 </FormControl>
-                <FormControl sx={{ minWidth: "18ch" }}>
+                <FormControl sx={{ minWidth: "18ch" }} disabled={!withFilter()}>
                     <InputLabel>Window Type</InputLabel>
                     <Select label="Window Type" value={windowType()} onChange={(e) => setWindowType(e.target.value)}>
                         <MenuItem value="flattop">FlatTop</MenuItem>
@@ -214,6 +218,7 @@ const Settings: Component = () => {
                     value={dampingRatio()}
                     defaultValue={dampingRatio()}
                     onChange={(_, value) => setDampingRatio(value)}
+                    disabled={!withResponseSpectrum()}
                 />
                 <TextField
                     error={ifError(periodStep())}
@@ -222,6 +227,7 @@ const Settings: Component = () => {
                     value={periodStep()}
                     defaultValue={periodStep()}
                     onChange={(_, value) => setPeriodStep(value)}
+                    disabled={!withResponseSpectrum()}
                 />
                 <TextField
                     error={ifError(periodEnd())}
@@ -230,6 +236,7 @@ const Settings: Component = () => {
                     value={periodEnd()}
                     defaultValue={periodEnd()}
                     onChange={(_, value) => setPeriodEnd(value)}
+                    disabled={!withResponseSpectrum()}
                 />
                 <ButtonGroup variant="outlined" orientation="vertical">
                     <Button onClick={process} id="btn-process" disabled={loading()}>
