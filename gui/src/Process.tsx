@@ -130,10 +130,9 @@ const Settings: Component<sxProps> = (props) => {
     });
 
     return (
-        <Card>
+        <Card sx={props.sx}>
             <CardContent
                 sx={{
-                    ...props.sx,
                     display: "flex",
                     flexDirection: "column",
                     justifyContent: "center",
@@ -499,7 +498,7 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
 
 const Process: Component<sxProps> = (props) => {
     return (
-        <Stack sx={{ gap: "1rem" }}>
+        <Stack sx={{ gap: "1rem", flexGrow: 1 }}>
             <Settings sx={props.sx} />
             {withWaveform() && processed().waveform && <Waveform sx={{ ...props.sx, height: "70vh" }} />}
             {withSpectrum() && processed().spectrum && <FrequencySpectrum sx={{ ...props.sx, height: "70vh" }} />}

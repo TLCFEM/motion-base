@@ -110,10 +110,9 @@ const Settings: Component<sxProps> = (props) => {
     });
 
     return (
-        <Card>
+        <Card sx={props.sx}>
             <CardContent
                 sx={{
-                    ...props.sx,
                     display: "flex",
                     flexDirection: "row",
                     justifyContent: "center",
