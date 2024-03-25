@@ -205,11 +205,14 @@ class MBClient:
                 )
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError("Failed to upload.")
-            self.current_upload_size += 1
-            self.print(
-                f"Successfully uploaded file [green]{base_name}[/]. "
-                f"[[red]{self.current_upload_size}/{self.upload_size}[/]]."
-            )
+            if self.upload_size > 0:
+                self.current_upload_size += 1
+                self.print(
+                    f"Successfully uploaded file [green]{base_name}[/]. "
+                    f"[[red]{self.current_upload_size}/{self.upload_size}[/]]."
+                )
+            else:
+                self.print(f"Successfully uploaded file [green]{base_name}[/]. ")
             for task_id in result.json()["task_ids"]:
                 self.tasks[task_id] = 0
 
