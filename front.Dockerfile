@@ -15,4 +15,6 @@ WORKDIR /mb/gui
 
 RUN npm install -g serve
 
-CMD ["npx", "serve", "-n", "-s", "dist", "-l", "4173"]
+ENTRYPOINT ["npx", "serve", "-n", "-s", "dist"]
+
+CMD ["-l", "4173"]

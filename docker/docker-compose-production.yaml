@@ -81,6 +81,8 @@ services:
     image: motion-base-front
     container_name: motion-base-front
     restart: 'no'
+    command:
+      - -l 80
     depends_on:
       - motion-base-back
     ports:
