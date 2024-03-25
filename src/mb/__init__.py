@@ -18,7 +18,7 @@ import uvicorn
 
 
 def run_app(**kwargs):
-    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
+    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
 
     workers = MB_FASTAPI_WORKERS
     if kwargs.get("overwrite_env", False) and "workers" in kwargs:
