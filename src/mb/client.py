@@ -109,9 +109,9 @@ class MBRecord(RecordResponse):
 
 class MBClient:
     def __init__(self, host_url: str | None = None, username: str | None = None, password: str | None = None, **kwargs):
-        self.host_url = host_url if host_url else "http://localhost:8000"
-        self.username = username
-        self.password = password
+        self.host_url: str = host_url if host_url else "http://localhost:8000"
+        self.username: str | None = username
+        self.password: str | None = password
         self.auth: OAuth2ResourceOwnerPasswordCredentials | None = (
             OAuth2ResourceOwnerPasswordCredentials(
                 f"{self.host_url}/token",
@@ -133,16 +133,15 @@ class MBClient:
         self.client = httpx.AsyncClient(**kwargs)
         self.tasks: dict[str, float] = {}
 
-        self.upload_size = 0
-        self.download_size = 0
-        self.current_upload_size = 0
-        self.current_download_size = 0
+        self.upload_size: int = 0
+        self.download_size: int = 0
+        self.current_upload_size: int = 0
+        self.current_download_size: int = 0
 
         self.download_pool: list = []
 
     async def __aenter__(self) -> MBClient:
-        result = await self.client.get("/alive")
-        if result.status_code != HTTPStatus.OK:
+        if (await self.client.get("/alive")).status_code != HTTPStatus.OK:
             raise RuntimeError("Server is not reachable.")
 
         return self
@@ -250,14 +249,6 @@ async def main():
             result = await client.jackpot()
             fig = result.plot_spectrum()
             fig.show()
-        # await client.upload('jp', '/home/theodore/Downloads/ESR')
-        # await client.status()
-        # await anyio.sleep(10)
-        # await client.status()
-        # await client.download("fb0e7337-cd32-49ff-966d-1d43c3f1c635")
-        # result = await client.search(QueryConfig())
-        # for r in result:
-        #     r.print()
 
 
 if __name__ == "__main__":

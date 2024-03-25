@@ -169,8 +169,7 @@ class ParserNIED:
 class ParserNZSM:
     @staticmethod
     def validate_file(file_path: str):
-        lower_path = file_path.lower()
-        if lower_path.endswith((".v2a", ".v1a")):
+        if file_path.lower().endswith((".v2a", ".v1a")):
             return
 
         raise ValueError("NZSM archive file should be a V2A/V1A file.")
@@ -247,8 +246,7 @@ class ParserNZSM:
     @staticmethod
     def _parse_interval(line: str):
         pattern = re.compile(r"\s(\d+\.\d+)\s")
-        matches = pattern.search(line)
-        if matches:
+        if matches := pattern.search(line):
             return float(matches[1])
 
         raise ValueError("Sampling frequency/interval not found.")

@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from datetime import datetime
 from uuid import UUID, uuid4, NAMESPACE_OID, uuid5
 
@@ -77,8 +78,7 @@ class Record(MetadataRecord):
         sampling_interval: float = 1 / self.sampling_frequency
 
         numpy_array: np.ndarray = np.array(self.raw_data, dtype=float) + self.offset
-        normalised: bool = kwargs.get("normalised", False)
-        if normalised:
+        if kwargs.get("normalised", False):
             numpy_array = normalise(numpy_array)
             unit = None
         else:
