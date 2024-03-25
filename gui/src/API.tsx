@@ -38,6 +38,7 @@ export class SeismicRecord {
     public station_elevation: number = 0;
     public station_elevation_unit: string = "";
     public record_time: Date = new Date(0);
+    public last_update_time: Date = new Date(0);
 
     public sampling_frequency: number = 0;
     public sampling_frequency_unit: string = "---";

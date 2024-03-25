@@ -53,6 +53,7 @@ class MetadataRecord(Document):
         None, description="The unit of the elevation of the station recording the record."
     )
     record_time: datetime = Field(None, description="The time the record was recorded.")
+    last_update_time: datetime = Field(None, description="The time the record was last updated.")
 
     sampling_frequency: float = Field(None, description="The sampling frequency of the record.")
     sampling_frequency_unit: str = Field(None, description="The unit of the sampling frequency of the record.")
@@ -62,7 +63,10 @@ class MetadataRecord(Document):
 
     async def save(self, *args, **kwargs):
         if self.id is None:
-            self.id = uuid5(NAMESPACE_OID, f"{self.file_name}{self.category}{self.region}")
+            token: str = f"{self.file_name}{self.category}{self.region}"
+            if self.last_update_time is not None:
+                token += self.last_update_time.isoformat()
+            self.id = uuid5(NAMESPACE_OID, token)
         return await super().save(*args, **kwargs)
 
 

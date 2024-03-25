@@ -54,6 +54,7 @@ class MetadataResponse(BaseModel):
     station_elevation: float | None = Field(...)
     station_elevation_unit: str | None = Field(...)
     record_time: datetime | None = Field(...)
+    last_update_time: datetime | None = Field(...)
 
     sampling_frequency: float | None = Field(...)
     sampling_frequency_unit: str | None = Field(...)

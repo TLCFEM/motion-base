@@ -70,8 +70,8 @@ const Settings: Component = () => {
         if (isNumeric(maxMagnitude()) && Number(maxMagnitude()) > 0) config.max_magnitude = Number(maxMagnitude());
         if (isNumeric(minPGA()) && Number(minPGA()) > 0) config.min_pga = Number(minPGA());
         if (isNumeric(maxPGA()) && Number(maxPGA()) > 0) config.max_pga = Number(maxPGA());
-        if (fromDate().getTime() > 0) config.from_date = fromDate();
-        if (toDate().getTime() > 0) config.to_date = toDate();
+        if (fromDate().getTime() !== 0) config.from_date = fromDate();
+        if (toDate().getTime() !== 0) config.to_date = toDate();
         if (eventLocation()) config.event_location = eventLocation();
         if (maxEventDistance() > 0) config.max_event_distance = maxEventDistance();
 

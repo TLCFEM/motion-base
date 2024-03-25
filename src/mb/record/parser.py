@@ -120,6 +120,7 @@ class ParserNIED:
         record.scale_factor = float(ParserNIED._strip_unit(lines[13][18:]))
         record.maximum_acceleration = abs(float(lines[14][18:]))
         record.raw_data_unit = ParserNIED._normalise_unit(lines[14])
+        record.last_update_time = datetime.strptime(lines[15][18:], "%Y/%m/%d %H:%M:%S")
 
         record.raw_data = [int(value) for line in lines[17:] for value in line.split()]
 
@@ -204,12 +205,19 @@ class ParserNZSM:
             event_time: datetime = datetime.strptime(event_string, event_format)
             station_code = [x for x in lines[1].split(" ") if x][1]
 
+        if len(last_processed := lines[5].upper().split('PROCESSED')) == 2:
+            last_update_time: datetime | None = datetime.strptime(last_processed[1].strip(), "%Y %B %d")
+        else:
+            last_update_time = None
+
         async def _populate_common_fields(record: NZSM):
             record.event_time = event_time
             record.station_code = station_code
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path).upper()
             record.category = "processed" if record.file_name.endswith(".V2A") else "unprocessed"
+            if last_update_time is not None:
+                record.last_update_time = last_update_time
             await record.save()
             record_names.append(record.file_name)
 
