@@ -96,7 +96,7 @@ const Settings: Component = () => {
         try {
             setProcessed(await process_api(currentRecord(), config));
         } catch (e) {
-            clear();
+            // clear();
             setError((e as Error).message);
         }
 

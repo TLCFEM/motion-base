@@ -78,7 +78,7 @@ const Settings: Component = () => {
         try {
             setRecords(await query_api(config));
         } catch (e) {
-            setRecords([]);
+            // clear();
             setError((e as Error).message);
         }
 
