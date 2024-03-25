@@ -55,7 +55,7 @@ const App: Component = () => {
                 marginRight: "1vw",
                 marginTop: "1vh",
             }}
-            spacing={1}
+            spacing="1rem"
         >
             <AppBar position="static" enableColorOnDark>
                 <Toolbar
