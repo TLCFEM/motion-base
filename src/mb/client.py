@@ -111,6 +111,8 @@ class MBRecord(RecordResponse):
 class MBClient:
     def __init__(self, host_url: str | None = None, username: str | None = None, password: str | None = None, **kwargs):
         self.host_url: str = host_url if host_url else "http://localhost:8000"
+        while self.host_url.endswith("/"):
+            self.host_url = self.host_url[:-1]
         self.username: str | None = username
         self.password: str | None = password
         self.auth: OAuth2ResourceOwnerPasswordCredentials | None = (
@@ -177,7 +179,7 @@ class MBClient:
                 f"[[red]{self.current_download_size}/1[/]]."
             )
 
-    async def upload(self, region: str, path: str):
+    async def upload(self, region: str, path: str, wait_for_result: bool = False):
         if os.path.isdir(path):
             file_list: list[str] = []
             for root, _, files in os.walk(path):
@@ -197,7 +199,7 @@ class MBClient:
         async with self.semaphore:
             with open(path, "rb") as file:
                 result = await self.client.post(
-                    f"/{region}/upload?wait_for_result=false",
+                    f"/{region}/upload?wait_for_result={'true' if wait_for_result else 'false'}",
                     files={"archives": (base_name, file, "multipart/form-data")},
                     auth=self.auth,
                 )
