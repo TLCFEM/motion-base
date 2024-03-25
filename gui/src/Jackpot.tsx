@@ -75,31 +75,27 @@ const MetadataCard: Component = () => {
         },
         {
             label: "Event Time",
-            value: data.loading ? "---" : data().event_time.toUTCString(),
+            value: data.loading || data().event_time.getTime() === 0 ? "---" : data().event_time.toUTCString(),
         },
         {
             label: "Record Time",
-            value: data.loading ? "---" : data().record_time.getTime() !== 0 ? data().record_time.toUTCString() : "---",
+            value: data.loading || data().record_time.getTime() === 0 ? "---" : data().record_time.toUTCString(),
         },
         {
             label: "Last Update Time",
-            value: data.loading
-                ? "---"
-                : data().last_update_time.getTime() !== 0
-                  ? data().last_update_time.toUTCString()
-                  : "---",
+            value:
+                data.loading || data().last_update_time.getTime() === 0 ? "---" : data().last_update_time.toUTCString(),
         },
         {
             tooltip: "Distance between event and station locations over the delay between event and record times.",
             label: "Approximated Speed (km/s)",
-            value: data.loading
-                ? "---"
-                : data().record_time.getTime() !== 0
-                  ? (
-                        distance_between(data().event_location, data().station_location) /
-                        (data().record_time.getTime() - data().event_time.getTime())
-                    ).toFixed(2)
-                  : "---",
+            value:
+                data.loading || data().record_time.getTime() === 0 || data().event_time.getTime() === 0
+                    ? "---"
+                    : (
+                          distance_between(data().event_location, data().station_location) /
+                          (data().record_time.getTime() - data().event_time.getTime())
+                      ).toFixed(2),
         },
     ]);
 
