@@ -90,6 +90,7 @@ structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 tomlkit==0.12.4           # via pylint
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
+tzdata==2024.1            # via motion-base (pyproject.toml)
 urllib3==2.2.1            # via requests
 uvicorn==0.29.0           # via motion-base (pyproject.toml)
 werkzeug==3.0.1           # via flask, flask-login, locust

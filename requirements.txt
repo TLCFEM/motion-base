@@ -55,4 +55,5 @@ starlette==0.27.0         # via fastapi
 structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
+tzdata==2024.1            # via motion-base (pyproject.toml)
 uvicorn==0.28.1           # via motion-base (pyproject.toml)
