@@ -61,6 +61,7 @@ export class SeismicRecord {
         Object.assign(this, data);
         this.record_time = new Date(data?.record_time ? data?.record_time : 0);
         this.event_time = new Date(data?.event_time ? data?.event_time : 0);
+        this.last_update_time = new Date(data?.last_update_time ? data?.last_update_time : 0);
         if (data?.event_location) {
             this.event_location = data?.event_location;
         } else {
