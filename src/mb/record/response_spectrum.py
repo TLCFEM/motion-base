@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os
 
 import numpy as np
@@ -106,7 +107,7 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
             return np.array([0, 0, Oscillator.amplitude(motion)])
         return Oscillator(2 * np.pi / p, damping_ratio).compute_maximum_response(interval, motion)
 
-    return np.array(Parallel(n_jobs=os.cpu_count(), prefer="threads")(delayed(compute_task)(p) for p in period))
+    return np.array(Parallel(n_jobs=os.cpu_count())(delayed(compute_task)(p) for p in period))
 
 
 def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:

@@ -22,9 +22,9 @@ from mb.app.utility import User, is_active
 from mb.utility.config import init_mongo
 
 
-@pytest.fixture(scope="session")
-def celery_config():
-    return {"broker_url": "amqp://", "result_backend": "mongodb://"}
+# @pytest.fixture(scope="session")
+# def celery_config():
+#     return {"broker_url": "amqp://", "result_backend": "mongodb://"}
 
 
 @pytest.fixture(scope="function", autouse=True)

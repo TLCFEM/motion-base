@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "aiofiles",
     "beanie",
-    "celery",
+    #    "celery",
     "email-validator",
     "fastapi==0.105.0",
     "httpx",
@@ -50,7 +50,7 @@ dev = [
     "locust",
     "pylint",
     "pytest-asyncio",
-    "pytest-celery",
+    #    "pytest-celery",
     "pytest-cov",
     #    "ruff",
 ]

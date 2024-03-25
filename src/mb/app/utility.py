@@ -122,8 +122,7 @@ def create_token(sub: str):
 async def current_user(token: str = Depends(OAUTH2)):
     try:
         payload = jwt.decode(token, MB_SECRET_KEY, algorithms=[MB_ALGORITHM])
-        username: str = payload.get("sub")
-        if username is None:
+        if (username := payload.get("sub")) is None:
             raise CredentialException()
     except JWTError as e:
         raise CredentialException() from e

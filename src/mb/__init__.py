@@ -12,43 +12,37 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
-
 import click
 import uvicorn
 
-from mb.celery import celery
 from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 
 
 def run_app(**kwargs):
-    if "celery" in kwargs:
-        celery.start(["worker"])
+    workers = MB_FASTAPI_WORKERS
+    if kwargs.get("overwrite_env", False) and "workers" in kwargs:
+        workers = kwargs["workers"]
+
+    workers = int(workers)
+
+    config: dict = {}
+
+    if workers > 1:
+        config["workers"] = workers
+        config["log_level"] = "info"
     else:
-        workers = MB_FASTAPI_WORKERS
-        if kwargs.get("overwrite_env", False) and "workers" in kwargs:
-            workers = kwargs["workers"]
+        config["reload"] = True
+        config["log_level"] = "debug"
 
-        workers = int(workers)
+    port = MB_PORT
+    if kwargs.get("overwrite_env", False) and "port" in kwargs:
+        port = kwargs["port"]
+    config["port"] = int(port)
 
-        config: dict = {}
+    if "host" in kwargs:
+        config["host"] = kwargs["host"]
 
-        if workers > 1:
-            config["workers"] = workers
-            config["log_level"] = "info"
-        else:
-            config["reload"] = True
-            config["log_level"] = "debug"
-
-        port = MB_PORT
-        if kwargs.get("overwrite_env", False) and "port" in kwargs:
-            port = kwargs["port"]
-        config["port"] = int(port)
-
-        if "host" in kwargs:
-            config["host"] = kwargs["host"]
-
-        uvicorn.run("mb.app.main:app", **config)
+    uvicorn.run("mb.app.main:app", **config)
 
 
 @click.command()
