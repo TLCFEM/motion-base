@@ -17,7 +17,8 @@ import os
 from uuid import uuid4
 
 import pytest
-from mb.record.parser import ParserNIED
+
+from mb.record.async_parser import ParserNIED
 
 
 @pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])

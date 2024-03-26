@@ -45,7 +45,7 @@ from .utility import (
     create_token,
     is_active,
 )
-from ..record.record import Record, MetadataRecord
+from ..record.async_record import Record, MetadataRecord
 from ..utility.config import init_mongo
 
 

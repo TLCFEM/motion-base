@@ -17,7 +17,8 @@ import os
 from http import HTTPStatus
 
 import pytest
-from mb.record.record import Record
+
+from mb.record.async_record import Record
 
 
 async def test_alive(mock_client):

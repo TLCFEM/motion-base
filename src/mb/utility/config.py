@@ -27,7 +27,7 @@ from .env import (
     RABBITMQ_USERNAME,
 )
 from ..app.utility import UploadTask, User
-from ..record.record import Record
+from ..record.async_record import Record
 
 
 def rabbitmq_uri():
@@ -47,4 +47,4 @@ def mongo_uri():
 async def init_mongo():
     uri = mongo_uri()
     await init_beanie(database=AsyncIOMotorClient(uri)["StrongMotion"], document_models=[Record, User, UploadTask])
-    connect(f"{uri}StrongMotion")
+    connect(host=f"{uri}StrongMotion")

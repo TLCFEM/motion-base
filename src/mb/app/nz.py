@@ -26,7 +26,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 
 from .response import UploadResponse
 from .utility import UploadTask, User, create_task, is_active, send_notification
-from ..record.parser import ParserNZSM
+from ..record.async_parser import ParserNZSM
 
 router = APIRouter(tags=["New Zealand"])
 

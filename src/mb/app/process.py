@@ -20,7 +20,7 @@ import numpy as np
 from fastapi import HTTPException
 
 from .response import ProcessConfig, ProcessedResponse
-from ..record.record import Record
+from ..record.async_record import Record
 from ..record.response_spectrum import response_spectrum
 from ..record.utility import apply_filter, get_window, zero_stuff, perform_fft
 

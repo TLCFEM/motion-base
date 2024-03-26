@@ -23,7 +23,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 
 from .response import UploadResponse
 from .utility import User, create_task, is_active, send_notification
-from ..record.parser import ParserNIED
+from ..record.async_parser import ParserNIED
 
 router = APIRouter(tags=["Japan"])
 
