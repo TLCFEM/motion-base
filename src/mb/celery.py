@@ -21,6 +21,6 @@ celery = Celery(
     "mb",
     broker=rabbitmq_uri(),
     backend=mongo_uri(),
-    include=["mb.app.jp", "mb.app.nz"],
+    include=["mb.app.jp_sync", "mb.app.nz_sync"],
 )
 celery.conf.broker_connection_retry_on_startup = True
