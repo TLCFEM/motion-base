@@ -45,7 +45,7 @@ class ParserNIED:
 
     @staticmethod
     async def parse_archive(
-            archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -219,31 +219,36 @@ class ParserNZSM:
             record_names.append(record.file_name)
 
         await _populate_common_fields(ParserNZSM.parse_file(lines[:num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines: 2 * num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines:]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines : 2 * num_lines]))
+        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines :]))
 
         return record_names
 
     @staticmethod
     def parse_file(lines: list[str]) -> NZSM:
-        '''
+        """
         Parse file according to the format shown in the following link.
 
         https://www.geonet.org.nz/data/supplementary/strong_motion_file_formats
-        '''
+        """
         record = NZSM()
 
         int_header, float_header = ParserNZSM._parse_header(lines)
 
         record.event_time = datetime(
-            int_header[0], int_header[1], int_header[2], int_header[3], int_header[4],
-            int(int_header[5] / 10))
+            int_header[0], int_header[1], int_header[2], int_header[3], int_header[4], int(int_header[5] / 10)
+        )
         record.event_location = [float_header[13], -float_header[12]]
         record.depth = int_header[16]
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
 
         date_tuple: tuple = (
-            int_header[8], int_header[9], int_header[18], int_header[19], int_header[38], int(int_header[39] / 1000)
+            int_header[8],
+            int_header[9],
+            int_header[18],
+            int_header[19],
+            int_header[38],
+            int(int_header[39] / 1000),
         )
         if date_tuple != (1970, 1, 1, 0, 0, -1):
             record.record_time = datetime(*date_tuple)
@@ -257,8 +262,9 @@ class ParserNZSM:
         a_samples = int_header[33]
         a_lines = ceil(a_samples / 10)
         record.raw_data = [
-            int(record.FTI * float(v) * float_header[7]) for line in lines[offset: offset + a_lines] for v in
-            ParserNZSM._split(line)
+            int(record.FTI * float(v) * float_header[7])
+            for line in lines[offset : offset + a_lines]
+            for v in ParserNZSM._split(line)
         ]
 
         return record
@@ -275,7 +281,7 @@ class ParserNZSM:
     def _split(line: str, size: int = 8) -> list[str]:
         line = line.replace("\n", "")
         for i in range(0, len(line), size):
-            yield line[i: i + size]
+            yield line[i : i + size]
 
     @staticmethod
     def _parse_header(lines: list[str]) -> tuple[list, list]:
