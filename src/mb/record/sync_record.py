@@ -62,9 +62,9 @@ class MetadataRecord(Document):
             "-magnitude",
             "-maximum_acceleration",
             "-event_time",
-            ("event_location", "2dsphere"),
+            [("event_location", "2dsphere")],
             "depth",
-            ("station_location", "2dsphere"),
+            [("station_location", "2dsphere")],
             "direction",
         ],
     }
