@@ -23,8 +23,8 @@ from mongoengine import Document, UUIDField, StringField, FloatField, DateTimeFi
 from .utility import normalise, convert_to, perform_fft
 
 
-class MetadataRecord(Document):
-    id = UUIDField(primary_key=True)
+class Record(Document):
+    id = UUIDField(False, primary_key=True)
 
     file_name = StringField(default=None, description="The original file name of the record.")
     category = StringField(default=None, description="The category of the record.")
@@ -53,7 +53,12 @@ class MetadataRecord(Document):
     direction = StringField(default=None, description="The direction of the record.")
     scale_factor = FloatField(default=None, description="The scale factor of the record.")
 
+    raw_data = ListField(default=None, description="The raw acceleration data of the record.")
+    raw_data_unit = StringField(default=None, description="The unit of the raw acceleration data of the record.")
+    offset = FloatField(default=0, description="The offset of the record.")
+
     meta = {
+        "collection": "Record",
         "allow_inheritance": True,
         "indexes": [
             "file_name",
@@ -81,12 +86,6 @@ class MetadataRecord(Document):
             token += self.direction
         self.id = uuid5(NAMESPACE_OID, token)
         return super().save(*args, **kwargs)
-
-
-class Record(MetadataRecord):
-    raw_data = ListField(default=None, description="The raw acceleration data of the record.")
-    raw_data_unit = StringField(default=None, description="The unit of the raw acceleration data of the record.")
-    offset = FloatField(default=0, description="The offset of the record.")
 
     def to_raw_waveform(self) -> tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data
