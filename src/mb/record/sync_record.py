@@ -151,3 +151,9 @@ class UploadTask(Document):
             except Exception as e:
                 _logger.error("Failed to delete the archive.", exc_info=e, archive_path=self.archive_path)
         return super().delete(*args, **kwargs)
+
+
+def create_task():
+    task = UploadTask()
+    task.save()
+    return task.id

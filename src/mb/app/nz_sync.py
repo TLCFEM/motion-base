@@ -24,9 +24,10 @@ import structlog
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from .response import UploadResponse
-from .utility import User, create_task, is_active
+from .utility import User, is_active
 from ..celery import celery
 from ..record.sync_parser import ParserNZSM
+from ..record.sync_record import create_task
 from ..utility.files import store
 
 router = APIRouter(tags=["New Zealand"])
@@ -67,7 +68,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
     if not wait_for_result:
         task_id_pool: list[UUID] = []
         for archive in valid_archives:
-            task_id: UUID = await create_task()
+            task_id: UUID = create_task()
             _parse_archive_in_background.delay(archive, user.id, task_id)
             task_id_pool.append(task_id)
 

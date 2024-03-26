@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 from datetime import datetime
 from uuid import UUID, uuid4, NAMESPACE_OID, uuid5
 
@@ -133,3 +135,9 @@ class UploadTask(Document):
     @property
     def progress(self) -> float:
         return self.current_size / max(1, self.total_size)
+
+
+async def create_task():
+    task = UploadTask()
+    await task.save()
+    return task.id

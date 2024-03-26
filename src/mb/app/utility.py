@@ -27,7 +27,6 @@ from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 
-from mb.record.async_record import UploadTask
 from mb.utility.env import (
     MB_ACCESS_TOKEN_EXPIRE_MINUTES,
     MB_ALGORITHM,
@@ -129,12 +128,6 @@ async def is_active(user: User = Depends(current_user)):
 # noinspection PyUnusedLocal
 async def send_notification(mail: dict):  # pylint: disable=W0613
     pass
-
-
-async def create_task():
-    task = UploadTask()
-    await task.save()
-    return task.id
 
 
 uuid_regex = re.compile(r"[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}")
