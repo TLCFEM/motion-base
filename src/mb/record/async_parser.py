@@ -33,6 +33,7 @@ from .base_parser import BaseParserNIED, BaseParserNZSM
 _logger = structlog.get_logger(__name__)
 
 
+# noinspection DuplicatedCode
 class ParserNIED(BaseParserNIED):
     @staticmethod
     async def parse_archive(
@@ -123,6 +124,7 @@ class ParserNIED(BaseParserNIED):
         return record
 
 
+# noinspection DuplicatedCode
 class ParserNZSM(BaseParserNZSM):
     @staticmethod
     async def parse_archive(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> list[str]:
