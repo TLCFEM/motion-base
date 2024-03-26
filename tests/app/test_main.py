@@ -85,8 +85,8 @@ async def test_process(mock_client):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_acquire_token(mock_client):
-    response = await mock_client.post(
+async def test_acquire_token(mock_client_superuser):
+    response = await mock_client_superuser.post(
         "/token",
         data={"username": "test", "password": "test"},
     )

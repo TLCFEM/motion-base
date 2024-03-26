@@ -53,11 +53,14 @@ async def always_active():
 
 
 @pytest.fixture(scope="function", autouse=True)
-async def mock_client_superuser():
+async def mock_client_superuser(mongo_connection):
+    user = await always_active()
+    await user.save()
     app.dependency_overrides[is_active] = always_active
     async with AsyncClient(app=app, base_url="http://test") as ac:
         yield ac
     app.dependency_overrides = {}
+    await user.delete()
 
 
 @pytest.fixture(scope="function", autouse=True)
