@@ -15,11 +15,9 @@
 from __future__ import annotations
 
 import re
-from zoneinfo import ZoneInfo  # noqa
 
 import pint
 import structlog
-import tzdata  # noqa # pylint: disable=unused-import
 
 _logger = structlog.get_logger(__name__)
 
