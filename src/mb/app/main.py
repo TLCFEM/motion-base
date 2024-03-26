@@ -23,8 +23,15 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .jp_sync import router as jp_router
-from .nz_sync import router as nz_router
+from ..utility.env import MB_CELERY
+
+if MB_CELERY:
+    from .jp_sync import router as jp_router
+    from .nz_sync import router as nz_router
+else:
+    from .jp_async import router as jp_router
+    from .nz_async import router as nz_router
+
 from .process import processing_record
 from .response import (
     ProcessConfig,
