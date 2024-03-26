@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from numba import float64
+from numba import float64, njit
 from numba.experimental import jitclass
 
 
@@ -35,7 +35,7 @@ class Oscillator:
         self.omega: float = o
         self.zeta: float = z
         self.alpha: float = self.omega * self.zeta
-        self.beta: float = self.omega * np.sqrt(1 - self.zeta ** 2)
+        self.beta: float = self.omega * np.sqrt(1 - self.zeta**2)
         self.gamma: float = 0
         self.a: float = 0
         self.b: float = 0
@@ -54,9 +54,9 @@ class Oscillator:
 
         self.a = exp_term * np.sin(self.beta * interval) / self.beta
         self.b = 2 * exp_term * np.cos(self.beta * interval)
-        self.c = exp_term ** 2
+        self.c = exp_term**2
 
-        self.gamma = (1 - self.b + self.c) / self.a / interval / self.omega ** 2
+        self.gamma = (1 - self.b + self.c) / self.a / interval / self.omega**2
 
     def populate(self, motion: np.ndarray) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
         displacement: np.ndarray = np.zeros_like(motion, dtype=np.float64)
@@ -98,15 +98,26 @@ class Oscillator:
         )
 
 
+@njit
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
     def compute_task(p):
-        if p == 0:
-            return np.array([0, 0, Oscillator.amplitude(motion)])
         return Oscillator(2 * np.pi / p, damping_ratio).compute_maximum_response(interval, motion)
 
-    return np.array([compute_task(p) for p in period])
+    results = np.empty((len(period), 3), dtype=np.float64)
+    results[0, 0] = 0
+    results[0, 1] = 0
+    results[0, 2] = np.max(np.abs(motion))
+    for i in range(1, len(period)):
+        results[i] = compute_task(period[i])
+
+    return results
 
 
+@njit
 def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:
-    oscillator = Oscillator(2 * np.pi * freq, damping_ratio)
-    return np.column_stack((interval * np.arange(len(motion)), oscillator.compute_response(interval, motion)))
+    return np.column_stack(
+        (
+            interval * np.arange(len(motion)),
+            Oscillator(2 * np.pi * freq, damping_ratio).compute_response(interval, motion),
+        )
+    )
