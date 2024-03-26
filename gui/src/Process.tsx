@@ -43,13 +43,13 @@ const [dampingRatio, setDampingRatio] = createSignal("");
 const [periodStep, setPeriodStep] = createSignal("");
 const [periodEnd, setPeriodEnd] = createSignal("");
 
-const resizePlot = () => {
-    Plotly.relayout("time", {}).then();
-    Plotly.relayout("spectrum", {}).then();
-    Plotly.relayout("a_spectrum", {}).then();
-    Plotly.relayout("v_spectrum", {}).then();
-    Plotly.relayout("u_spectrum", {}).then();
-};
+// async function resizePlot() {
+//     await Plotly.relayout("time", {});
+//     await Plotly.relayout("spectrum", {});
+//     await Plotly.relayout("a_spectrum", {});
+//     await Plotly.relayout("v_spectrum", {});
+//     await Plotly.relayout("u_spectrum", {});
+// }
 
 const Settings: Component<sxProps> = (props) => {
     const [currentRecord, setCurrentRecord] = createSignal("");
@@ -127,6 +127,36 @@ const Settings: Component<sxProps> = (props) => {
             content: "Download the processed record in json.",
             animation: "scale",
         });
+        tippy(`#upsampling-ratio`, {
+            content: "Assign a positive integer to upsample the record.",
+            animation: "scale",
+        });
+        tippy(`#filter-length`, {
+            content: "Assign a positive integer to set the filter window length.",
+            animation: "scale",
+        });
+        tippy(`#low-cut`, {
+            content: "The low-cut frenquency for the highpass and bandpass filters.",
+            animation: "scale",
+        });
+        tippy(`#high-cut`, {
+            content: "The high-cut frenquency for the lowpass and bandpass filters.",
+            animation: "scale",
+        });
+        tippy(`#damping-ratio`, {
+            content:
+                "Assign a positive floating point number repserenting the damping ratio, the default value is 0.05.",
+            animation: "scale",
+        });
+        tippy(`#period-step`, {
+            content: "The period interval for the response spectrum computation, the default value is 0.05.",
+            animation: "scale",
+        });
+        tippy(`#period-end`, {
+            content:
+                "The termination period (right bound) for the response spectrum computation, the default value is 20.",
+            animation: "scale",
+        });
     });
 
     return (
@@ -163,6 +193,7 @@ const Settings: Component<sxProps> = (props) => {
                         label="Compute Frequency Spectrum"
                     />
                     <TextField
+                        sx={{ minWidth: "34ch" }}
                         label="ID"
                         value={currentRecord()}
                         defaultValue={currentRecord()}
@@ -209,6 +240,7 @@ const Settings: Component<sxProps> = (props) => {
                         label="Apply Filter"
                     />
                     <TextField
+                        id="upsampling-ratio"
                         label="Upsampling Ratio"
                         type="number"
                         value={ratio() > 0 ? ratio() : ""}
@@ -217,6 +249,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withFilter()}
                     />
                     <TextField
+                        id="filter-length"
                         label="Filter Length"
                         type="number"
                         value={filterLength() > 0 ? filterLength() : ""}
@@ -225,6 +258,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withFilter()}
                     />
                     <TextField
+                        id="low-cut"
                         error={ifError(lowCut())}
                         label="Low Cut"
                         type="number"
@@ -234,6 +268,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withFilter() || filterType() === "lowpass"}
                     />
                     <TextField
+                        id="high-cut"
                         error={ifError(highCut())}
                         label="High Cut"
                         type="number"
@@ -286,13 +321,13 @@ const Settings: Component<sxProps> = (props) => {
                                 checked={withResponseSpectrum()}
                                 onChange={(_, checked) => {
                                     setWithResponseSpectrum(checked);
-                                    resizePlot();
                                 }}
                             />
                         }
                         label="Compute Response Spectrum"
                     />
                     <TextField
+                        id="damping-ratio"
                         error={ifError(dampingRatio())}
                         label="Damping Ratio"
                         type="number"
@@ -302,6 +337,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withResponseSpectrum()}
                     />
                     <TextField
+                        id="period-step"
                         error={ifError(periodStep())}
                         label="Period Step"
                         type="number"
@@ -311,6 +347,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withResponseSpectrum()}
                     />
                     <TextField
+                        id="period-end"
                         error={ifError(periodEnd())}
                         label="Period End"
                         type="number"
@@ -330,7 +367,7 @@ const Settings: Component<sxProps> = (props) => {
 
 const Waveform: Component<sxProps> = (props) => {
     createEffect(async () => {
-        if (loading()) return;
+        if (loading() || !processed().waveform) return;
 
         await Plotly.newPlot(
             "time",
@@ -368,7 +405,7 @@ const Waveform: Component<sxProps> = (props) => {
 
 const FrequencySpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
-        if (loading()) return;
+        if (loading() || !withSpectrum()) return;
 
         await Plotly.newPlot(
             "spectrum",
@@ -406,7 +443,7 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
 
 const ResponseSpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
-        if (loading()) return;
+        if (loading() || !withResponseSpectrum()) return;
 
         await Plotly.newPlot(
             "a_spectrum",
