@@ -77,10 +77,10 @@ async def test_download_nz(mock_client, count_total):
 
 
 @pytest.fixture(scope="function")
-async def sample_data(pwd):
-    from mb.record.async_parser import ParserNZSM
+def sample_data(pwd):
+    from mb.record.sync_parser import ParserNZSM
 
-    yield await ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
+    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
 
 
 async def test_process(sample_data, mock_celery, mock_client):
