@@ -3,9 +3,7 @@ FROM python:3.11-slim as dependency
 COPY requirements.txt /mb/requirements.txt
 WORKDIR /mb
 
-RUN apt-get update && apt-get install -y python3-pip
-
-RUN pip3 install -r requirements.txt
+RUN pip install --no-cache-dir --upgrade -r requirements.txt
 
 FROM python:3.11-slim
 

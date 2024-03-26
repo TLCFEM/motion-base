@@ -39,11 +39,9 @@ const [data, { refetch }] = createResource(jackpot_waveform_api);
 const [withWaveform, setWithWaveform] = createSignal(true);
 const [withMap, setWithMap] = createSignal(true);
 
-function distance_between(a: number[], b: number[]) {
-    const event_location = new LatLng(a[1], a[0]);
-    const station_location = new LatLng(b[1], b[0]);
-
-    return event_location.distanceTo(station_location);
+function replot() {
+    if (withWaveform()) Plotly.relayout("canvas", {}).then();
+    if (withMap()) map.invalidateSize();
 }
 
 const MetadataCard: Component<sxProps> = (props) => {
@@ -140,28 +138,36 @@ const MetadataCard: Component<sxProps> = (props) => {
                 }}
             >
                 <FormControlLabel
+                    id="chk-map"
+                    name="chk-map"
+                    label="Map"
                     control={
                         <Checkbox
                             checked={withMap()}
                             onChange={(_, checked) => {
-                                if (checked || withWaveform()) setWithMap(checked);
+                                if (checked || withWaveform()) {
+                                    setWithMap(checked);
+                                    replot();
+                                }
                             }}
                         />
                     }
-                    label="Map"
-                    disabled
                 />
                 <FormControlLabel
+                    id="chk-waveform"
+                    name="chk-waveform"
+                    label="Waveform"
                     control={
                         <Checkbox
                             checked={withWaveform()}
                             onChange={(_, checked) => {
-                                if (checked || withMap()) setWithWaveform(checked);
+                                if (checked || withMap()) {
+                                    setWithWaveform(checked);
+                                    replot();
+                                }
                             }}
                         />
                     }
-                    label="Waveform"
-                    disabled
                 />
                 <Button id="btn-next" variant="contained" onClick={refetch} disabled={data.loading}>
                     Next
@@ -171,8 +177,9 @@ const MetadataCard: Component<sxProps> = (props) => {
     );
 };
 
+let map: L.Map;
+
 const Epicenter: Component<sxProps> = (props) => {
-    let map: L.Map;
     let event_marker: L.Marker;
     let station_marker: L.Marker;
 
@@ -246,11 +253,14 @@ const Waveform: Component<sxProps> = (props) => {
 const Jackpot: Component<sxProps> = (props) => {
     onMount(refetch);
 
+    const mapSize = 3;
+    const waveformSize = 4;
+
     return (
         <>
-            <MetadataCard sx={{ ...props.sx, flexGrow: 1 }} />
-            {withMap() && <Epicenter sx={{ ...props.sx, flexGrow: 30 }} />}
-            {withWaveform() && <Waveform sx={{ ...props.sx, flexGrow: 40 }} />}
+            <MetadataCard sx={{ ...props.sx, width: "20rem" }} />
+            {withMap() && <Epicenter sx={{ ...props.sx, flexGrow: mapSize }} />}
+            {withWaveform() && <Waveform sx={{ ...props.sx, flexGrow: waveformSize }} />}
         </>
     );
 };

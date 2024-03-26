@@ -27,6 +27,8 @@ const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessRes
 const [error, setError] = createSignal("");
 const [loading, setLoading] = createSignal(false);
 
+const [normalised, setNormalised] = createSignal(false);
+
 const [withWaveform, setWithWaveform] = createSignal(true);
 const [withFilter, setWithFilter] = createSignal(false);
 const [withSpectrum, setWithSpectrum] = createSignal(false);
@@ -43,14 +45,6 @@ const [dampingRatio, setDampingRatio] = createSignal("");
 const [periodStep, setPeriodStep] = createSignal("");
 const [periodEnd, setPeriodEnd] = createSignal("");
 
-// async function resizePlot() {
-//     await Plotly.relayout("time", {});
-//     await Plotly.relayout("spectrum", {});
-//     await Plotly.relayout("a_spectrum", {});
-//     await Plotly.relayout("v_spectrum", {});
-//     await Plotly.relayout("u_spectrum", {});
-// }
-
 const Settings: Component<sxProps> = (props) => {
     const [currentRecord, setCurrentRecord] = createSignal("");
 
@@ -66,6 +60,8 @@ const Settings: Component<sxProps> = (props) => {
     }
 
     function clear() {
+        setNormalised(false);
+
         setWithFilter(false);
         setWithSpectrum(false);
         setWithResponseSpectrum(false);
@@ -88,6 +84,8 @@ const Settings: Component<sxProps> = (props) => {
         setLoading(true);
 
         let config = new ProcessConfig();
+
+        if (normalised()) config.normalised = normalised();
 
         config.with_spectrum = withSpectrum();
 
@@ -157,6 +155,26 @@ const Settings: Component<sxProps> = (props) => {
                 "The termination period (right bound) for the response spectrum computation, the default value is 20.",
             animation: "scale",
         });
+        tippy(`#chk-waveform`, {
+            content: "Display the original waveform.",
+            animation: "scale",
+        });
+        tippy(`#chk-normalised`, {
+            content: "Normalise the PGA to unity.",
+            animation: "scale",
+        });
+        tippy(`#chk-frequency-spectrum`, {
+            content: "Compute the frequency spectrum of the original waveform.",
+            animation: "scale",
+        });
+        tippy(`#chk-filter`, {
+            content: "Further process the record by applying a filter.",
+            animation: "scale",
+        });
+        tippy(`#chk-response-spectrum`, {
+            content: "Compute response spectra of the original waveform.",
+            animation: "scale",
+        });
     });
 
     return (
@@ -181,16 +199,26 @@ const Settings: Component<sxProps> = (props) => {
                     }}
                 >
                     <FormControlLabel
+                        id="chk-waveform"
+                        name="chk-waveform"
+                        label="Waveform"
                         control={
                             <Checkbox checked={withWaveform()} onChange={(_, checked) => setWithWaveform(checked)} />
                         }
-                        label="Show Waveform"
                     />
                     <FormControlLabel
+                        id="chk-normalised"
+                        name="chk-normalised"
+                        label="Normalised"
+                        control={<Checkbox checked={normalised()} onChange={(_, checked) => setNormalised(checked)} />}
+                    />
+                    <FormControlLabel
+                        id="chk-frequency-spectrum"
+                        name="chk-frequency-spectrum"
+                        label="Frequency Spectrum"
                         control={
                             <Checkbox checked={withSpectrum()} onChange={(_, checked) => setWithSpectrum(checked)} />
                         }
-                        label="Compute Frequency Spectrum"
                     />
                     <TextField
                         sx={{ minWidth: "34ch" }}
@@ -236,8 +264,10 @@ const Settings: Component<sxProps> = (props) => {
                     }}
                 >
                     <FormControlLabel
-                        control={<Checkbox checked={withFilter()} onChange={(_, value) => setWithFilter(value)} />}
+                        id="chk-filter"
+                        name="chk-filter"
                         label="Apply Filter"
+                        control={<Checkbox checked={withFilter()} onChange={(_, value) => setWithFilter(value)} />}
                     />
                     <TextField
                         id="upsampling-ratio"
@@ -280,6 +310,8 @@ const Settings: Component<sxProps> = (props) => {
                     <FormControl sx={{ minWidth: "14ch" }} disabled={!withFilter()}>
                         <InputLabel>Filter Type</InputLabel>
                         <Select
+                            id="select-filter"
+                            name="select-filter"
                             label="Filter Type"
                             value={filterType()}
                             onChange={(e) => setFilterType(e.target.value)}
@@ -292,6 +324,8 @@ const Settings: Component<sxProps> = (props) => {
                     <FormControl sx={{ minWidth: "18ch" }} disabled={!withFilter()}>
                         <InputLabel>Window Type</InputLabel>
                         <Select
+                            id="select-window"
+                            name="select-window"
                             label="Window Type"
                             value={windowType()}
                             onChange={(e) => setWindowType(e.target.value)}
@@ -316,6 +350,9 @@ const Settings: Component<sxProps> = (props) => {
                     }}
                 >
                     <FormControlLabel
+                        id="chk-response-spectrum"
+                        name="chk-response-spectrum"
+                        label="Compute Response Spectrum"
                         control={
                             <Checkbox
                                 checked={withResponseSpectrum()}
@@ -324,7 +361,6 @@ const Settings: Component<sxProps> = (props) => {
                                 }}
                             />
                         }
-                        label="Compute Response Spectrum"
                     />
                     <TextField
                         id="damping-ratio"
