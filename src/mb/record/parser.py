@@ -242,9 +242,11 @@ class ParserNZSM:
         record.depth = int_header[16]
         record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
 
-        record.record_time = datetime(
-            int_header[8], int_header[9], int_header[18], int_header[19], int_header[38],
-            int(int_header[39] / 1000))
+        date_tuple: tuple = (
+            int_header[8], int_header[9], int_header[18], int_header[19], int_header[38], int(int_header[39] / 1000)
+        )
+        if date_tuple != (1970, 1, 1, 0, 0, -1):
+            record.record_time = datetime(*date_tuple)
         record.station_location = [float_header[11], -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]

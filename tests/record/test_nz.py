@@ -25,7 +25,7 @@ from mb.record.parser import ParserNZSM
 from mb.record.response_spectrum import response_spectrum
 
 
-@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A"])
+@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "I06465B10.V2A"])
 async def test_nz_parse_archive(pwd, file_path):
     await ParserNZSM.parse_archive(os.path.join(pwd, file_path), uuid4())
 

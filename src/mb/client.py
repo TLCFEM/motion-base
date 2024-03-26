@@ -129,7 +129,7 @@ class MBClient:
 
         kwargs["base_url"] = self.host_url
         if "timeout" not in kwargs:
-            kwargs["timeout"] = 60
+            kwargs["timeout"] = None
 
         self.semaphore = anyio.Semaphore(kwargs.pop("semaphore", 10))
 
