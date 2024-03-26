@@ -18,14 +18,14 @@ from uuid import uuid4
 
 import pytest
 
-from mb.record.async_parser import ParserNIED
+from mb.record.sync_parser import ParserNIED
 
 
 @pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])
-async def test_jp_parse_file(pwd, file_path):
-    await ParserNIED.parse_file(os.path.join(pwd, file_path))
+def test_jp_parse_file(pwd, file_path):
+    ParserNIED.parse_file(os.path.join(pwd, file_path))
 
 
 @pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
-async def test_jp_parse_archive(pwd, file_path):
-    await ParserNIED.parse_archive(os.path.join(pwd, file_path), uuid4())
+def test_jp_parse_archive(pwd, file_path):
+    ParserNIED.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=uuid4())

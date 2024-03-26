@@ -16,6 +16,7 @@ from __future__ import annotations
 
 import os
 import tarfile
+import zipfile
 from datetime import datetime
 from math import ceil
 from typing import BinaryIO, IO
@@ -37,7 +38,7 @@ _logger = structlog.get_logger(__name__)
 class ParserNIED(BaseParserNIED):
     @staticmethod
     async def parse_archive(
-        archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        *, archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -127,7 +128,77 @@ class ParserNIED(BaseParserNIED):
 # noinspection DuplicatedCode
 class ParserNZSM(BaseParserNZSM):
     @staticmethod
-    async def parse_archive(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> list[str]:
+    async def parse_archive(
+        *, archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+    ) -> list[str]:
+        if not isinstance(archive_obj, str) and archive_name is None:
+            raise ValueError("Need archive name if archive is provided as a BinaryIO.")
+
+        name_string: str = archive_obj if isinstance(archive_obj, str) else archive_name
+
+        kwargs: dict = {}
+        if name_string.endswith(".tar.gz"):
+            kwargs["mode"] = "r:gz"
+            if isinstance(archive_obj, str):
+                kwargs["name"] = archive_obj
+            else:
+                kwargs["fileobj"] = archive_obj
+        elif name_string.endswith(".zip"):
+            kwargs["mode"] = "r"
+            kwargs["file"] = archive_obj
+
+        task: UploadTask | None = None
+        if task_id is not None:
+            task = await UploadTask.find_one(UploadTask.id == task_id)
+
+        records: list = []
+
+        if name_string.endswith(".tar.gz"):
+            try:
+                with tarfile.open(**kwargs) as archive:
+                    if task:
+                        task.pid = os.getpid()
+                        task.total_size = len(archive.getnames())
+                    for f in archive:
+                        if task:
+                            task.current_size += 1
+                            await task.save()
+                        if not f.name.endswith((".V2A", ".V1A")):
+                            continue
+                        if target := archive.extractfile(f):
+                            try:
+                                records.extend(await ParserNZSM.parse_file(target, user_id, os.path.basename(f.name)))
+                            except Exception as e:
+                                _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
+            except tarfile.ReadError as e:
+                _logger.critical("Failed to open the archive.", exc_info=e)
+        elif name_string.endswith(".zip"):
+            try:
+                with zipfile.ZipFile(**kwargs) as archive:
+                    if task:
+                        task.pid = os.getpid()
+                        task.total_size = len(archive.namelist())
+                    for f in archive.namelist():
+                        if task:
+                            task.current_size += 1
+                            await task.save()
+                        if not f.endswith((".V2A", ".V1A")):
+                            continue
+                        with archive.open(f) as target:
+                            try:
+                                records.extend(await ParserNZSM.parse_file(target, user_id, os.path.basename(f)))
+                            except Exception as e:
+                                _logger.critical("Failed to parse.", file_name=f, exc_info=e)
+            except zipfile.BadZipFile as e:
+                _logger.critical("Failed to open the archive.", exc_info=e)
+
+        if task:
+            await task.delete()
+
+        return records
+
+    @staticmethod
+    async def parse_file(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> list[str]:
         if isinstance(file_path, str):
             async with aiofiles.open(file_path, "r", encoding="utf-8") as f:
                 lines = await f.readlines()
@@ -164,14 +235,14 @@ class ParserNZSM(BaseParserNZSM):
             await record.save()
             record_names.append(record.file_name)
 
-        await _populate_common_fields(ParserNZSM.parse_file(lines[:num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[num_lines : 2 * num_lines]))
-        await _populate_common_fields(ParserNZSM.parse_file(lines[2 * num_lines :]))
+        await _populate_common_fields(ParserNZSM.parse_lines(lines[:num_lines]))
+        await _populate_common_fields(ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines]))
+        await _populate_common_fields(ParserNZSM.parse_lines(lines[2 * num_lines :]))
 
         return record_names
 
     @staticmethod
-    def parse_file(lines: list[str]) -> NZSM:
+    def parse_lines(lines: list[str]) -> NZSM:
         """
         Parse file according to the format shown in the following link.
 

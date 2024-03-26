@@ -12,12 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
 
 import itertools
-import os
-import tarfile
-import zipfile
 from http import HTTPStatus
 from uuid import UUID
 
@@ -27,7 +25,6 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from .response import UploadResponse
 from .utility import User, create_task, is_active, send_notification
 from ..record.async_parser import ParserNZSM
-from ..record.async_record import UploadTask
 
 router = APIRouter(tags=["New Zealand"])
 
@@ -35,55 +32,7 @@ _logger = structlog.get_logger(__name__)
 
 
 async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
-    task: UploadTask | None = None
-    if task_id is not None:
-        task = await UploadTask.find_one(UploadTask.id == task_id)
-
-    records: list = []
-
-    if archive.filename.endswith(".tar.gz"):
-        try:
-            with tarfile.open(mode="r:gz", fileobj=archive.file) as archive_obj:
-                if task:
-                    task.pid = os.getpid()
-                    task.total_size = len(archive_obj.getnames())
-                for f in archive_obj:
-                    if task:
-                        task.current_size += 1
-                        await task.save()
-                    if not f.name.endswith((".V2A", ".V1A")):
-                        continue
-                    if target := archive_obj.extractfile(f):
-                        try:
-                            records.extend(await ParserNZSM.parse_archive(target, user_id, os.path.basename(f.name)))
-                        except Exception as e:
-                            _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
-        except tarfile.ReadError as e:
-            _logger.critical("Failed to open the archive.", exc_info=e)
-    elif archive.filename.endswith(".zip"):
-        try:
-            with zipfile.ZipFile(archive.file, "r") as archive_obj:
-                if task:
-                    task.pid = os.getpid()
-                    task.total_size = len(archive_obj.namelist())
-                for f in archive_obj.namelist():
-                    if task:
-                        task.current_size += 1
-                        await task.save()
-                    if not f.endswith((".V2A", ".V1A")):
-                        continue
-                    with archive_obj.open(f) as target:
-                        try:
-                            records.extend(await ParserNZSM.parse_archive(target, user_id, os.path.basename(f)))
-                        except Exception as e:
-                            _logger.critical("Failed to parse.", file_name=f, exc_info=e)
-        except zipfile.BadZipFile as e:
-            _logger.critical("Failed to open the archive.", exc_info=e)
-
-    if task:
-        await task.delete()
-
-    return records
+    return await ParserNZSM.parse_archive(archive.file, user_id, archive.filename, task_id)
 
 
 async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):

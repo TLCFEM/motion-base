@@ -32,7 +32,7 @@ router = APIRouter(tags=["Japan"])
 
 @celery.task
 def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
-    return ParserNIED.parse_archive(archive_obj=archive, user_id=user_id, archive_name=None, task_id=task_id)
+    return ParserNIED.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)

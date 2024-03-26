@@ -13,28 +13,19 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os.path
+import os
 from uuid import uuid4
 
-import numpy as np
 import pytest
 
-from mb.record.response_spectrum import response_spectrum
-from mb.record.sync_parser import ParserNZSM
+from mb.record.async_parser import ParserNIED
 
 
-@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "I06465B10.V2A"])
-def test_nz_parse_file(pwd, file_path):
-    ParserNZSM.parse_file(os.path.join(pwd, file_path), uuid4())
+@pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])
+async def test_jp_parse_file(pwd, file_path):
+    await ParserNIED.parse_file(os.path.join(pwd, file_path))
 
 
-@pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
-def test_nz_parse_archive(pwd, file_path):
-    ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=uuid4())
-
-
-def test_nz_response_spectrum():
-    motion = np.array([0, 1, 1, 0, 2, 0, 0])
-    interval = 0.01
-    period = np.arange(0.1, 0.2, interval)
-    response_spectrum(0.05, interval, motion, period)
+@pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
+async def test_jp_parse_archive(pwd, file_path):
+    await ParserNIED.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=uuid4())

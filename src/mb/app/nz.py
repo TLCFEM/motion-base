@@ -12,12 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
 
 import itertools
-import os
-import tarfile
-import zipfile
 from http import HTTPStatus
 from uuid import UUID
 
@@ -28,7 +26,6 @@ from .response import UploadResponse
 from .utility import User, create_task, is_active
 from ..celery import celery
 from ..record.sync_parser import ParserNZSM
-from ..record.sync_record import UploadTask
 from ..utility.files import store
 
 router = APIRouter(tags=["New Zealand"])
@@ -37,56 +34,8 @@ _logger = structlog.get_logger(__name__)
 
 
 @celery.task
-def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list:
-    task: UploadTask | None = None
-    if task_id is not None:
-        task = UploadTask.objects(id=task_id).first()
-        task.archive_path = archive
-        task.pid = os.getpid()
-
-    records: list = []
-
-    if archive.endswith(".tar.gz"):
-        try:
-            with tarfile.open(name=archive, mode="r:gz") as archive_obj:
-                if task:
-                    task.total_size = len(archive_obj.getnames())
-                for f in archive_obj:
-                    if task:
-                        task.current_size += 1
-                        task.save()
-                    if not f.name.endswith((".V2A", ".V1A")):
-                        continue
-                    if target := archive_obj.extractfile(f):
-                        try:
-                            records.extend(ParserNZSM.parse_archive(target, user_id, os.path.basename(f.name)))
-                        except Exception as e:
-                            _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
-        except tarfile.ReadError as e:
-            _logger.critical("Failed to open the archive.", exc_info=e)
-    elif archive.endswith(".zip"):
-        try:
-            with zipfile.ZipFile(archive, "r") as archive_obj:
-                if task:
-                    task.total_size = len(archive_obj.namelist())
-                for f in archive_obj.namelist():
-                    if task:
-                        task.current_size += 1
-                        task.save()
-                    if not f.endswith((".V2A", ".V1A")):
-                        continue
-                    with archive_obj.open(f) as target:
-                        try:
-                            records.extend(ParserNZSM.parse_archive(target, user_id, os.path.basename(f)))
-                        except Exception as e:
-                            _logger.critical("Failed to parse.", file_name=f, exc_info=e)
-        except zipfile.BadZipFile as e:
-            _logger.critical("Failed to open the archive.", exc_info=e)
-
-    if task:
-        task.delete()
-
-    return records
+def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
+    return ParserNZSM.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
@@ -94,8 +43,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
     """
     Upload a compressed archive.
 
-    The archive must be gzip-compressed tarball.
-    The zip-compressed archive is not supported due to some technical issues.
+    The archive must be gzip-compressed tarball or zip archive.
     All files will be checked and those with ".V2A" and/or ".V1A" extensions will be parsed.
 
     Two modes are supported, one can choose to wait for the result or not.
@@ -107,8 +55,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
 
     valid_archives: list[str] = []
     for archive in archives:
-        # ".zip" does not work, see: https://github.com/python/cpython/issues/70363
-        if archive.filename.endswith(".tar.gz"):
+        if archive.filename.endswith((".tar.gz", ".zip")):
             valid_archives.append(store(archive))
 
     if not wait_for_result:
