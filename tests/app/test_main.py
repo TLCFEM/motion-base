@@ -87,6 +87,8 @@ async def test_process(sample_data, mock_celery, mock_client):
     from mb.record.async_record import Record
 
     record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
+    await Record.find_one(Record.id == record[0].id)
+
     response = await mock_client.post(
         f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}
     )
