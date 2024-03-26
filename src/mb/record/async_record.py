@@ -123,11 +123,12 @@ class NZSM(Record):
 
 
 class UploadTask(Document):
-    id: UUID = Field(default_factory=uuid4)
+    id: UUID = Field(default_factory=uuid4, primary_key=True)
     create_time: datetime = Field(default_factory=datetime.now)
     pid: int = Field(default=0)
     total_size: int = Field(default=0)
     current_size: int = Field(default=0)
+    archive_path: str = Field(default=None)
 
     @property
     def progress(self) -> float:

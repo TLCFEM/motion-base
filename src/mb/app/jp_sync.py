@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 from http import HTTPStatus
 from uuid import UUID
 
@@ -32,7 +33,12 @@ router = APIRouter(tags=["Japan"])
 
 @celery.task
 def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
-    return ParserNIED.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
+    results: list[str] = ParserNIED.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
+    if os.path.exists(archive):
+        os.remove(archive)
+    if not os.listdir(folder := os.path.dirname(archive)):
+        os.rmdir(folder)
+    return results
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)

@@ -100,5 +100,4 @@ async def test_acquire_token(mock_client_superuser):
         "/token",
         data={"username": "test", "password": "test"},
     )
-    print(response.json())
     assert response.status_code == HTTPStatus.OK

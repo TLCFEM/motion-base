@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import itertools
+import os
 from http import HTTPStatus
 from uuid import UUID
 
@@ -35,7 +36,12 @@ _logger = structlog.get_logger(__name__)
 
 @celery.task
 def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
-    return ParserNZSM.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
+    results: list[str] = ParserNZSM.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
+    if os.path.exists(archive):
+        os.remove(archive)
+    if not os.listdir(folder := os.path.dirname(archive)):
+        os.rmdir(folder)
+    return results
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)

@@ -76,9 +76,3 @@ async def mock_header():
 @pytest.fixture(scope="function", autouse=True)
 def pwd():
     return os.path.dirname(os.path.abspath(__file__))
-
-
-def test_add_task(mock_celery):
-    from mb.celery import add
-
-    add.delay(2, 2).get(timeout=10)
