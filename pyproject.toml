@@ -35,6 +35,7 @@ dependencies = [
     "passlib",
     "Pint",
     "pydantic<2",
+    "python-dateutil>=2.1.0",
     "python-dotenv",
     "python-jose[cryptography]",
     "python-multipart",

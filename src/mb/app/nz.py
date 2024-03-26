@@ -25,8 +25,9 @@ import structlog
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
 from .response import UploadResponse
-from .utility import UploadTask, User, create_task, is_active, send_notification
+from .utility import User, create_task, is_active, send_notification
 from ..record.async_parser import ParserNZSM
+from ..record.async_record import UploadTask
 
 router = APIRouter(tags=["New Zealand"])
 

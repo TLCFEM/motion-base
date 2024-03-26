@@ -24,6 +24,8 @@ import tippy_logo from "./assets/tippy.svg";
 import plotly_logo from "./assets/plotly.svg";
 import leafllet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
+import mongoengine_logo from "./assets/mongoengine.png";
+import celery_logo from "./assets/celery.png";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
@@ -87,11 +89,13 @@ export default function AboutModal() {
                     </Typography>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
                         <img src={mongodb_logo} alt="mongodb" height="40px" />
+                        <img src={mongoengine_logo} alt="mongoengine" height="40px" />
+                        <img src={beanie_logo} alt="beanie" height="40px" />
+                        <img src={celery_logo} alt="celery" height="40px" />
                         <img src={fastapi_logo} alt="fastapi" height="40px" />
-                        <img src={solid_logo} alt="solid" height="40px" />
                     </Stack>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <img src={beanie_logo} alt="beanie" height="40px" />
+                        <img src={solid_logo} alt="solid" height="40px" />
                         <img src={leafllet_logo} alt="leaflet" height="40px" />
                         <img src={plotly_logo} alt="plotly" height="40px" />
                         <img src={tippy_logo} alt="tippy" height="40px" />

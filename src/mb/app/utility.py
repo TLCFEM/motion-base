@@ -18,7 +18,7 @@ from __future__ import annotations
 import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from uuid import NAMESPACE_OID, UUID, uuid4, uuid5
+from uuid import NAMESPACE_OID, UUID, uuid5
 
 from beanie import Document
 from fastapi import Depends, HTTPException
@@ -27,6 +27,7 @@ from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 
+from mb.record.async_record import UploadTask
 from mb.utility.env import (
     MB_ACCESS_TOKEN_EXPIRE_MINUTES,
     MB_ALGORITHM,
@@ -46,18 +47,6 @@ class CredentialException(HTTPException):
             detail="Could not validate credentials.",
             headers={"WWW-Authenticate": "Bearer"},
         )
-
-
-class UploadTask(Document):
-    id: UUID = Field(default_factory=uuid4)
-    create_time: datetime = Field(default_factory=datetime.now)
-    pid: int = 0
-    total_size: int = 0
-    current_size: int = 0
-
-    @property
-    def progress(self) -> float:
-        return self.current_size / max(1, self.total_size)
 
 
 class Token(BaseModel):

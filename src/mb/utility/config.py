@@ -26,8 +26,8 @@ from .env import (
     RABBITMQ_PASSWORD,
     RABBITMQ_USERNAME,
 )
-from ..app.utility import UploadTask, User
-from ..record.async_record import Record
+from ..app.utility import User
+from ..record.async_record import Record, UploadTask
 
 
 def rabbitmq_uri():
