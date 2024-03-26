@@ -110,7 +110,7 @@ const Settings: Component<sxProps> = (props) => {
     });
 
     return (
-        <Card sx={props.sx}>
+        <Card sx={{ ...props.sx, display: "flex", flexDirection: "column" }}>
             <CardContent
                 sx={{
                     display: "flex",
@@ -119,6 +119,7 @@ const Settings: Component<sxProps> = (props) => {
                     alignContent: "center",
                     alignItems: "center",
                     gap: "1rem",
+                    flexGrow: 1,
                 }}
             >
                 <TextField
@@ -349,9 +350,9 @@ const QueryDatabase: Component = () => {
 
     return (
         <>
-            <Paper id="overview" sx={{ border: "1px solid darkgrey", height: "90vh", flexGrow: 1 }} />
-            <Stack sx={{ display: "flex", width: "60%" }} spacing="1rem">
-                <Settings sx={{ border: "1px solid darkgrey" }} />
+            <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
+            <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
+                <Settings sx={{ border: "1px solid darkgrey", minHeight: "7rem" }} />
                 <BasicTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>
         </>
