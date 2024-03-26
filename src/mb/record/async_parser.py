@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 import os
-import re
 import tarfile
 from datetime import datetime
 from math import ceil
@@ -28,21 +27,14 @@ import pint
 import structlog
 import tzdata  # noqa # pylint: disable=unused-import
 
+from .parser_base import BaseParserNIED, BaseParserNZSM
 from .record import NIED, NZSM
 from ..app.utility import UploadTask
 
 _logger = structlog.get_logger(__name__)
 
 
-class ParserNIED:
-    @staticmethod
-    def validate_archive(archive_name: str):
-        if not archive_name.endswith(".tar.gz"):
-            raise ValueError("NIED archive file should be a .tar.gz file.")
-
-        if "knt" not in archive_name and "kik" not in archive_name:
-            raise ValueError("NIED archive file name should contain knt or kik.")
-
+class ParserNIED(BaseParserNIED):
     @staticmethod
     async def parse_archive(
         archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
@@ -131,55 +123,8 @@ class ParserNIED:
 
         return record
 
-    @staticmethod
-    def _parse_unit(line: str) -> str:
-        matches = re.findall(r"\(([^)]+)\)", line)
-        if len(matches) == 0:
-            raise ValueError(f"No unit found in line: {line}.")
-        if len(matches) > 1:
-            raise ValueError(f"Multiple units found in line: {line}.")
 
-        return matches[0]
-
-    @staticmethod
-    def _normalise_unit(line: str) -> str:
-        unit = ParserNIED._parse_unit(line)
-        if unit == "gal":
-            unit = unit.capitalize()
-        return str(pint.Unit(unit))
-
-    @staticmethod
-    def _strip_unit(line: str) -> float:
-        try:
-            unit = ParserNIED._parse_unit(line)
-            numerator, denominator = line.replace(f"({unit})", "").split("/")
-        except ValueError:
-            numerator, denominator = line.split("/")
-
-        return float(numerator) / float(denominator)
-
-    @staticmethod
-    def _parse_direction(line: str) -> str:
-        return line.replace("-", "").upper()
-
-    @staticmethod
-    def _parse_value(line: str) -> str:
-        matches = re.findall(r"([0-9.]+)", line)
-        if len(matches) == 0:
-            raise ValueError(f"No value found in line: {line}.")
-        if len(matches) > 1:
-            raise ValueError(f"Multiple values found in line: {line}.")
-        return matches[0]
-
-
-class ParserNZSM:
-    @staticmethod
-    def validate_file(file_path: str):
-        if file_path.lower().endswith((".v2a", ".v1a")):
-            return
-
-        raise ValueError("NZSM archive file should be a V2A/V1A file.")
-
+class ParserNZSM(BaseParserNZSM):
     @staticmethod
     async def parse_archive(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> list[str]:
         if isinstance(file_path, str):
@@ -268,23 +213,3 @@ class ParserNZSM:
         ]
 
         return record
-
-    @staticmethod
-    def _parse_interval(line: str):
-        pattern = re.compile(r"\s(\d+\.\d+)\s")
-        if matches := pattern.search(line):
-            return float(matches[1])
-
-        raise ValueError("Sampling frequency/interval not found.")
-
-    @staticmethod
-    def _split(line: str, size: int = 8) -> list[str]:
-        line = line.replace("\n", "")
-        for i in range(0, len(line), size):
-            yield line[i : i + size]
-
-    @staticmethod
-    def _parse_header(lines: list[str]) -> tuple[list, list]:
-        int_header = [int(v) for line in lines[16:20] for v in ParserNZSM._split(line)]
-        float_header = [float(v) for line in lines[20:26] for v in ParserNZSM._split(line)]
-        return int_header, float_header

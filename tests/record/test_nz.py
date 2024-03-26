@@ -20,8 +20,8 @@ from uuid import uuid4
 
 import numpy as np
 import pytest
-
 from mb.record.parser import ParserNZSM
+
 from mb.record.response_spectrum import response_spectrum
 
 

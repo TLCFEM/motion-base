@@ -17,7 +17,6 @@ import os
 from http import HTTPStatus
 
 import pytest
-
 from mb.record.record import Record
 
 
