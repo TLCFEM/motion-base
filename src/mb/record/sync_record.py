@@ -12,15 +12,18 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import os
 from datetime import datetime
 from uuid import NAMESPACE_OID, uuid5, uuid4
 
 import numpy as np
 import pint
+import structlog
 from mongoengine import Document, UUIDField, StringField, FloatField, DateTimeField, ListField, IntField
 
 from .utility import normalise, convert_to, perform_fft
+
+_logger = structlog.get_logger(__name__)
 
 
 class Record(Document):
@@ -135,7 +138,16 @@ class UploadTask(Document):
     pid = IntField(default=0)
     total_size = IntField(default=0)
     current_size = IntField(default=0)
+    archive_path = StringField(default=None)
 
     @property
     def progress(self) -> float:
         return self.current_size / max(1, self.total_size)
+
+    def delete(self, *args, **kwargs):
+        if self.archive_path and os.path.exists(self.archive_path):
+            try:
+                os.remove(self.archive_path)
+            except Exception as e:
+                _logger.error("Failed to delete the archive.", exc_info=e, archive_path=self.archive_path)
+        return super().delete(*args, **kwargs)

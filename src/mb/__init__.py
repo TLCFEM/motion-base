@@ -20,6 +20,10 @@ def run_app(**kwargs):
     if kwargs.get("celery", False):
         from mb.celery import celery
 
+        from mb.utility.config import init_mongo
+        import asyncio
+
+        asyncio.run(init_mongo())
         celery.start(["worker"])
     else:
         from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel

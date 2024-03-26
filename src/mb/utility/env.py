@@ -27,6 +27,7 @@ else:
 
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
+MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
 
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")

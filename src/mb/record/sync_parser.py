@@ -37,7 +37,7 @@ _logger = structlog.get_logger(__name__)
 class ParserNIED(BaseParserNIED):
     @staticmethod
     def parse_archive(
-        archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        *, archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -54,12 +54,14 @@ class ParserNIED(BaseParserNIED):
         task: UploadTask | None = None
         if task_id is not None:
             task = UploadTask.objects(id=task_id).first()
+            task.pid = os.getpid()
+            if isinstance(archive_obj, str):
+                task.archive_path = archive_obj
 
         records = []
         try:
             with tarfile.open(**kwargs) as archive:
                 if task:
-                    task.pid = os.getpid()
                     task.total_size = len(archive.getnames())
                 for f in archive:
                     if task:
