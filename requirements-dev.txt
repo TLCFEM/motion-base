@@ -50,6 +50,7 @@ markupsafe==2.1.5         # via jinja2, werkzeug
 matplotlib==3.8.3         # via motion-base (pyproject.toml)
 mccabe==0.7.0             # via pylint
 mdurl==0.1.2              # via markdown-it-py
+mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.3.2              # via beanie
 msgpack==1.0.8            # via locust
 mypy-extensions==1.0.0    # via black
@@ -68,7 +69,7 @@ pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
 pylint==3.1.0             # via motion-base (pyproject.toml)
-pymongo==4.6.2            # via motor
+pymongo==4.6.2            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
 pytest==8.1.1             # via pytest-asyncio, pytest-cov
 pytest-asyncio==0.23.6    # via motion-base (pyproject.toml)

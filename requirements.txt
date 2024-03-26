@@ -29,6 +29,7 @@ llvmlite==0.42.0          # via numba
 markdown-it-py==3.0.0     # via rich
 matplotlib==3.8.3         # via motion-base (pyproject.toml)
 mdurl==0.1.2              # via markdown-it-py
+mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.3.2              # via beanie
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
@@ -40,7 +41,7 @@ pyasn1==0.5.1             # via python-jose, rsa
 pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
-pymongo==4.6.2            # via motor
+pymongo==4.6.2            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
 python-dateutil==2.9.0.post0  # via matplotlib
 python-dotenv==1.0.1      # via motion-base (pyproject.toml)

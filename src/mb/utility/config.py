@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from beanie import init_beanie
+from mongoengine import connect
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .env import (
@@ -44,6 +45,6 @@ def mongo_uri():
 
 
 async def init_mongo():
-    await init_beanie(
-        database=AsyncIOMotorClient(mongo_uri())["StrongMotion"], document_models=[Record, User, UploadTask]
-    )
+    uri = mongo_uri()
+    await init_beanie(database=AsyncIOMotorClient(uri)["StrongMotion"], document_models=[Record, User, UploadTask])
+    connect(f"{uri}StrongMotion")
