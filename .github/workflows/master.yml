@@ -26,6 +26,10 @@ jobs:
           mongodb-username: test
           mongodb-password: password
           mongodb-db: StrongMotion
+      - name: RabbitMQ
+        uses: namoshek/rabbitmq-github-action@v1
+        with:
+          version: 'latest'
       #      - name: Lint
       #        run: |
       #          pylint src

@@ -15,10 +15,12 @@
 
 import os
 from http import HTTPStatus
+from uuid import uuid4
 
 import pytest
 
 from mb.record.async_record import Record
+from mb.record.sync_parser import ParserNZSM
 
 
 async def test_alive(mock_client):
@@ -35,7 +37,7 @@ async def test_alive(mock_client):
     ],
 )
 @pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
+async def test_upload_jp(mock_celery, mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
     with open(os.path.join(pwd, "data/jp_test.knt.tar.gz"), "rb") as file:
         files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
@@ -53,7 +55,7 @@ async def test_upload_jp(mock_client_superuser, mock_header, pwd, file_name, sta
     ],
 )
 @pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-async def test_upload_nz(mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
+async def test_upload_nz(mock_celery, mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
     with open(os.path.join(pwd, f"data/{file_name}" if "zip" in file_name else "data/nz_test.tar.gz"), "rb") as file:
         files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
@@ -77,7 +79,12 @@ async def test_download_nz(mock_client, count_total):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_process(mock_client):
+@pytest.fixture(scope="function")
+def sample_data(pwd):
+    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
+
+
+async def test_process(sample_data, mock_celery, mock_client):
     record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
     response = await mock_client.post(
         f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}

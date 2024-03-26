@@ -74,7 +74,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
         message="Successfully uploaded and processed.",
         records=list(
             itertools.chain.from_iterable(
-                [_parse_archive_in_background.delay(archive, user.id) for archive in valid_archives]
+                [_parse_archive_in_background.delay(archive, user.id).get() for archive in valid_archives]
             )
         ),
     )

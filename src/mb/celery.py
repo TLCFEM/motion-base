@@ -24,3 +24,8 @@ celery = Celery(
     include=["mb.app.jp", "mb.app.nz"],
 )
 celery.conf.broker_connection_retry_on_startup = True
+
+
+@celery.task
+def add(x, y):
+    return x + y

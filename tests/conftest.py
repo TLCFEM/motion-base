@@ -20,12 +20,17 @@ from httpx import AsyncClient
 
 from mb.app.main import app
 from mb.app.utility import User, is_active, crypt_context
-from mb.utility.config import init_mongo
+from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="session", autouse=True)
 def celery_config():
-    return {"broker_url": "amqp://", "result_backend": "mongodb://"}
+    return {"broker_url": rabbitmq_uri(), "result_backend": mongo_uri()}
+
+
+@pytest.fixture(scope="function", autouse=True)
+def mock_celery(celery_session_worker):
+    yield celery_session_worker
 
 
 @pytest.fixture(scope="function", autouse=True)
@@ -71,3 +76,9 @@ async def mock_header():
 @pytest.fixture(scope="function", autouse=True)
 def pwd():
     return os.path.dirname(os.path.abspath(__file__))
+
+
+def test_add_task(mock_celery):
+    from mb.celery import add
+
+    add.delay(2, 2).get(timeout=10)

@@ -23,8 +23,8 @@ from mb.record.async_parser import ParserNZSM
 from mb.record.response_spectrum import response_spectrum
 
 
-@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "I06465B10.V2A"])
-async def test_nz_parse_file(pwd, file_path):
+@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "data/I06465B10.V2A"])
+async def test_nz_parse_file(mock_celery, pwd, file_path):
     await ParserNZSM.parse_file(os.path.join(pwd, file_path), uuid4())
 
 
