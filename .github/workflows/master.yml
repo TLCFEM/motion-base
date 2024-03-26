@@ -8,6 +8,23 @@ jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 30
+    services:
+      mongodb:
+        image: mongo:latest
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_DATABASE: StrongMotion
+        ports:
+          - 27017:27017
+      rabbitmq:
+        image: rabbitmq:latest
+        env:
+          RABBITMQ_DEFAULT_USER: test
+          RABBITMQ_DEFAULT_PASS: password
+          RABBITMQ_DEFAULT_VHOST: vhost
+        ports:
+          - 5672:5672
     steps:
       - name: Clone
         uses: actions/checkout@v4
@@ -20,18 +37,6 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -e .[dev]
-      - name: MongoDB
-        uses: supercharge/mongodb-github-action@1.10.0
-        with:
-          mongodb-username: test
-          mongodb-password: password
-          mongodb-db: StrongMotion
-      - name: RabbitMQ
-        uses: mer-team/rabbitmq-mng-action@v1.2
-        with:
-          RABBITMQ_USER: test
-          RABBITMQ_PASS: password
-          RABBITMQ_TAG: latest
       #      - name: Lint
       #        run: |
       #          pylint src
