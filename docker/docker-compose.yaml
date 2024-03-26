@@ -26,17 +26,17 @@ services:
       ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
       ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
       ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@dev-mongo:${MONGO_PORT}/
-#  dev-rabbitmq:
-#    image: rabbitmq
-#    container_name: dev-rabbitmq
-#    restart: 'no'
-#    ports:
-#      - '5672:5672'
-#      - '15672:15672'
-#    environment:
-#      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-#      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-#      RABBITMQ_DEFAULT_VHOST: vhost
+  dev-rabbitmq:
+    image: rabbitmq
+    container_name: dev-rabbitmq
+    restart: 'no'
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    environment:
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
 
 volumes:
   motion_mongo:

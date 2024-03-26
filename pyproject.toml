@@ -24,7 +24,7 @@ classifiers = [
 dependencies = [
     "aiofiles",
     "beanie",
-    #    "celery",
+    "celery",
     "email-validator",
     "fastapi==0.105.0",
     "httpx",
@@ -50,10 +50,10 @@ dependencies = [
 dev = [
     "black",
     "locust",
-#    "pylint",
-#    "pylint-mongoengine",
+    #    "pylint",
+    #    "pylint-mongoengine",
     "pytest-asyncio",
-    #    "pytest-celery",
+    "pytest-celery",
     "pytest-cov",
     #    "ruff",
 ]

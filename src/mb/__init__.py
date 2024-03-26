@@ -14,36 +14,42 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import click
-import uvicorn
 
 
 def run_app(**kwargs):
-    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
+    if kwargs.get("celery", False):
+        from mb.celery import celery
 
-    workers = MB_FASTAPI_WORKERS
-    if kwargs.get("overwrite_env", False) and "workers" in kwargs:
-        workers = kwargs["workers"]
-
-    workers = int(workers)
-
-    config: dict = {}
-
-    if workers > 1:
-        config["workers"] = workers
-        config["log_level"] = "info"
+        celery.start(["worker"])
     else:
-        config["reload"] = True
-        config["log_level"] = "debug"
+        from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
 
-    port = MB_PORT
-    if kwargs.get("overwrite_env", False) and "port" in kwargs:
-        port = kwargs["port"]
-    config["port"] = int(port)
+        workers = MB_FASTAPI_WORKERS
+        if kwargs.get("overwrite_env", False) and "workers" in kwargs:
+            workers = kwargs["workers"]
 
-    if "host" in kwargs:
-        config["host"] = kwargs["host"]
+        workers = int(workers)
 
-    uvicorn.run("mb.app.main:app", **config)
+        config: dict = {}
+
+        if workers > 1:
+            config["workers"] = workers
+            config["log_level"] = "info"
+        else:
+            config["reload"] = True
+            config["log_level"] = "debug"
+
+        port = MB_PORT
+        if kwargs.get("overwrite_env", False) and "port" in kwargs:
+            port = kwargs["port"]
+        config["port"] = int(port)
+
+        if "host" in kwargs:
+            config["host"] = kwargs["host"]
+
+        import uvicorn
+
+        uvicorn.run("mb.app.main:app", **config)
 
 
 @click.command()

@@ -13,14 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-# from celery import Celery
-#
-# from mb.utility.config import rabbitmq_uri, mongo_uri
-#
-# celery = Celery(
-#     "mb",
-#     broker=rabbitmq_uri(),
-#     backend=mongo_uri(),
-#     include=["mb.app.jp", "mb.app.nz"],
-# )
-# celery.conf.broker_connection_retry_on_startup = True
+from celery import Celery
+
+from mb.utility.config import rabbitmq_uri, mongo_uri
+
+celery = Celery(
+    "mb",
+    broker=rabbitmq_uri(),
+    backend=mongo_uri(),
+    include=["mb.app.jp", "mb.app.nz"],
+)
+celery.conf.broker_connection_retry_on_startup = True
