@@ -19,9 +19,6 @@ from uuid import uuid4
 
 import pytest
 
-from mb.record.async_record import Record
-from mb.record.sync_parser import ParserNZSM
-
 
 async def test_alive(mock_client):
     response = await mock_client.get("/alive")
@@ -80,11 +77,15 @@ async def test_download_nz(mock_client, count_total):
 
 
 @pytest.fixture(scope="function")
-def sample_data(pwd):
-    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
+async def sample_data(pwd):
+    from mb.record.async_parser import ParserNZSM
+
+    yield await ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
 
 
 async def test_process(sample_data, mock_celery, mock_client):
+    from mb.record.async_record import Record
+
     record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
     response = await mock_client.post(
         f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}

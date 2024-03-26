@@ -23,8 +23,8 @@ from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from .jp import router as jp_router
-from .nz import router as nz_router
+from .jp_sync import router as jp_router
+from .nz_sync import router as nz_router
 from .process import processing_record
 from .response import (
     ProcessConfig,

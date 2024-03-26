@@ -20,38 +20,30 @@ from http import HTTPStatus
 from uuid import UUID
 
 import structlog
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from .response import UploadResponse
-from .utility import User, create_task, is_active, send_notification
-from ..record.async_parser import ParserNZSM
+from .utility import User, create_task, is_active
+from ..celery import celery
+from ..record.sync_parser import ParserNZSM
+from ..utility.files import store
 
 router = APIRouter(tags=["New Zealand"])
 
 _logger = structlog.get_logger(__name__)
 
 
-async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
-    return await ParserNZSM.parse_archive(archive.file, user_id, archive.filename, task_id)
-
-
-async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
-    records: list = await _parse_archive_in_background(archive, user_id, task_id)
-    mail_body = "The following records are parsed:\n"
-    mail_body += "\n".join([f"{record}" for record in records])
-    mail = {"body": mail_body}
-    await send_notification(mail)
+@celery.task
+def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
+    return ParserNZSM.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
-async def upload_archive(
-    archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
-):
+async def upload_archive(archives: list[UploadFile], user: User = Depends(is_active), wait_for_result: bool = False):
     """
     Upload a compressed archive.
 
-    The archive must be gzip-compressed tarball.
-    The zip-compressed archive is not supported due to some technical issues.
+    The archive must be gzip-compressed tarball or zip archive.
     All files will be checked and those with ".V2A" and/or ".V1A" extensions will be parsed.
 
     Two modes are supported, one can choose to wait for the result or not.
@@ -61,17 +53,16 @@ async def upload_archive(
     if not user.can_upload:
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
-    valid_archives: list[UploadFile] = []
+    valid_archives: list[str] = []
     for archive in archives:
-        # ".zip" does not work, see: https://github.com/python/cpython/issues/70363
-        if archive.filename.endswith(".tar.gz"):
-            valid_archives.append(archive)
+        if archive.filename.endswith((".tar.gz", ".zip")):
+            valid_archives.append(store(archive))
 
     if not wait_for_result:
         task_id_pool: list[UUID] = []
         for archive in valid_archives:
             task_id: UUID = await create_task()
-            tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
+            _parse_archive_in_background.delay(archive, user.id, task_id)
             task_id_pool.append(task_id)
 
         return UploadResponse(
@@ -82,7 +73,7 @@ async def upload_archive(
         message="Successfully uploaded and processed.",
         records=list(
             itertools.chain.from_iterable(
-                [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
+                [_parse_archive_in_background.delay(archive, user.id).get() for archive in valid_archives]
             )
         ),
     )
