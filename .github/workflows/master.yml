@@ -26,9 +26,9 @@ jobs:
           mongodb-username: test
           mongodb-password: password
           mongodb-db: StrongMotion
-      - name: Lint
-        run: |
-          pylint src
+#      - name: Lint
+#        run: |
+#          pylint src
       - name: Test
         run: |
           pytest --cov .

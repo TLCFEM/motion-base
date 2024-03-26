@@ -45,7 +45,7 @@ from .utility import (
     is_active,
 )
 from ..record.async_record import Record, MetadataRecord, UploadTask
-from ..utility.config import init_mongo
+from ..utility.config import init_mongo, shutdown_mongo
 
 
 @asynccontextmanager
@@ -53,6 +53,7 @@ async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argum
     await init_mongo()
     await create_superuser()
     yield
+    await shutdown_mongo()
 
 
 app = FastAPI(

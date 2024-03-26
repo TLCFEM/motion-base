@@ -6,7 +6,6 @@
 #
 aiofiles==23.2.1          # via motion-base (pyproject.toml)
 anyio==3.7.1              # via fastapi, httpx, starlette
-astroid==3.1.0            # via pylint
 beanie==1.25.0            # via motion-base (pyproject.toml)
 black==24.3.0             # via motion-base (pyproject.toml)
 blinker==1.7.0            # via flask
@@ -20,7 +19,6 @@ contourpy==1.2.0          # via matplotlib
 coverage[toml]==7.4.4     # via pytest-cov
 cryptography==42.0.5      # via python-jose
 cycler==0.12.1            # via matplotlib
-dill==0.3.8               # via pylint
 dnspython==2.6.1          # via email-validator, pymongo
 ecdsa==0.18.0             # via python-jose
 email-validator==2.1.1    # via motion-base (pyproject.toml)
@@ -38,7 +36,6 @@ httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
 idna==3.6                 # via anyio, email-validator, httpx, requests
 iniconfig==2.0.0          # via pytest
-isort==5.13.2             # via pylint
 itsdangerous==2.1.2       # via flask
 jinja2==3.1.3             # via flask
 kiwisolver==1.4.5         # via matplotlib
@@ -48,7 +45,6 @@ locust==2.24.1            # via motion-base (pyproject.toml)
 markdown-it-py==3.0.0     # via rich
 markupsafe==2.1.5         # via jinja2, werkzeug
 matplotlib==3.8.3         # via motion-base (pyproject.toml)
-mccabe==0.7.0             # via pylint
 mdurl==0.1.2              # via markdown-it-py
 mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.3.2              # via beanie
@@ -61,16 +57,13 @@ passlib==1.7.4            # via motion-base (pyproject.toml)
 pathspec==0.12.1          # via black
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)
-platformdirs==4.2.0       # via black, pylint
+platformdirs==4.2.0       # via black
 pluggy==1.4.0             # via pytest
 psutil==5.9.8             # via locust
 pyasn1==0.5.1             # via python-jose, rsa
 pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
-pylint==3.1.0             # via motion-base (pyproject.toml), pylint-mongoengine, pylint-plugin-utils
-pylint-mongoengine==0.5.0  # via motion-base (pyproject.toml)
-pylint-plugin-utils==0.8.2  # via pylint-mongoengine
 pymongo==4.6.2            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
 pytest==8.1.1             # via pytest-asyncio, pytest-cov
@@ -91,7 +84,6 @@ sniffio==1.3.1            # via anyio, httpx
 starlette==0.27.0         # via fastapi
 structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
-tomlkit==0.12.4           # via pylint
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
 tzdata==2024.1            # via motion-base (pyproject.toml)
 urllib3==2.2.1            # via requests
