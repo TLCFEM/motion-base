@@ -18,6 +18,8 @@ from http import HTTPStatus
 
 import pytest
 
+from mb.record.record import Record
+
 
 async def test_alive(mock_client):
     response = await mock_client.get("/alive")
@@ -69,6 +71,15 @@ async def test_jackpot(mock_client, data_type):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_download_nz(mock_client):
-    response = await mock_client.post("/query", json={})
+@pytest.mark.parametrize("count_total", [True, False])
+async def test_download_nz(mock_client, count_total):
+    response = await mock_client.post(f"/query?count_total={count_total}", json={})
+    assert response.status_code == HTTPStatus.OK
+
+
+async def test_process(mock_client):
+    record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
+    response = await mock_client.post(
+        f"/process?record_id={record[0].id}",
+        json={"with_spectrum": True, "with_response_spectrum": True})
     assert response.status_code == HTTPStatus.OK
