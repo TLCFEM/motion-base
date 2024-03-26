@@ -54,6 +54,7 @@ const App: Component = () => {
                 marginLeft: "1vw",
                 marginRight: "1vw",
                 marginTop: "1vh",
+                marginBottom: "1vh",
             }}
             spacing="1rem"
         >
