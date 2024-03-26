@@ -27,11 +27,11 @@ jobs:
           mongodb-password: password
           mongodb-db: StrongMotion
       - name: RabbitMQ
-        uses: getong/rabbitmq-action@v1.2
+        uses: mer-team/rabbitmq-mng-action@v1.2
         with:
-          rabbitmq user: test
-          rabbitmq password: password
-          rabbitmq vhost: vhost
+          RABBITMQ_USER: test
+          RABBITMQ_PASS: password
+          RABBITMQ_TAG: latest
       #      - name: Lint
       #        run: |
       #          pylint src
