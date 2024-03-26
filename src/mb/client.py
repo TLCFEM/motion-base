@@ -18,6 +18,7 @@ from __future__ import annotations
 import os.path
 import uuid
 from http import HTTPStatus
+from typing import Generator
 
 import anyio
 import httpx
@@ -179,7 +180,13 @@ class MBClient:
                 f"[[red]{self.current_download_size}/1[/]]."
             )
 
-    async def upload(self, region: str, path: str, wait_for_result: bool = False):
+    async def upload(self, region: str, path: str | Generator, wait_for_result: bool = False):
+        if isinstance(path, Generator):
+            async with anyio.create_task_group() as tg:
+                for file in path:
+                    tg.start_soon(self.upload, region, file, wait_for_result)
+            return
+
         if os.path.isdir(path):
             file_list: list[str] = []
             for root, _, files in os.walk(path):
@@ -188,11 +195,13 @@ class MBClient:
             self.current_upload_size = 0
             async with anyio.create_task_group() as tg:
                 for file in file_list:
-                    tg.start_soon(self.upload, region, file)
+                    tg.start_soon(self.upload, region, file, wait_for_result)
 
             return
 
-        if not path.endswith(".tar.gz"):
+        if not path.endswith(".tar.gz") or not os.path.exists(path):
+            if self.upload_size > 0:
+                self.current_upload_size += 1
             return
 
         base_name = os.path.basename(path)
