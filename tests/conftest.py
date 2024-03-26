@@ -19,7 +19,7 @@ import pytest
 from httpx import AsyncClient
 
 from mb.app.main import app
-from mb.app.utility import User, is_active
+from mb.app.utility import User, is_active, crypt_context
 from mb.utility.config import init_mongo
 
 
@@ -45,7 +45,7 @@ async def always_active():
         email="test",
         last_name="test",
         first_name="test",
-        hashed_password="test",
+        hashed_password=crypt_context.hash("test"),
         disabled=False,
         can_upload=True,
         can_delete=True,

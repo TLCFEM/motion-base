@@ -80,6 +80,15 @@ async def test_download_nz(mock_client, count_total):
 async def test_process(mock_client):
     record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
     response = await mock_client.post(
-        f"/process?record_id={record[0].id}",
-        json={"with_spectrum": True, "with_response_spectrum": True})
+        f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}
+    )
+    assert response.status_code == HTTPStatus.OK
+
+
+async def test_acquire_token(mock_client):
+    response = await mock_client.post(
+        "/token",
+        data={"username": "test", "password": "test"},
+    )
+    print(response.json())
     assert response.status_code == HTTPStatus.OK
