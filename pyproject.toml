@@ -51,6 +51,7 @@ dev = [
     "black",
     "locust",
     "pylint",
+    "pylint-mongoengine",
     "pytest-asyncio",
     #    "pytest-celery",
     "pytest-cov",
