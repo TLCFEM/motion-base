@@ -18,7 +18,8 @@ from http import HTTPStatus
 from fastapi import Depends, HTTPException, APIRouter
 from fastapi.security import OAuth2PasswordRequestForm
 
-from mb.app.utility import Token, authenticate_user, create_token, UserForm, User, UserInformation, is_active
+from mb.app.response import Token, UserResponse
+from mb.app.utility import authenticate_user, create_token, UserForm, User, is_active
 
 router = APIRouter(tags=["account"])
 
@@ -34,16 +35,30 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
     return create_token(user.username)
 
 
-@router.post("/new", status_code=HTTPStatus.OK)
-async def create_new_user(form_data: UserForm):
+async def ensure_user_available(form_data: UserForm):
     if await User.find_one(User.username == form_data.username):
         raise HTTPException(HTTPStatus.CONFLICT, detail="Username already exists.")
+
+    if await User.find_one(User.email == form_data.email):
+        raise HTTPException(HTTPStatus.CONFLICT, detail="Email already exists.")
+
+
+@router.post("/check", status_code=HTTPStatus.OK)
+async def check_new_user(form_data: UserForm):
+    await ensure_user_available(form_data)
+
+    return {"message": "User does not exist."}
+
+
+@router.post("/new", status_code=HTTPStatus.OK)
+async def create_new_user(form_data: UserForm):
+    await ensure_user_available(form_data)
 
     await form_data.create_user().save()
 
     return {"message": "User created."}
 
 
-@router.get("/whoami", response_model=UserInformation)
+@router.get("/whoami", response_model=UserResponse)
 async def retrieve_myself(user: User = Depends(is_active)):
-    return UserInformation(**user.dict())
+    return UserResponse(**user.dict())

@@ -32,6 +32,9 @@ else:
     from .jp_async import router as jp_router
     from .nz_async import router as nz_router
 
+
+from .user import router as user_router
+
 from .process import processing_record
 from .response import (
     ProcessConfig,
@@ -71,6 +74,7 @@ app = FastAPI(
 )
 app.include_router(jp_router, prefix="/jp")
 app.include_router(nz_router, prefix="/nz")
+app.include_router(user_router, prefix="/user")
 app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,

@@ -222,3 +222,16 @@ class UploadTaskResponse(BaseModel):
 
 class UploadTasksResponse(BaseModel):
     tasks: list[UploadTaskResponse | None]
+
+
+class UserResponse(BaseModel):
+    id: str
+    username: str
+    email: str
+    last_name: str
+    first_name: str
+
+
+class Token(BaseModel):
+    access_token: str
+    token_type: str

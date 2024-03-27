@@ -24,7 +24,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, EmailStr
 
 from mb.record.utility import uuid5_str
 from mb.utility.env import (
@@ -48,15 +48,13 @@ class CredentialException(HTTPException):
         )
 
 
-class Token(BaseModel):
-    access_token: str
-    token_type: str
-
-
 class UserForm(BaseModel):
     username: str
-    password: str
-    email: str
+    password: str = Field(
+        regex=r"(?=\D*\d)(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])[A-Za-z0-9]{8,}$",
+        description="At least 8 characters, with at least one uppercase letter, one lowercase letter, and one number.",
+    )
+    email: EmailStr
     last_name: str
     first_name: str
 
@@ -73,7 +71,7 @@ class UserForm(BaseModel):
         )
 
 
-class UserInformation(Document):
+class User(Document):
     id: str = Field(default=None)
     username: str
     email: str
@@ -82,14 +80,12 @@ class UserInformation(Document):
     can_upload: bool
     can_delete: bool
 
+    hashed_password: str
+    disabled: bool
+
     def __init__(self, *args, **data):
         super().__init__(*args, **data)
         self.id = uuid5_str(self.username)
-
-
-class User(UserInformation):
-    hashed_password: str
-    disabled: bool
 
 
 crypt_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
@@ -113,7 +109,7 @@ async def authenticate_user(username: str, password: str):
     return user if user and crypt_context.verify(password, user.hashed_password) else False
 
 
-OAUTH2 = OAuth2PasswordBearer(tokenUrl="token")
+OAUTH2 = OAuth2PasswordBearer(tokenUrl="/user/token")
 
 
 def create_token(sub: str):
