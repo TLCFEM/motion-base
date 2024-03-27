@@ -31,6 +31,10 @@ export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
     const theme = useTheme();
 
+    const repo_link = <Link href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</Link>;
+    const nied_link = <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>;
+    const nzsm_link = <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand Strong-Motion</Link>;
+
     return (
         <>
             <Button onClick={() => setOpen(true)} variant="contained">
@@ -59,30 +63,29 @@ export default function AboutModal() {
                     <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
                         <img src={mb_logo} alt="logo" height="50px" />
                         <Typography variant="h4" sx={{ p: 1 }}>
-                            About
+                            Motion Base
                         </Typography>
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        This is a demo of the strong motion database. The source code is available at GitHub.
+                        This is a demo of the strong motion database.
+                    </Typography>
+                    <Typography variant="body1" sx={{ p: 1 }}>
+                        The source code is available in this repository {repo_link}.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         Japan Database
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        The data is retrieved from{" "}
-                        <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>. The data is
-                        not processed. Users may want to further filter the records.
+                        The data is retrieved from {nied_link}. The data is not processed. Users may want to further
+                        filter the records.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         New Zealand Database
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        The data is retrieved from{" "}
-                        <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">
-                            New Zealand Strong-Motion
-                        </Link>{" "}
-                        database. The selected strong motions are processed (*.V2A files). The other records (*.V1A
-                        files) are not processed. Users may want to further filter the records.
+                        The data is retrieved from {nzsm_link} database. Some selected strong motions are processed
+                        (*.V2A files). The other records (*.V1A files) are not processed. Users may want to further
+                        filter the records.
                     </Typography>
                     <Typography variant="h6" sx={{ p: 1 }}>
                         Built with
