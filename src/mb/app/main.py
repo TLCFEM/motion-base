@@ -12,6 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 import os.path
 from contextlib import asynccontextmanager
 from http import HTTPStatus
@@ -21,7 +22,6 @@ from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
-from fastapi.security import OAuth2PasswordRequestForm
 
 from ..utility.env import MB_CELERY, MB_FS_ROOT
 
@@ -45,12 +45,8 @@ from .response import (
     UploadTaskResponse,
 )
 from .utility import (
-    Token,
     User,
-    UserInformation,
-    authenticate_user,
     create_superuser,
-    create_token,
     is_active,
 )
 from ..record.async_record import Record, MetadataRecord, UploadTask
@@ -113,22 +109,6 @@ async def post_task_status(task_ids: list[UUID]) -> UploadTasksResponse:
             tasks[i] = task.dict()
 
     return UploadTasksResponse(tasks=tasks)
-
-
-@app.post("/token", tags=["account"], response_model=Token)
-async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
-    if not (user := await authenticate_user(form_data.username, form_data.password)):
-        raise HTTPException(
-            HTTPStatus.UNAUTHORIZED,
-            detail="Incorrect username or password",
-            headers={"WWW-Authenticate": "Bearer"},
-        )
-    return create_token(user.username)
-
-
-@app.get("/whoami", tags=["account"], response_model=UserInformation)
-async def retrieve_myself(user: User = Depends(is_active)):
-    return UserInformation(**user.dict())
 
 
 @app.get("/test_endpoint", tags=["misc"])

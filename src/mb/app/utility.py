@@ -53,6 +53,26 @@ class Token(BaseModel):
     token_type: str
 
 
+class UserForm(BaseModel):
+    username: str
+    password: str
+    email: str
+    last_name: str
+    first_name: str
+
+    def create_user(self):
+        return User(
+            username=self.username,
+            email=self.email,
+            first_name=self.first_name,
+            last_name=self.last_name,
+            hashed_password=crypt_context.hash(self.password),
+            disabled=False,
+            can_upload=True,
+            can_delete=True,
+        )
+
+
 class UserInformation(Document):
     id: str = Field(default=None)
     username: str

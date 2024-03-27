@@ -110,7 +110,7 @@ async def test_process(sample_data, mock_celery, mock_client):
 
 async def test_acquire_token(mock_client_superuser):
     response = await mock_client_superuser.post(
-        "/token",
+        "/account/token",
         data={"username": "test", "password": "test"},
     )
     assert response.status_code == HTTPStatus.OK
