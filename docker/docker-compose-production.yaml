@@ -2,7 +2,7 @@ services:
   mongo:
     image: mongo
     container_name: mongo
-    restart: 'no'
+    restart: 'always'
     command: --wiredTigerCacheSizeGB 2 --port ${MONGO_PORT}
     ports:
       - '${MONGO_PORT}:${MONGO_PORT}'
@@ -17,7 +17,7 @@ services:
   rabbitmq:
     image: rabbitmq
     container_name: rabbitmq
-    restart: 'no'
+    restart: 'always'
     ports:
       - '5672:5672'
       - '15672:15672'
@@ -28,7 +28,7 @@ services:
   motion-base-back:
     image: tlcfem/motion-base-back
     container_name: motion-base-back
-    restart: 'no'
+    restart: 'always'
     depends_on:
       - mongo
       - rabbitmq
@@ -52,18 +52,17 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-      RABBITMQ_HOST: 'rabbitmq'
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
   motion-base-worker:
     image: tlcfem/motion-base-back
     container_name: motion-base-worker
-    restart: 'no'
+    restart: 'always'
     depends_on:
       - mongo
       - rabbitmq
-    command:
-      - 'celery'
+    command: celery
     volumes:
       - motion_cache:${MB_FS_ROOT}
     environment:
@@ -82,13 +81,13 @@ services:
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
-      RABBITMQ_HOST: 'rabbitmq'
+      RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
   motion-base-front:
     image: tlcfem/motion-base-front
     container_name: motion-base-front
-    restart: 'no'
+    restart: 'always'
     depends_on:
       - motion-base-back
     ports:
