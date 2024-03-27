@@ -40,6 +40,12 @@ if not LOADED:
     else:
         _logger.info("Using self process as worker.")
 
+    from fastapi import __version__ as fastapi_version
+    from packaging import version
+
+    if version.parse(fastapi_version) >= version.parse("0.106.0") and not MB_CELERY:
+        raise RuntimeError("For 0.106.0 and later FastAPI versions, need to switch on celery.")
+
 
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")

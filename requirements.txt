@@ -6,7 +6,7 @@
 #
 aiofiles==23.2.1          # via motion-base (pyproject.toml)
 amqp==5.2.0               # via kombu
-anyio==3.7.1              # via fastapi, httpx, starlette
+anyio==4.3.0              # via httpx, starlette
 beanie==1.25.0            # via motion-base (pyproject.toml)
 billiard==4.2.0           # via celery
 celery==5.3.6             # via motion-base (pyproject.toml)
@@ -22,7 +22,7 @@ cycler==0.12.1            # via matplotlib
 dnspython==2.6.1          # via email-validator, pymongo
 ecdsa==0.18.0             # via python-jose
 email-validator==2.1.1    # via motion-base (pyproject.toml)
-fastapi==0.105.0          # via motion-base (pyproject.toml)
+fastapi==0.110.0          # via motion-base (pyproject.toml)
 fonttools==4.50.0         # via matplotlib
 h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.4           # via httpx
@@ -37,7 +37,7 @@ markdown-it-py==3.0.0     # via rich
 matplotlib==3.8.3         # via motion-base (pyproject.toml)
 mdurl==0.1.2              # via markdown-it-py
 mongoengine==0.28.2       # via motion-base (pyproject.toml)
-motor==3.3.2              # via beanie
+motor==3.4.0              # via beanie
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
 packaging==24.0           # via matplotlib
@@ -45,7 +45,7 @@ passlib==1.7.4            # via motion-base (pyproject.toml)
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)
 prompt-toolkit==3.0.43    # via click-repl
-pyasn1==0.5.1             # via python-jose, rsa
+pyasn1==0.6.0             # via python-jose, rsa
 pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
@@ -60,11 +60,11 @@ rsa==4.9                  # via python-jose
 scipy==1.12.0             # via motion-base (pyproject.toml)
 six==1.16.0               # via ecdsa, python-dateutil
 sniffio==1.3.1            # via anyio, httpx
-starlette==0.27.0         # via fastapi
+starlette==0.36.3         # via fastapi
 structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
 tzdata==2024.1            # via celery, motion-base (pyproject.toml)
-uvicorn==0.28.1           # via motion-base (pyproject.toml)
+uvicorn==0.29.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
