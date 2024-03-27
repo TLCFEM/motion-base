@@ -20,15 +20,26 @@ from dotenv import load_dotenv
 
 _logger = structlog.get_logger(__name__)
 
-if load_dotenv(os.path.join(os.path.dirname(__file__), "../../../docker/.env")):
-    _logger.info("Using .env file.")
-else:
-    _logger.info("No .env file found.")
+LOADED: bool = False
+
+if not LOADED:
+    if load_dotenv(os.path.join(os.path.dirname(__file__), "../../../docker/.env")):
+        _logger.info("Using .env file.")
+    else:
+        _logger.info("No .env file found.")
 
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
 MB_CELERY: str = os.getenv("MB_CELERY", "")
+
+
+if not LOADED:
+    if MB_CELERY:
+        _logger.info("Using celery.")
+    else:
+        _logger.info("Using self process as worker.")
+
 
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")
@@ -48,3 +59,5 @@ MONGO_USERNAME: str = os.getenv("MONGO_USERNAME")
 MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD")
 MONGO_HOST: str = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
+
+LOADED = True
