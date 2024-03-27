@@ -23,6 +23,7 @@ classifiers = [
 ]
 dependencies = [
     "aiofiles",
+    "bcrypt",
     "beanie",
     "celery",
     "email-validator",
@@ -32,7 +33,6 @@ dependencies = [
     "matplotlib",
     "mongoengine",
     "numba",
-    "passlib",
     "Pint",
     "pydantic<2",
     "python-dateutil>=2.1.0",

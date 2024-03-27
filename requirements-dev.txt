@@ -7,6 +7,7 @@
 aiofiles==23.2.1          # via motion-base (pyproject.toml)
 amqp==5.2.0               # via kombu
 anyio==4.3.0              # via httpx, starlette
+bcrypt==4.1.2             # via motion-base (pyproject.toml)
 beanie==1.25.0            # via motion-base (pyproject.toml)
 billiard==4.2.0           # via celery
 black==24.3.0             # via motion-base (pyproject.toml)
@@ -37,7 +38,7 @@ gevent==24.2.1            # via geventhttpclient, locust
 geventhttpclient==2.0.12  # via locust
 greenlet==3.0.3           # via gevent
 h11==0.14.0               # via httpcore, uvicorn
-httpcore==1.0.4           # via httpx
+httpcore==1.0.5           # via httpx
 httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
 idna==3.6                 # via anyio, email-validator, httpx, requests
@@ -45,7 +46,7 @@ iniconfig==2.0.0          # via pytest
 itsdangerous==2.1.2       # via flask
 jinja2==3.1.3             # via flask
 kiwisolver==1.4.5         # via matplotlib
-kombu==5.3.5              # via celery
+kombu==5.3.6              # via celery
 lazy-model==0.2.0         # via beanie
 llvmlite==0.42.0          # via numba
 locust==2.24.1            # via motion-base (pyproject.toml)
@@ -60,7 +61,6 @@ mypy-extensions==1.0.0    # via black
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
 packaging==24.0           # via black, matplotlib, pytest
-passlib==1.7.4            # via motion-base (pyproject.toml)
 pathspec==0.12.1          # via black
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)

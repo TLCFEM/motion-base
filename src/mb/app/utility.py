@@ -18,11 +18,11 @@ from __future__ import annotations
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
+import bcrypt
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from jose import JWTError, jwt  # noqa
-from passlib.context import CryptContext
 from pydantic import BaseModel, Field, EmailStr
 
 from mb.app.response import Token
@@ -37,6 +37,14 @@ from mb.utility.env import (
     MB_SUPERUSER_PASSWORD,
     MB_SUPERUSER_USERNAME,
 )
+
+
+def bcrypt_verify(plain_password: str, hashed_password: str) -> bool:
+    return bcrypt.checkpw(plain_password.encode(), hashed_password.encode())
+
+
+def bcrypt_hash(password: str) -> str:
+    return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
 class CredentialException(HTTPException):
@@ -64,7 +72,7 @@ class UserForm(BaseModel):
             email=self.email,
             first_name=self.first_name,
             last_name=self.last_name,
-            hashed_password=crypt_context.hash(self.password),
+            hashed_password=bcrypt_hash(self.password),
             disabled=False,
             can_upload=True,
             can_delete=True,
@@ -88,16 +96,13 @@ class User(Document):
         self.id = uuid5_str(self.username)
 
 
-crypt_context = CryptContext(schemes=["sha256_crypt"], deprecated="auto")
-
-
 async def create_superuser():
     await User(
         username=MB_SUPERUSER_USERNAME,
         email=MB_SUPERUSER_EMAIL,
         first_name=MB_SUPERUSER_FIRST_NAME,
         last_name=MB_SUPERUSER_LAST_NAME,
-        hashed_password=crypt_context.hash(MB_SUPERUSER_PASSWORD),
+        hashed_password=bcrypt_hash(MB_SUPERUSER_PASSWORD),
         disabled=False,
         can_upload=True,
         can_delete=True,
@@ -106,7 +111,7 @@ async def create_superuser():
 
 async def authenticate_user(username: str, password: str):
     user = await User.find_one(User.username == username)
-    return user if user and crypt_context.verify(password, user.hashed_password) else False
+    return user if user and bcrypt_verify(password, user.hashed_password) else False
 
 
 OAUTH2 = OAuth2PasswordBearer(tokenUrl="/user/token")
