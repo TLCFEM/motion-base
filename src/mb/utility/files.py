@@ -17,10 +17,13 @@ import os.path
 from io import BytesIO
 from typing import BinaryIO
 
+import structlog
 from fastapi import UploadFile
 from requests import delete, get
 
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
+
+_logger = structlog.get_logger(__name__)
 
 
 def _local_path(file_name: str, user_id: str, check_existence: bool = True):
@@ -72,17 +75,23 @@ class FileProxy:
         return os.path.basename(self.fs_path)
 
     def __enter__(self):
-        self.file = (
-            BytesIO(get(self._file_uri).content)
-            if self.is_remote
-            else os.path.abspath(os.path.join(MB_FS_ROOT, self.fs_path))
-        )
+        if self.is_remote:
+            response = get(self._file_uri)
+            if response.status_code != 200:
+                _logger.error(f"Failed to download file: {self._file_uri}")
+                self.file = BytesIO()
+            else:
+                self.file = BytesIO(response.content)
+        else:
+            self.file = os.path.abspath(os.path.join(MB_FS_ROOT, self.fs_path))
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.is_remote:
-            delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
+            response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
+            if response.status_code != 200:
+                _logger.error(f"Failed to delete file: {self._file_uri}")
         else:
             if os.path.exists(self.file):
                 os.remove(self.file)
