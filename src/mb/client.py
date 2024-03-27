@@ -118,7 +118,7 @@ class MBClient:
         self.password: str | None = password
         self.auth: OAuth2ResourceOwnerPasswordCredentials | None = (
             OAuth2ResourceOwnerPasswordCredentials(
-                f"{self.host_url}/account/token",
+                f"{self.host_url}/user/token",
                 username=self.username,
                 password=self.password,
             )
