@@ -41,6 +41,8 @@ from .response import (
     RecordResponse,
     RawRecordResponse,
     PaginationResponse,
+    UploadTasksResponse,
+    UploadTaskResponse,
 )
 from .utility import (
     Token,
@@ -96,11 +98,21 @@ async def total():
     return {"total": await Record.find(Record.magnitude > 0).count()}
 
 
-@app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTask)
-async def get_task_status(task_id: UUID) -> UploadTask:
+@app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTaskResponse)
+async def get_task_status(task_id: UUID) -> UploadTaskResponse:
     if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is None:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished.")
-    return task
+    return UploadTaskResponse(**task.dict())
+
+
+@app.post("/task/status/", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTasksResponse)
+async def post_task_status(task_ids: list[UUID]) -> UploadTasksResponse:
+    tasks: list = [None] * len(task_ids)
+    for i, task_id in enumerate(task_ids):
+        if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is not None:
+            tasks[i] = task.dict()
+
+    return UploadTasksResponse(tasks=tasks)
 
 
 @app.post("/token", tags=["account"], response_model=Token)

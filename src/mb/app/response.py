@@ -211,3 +211,14 @@ class QueryConfig(BaseModel):
             other_query["file_name"] = {"$regex": self.event_name, "$options": "i"}
 
         return geo_query, other_query
+
+
+class UploadTaskResponse(BaseModel):
+    id: str
+    create_time: datetime
+    total_size: int
+    current_size: int
+
+
+class UploadTasksResponse(BaseModel):
+    tasks: list[UploadTaskResponse | None]
