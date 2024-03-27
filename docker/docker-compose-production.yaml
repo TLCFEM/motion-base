@@ -25,9 +25,9 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: vhost
-  motion-base-back:
+  mb-back:
     image: tlcfem/motion-base-back
-    container_name: motion-base-back
+    container_name: mb-back
     restart: 'always'
     depends_on:
       - mongo
@@ -57,9 +57,9 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-  motion-base-worker:
+  mb-worker:
     image: tlcfem/motion-base-back
-    container_name: motion-base-worker
+    container_name: mb-worker
     restart: 'always'
     depends_on:
       - mongo
@@ -88,12 +88,12 @@ services:
       RABBITMQ_HOST: rabbitmq
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-  motion-base-front:
+  mb-front:
     image: tlcfem/motion-base-front
-    container_name: motion-base-front
+    container_name: mb-front
     restart: 'always'
     depends_on:
-      - motion-base-back
+      - mb-back
     ports:
       - '4173:4173'
 
