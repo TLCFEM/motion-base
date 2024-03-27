@@ -26,6 +26,7 @@ from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field, EmailStr
 
+from mb.app.response import Token
 from mb.record.utility import uuid5_str
 from mb.utility.env import (
     MB_ACCESS_TOKEN_EXPIRE_MINUTES,
