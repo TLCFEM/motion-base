@@ -125,7 +125,7 @@ class NZSM(Record):
 
 
 class UploadTask(Document):
-    id: UUID = Field(default_factory=uuid4, primary_key=True)
+    id: UUID = Field(default_factory=uuid4)
     create_time: datetime = Field(default_factory=datetime.now)
     pid: int = Field(default=0)
     total_size: int = Field(default=0)
