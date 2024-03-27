@@ -31,27 +31,27 @@ if not LOADED:
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
-MB_CELERY: str = os.getenv("MB_CELERY", "")
+MB_CELERY: str = os.getenv("MB_CELERY", "1")
 MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
 while MB_MAIN_SITE.endswith("/"):
     MB_MAIN_SITE = MB_MAIN_SITE[:-1]
 
-MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
-MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")
-MB_SUPERUSER_FIRST_NAME: str = os.getenv("MB_SUPERUSER_FIRST_NAME")
-MB_SUPERUSER_LAST_NAME: str = os.getenv("MB_SUPERUSER_LAST_NAME")
-MB_SUPERUSER_PASSWORD: str = os.getenv("MB_SUPERUSER_PASSWORD")
+MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME", "test")
+MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL", "password")
+MB_SUPERUSER_FIRST_NAME: str = os.getenv("MB_SUPERUSER_FIRST_NAME", "admin")
+MB_SUPERUSER_LAST_NAME: str = os.getenv("MB_SUPERUSER_LAST_NAME", "admin")
+MB_SUPERUSER_PASSWORD: str = os.getenv("MB_SUPERUSER_PASSWORD", "admin")
 
-MB_SECRET_KEY: str = os.getenv("MB_SECRET_KEY")
+MB_SECRET_KEY: str = os.getenv("MB_SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
 MB_ALGORITHM: str = os.getenv("MB_ALGORITHM", "HS256")
-MB_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "30"))
+MB_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "300"))
 
-RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME")
-RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD")
+RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME", "test")
+RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD", "password")
 RABBITMQ_HOST: str = os.getenv("RABBITMQ_HOST", "localhost")
 
-MONGO_USERNAME: str = os.getenv("MONGO_USERNAME")
-MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD")
+MONGO_USERNAME: str = os.getenv("MONGO_USERNAME", "test")
+MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD", "password")
 MONGO_HOST: str = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
 
