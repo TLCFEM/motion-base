@@ -48,6 +48,7 @@ services:
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 2
       MB_FS_ROOT: ${MB_FS_ROOT}
+      MB_MAIN_SITE: ${MB_MAIN_SITE}
       MB_CELERY: ${MB_CELERY}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
@@ -78,6 +79,7 @@ services:
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 2
       MB_FS_ROOT: ${MB_FS_ROOT}
+      MB_MAIN_SITE: ${MB_MAIN_SITE}
       MB_CELERY: ${MB_CELERY}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}

@@ -31,10 +31,8 @@ router = APIRouter(tags=["Japan"])
 
 
 @celery.task
-def _parse_archive_in_background(
-    archive: str, access_token: str, user_id: str, task_id: str | None = None
-) -> list[str]:
-    with FileProxy(archive, access_token) as archive_file:
+def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: str | None = None) -> list[str]:
+    with FileProxy(archive_uri, access_token) as archive_file:
         return ParserNIED.parse_archive(
             archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
         )
@@ -58,19 +56,19 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
 
     access_token: str = create_token(user.username).access_token
 
-    valid_archives: list[str] = []
+    valid_uris: list[str] = []
     for archive in archives:
         try:
             ParserNIED.validate_archive(archive.filename)
-            valid_archives.append(store(archive, user.id))
+            valid_uris.append(store(archive, user.id))
         except ValueError:
             pass
 
     if not wait_for_result:
         task_id_pool: list[str] = []
-        for archive in valid_archives:
+        for archive_uri in valid_uris:
             task_id: str = create_task()
-            _parse_archive_in_background.delay(archive, access_token, user.id, task_id)
+            _parse_archive.delay(archive_uri, access_token, user.id, task_id)
             task_id_pool.append(task_id)
 
         return UploadResponse(
@@ -81,7 +79,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
         message="Successfully uploaded and processed.",
         records=list(
             itertools.chain.from_iterable(
-                [_parse_archive_in_background.delay(archive, access_token, user.id).get() for archive in valid_archives]
+                [_parse_archive.delay(archive_uri, access_token, user.id).get() for archive_uri in valid_uris]
             )
         ),
     )

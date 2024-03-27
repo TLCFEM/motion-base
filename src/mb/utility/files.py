@@ -14,20 +14,26 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
+from io import BytesIO
 from typing import BinaryIO
 
 from fastapi import UploadFile
-from requests import delete
+from requests import delete, get
 
-from mb.utility.env import MB_FS_ROOT
+from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
 
 def _local_path(file_name: str, user_id: str, check_existence: bool = True):
+    if not os.path.exists(MB_FS_ROOT):
+        os.makedirs(MB_FS_ROOT)
+
     if not os.path.exists(folder := os.path.join(MB_FS_ROOT, user_id)):
         os.makedirs(folder)
 
+    fs_path: str = os.path.join(user_id, file_name)
+
     if not os.path.exists(path := os.path.abspath(os.path.join(folder, file_name))) or not check_existence:
-        return path
+        return path, fs_path
 
     raise FileExistsError(f"File {path} already exists.")
 
@@ -37,45 +43,50 @@ def _iter(file: BinaryIO):
         yield chunk
 
 
-def store(upload: UploadFile, user_id: str):
-    local_file_path: str = _local_path(upload.filename, user_id)
-    with open(local_file_path, "wb") as file:
+def store(upload: UploadFile, user_id: str) -> str:
+    local_path, fs_path = _local_path(upload.filename, user_id)
+    with open(local_path, "wb") as file:
         for chunk in _iter(upload.file):
             file.write(chunk)
 
-    return local_file_path
+    return f"{MB_MAIN_SITE}/access/{fs_path}"
 
 
 class FileProxy:
-    def __init__(self, file_path: str, auth_token: str):
-        self.file_path = file_path
-        self.auth_token = auth_token
+    def __init__(self, file_uri: str, auth_token: str):
+        self._file_uri = file_uri
+        self._auth_token = auth_token
 
         self.file = None
-        self.file_name = None
 
     @property
     def is_remote(self):
-        # noinspection HttpUrlsUsage
-        return self.file_path.startswith(("http://", "https://"))
+        return not self._file_uri.startswith(MB_MAIN_SITE)
+
+    @property
+    def fs_path(self):
+        return self._file_uri.split("access/")[1]
+
+    @property
+    def file_name(self):
+        return os.path.basename(self.fs_path)
 
     def __enter__(self):
-        if self.is_remote:
-            self.file = self.file_path
-            self.file_name = os.path.basename(self.file_path.split("access/")[1])
-        else:
-            self.file = self.file_path
-            self.file_name = os.path.basename(self.file_path)
+        self.file = (
+            BytesIO(get(self._file_uri).content)
+            if self.is_remote
+            else os.path.abspath(os.path.join(MB_FS_ROOT, self.fs_path))
+        )
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         if self.is_remote:
-            delete(self.file_path, headers={"Authorization": f"Bearer {self.auth_token}"})
+            delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
         else:
-            if os.path.exists(self.file_path):
-                os.remove(self.file_path)
-            if not os.listdir(folder := os.path.dirname(self.file_path)):
+            if os.path.exists(self.file):
+                os.remove(self.file)
+            if not os.listdir(folder := os.path.dirname(self.file)):
                 os.rmdir(folder)
 
 

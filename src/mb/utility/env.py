@@ -31,9 +31,12 @@ if not LOADED:
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
+
+MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
+while MB_MAIN_SITE.endswith("/"):
+    MB_MAIN_SITE = MB_MAIN_SITE[:-1]
+
 MB_CELERY: str = os.getenv("MB_CELERY", "")
-
-
 if not LOADED:
     if MB_CELERY:
         _logger.info("Using celery.")
@@ -45,7 +48,6 @@ if not LOADED:
 
     if version.parse(fastapi_version) >= version.parse("0.106.0") and not MB_CELERY:
         raise RuntimeError("For 0.106.0 and later FastAPI versions, need to switch on celery.")
-
 
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")
