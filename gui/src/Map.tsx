@@ -22,8 +22,8 @@ import marker from "leaflet/dist/images/marker-icon.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
 import earthquake from "./assets/earthquake.svg";
 
-export function DefaultMap(container: string, centre: LatLng) {
-    const map: L.Map = L.map(container).setView(centre, 6);
+export function DefaultMap(container: string, centre: LatLng, zoom: number = 6) {
+    const map: L.Map = L.map(container).setView(centre, zoom);
 
     L.tileLayer("https://tile.openstreetmap.org/{z}/{x}/{y}.png", {
         maxZoom: 15,

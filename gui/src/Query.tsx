@@ -276,12 +276,8 @@ const QueryDatabase: Component = () => {
     let map: L.Map;
 
     const normalize_longitude = (lon: number) => {
-        while (lon < -180) {
-            lon += 360;
-        }
-        while (lon > 180) {
-            lon -= 360;
-        }
+        while (lon < -180) lon += 360;
+        while (lon > 180) lon -= 360;
         return lon;
     };
 
@@ -299,7 +295,7 @@ const QueryDatabase: Component = () => {
     };
 
     onMount(() => {
-        map = DefaultMap("overview", new LatLng(35.652832, 139.839478));
+        map = DefaultMap("overview", new LatLng(-0.58725, 157.20725), 4);
 
         update_location();
 
