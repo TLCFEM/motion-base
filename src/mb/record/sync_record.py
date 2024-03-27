@@ -14,25 +14,24 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 import os
 from datetime import datetime
-from uuid import NAMESPACE_OID, uuid5, uuid4
 
 import numpy as np
 import pint
 import structlog
-from mongoengine import Document, UUIDField, StringField, FloatField, DateTimeField, ListField, IntField
+from mongoengine import Document, StringField, FloatField, DateTimeField, ListField, IntField
 
-from .utility import normalise, convert_to, perform_fft
+from .utility import normalise, convert_to, perform_fft, str_factory, uuid5_str
 
 _logger = structlog.get_logger(__name__)
 
 
 class Record(Document):
-    id = UUIDField(False, primary_key=True)
+    id = StringField(default=str_factory, primary_key=True)
 
     file_name = StringField(default=None, description="The original file name of the record.")
     category = StringField(default=None, description="The category of the record.")
     region = StringField(default=None, description="The region of the record.")
-    uploaded_by = UUIDField(default=None, description="The user who uploaded the record.")
+    uploaded_by = StringField(default=None, description="The user who uploaded the record.")
 
     magnitude = FloatField(default=None, description="The magnitude of the record.")
     maximum_acceleration = FloatField(default=None, description="PGA in Gal.")
@@ -87,7 +86,7 @@ class Record(Document):
             token += self.last_update_time.isoformat()
         if self.direction is not None:
             token += self.direction
-        self.id = uuid5(NAMESPACE_OID, token)
+        self.id = uuid5_str(token)
         return super().save(*args, **kwargs)
 
     def to_raw_waveform(self) -> tuple[float, list]:
@@ -133,7 +132,7 @@ class NZSM(Record):
 
 
 class UploadTask(Document):
-    id = UUIDField(False, default=uuid4, primary_key=True)
+    id = StringField(default=str_factory, primary_key=True)
     create_time = DateTimeField(default=datetime.now)
     pid = IntField(default=0)
     total_size = IntField(default=0)

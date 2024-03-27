@@ -14,11 +14,11 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from uuid import uuid4
 
 import pytest
 
 from mb.record.sync_parser import ParserNIED
+from mb.record.utility import str_factory
 
 
 @pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])
@@ -28,4 +28,4 @@ def test_jp_parse_file(pwd, file_path):
 
 @pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
 def test_jp_parse_archive(pwd, file_path):
-    ParserNIED.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=uuid4())
+    ParserNIED.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=str_factory())

@@ -15,7 +15,6 @@
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID
 
 from pydantic import BaseModel, Field
 
@@ -36,11 +35,11 @@ class MetadataResponse(BaseModel):
 
     endpoint: str = Field(None)
 
-    id: UUID = Field(...)
+    id: str = Field(...)
     file_name: str | None = Field(...)
     category: str | None = Field(...)
     region: str | None = Field(...)
-    uploaded_by: UUID | None = Field(...)
+    uploaded_by: str | None = Field(...)
 
     magnitude: float | None = Field(...)
     maximum_acceleration: float | None = Field(...)

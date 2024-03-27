@@ -98,7 +98,7 @@ async def total():
 
 @app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTask)
 async def get_task_status(task_id: UUID) -> UploadTask:
-    if (task := await UploadTask.find_one(UploadTask.id == task_id)) is None:
+    if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is None:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished.")
     return task
 
@@ -217,7 +217,7 @@ async def query_records(query: QueryConfig = Body(...), count_total: bool = Fals
 
 @app.post("/process", response_model=ProcessedResponse)
 async def process_record(record_id: UUID, process_config: ProcessConfig = Body(...)):
-    if result := await Record.find_one(Record.id == record_id):
+    if result := await Record.find_one(Record.id == str(record_id)):
         return processing_record(result, process_config)
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")

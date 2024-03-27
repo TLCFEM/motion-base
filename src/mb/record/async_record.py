@@ -16,26 +16,25 @@
 from __future__ import annotations
 
 from datetime import datetime
-from uuid import UUID, uuid4, NAMESPACE_OID, uuid5
 
 import numpy as np
 import pint
 from beanie import Document, Indexed
 from pydantic import Field
 
-from .utility import normalise, convert_to, perform_fft
+from .utility import normalise, convert_to, perform_fft, str_factory, uuid5_str
 
 DESCENDING = -1
 GEOSPHERE = "2dsphere"
 
 
 class MetadataRecord(Document):
-    id: UUID = Field(default_factory=uuid4)
+    id: str = Field(default_factory=str_factory)
 
     file_name: Indexed(str) = Field(None, description="The original file name of the record.")
     category: Indexed(str) = Field(None, description="The category of the record.")
     region: Indexed(str) = Field(None, description="The region of the record.")
-    uploaded_by: UUID = Field(None, description="The user who uploaded the record.")
+    uploaded_by: str = Field(None, description="The user who uploaded the record.")
 
     magnitude: Indexed(float, DESCENDING) = Field(None, description="The magnitude of the record.")
     maximum_acceleration: Indexed(float, DESCENDING) = Field(None, description="PGA in Gal.")
@@ -73,7 +72,7 @@ class MetadataRecord(Document):
             token += self.last_update_time.isoformat()
         if self.direction is not None:
             token += self.direction
-        self.id = uuid5(NAMESPACE_OID, token)
+        self.id = uuid5_str(token)
         return await super().save(*args, **kwargs)
 
 
@@ -125,7 +124,7 @@ class NZSM(Record):
 
 
 class UploadTask(Document):
-    id: UUID = Field(default_factory=uuid4)
+    id: str = Field(default_factory=str_factory)
     create_time: datetime = Field(default_factory=datetime.now)
     pid: int = Field(default=0)
     total_size: int = Field(default=0)

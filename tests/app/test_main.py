@@ -15,9 +15,10 @@
 
 import os
 from http import HTTPStatus
-from uuid import uuid4
 
 import pytest
+
+from mb.record.utility import str_factory
 
 
 async def test_alive(mock_client):
@@ -80,7 +81,7 @@ async def test_download_nz(mock_client, count_total):
 def sample_data(pwd):
     from mb.record.sync_parser import ParserNZSM
 
-    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=uuid4())
+    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
 
 
 async def test_process(sample_data, mock_celery, mock_client):

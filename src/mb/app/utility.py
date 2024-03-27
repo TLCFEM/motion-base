@@ -18,7 +18,6 @@ from __future__ import annotations
 import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
-from uuid import NAMESPACE_OID, UUID, uuid5
 
 from beanie import Document
 from fastapi import Depends, HTTPException
@@ -27,6 +26,7 @@ from jose import JWTError, jwt  # noqa
 from passlib.context import CryptContext
 from pydantic import BaseModel, Field
 
+from mb.record.utility import uuid5_str
 from mb.utility.env import (
     MB_ACCESS_TOKEN_EXPIRE_MINUTES,
     MB_ALGORITHM,
@@ -54,7 +54,7 @@ class Token(BaseModel):
 
 
 class UserInformation(Document):
-    id: UUID = Field(default=None)
+    id: str = Field(default=None)
     username: str
     email: str
     last_name: str
@@ -64,7 +64,7 @@ class UserInformation(Document):
 
     def __init__(self, *args, **data):
         super().__init__(*args, **data)
-        self.id = uuid5(NAMESPACE_OID, self.username)
+        self.id = uuid5_str(self.username)
 
 
 class User(UserInformation):

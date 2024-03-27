@@ -21,7 +21,6 @@ import zipfile
 from datetime import datetime
 from math import ceil
 from typing import BinaryIO, IO
-from uuid import UUID
 from zoneinfo import ZoneInfo  # noqa
 
 import pint
@@ -38,7 +37,7 @@ _logger = structlog.get_logger(__name__)
 class ParserNIED(BaseParserNIED):
     @staticmethod
     def parse_archive(
-        *, archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        *, archive_obj: str | BinaryIO, user_id: str, archive_name: str | None = None, task_id: str | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -132,7 +131,7 @@ class ParserNZSM(BaseParserNZSM):
 
     @staticmethod
     def parse_archive(
-        *, archive_obj: str | BinaryIO, user_id: UUID, archive_name: str | None = None, task_id: UUID | None = None
+        *, archive_obj: str | BinaryIO, user_id: str, archive_name: str | None = None, task_id: str | None = None
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -204,7 +203,7 @@ class ParserNZSM(BaseParserNZSM):
         pass
 
     @staticmethod
-    def parse_file(file_path: str | IO[bytes], user_id: UUID, file_name: str | None = None) -> list[str]:
+    def parse_file(file_path: str | IO[bytes], user_id: str, file_name: str | None = None) -> list[str]:
         if isinstance(file_path, str):
             with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()

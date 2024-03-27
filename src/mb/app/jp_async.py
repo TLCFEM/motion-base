@@ -17,7 +17,6 @@ from __future__ import annotations
 
 import itertools
 from http import HTTPStatus
-from uuid import UUID
 
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 
@@ -29,13 +28,13 @@ from ..record.async_record import create_task
 router = APIRouter(tags=["Japan"])
 
 
-async def _parse_archive_in_background(archive: UploadFile, user_id: UUID, task_id: UUID | None = None) -> list:
+async def _parse_archive_in_background(archive: UploadFile, user_id: str, task_id: str | None = None) -> list:
     return await ParserNIED.parse_archive(
         archive_obj=archive.file, user_id=user_id, archive_name=archive.filename, task_id=task_id
     )
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, user_id: UUID, task_id: UUID):
+async def _parse_archive_in_background_task(archive: UploadFile, user_id: str, task_id: str):
     records: list = await _parse_archive_in_background(archive, user_id, task_id)
     mail_body = "The following records are parsed:\n"
     mail_body += "\n".join([f"{record}" for record in records])
@@ -70,9 +69,9 @@ async def upload_archive(
             pass
 
     if not wait_for_result:
-        task_id_pool: list[UUID] = []
+        task_id_pool: list[str] = []
         for archive in valid_archives:
-            task_id: UUID = await create_task()
+            task_id: str = await create_task()
             tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
             task_id_pool.append(task_id)
 

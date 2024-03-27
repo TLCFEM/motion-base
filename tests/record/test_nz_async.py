@@ -14,23 +14,23 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
-from uuid import uuid4
 
 import numpy as np
 import pytest
 
 from mb.record.async_parser import ParserNZSM
 from mb.record.response_spectrum import response_spectrum
+from mb.record.utility import str_factory
 
 
 @pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "data/I06465B10.V2A"])
 async def test_nz_parse_file(mock_celery, pwd, file_path):
-    await ParserNZSM.parse_file(os.path.join(pwd, file_path), uuid4())
+    await ParserNZSM.parse_file(os.path.join(pwd, file_path), str_factory())
 
 
 @pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
 async def test_nz_parse_archive(pwd, file_path):
-    await ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=uuid4())
+    await ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=str_factory())
 
 
 def test_nz_response_spectrum():

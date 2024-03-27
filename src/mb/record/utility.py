@@ -15,6 +15,8 @@
 
 from __future__ import annotations
 
+from uuid import uuid4, NAMESPACE_OID, uuid5
+
 import numpy as np
 import pint
 from numba import njit
@@ -74,3 +76,11 @@ def get_window(filter_type: str, window_type: str, length: int, cutoff: float | 
         raise ValueError(f"Unknown window type: {window_type}.")
 
     return signal.firwin(2 * length + 1, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)
+
+
+def str_factory():
+    return str(uuid4())
+
+
+def uuid5_str(token: str) -> str:
+    return str(uuid5(NAMESPACE_OID, token))

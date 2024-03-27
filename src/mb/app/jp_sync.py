@@ -18,7 +18,6 @@ from __future__ import annotations
 import itertools
 import os
 from http import HTTPStatus
-from uuid import UUID
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
@@ -33,7 +32,7 @@ router = APIRouter(tags=["Japan"])
 
 
 @celery.task
-def _parse_archive_in_background(archive: str, user_id: UUID, task_id: UUID | None = None) -> list[str]:
+def _parse_archive_in_background(archive: str, user_id: str, task_id: str | None = None) -> list[str]:
     results: list[str] = ParserNIED.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
     if os.path.exists(archive):
         os.remove(archive)
@@ -67,9 +66,9 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
             pass
 
     if not wait_for_result:
-        task_id_pool: list[UUID] = []
+        task_id_pool: list[str] = []
         for archive in valid_archives:
-            task_id: UUID = create_task()
+            task_id: str = create_task()
             _parse_archive_in_background.delay(archive, user.id, task_id)
             task_id_pool.append(task_id)
 
