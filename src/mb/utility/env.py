@@ -31,23 +31,10 @@ if not LOADED:
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
-
+MB_CELERY: str = os.getenv("MB_CELERY", "")
 MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
 while MB_MAIN_SITE.endswith("/"):
     MB_MAIN_SITE = MB_MAIN_SITE[:-1]
-
-MB_CELERY: str = os.getenv("MB_CELERY", "")
-if not LOADED:
-    if MB_CELERY:
-        _logger.info("Using celery.")
-    else:
-        _logger.info("Using self process as worker.")
-
-    from fastapi import __version__ as fastapi_version
-    from packaging import version
-
-    if version.parse(fastapi_version) >= version.parse("0.106.0") and not MB_CELERY:
-        raise RuntimeError("For 0.106.0 and later FastAPI versions, need to switch on celery.")
 
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME")
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL")
@@ -67,5 +54,19 @@ MONGO_USERNAME: str = os.getenv("MONGO_USERNAME")
 MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD")
 MONGO_HOST: str = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
+
+if not LOADED:
+    _logger.info(f"Hosting on {MB_MAIN_SITE}.")
+
+    if MB_CELERY:
+        _logger.info("Using celery.")
+    else:
+        _logger.info("Using self process as worker.")
+
+    from fastapi import __version__ as fastapi_version
+    from packaging import version
+
+    if version.parse(fastapi_version) >= version.parse("0.106.0") and not MB_CELERY:
+        raise RuntimeError("For 0.106.0 and later FastAPI versions, need to switch on celery.")
 
 LOADED = True
