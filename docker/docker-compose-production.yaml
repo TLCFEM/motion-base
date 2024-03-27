@@ -34,6 +34,8 @@ services:
       - rabbitmq
     ports:
       - '${MB_PORT}:${MB_PORT}'
+    volumes:
+      - motion_cache:${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: ${MB_SECRET_KEY}
       MB_ALGORITHM: ${MB_ALGORITHM}
@@ -45,7 +47,7 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 2
-      MB_FS_ROOT: ./files
+      MB_FS_ROOT: ${MB_FS_ROOT}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
@@ -62,6 +64,8 @@ services:
       - rabbitmq
     command:
       - 'celery'
+    volumes:
+      - motion_cache:${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: ${MB_SECRET_KEY}
       MB_ALGORITHM: ${MB_ALGORITHM}
@@ -73,7 +77,7 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 2
-      MB_FS_ROOT: ./files
+      MB_FS_ROOT: ${MB_FS_ROOT}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
@@ -93,3 +97,4 @@ services:
 volumes:
   motion_mongo:
   motion_mongoconfig:
+  motion_cache:
