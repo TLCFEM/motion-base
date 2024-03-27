@@ -12,7 +12,7 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
-
+import os.path
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 from uuid import UUID
@@ -20,10 +20,10 @@ from uuid import UUID
 from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, FileResponse
 from fastapi.security import OAuth2PasswordRequestForm
 
-from ..utility.env import MB_CELERY
+from ..utility.env import MB_CELERY, MB_FS_ROOT
 
 if MB_CELERY:
     from .jp_sync import router as jp_router
@@ -79,7 +79,7 @@ app.add_middleware(GZipMiddleware, minimum_size=1024)
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
-    allow_methods=["GET", "POST"],
+    allow_methods=["GET", "POST", "DELETE"],
 )
 
 
@@ -233,3 +233,34 @@ async def process_record(record_id: UUID, process_config: ProcessConfig = Body(.
         return processing_record(result, process_config)
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")
+
+
+@app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
+async def download_file(file_path: str):
+    if not MB_FS_ROOT:
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File system is not available.")
+
+    local_path = os.path.join(MB_FS_ROOT, file_path)
+    if not os.path.exists(local_path):
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File not found.")
+
+    return FileResponse(local_path)
+
+
+@app.delete("/access/{file_path:path}", tags=["misc"])
+async def delete_file(file_path: str):
+    if not MB_FS_ROOT:
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File system is not available.")
+
+    local_path = os.path.join(MB_FS_ROOT, file_path)
+    if not os.path.exists(local_path):
+        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File not found.")
+
+    try:
+        os.remove(local_path)
+        if not os.listdir(parent := os.path.dirname(local_path)):
+            os.rmdir(parent)
+    except OSError:
+        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file.")
+
+    return {"message": "File deleted."}
