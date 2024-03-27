@@ -16,18 +16,17 @@
 from __future__ import annotations
 
 import itertools
-import os
 from http import HTTPStatus
 
 import structlog
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from .response import UploadResponse
-from .utility import User, is_active
+from .utility import User, is_active, create_token
 from ..celery import celery
 from ..record.sync_parser import ParserNZSM
 from ..record.sync_record import create_task
-from ..utility.files import store
+from ..utility.files import store, FileProxy
 
 router = APIRouter(tags=["New Zealand"])
 
@@ -35,13 +34,13 @@ _logger = structlog.get_logger(__name__)
 
 
 @celery.task
-def _parse_archive_in_background(archive: str, user_id: str, task_id: str | None = None) -> list[str]:
-    results: list[str] = ParserNZSM.parse_archive(archive_obj=archive, user_id=user_id, task_id=task_id)
-    if os.path.exists(archive):
-        os.remove(archive)
-    if not os.listdir(folder := os.path.dirname(archive)):
-        os.rmdir(folder)
-    return results
+def _parse_archive_in_background(
+    archive: str, access_token: str, user_id: str, task_id: str | None = None
+) -> list[str]:
+    with FileProxy(archive, access_token) as archive_file:
+        return ParserNZSM.parse_archive(
+            archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+        )
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
@@ -59,6 +58,8 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
     if not user.can_upload:
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
+    access_token: str = create_token(user.username).access_token
+
     valid_archives: list[str] = []
     for archive in archives:
         if archive.filename.endswith((".tar.gz", ".zip")):
@@ -68,7 +69,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
         task_id_pool: list[str] = []
         for archive in valid_archives:
             task_id: str = create_task()
-            _parse_archive_in_background.delay(archive, user.id, task_id)
+            _parse_archive_in_background.delay(archive, access_token, user.id, task_id)
             task_id_pool.append(task_id)
 
         return UploadResponse(
@@ -79,7 +80,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
         message="Successfully uploaded and processed.",
         records=list(
             itertools.chain.from_iterable(
-                [_parse_archive_in_background.delay(archive, user.id).get() for archive in valid_archives]
+                [_parse_archive_in_background.delay(archive, access_token, user.id).get() for archive in valid_archives]
             )
         ),
     )

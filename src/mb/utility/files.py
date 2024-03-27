@@ -17,6 +17,7 @@ import os.path
 from typing import BinaryIO
 
 from fastapi import UploadFile
+from requests import delete
 
 from mb.utility.env import MB_FS_ROOT
 
@@ -43,6 +44,39 @@ def store(upload: UploadFile, user_id: str):
             file.write(chunk)
 
     return local_file_path
+
+
+class FileProxy:
+    def __init__(self, file_path: str, auth_token: str):
+        self.file_path = file_path
+        self.auth_token = auth_token
+
+        self.file = None
+        self.file_name = None
+
+    @property
+    def is_remote(self):
+        # noinspection HttpUrlsUsage
+        return self.file_path.startswith(("http://", "https://"))
+
+    def __enter__(self):
+        if self.is_remote:
+            self.file = self.file_path
+            self.file_name = os.path.basename(self.file_path.split("access/")[1])
+        else:
+            self.file = self.file_path
+            self.file_name = os.path.basename(self.file_path)
+
+        return self
+
+    def __exit__(self, exc_type, exc_value, traceback):
+        if self.is_remote:
+            delete(self.file_path, headers={"Authorization": f"Bearer {self.auth_token}"})
+        else:
+            if os.path.exists(self.file_path):
+                os.remove(self.file_path)
+            if not os.listdir(folder := os.path.dirname(self.file_path)):
+                os.rmdir(folder)
 
 
 if __name__ == "__main__":

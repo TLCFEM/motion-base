@@ -10,8 +10,9 @@ anyio==4.3.0              # via httpx, starlette
 beanie==1.25.0            # via motion-base (pyproject.toml)
 billiard==4.2.0           # via celery
 celery==5.3.6             # via motion-base (pyproject.toml)
-certifi==2024.2.2         # via httpcore, httpx
+certifi==2024.2.2         # via httpcore, httpx, requests
 cffi==1.16.0              # via cryptography
+charset-normalizer==3.3.2  # via requests
 click==8.1.7              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1      # via celery
@@ -28,7 +29,7 @@ h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.4           # via httpx
 httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
-idna==3.6                 # via anyio, email-validator, httpx
+idna==3.6                 # via anyio, email-validator, httpx, requests
 kiwisolver==1.4.5         # via matplotlib
 kombu==5.3.5              # via celery
 lazy-model==0.2.0         # via beanie
@@ -55,6 +56,7 @@ python-dateutil==2.9.0.post0  # via celery, matplotlib, motion-base (pyproject.t
 python-dotenv==1.0.1      # via motion-base (pyproject.toml)
 python-jose[cryptography]==3.3.0  # via motion-base (pyproject.toml)
 python-multipart==0.0.9   # via motion-base (pyproject.toml)
+requests==2.31.0          # via motion-base (pyproject.toml)
 rich==13.7.1              # via motion-base (pyproject.toml)
 rsa==4.9                  # via python-jose
 scipy==1.12.0             # via motion-base (pyproject.toml)
@@ -65,6 +67,7 @@ structlog==24.1.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.10.0  # via fastapi, pint, pydantic
 tzdata==2024.1            # via celery, motion-base (pyproject.toml)
+urllib3==2.2.1            # via requests
 uvicorn==0.29.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit

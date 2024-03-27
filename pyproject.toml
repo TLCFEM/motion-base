@@ -40,6 +40,7 @@ dependencies = [
     "python-jose[cryptography]",
     "python-multipart",
     "rich",
+    "requests",
     "scipy",
     "structlog",
     "tzdata",

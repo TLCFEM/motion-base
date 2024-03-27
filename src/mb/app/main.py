@@ -248,7 +248,10 @@ async def download_file(file_path: str):
 
 
 @app.delete("/access/{file_path:path}", tags=["misc"])
-async def delete_file(file_path: str):
+async def delete_file(file_path: str, user: User = Depends(is_active)):
+    if not user.can_delete:
+        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files.")
+
     if not MB_FS_ROOT:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="File system is not available.")
 
