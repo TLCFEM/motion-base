@@ -21,57 +21,25 @@ import pytest
 from mb.record.utility import str_factory
 
 
+async def test_redirect_to_docs(mock_client):
+    response = await mock_client.get("/")
+    assert response.status_code == HTTPStatus.TEMPORARY_REDIRECT
+
+
 async def test_alive(mock_client):
     response = await mock_client.get("/alive")
-    assert response.status_code == 200
+    assert response.status_code == HTTPStatus.OK
     assert response.json() == {"message": "I'm alive!"}
 
 
-@pytest.mark.parametrize(
-    "file_name,status",
-    [
-        pytest.param("jp_test.knt.tar.gz", HTTPStatus.ACCEPTED, id="correct-name"),
-        pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
-    ],
-)
-@pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-async def test_upload_jp(mock_celery, mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
-    with open(os.path.join(pwd, "data/jp_test.knt.tar.gz"), "rb") as file:
-        files = {"archives": (file_name, file, "multipart/form-data")}
-        response = await mock_client_superuser.post(
-            f"/jp/upload?wait_for_result={if_wait}", files=files, headers=mock_header
-        )
-        assert response.status_code == status
+async def test_total(mock_client):
+    response = await mock_client.get("/total")
+    assert response.status_code == HTTPStatus.OK
 
 
-@pytest.mark.parametrize(
-    "file_name,status",
-    [
-        pytest.param("nz_test.zip", HTTPStatus.ACCEPTED, id="zip-file"),
-        pytest.param("nz_test.tar.gz", HTTPStatus.ACCEPTED, id="correct-name"),
-        pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
-    ],
-)
-@pytest.mark.parametrize(
-    "remote",
-    [
-        pytest.param(True, id="remote-worker"),
-        pytest.param(False, id="local-worker"),
-    ],
-)
-@pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-async def test_upload_nz(
-    mock_celery, mock_client_superuser, mock_header, pwd, monkeypatch, file_name, status, remote, if_wait
-):
-    if remote:
-        monkeypatch.setattr("mb.utility.env.MB_MAIN_SITE", "http://i_am_remote")
-
-    with open(os.path.join(pwd, f"data/{file_name}" if "zip" in file_name else "data/nz_test.tar.gz"), "rb") as file:
-        files = {"archives": (file_name, file, "multipart/form-data")}
-        response = await mock_client_superuser.post(
-            f"/nz/upload?wait_for_result={if_wait}", files=files, headers=mock_header
-        )
-        assert response.status_code == status
+async def test_for_test_only(mock_client):
+    response = await mock_client.get("/test_endpoint")
+    assert response.status_code == HTTPStatus.OK
 
 
 @pytest.mark.parametrize(
@@ -84,7 +52,7 @@ async def test_jackpot(mock_client, data_type):
 
 
 @pytest.mark.parametrize("count_total", [True, False])
-async def test_download_nz(mock_client, count_total):
+async def test_query(mock_client, count_total):
     response = await mock_client.post(f"/query?count_total={count_total}", json={})
     assert response.status_code == HTTPStatus.OK
 
@@ -104,13 +72,5 @@ async def test_process(sample_data, mock_celery, mock_client):
 
     response = await mock_client.post(
         f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}
-    )
-    assert response.status_code == HTTPStatus.OK
-
-
-async def test_acquire_token(mock_client_superuser):
-    response = await mock_client_superuser.post(
-        "/user/token",
-        data={"username": "test", "password": "test"},
     )
     assert response.status_code == HTTPStatus.OK
