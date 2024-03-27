@@ -28,7 +28,7 @@ if not LOADED:
     else:
         _logger.info("No .env file found.")
 
-MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "1")
+MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
 MB_CELERY: str = os.getenv("MB_CELERY", "1")
