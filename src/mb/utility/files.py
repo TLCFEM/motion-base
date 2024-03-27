@@ -13,30 +13,33 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os.path
+import os
 from io import BytesIO
+from pathlib import Path
 from typing import BinaryIO
 
 import structlog
 from fastapi import UploadFile
 from requests import delete, get
 
+from mb.record.utility import str_factory
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
 _logger = structlog.get_logger(__name__)
 
 
-def _local_path(file_name: str, user_id: str, check_existence: bool = True):
-    if not os.path.exists(MB_FS_ROOT):
-        os.makedirs(MB_FS_ROOT)
+def _local_path(file_name: str):
+    fs_root: Path = Path(MB_FS_ROOT)
+    if not fs_root.exists():
+        os.makedirs(fs_root)
 
-    if not os.path.exists(folder := os.path.join(MB_FS_ROOT, user_id)):
+    folder: Path = fs_root / str_factory()
+    if not folder.exists():
         os.makedirs(folder)
 
-    fs_path: str = os.path.join(user_id, file_name)
-
-    if not os.path.exists(path := os.path.abspath(os.path.join(folder, file_name))) or not check_existence:
-        return path, fs_path
+    path: Path = folder / file_name
+    if not path.exists():
+        return path, path.relative_to(fs_root)
 
     raise FileExistsError(f"File {path} already exists.")
 
@@ -46,8 +49,8 @@ def _iter(file: BinaryIO):
         yield chunk
 
 
-def store(upload: UploadFile, user_id: str) -> str:
-    local_path, fs_path = _local_path(upload.filename, user_id)
+def store(upload: UploadFile) -> str:
+    local_path, fs_path = _local_path(upload.filename)
     with open(local_path, "wb") as file:
         for chunk in _iter(upload.file):
             file.write(chunk)

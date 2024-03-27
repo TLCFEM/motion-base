@@ -60,7 +60,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
     for archive in archives:
         try:
             ParserNIED.validate_archive(archive.filename)
-            valid_uris.append(store(archive, user.id))
+            valid_uris.append(store(archive))
         except ValueError:
             pass
 

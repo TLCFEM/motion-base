@@ -147,14 +147,6 @@ class UploadTask(Document):
     def progress(self) -> float:
         return self.current_size / max(1, self.total_size)
 
-    def delete(self, *args, **kwargs):
-        if self.archive_path and os.path.exists(self.archive_path):
-            try:
-                os.remove(self.archive_path)
-            except Exception as e:
-                _logger.error("Failed to delete the archive.", exc_info=e, archive_path=self.archive_path)
-        return super().delete(*args, **kwargs)
-
 
 def create_task():
     task = UploadTask()

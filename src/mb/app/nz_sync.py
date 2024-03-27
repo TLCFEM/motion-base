@@ -61,7 +61,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
     valid_uris: list[str] = []
     for archive in archives:
         if archive.filename.endswith((".tar.gz", ".zip")):
-            valid_uris.append(store(archive, user.id))
+            valid_uris.append(store(archive))
 
     if not wait_for_result:
         task_id_pool: list[str] = []

@@ -52,8 +52,20 @@ async def test_upload_jp(mock_celery, mock_client_superuser, mock_header, pwd, f
         pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
     ],
 )
+@pytest.mark.parametrize(
+    "remote",
+    [
+        pytest.param(True, id="remote-worker"),
+        pytest.param(False, id="local-worker"),
+    ],
+)
 @pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-async def test_upload_nz(mock_celery, mock_client_superuser, mock_header, pwd, file_name, status, if_wait):
+async def test_upload_nz(
+    mock_celery, mock_client_superuser, mock_header, pwd, monkeypatch, file_name, status, remote, if_wait
+):
+    if remote:
+        monkeypatch.setattr("mb.utility.env.MB_MAIN_SITE", "http://i_am_remote")
+
     with open(os.path.join(pwd, f"data/{file_name}" if "zip" in file_name else "data/nz_test.tar.gz"), "rb") as file:
         files = {"archives": (file_name, file, "multipart/form-data")}
         response = await mock_client_superuser.post(
