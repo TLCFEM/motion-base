@@ -42,11 +42,18 @@ async def test_for_test_only(mock_client):
     assert response.status_code == HTTPStatus.OK
 
 
+@pytest.fixture(scope="function")
+def sample_data(pwd):
+    from mb.record.sync_parser import ParserNZSM
+
+    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
+
+
 @pytest.mark.parametrize(
     "data_type",
     [pytest.param("raw", id="raw"), pytest.param("waveform", id="waveform"), pytest.param("spectrum", id="spectrum")],
 )
-async def test_jackpot(mock_client, data_type):
+async def test_jackpot(mock_client, sample_data, data_type):
     response = await mock_client.get(f"/{data_type}/jackpot")
     assert response.status_code == HTTPStatus.OK
 
@@ -55,13 +62,6 @@ async def test_jackpot(mock_client, data_type):
 async def test_query(mock_client, count_total):
     response = await mock_client.post(f"/query?count_total={count_total}", json={})
     assert response.status_code == HTTPStatus.OK
-
-
-@pytest.fixture(scope="function")
-def sample_data(pwd):
-    from mb.record.sync_parser import ParserNZSM
-
-    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
 
 
 async def test_process(sample_data, mock_celery, mock_client):

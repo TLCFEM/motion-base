@@ -35,7 +35,9 @@ def mock_celery(celery_session_worker):
 
 @pytest.fixture(scope="function", autouse=True)
 async def mongo_connection():
-    await init_mongo()
+    mongo_client = await init_mongo()
+    yield
+    mongo_client.drop_database("StrongMotion")
 
 
 @pytest.fixture(scope="function", autouse=True)
