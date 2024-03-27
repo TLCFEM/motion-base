@@ -47,7 +47,10 @@ def mongo_uri():
 async def init_mongo():
     uri = mongo_uri()
     connect(host=f"{uri}StrongMotion?authSource=admin", uuidrepresentation="standard")
-    await init_beanie(database=AsyncIOMotorClient(uri)["StrongMotion"], document_models=[Record, User, UploadTask])
+    await init_beanie(
+        database=AsyncIOMotorClient(uri, uuidRepresentation="standard")["StrongMotion"],
+        document_models=[Record, User, UploadTask],
+    )
 
 
 async def shutdown_mongo():
