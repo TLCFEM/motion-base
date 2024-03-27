@@ -71,6 +71,7 @@ async def test_process(sample_data, mock_celery, mock_client):
     await Record.find_one(Record.id == record[0].id)
 
     response = await mock_client.post(
-        f"/process?record_id={record[0].id}", json={"with_spectrum": True, "with_response_spectrum": True}
+        f"/process?record_id={record[0].id}",
+        json={"with_filter": True, "with_spectrum": True, "with_response_spectrum": True},
     )
     assert response.status_code == HTTPStatus.OK

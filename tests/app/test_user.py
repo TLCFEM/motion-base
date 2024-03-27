@@ -24,3 +24,11 @@ async def test_acquire_token(mock_client_superuser):
 async def test_whoami(mock_client_superuser):
     response = await mock_client_superuser.get("/user/whoami")
     assert response.status_code == HTTPStatus.OK
+
+
+async def test_user_new(mock_client):
+    response = await mock_client.post(
+        "/user/new",
+        json={"username": "tester1", "password": "teste2zAr", "email": "a@b.c", "last_name": "a", "first_name": "a"},
+    )
+    assert response.status_code == HTTPStatus.OK

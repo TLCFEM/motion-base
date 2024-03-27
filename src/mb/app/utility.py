@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 
-import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
@@ -145,10 +144,3 @@ async def is_active(user: User = Depends(current_user)):
 # noinspection PyUnusedLocal
 async def send_notification(mail: dict):  # pylint: disable=W0613
     pass
-
-
-uuid_regex = re.compile(r"[a-zA-Z0-9]{8}-([a-zA-Z0-9]{4}-){3}[a-zA-Z0-9]{12}")
-
-
-def match_uuid(uuid_string: str):
-    return uuid_regex.match(uuid_string) is not None
