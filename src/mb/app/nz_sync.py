@@ -18,7 +18,6 @@ from __future__ import annotations
 import itertools
 from http import HTTPStatus
 
-import structlog
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from .response import UploadResponse
@@ -30,15 +29,18 @@ from ..utility.files import store, FileProxy
 
 router = APIRouter(tags=["New Zealand"])
 
-_logger = structlog.get_logger(__name__)
 
-
-@celery.task
+@celery.task(autoretry_for=(ConnectionError, TimeoutError), retry_kwargs={"max_retries": 3}, default_retry_delay=10)
 def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: str | None = None) -> list[str]:
-    with FileProxy(archive_uri, access_token) as archive_file:
-        return ParserNZSM.parse_archive(
-            archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
-        )
+    try:
+        with FileProxy(archive_uri, access_token) as archive_file:
+            return ParserNZSM.parse_archive(
+                archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+            )
+    except Exception as exc:
+        if task_id is not None:
+            create_task(task_id)
+        raise exc
 
 
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)

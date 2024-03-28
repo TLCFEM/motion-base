@@ -83,25 +83,27 @@ class FileProxy:
         if self.is_remote:
             response = get(self._file_uri)
             if response.status_code != 200:
-                _logger.error(f"Failed to download file: {self._file_uri}")
-                self.file = BytesIO()
-            else:
-                self.file = BytesIO(response.content)
+                raise ConnectionError(f"Failed to download file: {self._file_uri}")
+
+            self.file = BytesIO(response.content)
         else:
             self.file = os.path.abspath(os.path.join(MB_FS_ROOT, self.fs_path))
 
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.is_remote and self._auth_token:
-            response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
-            if response.status_code != 200:
-                _logger.error(f"Failed to delete file: {self._file_uri}")
-        else:
-            if os.path.exists(self.file):
-                os.remove(self.file)
-            if not os.listdir(folder := os.path.dirname(self.file)):
-                os.rmdir(folder)
+        # do not try to delete files if there is an exception
+        # the task will be retried
+        if not exc_type:
+            if self.is_remote and self._auth_token:
+                response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
+                if response.status_code != 200:
+                    _logger.error(f"Failed to delete file: {self._file_uri}")
+            else:
+                if os.path.exists(self.file):
+                    os.remove(self.file)
+                if not os.listdir(folder := os.path.dirname(self.file)):
+                    os.rmdir(folder)
 
 
 if __name__ == "__main__":

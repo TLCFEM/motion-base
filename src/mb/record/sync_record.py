@@ -147,7 +147,7 @@ class UploadTask(Document):
         return self.current_size / max(1, self.total_size)
 
 
-def create_task():
-    task = UploadTask()
+def create_task(task_id=None):
+    task = UploadTask() if task_id is None else UploadTask(id=task_id)
     task.save()
     return task.id
