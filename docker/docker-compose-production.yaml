@@ -39,6 +39,7 @@ services:
       RABBITMQ_DEFAULT_VHOST: vhost
   flower:
     image: mher/flower
+    container_name: flower
     depends_on:
       - rabbitmq
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672/vhost flower --broker_api="http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost"
