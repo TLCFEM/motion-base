@@ -28,6 +28,7 @@ dependencies = [
     "celery",
     "email-validator",
     "fastapi",
+    "httpx",
     "joserfc",
     "mongoengine",
     "numba",
@@ -55,7 +56,6 @@ dev = [
     #    "ruff",
 ]
 client = [
-    "httpx",
     "httpx-auth",
     "matplotlib",
     "rich",
