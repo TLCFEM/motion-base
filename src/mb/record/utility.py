@@ -79,8 +79,8 @@ def get_window(filter_type: str, window_type: str, length: int, cutoff: float | 
 
 
 def str_factory():
-    return str(uuid4())
+    return uuid4().hex
 
 
 def uuid5_str(token: str) -> str:
-    return str(uuid5(NAMESPACE_OID, token))
+    return uuid5(NAMESPACE_OID, token).hex
