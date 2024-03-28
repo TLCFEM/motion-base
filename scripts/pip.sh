@@ -17,6 +17,6 @@ then
 fi
 
 pip-compile -r -U --annotation-style=line pyproject.toml
-pip-compile -r -U --annotation-style=line --extra=dev --output-file=requirements-dev.txt pyproject.toml
+pip-compile -r -U --annotation-style=line --all-extras --output-file=requirements-dev.txt pyproject.toml
 
 cd ..

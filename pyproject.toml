@@ -28,18 +28,13 @@ dependencies = [
     "celery",
     "email-validator",
     "fastapi",
-    "httpx",
-    "httpx-auth",
-    "matplotlib",
+    "joserfc",
     "mongoengine",
     "numba",
     "Pint",
     "pydantic<2",
-    "python-dateutil>=2.1.0",
     "python-dotenv",
-    "python-jose[cryptography]",
     "python-multipart",
-    "rich",
     "requests",
     "scipy",
     "structlog",
@@ -51,12 +46,18 @@ dependencies = [
 dev = [
     "black",
     "locust",
-    #    "pylint",
-    #    "pylint-mongoengine",
     "pytest-asyncio",
     "pytest-celery",
     "pytest-cov",
+    #    "pylint",
+    #    "pylint-mongoengine",
     #    "ruff",
+]
+client = [
+    "httpx",
+    "httpx-auth",
+    "matplotlib",
+    "rich",
 ]
 
 [project.urls]

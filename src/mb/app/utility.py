@@ -22,7 +22,7 @@ import bcrypt
 from beanie import Document
 from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
-from jose import JWTError, jwt  # noqa
+from joserfc import jwt
 from pydantic import BaseModel, Field, EmailStr
 
 from mb.app.response import Token
@@ -120,9 +120,9 @@ OAUTH2 = OAuth2PasswordBearer(tokenUrl="/user/token")
 def create_token(sub: str):
     return Token(
         access_token=jwt.encode(
+            {"alg": MB_ALGORITHM},
             {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES)},
             MB_SECRET_KEY,
-            algorithm=MB_ALGORITHM,
         ),
         token_type="bearer",
     )
@@ -131,9 +131,9 @@ def create_token(sub: str):
 async def current_user(token: str = Depends(OAUTH2)):
     try:
         payload = jwt.decode(token, MB_SECRET_KEY, algorithms=[MB_ALGORITHM])
-        if (username := payload.get("sub")) is None:
+        if (username := payload.claims.get("sub")) is None:
             raise CredentialException()
-    except JWTError as e:
+    except Exception as e:
         raise CredentialException() from e
     if (user := await User.find_one(User.username == username)) is None:
         raise CredentialException()
