@@ -45,7 +45,7 @@ class MetadataRecord(Document):
     )
     depth: Indexed(float) = Field(None, description="The depth of the earthquake event in kilometer.")
 
-    station_code: str = Field(None, description="The code of the station recording the record.")
+    station_code: Indexed(str) = Field(None, description="The code of the station recording the record.")
     station_location: Indexed(list[float, float], GEOSPHERE) = Field(
         None, description="The geolocation of the station recording the record."
     )

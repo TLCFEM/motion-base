@@ -155,6 +155,20 @@ async def download_single_random_waveform(normalised: bool = False):
     )
 
 
+@app.get("/spectrum/jackpot", response_model=RecordResponse)
+async def download_single_random_spectrum():
+    """
+    Retrieve a single random spectrum from the database.
+    """
+    result: Record = await get_random_record()
+
+    frequency, record = result.to_spectrum()
+    # noinspection PyTypeChecker
+    return RecordResponse(
+        **result.dict(), endpoint="/spectrum/jackpot", frequency_interval=frequency, spectrum=record.tolist()
+    )
+
+
 @app.post("/waveform", response_model=ListRecordResponse)
 async def download_waveform(record_id: UUID | list[UUID]):
     """
@@ -170,20 +184,6 @@ async def download_waveform(record_id: UUID | list[UUID]):
         return RecordResponse(**result.dict(), endpoint="/waveform", time_interval=interval, waveform=record.tolist())
 
     return ListRecordResponse(records=[_populate_waveform(result) for result in results])
-
-
-@app.get("/spectrum/jackpot", response_model=RecordResponse)
-async def download_single_random_spectrum():
-    """
-    Retrieve a single random spectrum from the database.
-    """
-    result: Record = await get_random_record()
-
-    frequency, record = result.to_spectrum()
-    # noinspection PyTypeChecker
-    return RecordResponse(
-        **result.dict(), endpoint="/spectrum/jackpot", frequency_interval=frequency, spectrum=record.tolist()
-    )
 
 
 @app.post("/query", response_model=ListMetadataResponse)
