@@ -70,6 +70,7 @@ class Record(Document):
             "-event_time",
             [("event_location", "2dsphere")],
             "depth",
+            "station_code",
             [("station_location", "2dsphere")],
             "direction",
         ],

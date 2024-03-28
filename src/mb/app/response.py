@@ -141,7 +141,7 @@ class UploadResponse(BaseModel):
 
 
 class QueryConfig(BaseModel):
-    region: str = Field(None)
+    region: str = Field(None, regex="^(jp|nz)$")
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
     category: str = Field(None)
@@ -153,7 +153,8 @@ class QueryConfig(BaseModel):
     to_date: datetime = Field(None)
     min_pga: float = Field(None)
     max_pga: float = Field(None)
-    event_name: str = Field(None)
+    file_name: str = Field(None)
+    station_code: str = Field(None)
     direction: str = Field(None)
     page_size: int = Field(10, ge=1, le=1000)
     page_number: int = Field(0, ge=0)
@@ -207,8 +208,11 @@ class QueryConfig(BaseModel):
         if self.direction is not None:
             other_query["direction"] = {"$regex": self.direction, "$options": "i"}
 
-        if self.event_name is not None:
-            other_query["file_name"] = {"$regex": self.event_name, "$options": "i"}
+        if self.file_name is not None:
+            other_query["file_name"] = {"$regex": self.file_name, "$options": "i"}
+
+        if self.station_code is not None:
+            other_query["station_code"] = {"$regex": self.station_code, "$options": "i"}
 
         return geo_query, other_query
 

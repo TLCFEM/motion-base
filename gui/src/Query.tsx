@@ -59,6 +59,8 @@ const Settings: Component<sxProps> = (props) => {
     const [maxPGA, setMaxPGA] = createSignal("");
     const [fromDate, setFromDate] = createSignal<Date>(new Date(0));
     const [toDate, setToDate] = createSignal<Date>(new Date(0));
+    const [fileName, setFileName] = createSignal("");
+    const [stationCode, setStationCode] = createSignal("");
 
     async function fetch() {
         setLoading(true);
@@ -74,6 +76,8 @@ const Settings: Component<sxProps> = (props) => {
         if (toDate().getTime() !== 0) config.to_date = toDate();
         if (eventLocation()) config.event_location = eventLocation();
         if (maxEventDistance() > 0) config.max_event_distance = maxEventDistance();
+        if (fileName()) config.file_name = fileName();
+        if (stationCode()) config.station_code = stationCode();
 
         try {
             setRecords(await query_api(config));
@@ -94,6 +98,8 @@ const Settings: Component<sxProps> = (props) => {
         setMaxPGA("");
         setFromDate(new Date(0));
         setToDate(new Date(0));
+        setFileName("");
+        setStationCode("");
 
         // setRecords([] as SeismicRecord[]);
     }
@@ -107,7 +113,55 @@ const Settings: Component<sxProps> = (props) => {
             content: "Clear searching criteria.",
             animation: "scale",
         });
+        tippy(`#page-number`, {
+            content: "The query results are paginated. Choose which page to be fetched.",
+            animation: "scale",
+        });
+        tippy(`#page-size`, {
+            content: "The query results are paginated. Assign the number of records per page.",
+            animation: "scale",
+        });
+        tippy(`#min-magnitude`, {
+            content: "The minimum magnitude of interest.",
+            animation: "scale",
+        });
+        tippy(`#max-magnitude`, {
+            content: "The maximum magnitude of interest.",
+            animation: "scale",
+        });
+        tippy(`#min-pga`, {
+            content: "The minimum PGA of interest.",
+            animation: "scale",
+        });
+        tippy(`#max-pga`, {
+            content: "The maximum PGA of interest.",
+            animation: "scale",
+        });
+        tippy(`#from-date`, {
+            content: "The date of the earthquake event.",
+            animation: "scale",
+        });
+        tippy(`#to-date`, {
+            content: "The date of the earthquake event.",
+            animation: "scale",
+        });
+        tippy(`#file-name`, {
+            content: "Regular expression to filter file names.",
+            animation: "scale",
+        });
+        tippy(`station-code`, {
+            content: "Regular expression to filter station codes.",
+            animation: "scale",
+        });
     });
+
+    const stackProps = {
+        gap: "1rem",
+        display: "flex",
+        justifyContent: "center",
+        alignContent: "center",
+        alignItems: "stretch",
+    };
 
     return (
         <Card sx={{ ...props.sx, display: "flex", flexDirection: "column" }}>
@@ -122,78 +176,108 @@ const Settings: Component<sxProps> = (props) => {
                     flexGrow: 1,
                 }}
             >
-                <TextField
-                    label="Page Number"
-                    type="number"
-                    value={pageNumber()}
-                    defaultValue={pageNumber()}
-                    onChange={(_, value) => setPageNumber(Math.max(Math.round(Number(value)), 0))}
-                    disabled={loading()}
-                />
-                <TextField
-                    label="Page Size"
-                    type="number"
-                    value={pageSize() > 0 ? pageSize() : ""}
-                    defaultValue={pageSize() > 0 ? pageSize() : ""}
-                    onChange={(_, value) =>
-                        setPageSize(value ? Math.max(Math.min(1000, Math.round(Number(value))), 1) : 0)
-                    }
-                    disabled={loading()}
-                />
-                <TextField
-                    error={ifError(minMagnitude())}
-                    label="Min Magnitude"
-                    type="number"
-                    value={minMagnitude()}
-                    defaultValue={minMagnitude()}
-                    onChange={(_, value) => setMinMagnitude(value)}
-                    disabled={loading()}
-                />
-                <TextField
-                    error={ifError(maxMagnitude())}
-                    label="Max Magnitude"
-                    type="number"
-                    value={maxMagnitude()}
-                    defaultValue={maxMagnitude()}
-                    onChange={(_, value) => setMaxMagnitude(value)}
-                    disabled={loading()}
-                />
-                <TextField
-                    error={ifError(minPGA())}
-                    label="Min PGA (Gal)"
-                    type="number"
-                    value={minPGA()}
-                    defaultValue={minPGA()}
-                    onChange={(_, value) => setMinPGA(value)}
-                    disabled={loading()}
-                />
-                <TextField
-                    error={ifError(maxPGA())}
-                    label="Max PGA (Gal)"
-                    type="number"
-                    value={maxPGA()}
-                    defaultValue={maxPGA()}
-                    onChange={(_, value) => setMaxPGA(value)}
-                    disabled={loading()}
-                />
-                <TextField
-                    label="From"
-                    type="date"
-                    InputLabelProps={{ shrink: true }}
-                    value={fromDate().getTime() === 0 ? "" : fromDate().toISOString().split("T")[0]}
-                    onChange={(_, value) => setFromDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                    sx={{ minWidth: "16ch" }}
-                    disabled={loading()}
-                />
-                <TextField
-                    label="To"
-                    type="date"
-                    InputLabelProps={{ shrink: true }}
-                    value={toDate().getTime() === 0 ? "" : toDate().toISOString().split("T")[0]}
-                    onChange={(_, value) => setToDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                    sx={{ minWidth: "16ch" }}
-                    disabled={loading()}
-                />
+                <Stack sx={stackProps}>
+                    <TextField
+                        id="page-number"
+                        label="Page Number"
+                        type="number"
+                        value={pageNumber()}
+                        defaultValue={pageNumber()}
+                        onChange={(_, value) => setPageNumber(Math.max(Math.round(Number(value)), 0))}
+                        disabled={loading()}
+                    />
+                    <TextField
+                        id="page-size"
+                        label="Page Size"
+                        type="number"
+                        value={pageSize() > 0 ? pageSize() : ""}
+                        defaultValue={pageSize() > 0 ? pageSize() : ""}
+                        onChange={(_, value) =>
+                            setPageSize(value ? Math.max(Math.min(1000, Math.round(Number(value))), 1) : 0)
+                        }
+                        disabled={loading()}
+                    />
+                </Stack>
+                <Stack sx={stackProps}>
+                    <TextField
+                        id="min-magnitude"
+                        error={ifError(minMagnitude())}
+                        label="Min Magnitude"
+                        type="number"
+                        value={minMagnitude()}
+                        defaultValue={minMagnitude()}
+                        onChange={(_, value) => setMinMagnitude(value)}
+                        disabled={loading()}
+                    />
+                    <TextField
+                        id="max-magnitude"
+                        error={ifError(maxMagnitude())}
+                        label="Max Magnitude"
+                        type="number"
+                        value={maxMagnitude()}
+                        defaultValue={maxMagnitude()}
+                        onChange={(_, value) => setMaxMagnitude(value)}
+                        disabled={loading()}
+                    />
+                </Stack>
+                <Stack sx={stackProps}>
+                    <TextField
+                        id="min-pga"
+                        error={ifError(minPGA())}
+                        label="Min PGA (Gal)"
+                        type="number"
+                        value={minPGA()}
+                        defaultValue={minPGA()}
+                        onChange={(_, value) => setMinPGA(value)}
+                        disabled={loading()}
+                    />
+                    <TextField
+                        id="max-pga"
+                        error={ifError(maxPGA())}
+                        label="Max PGA (Gal)"
+                        type="number"
+                        value={maxPGA()}
+                        defaultValue={maxPGA()}
+                        onChange={(_, value) => setMaxPGA(value)}
+                        disabled={loading()}
+                    />
+                </Stack>
+                <Stack sx={stackProps}>
+                    <TextField
+                        id="from-date"
+                        label="From"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
+                        value={fromDate().getTime() === 0 ? "" : fromDate().toISOString().split("T")[0]}
+                        onChange={(_, value) => setFromDate(value ? new Date(Date.parse(value)) : new Date(0))}
+                        sx={{ minWidth: "17ch" }}
+                        disabled={loading()}
+                    />
+                    <TextField
+                        id="to-date"
+                        label="To"
+                        type="date"
+                        InputLabelProps={{ shrink: true }}
+                        value={toDate().getTime() === 0 ? "" : toDate().toISOString().split("T")[0]}
+                        onChange={(_, value) => setToDate(value ? new Date(Date.parse(value)) : new Date(0))}
+                        sx={{ minWidth: "17ch" }}
+                        disabled={loading()}
+                    />
+                </Stack>
+                <Stack sx={stackProps}>
+                    <TextField
+                        id="file-name"
+                        label="File Name"
+                        onChange={(_, value) => setFileName(value)}
+                        disabled={loading()}
+                    />
+                    <TextField
+                        id="station-code"
+                        label="Station Code"
+                        onChange={(_, value) => setStationCode(value)}
+                        disabled={loading()}
+                    />
+                </Stack>
                 <ButtonGroup variant="outlined" orientation="vertical">
                     <Button onClick={fetch} id="btn-search" disabled={loading()}>
                         Search

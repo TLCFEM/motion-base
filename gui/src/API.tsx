@@ -30,11 +30,11 @@ export class SeismicRecord {
     public maximum_acceleration: number = 0;
 
     public event_time: Date = new Date(0);
-    public event_location: Array<number> = Array<number>(2);
+    public event_location: number[] = Array<number>(2);
     public depth: number = 0;
 
     public station_code: string = "---";
-    public station_location: Array<number> = Array<number>(2);
+    public station_location: number[] = Array<number>(2);
     public station_elevation: number = 0;
     public station_elevation_unit: string = "";
     public record_time: Date = new Date(0);
@@ -47,15 +47,15 @@ export class SeismicRecord {
     public scale_factor: number = 0;
 
     public time_interval: number = 0;
-    public waveform: Array<number> = Array<number>(0);
+    public waveform: number[] = Array<number>(0);
 
     public frequency_interval: number = 0;
-    public spectrum: Array<number> = Array<number>(0);
+    public spectrum: number[] = Array<number>(0);
 
-    public period: Array<number> = Array<number>(0);
-    public displacement_spectrum: Array<number> = Array<number>(0);
-    public velocity_spectrum: Array<number> = Array<number>(0);
-    public acceleration_spectrum: Array<number> = Array<number>(0);
+    public period: number[] = Array<number>(0);
+    public displacement_spectrum: number[] = Array<number>(0);
+    public velocity_spectrum: number[] = Array<number>(0);
+    public acceleration_spectrum: number[] = Array<number>(0);
 
     public constructor(data: any) {
         Object.assign(this, data);
@@ -92,7 +92,8 @@ export class QueryConfig {
     public to_date: Date | undefined;
     public min_pga: number | undefined;
     public max_pga: number | undefined;
-    public event_name: string | undefined;
+    public file_name: string | undefined;
+    public station_code: string | undefined;
     public direction: string | undefined;
     public page_size: number | undefined;
     public page_number: number | undefined;
