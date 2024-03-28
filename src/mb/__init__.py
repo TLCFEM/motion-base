@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import sys
+
 import click
 
 
@@ -23,8 +25,12 @@ def run_app(**kwargs):
         from mb.utility.config import init_mongo
         import asyncio
 
+        args: list = ["worker"]
+        if sys.platform == "win32":
+            args.extend(["--pool", "solo", "--loglevel", "info"])
+
         asyncio.run(init_mongo())
-        celery.start(["worker"])
+        celery.start(args)
     else:
         from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
 
