@@ -60,7 +60,7 @@ msgpack==1.0.8            # via locust
 mypy-extensions==1.0.0    # via black
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
-packaging==24.0           # via black, matplotlib, motion-base (pyproject.toml), pytest
+packaging==24.0           # via black, matplotlib, pytest
 pathspec==0.12.1          # via black
 pillow==10.2.0            # via matplotlib
 pint==0.23                # via motion-base (pyproject.toml)
@@ -71,7 +71,7 @@ psutil==5.9.8             # via locust
 pycparser==2.21           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
-pymongo==4.6.2            # via mongoengine, motor
+pymongo==4.6.3            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
 pytest==8.1.1             # via pytest-asyncio, pytest-cov
 pytest-asyncio==0.23.6    # via motion-base (pyproject.toml)
