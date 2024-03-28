@@ -19,6 +19,7 @@ import itertools
 from http import HTTPStatus
 
 from fastapi import APIRouter, Depends, HTTPException, UploadFile
+from pymongo.errors import ServerSelectionTimeoutError
 
 from .response import UploadResponse
 from .utility import User, is_active, create_token
@@ -30,7 +31,11 @@ from ..utility.files import store, FileProxy
 router = APIRouter(tags=["New Zealand"])
 
 
-@celery.task(autoretry_for=(ConnectionError, TimeoutError), retry_kwargs={"max_retries": 3}, default_retry_delay=10)
+@celery.task(
+    autoretry_for=(ConnectionError, TimeoutError, ServerSelectionTimeoutError),
+    retry_kwargs={"max_retries": 3},
+    default_retry_delay=10,
+)
 def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: str | None = None) -> list[str]:
     try:
         with FileProxy(archive_uri, access_token) as archive_file:
