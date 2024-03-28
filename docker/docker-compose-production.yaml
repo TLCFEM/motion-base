@@ -15,7 +15,7 @@ services:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
   rabbitmq:
-    image: rabbitmq
+    image: rabbitmq:management
     container_name: rabbitmq
     restart: 'always'
     ports:
@@ -25,6 +25,13 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: vhost
+  flower:
+    image: mher/flower
+    depends_on:
+      - rabbitmq
+    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672/vhost flower --broker_api="http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost"
+    ports:
+      - '5555:5555'
   mb-back:
     image: tlcfem/motion-base-back
     container_name: mb-back
