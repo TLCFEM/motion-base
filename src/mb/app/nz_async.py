@@ -25,20 +25,23 @@ from .response import UploadResponse
 from .utility import User, is_active, send_notification
 from ..record.async_parser import ParserNZSM
 from ..record.async_record import create_task
+from ..utility.files import FileProxy, store
 
 router = APIRouter(tags=["New Zealand"])
 
 _logger = structlog.get_logger(__name__)
 
 
-async def _parse_archive_in_background(archive: UploadFile, user_id: str, task_id: str | None = None) -> list:
-    return await ParserNZSM.parse_archive(
-        archive_obj=archive.file, user_id=user_id, archive_name=archive.filename, task_id=task_id
-    )
+# noinspection DuplicatedCode
+async def _parse_archive_in_background(archive_uri: str, user_id: str, task_id: str | None = None) -> list:
+    with FileProxy(archive_uri, None) as archive_file:
+        return await ParserNZSM.parse_archive(
+            archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+        )
 
 
-async def _parse_archive_in_background_task(archive: UploadFile, user_id: str, task_id: str):
-    records: list = await _parse_archive_in_background(archive, user_id, task_id)
+async def _parse_archive_in_background_task(archive_uri: str, user_id: str, task_id: str):
+    records: list = await _parse_archive_in_background(archive_uri, user_id, task_id)
     mail_body = "The following records are parsed:\n"
     mail_body += "\n".join([f"{record}" for record in records])
     mail = {"body": mail_body}
@@ -63,17 +66,17 @@ async def upload_archive(
     if not user.can_upload:
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
-    valid_archives: list[UploadFile] = []
+    valid_uris: list[str] = []
     for archive in archives:
         # ".zip" does not work, see: https://github.com/python/cpython/issues/70363
         if archive.filename.endswith(".tar.gz"):
-            valid_archives.append(archive)
+            valid_uris.append(store(archive))
 
     if not wait_for_result:
         task_id_pool: list[str] = []
-        for archive in valid_archives:
+        for archive_uri in valid_uris:
             task_id: str = await create_task()
-            tasks.add_task(_parse_archive_in_background_task, archive, user.id, task_id)
+            tasks.add_task(_parse_archive_in_background_task, archive_uri, user.id, task_id)
             task_id_pool.append(task_id)
 
         return UploadResponse(
@@ -84,7 +87,7 @@ async def upload_archive(
         message="Successfully uploaded and processed.",
         records=list(
             itertools.chain.from_iterable(
-                [await _parse_archive_in_background(archive, user.id) for archive in valid_archives]
+                [await _parse_archive_in_background(archive_uri, user.id) for archive_uri in valid_uris]
             )
         ),
     )

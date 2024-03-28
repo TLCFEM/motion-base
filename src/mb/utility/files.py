@@ -13,6 +13,8 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import os
 from io import BytesIO
 from pathlib import Path
@@ -59,7 +61,7 @@ def store(upload: UploadFile) -> str:
 
 
 class FileProxy:
-    def __init__(self, file_uri: str, auth_token: str):
+    def __init__(self, file_uri: str, auth_token: str | None):
         self._file_uri = file_uri
         self._auth_token = auth_token
 
@@ -91,7 +93,7 @@ class FileProxy:
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
-        if self.is_remote:
+        if self.is_remote and self._auth_token:
             response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
             if response.status_code != 200:
                 _logger.error(f"Failed to delete file: {self._file_uri}")
