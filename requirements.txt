@@ -32,6 +32,7 @@ mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.4.0              # via beanie
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via numba, scipy
+packaging==24.0           # via motion-base (pyproject.toml)
 pint==0.23                # via motion-base (pyproject.toml)
 prompt-toolkit==3.0.43    # via click-repl
 pycparser==2.21           # via cffi
