@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+from uuid import uuid4
 
 import click
 
@@ -27,7 +28,7 @@ def run_app(**kwargs):
 
         args: list = ["worker"]
         if sys.platform == "win32":
-            args.extend(["--pool", "solo", "--loglevel", "info"])
+            args.extend(["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "info"])
 
         asyncio.run(init_mongo())
         celery.start(args)
