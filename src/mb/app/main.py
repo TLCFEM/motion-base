@@ -26,7 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 
-from ..celery import celery
+from ..celery import get_stats
 from ..utility.env import MB_CELERY, MB_FS_ROOT
 
 if MB_CELERY:
@@ -237,7 +237,7 @@ async def query_records(query: QueryConfig = Body(...), count_total: bool = Fals
 async def process_record(record_id: UUID, process_config: ProcessConfig = Body(...)):
     if result := await Record.find_one(Record.id == str(record_id)):
         light_work: bool = not process_config.with_filter and not process_config.with_response_spectrum
-        if (stats := celery.control.inspect().stats()) is None or len(stats) == 1 or light_work:
+        if (stats := get_stats()) is None or len(stats) == 1 or light_work:
             # consider only calculating frequency spectrum is not so expensive and can be done locally
             # assuming the only worker is deployed on the same machine so that do not pay the cost of serialization
             return process_record_local(result, process_config)
