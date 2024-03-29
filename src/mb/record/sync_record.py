@@ -152,3 +152,8 @@ def create_task(task_id=None):
     task = UploadTask() if task_id is None else UploadTask(id=task_id)
     task.save()
     return task.id
+
+
+def delete_task(task_id: str):
+    if (task := UploadTask.objects(id=task_id).first()) is not None:
+        task.delete()

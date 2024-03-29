@@ -61,9 +61,10 @@ def store(upload: UploadFile) -> str:
 
 
 class FileProxy:
-    def __init__(self, file_uri: str, auth_token: str | None):
+    def __init__(self, file_uri: str, auth_token: str | None, *, always_delete_on_exit: bool = False):
         self._file_uri = file_uri
         self._auth_token = auth_token
+        self._always_delete_on_exit = always_delete_on_exit
 
         self.file = None
 
@@ -94,7 +95,7 @@ class FileProxy:
     def __exit__(self, exc_type, exc_value, traceback):
         # do not try to delete files if there is an exception
         # the task will be retried
-        if not exc_type:
+        if not exc_type or self._always_delete_on_exit:
             if self.is_remote and self._auth_token:
                 response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
                 if response.status_code != 200:

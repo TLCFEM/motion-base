@@ -71,10 +71,5 @@ async def mock_client_superuser(mongo_connection):
 
 
 @pytest.fixture(scope="function", autouse=True)
-async def mock_header():
-    return {"WWW-Authenticate": "Bearer"}
-
-
-@pytest.fixture(scope="function", autouse=True)
 def pwd():
     return os.path.dirname(os.path.abspath(__file__))

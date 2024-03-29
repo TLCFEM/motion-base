@@ -18,17 +18,34 @@ from __future__ import annotations
 import itertools
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, UploadFile
+import structlog
+from fastapi import APIRouter, Depends, HTTPException, UploadFile, BackgroundTasks
 from pymongo.errors import ServerSelectionTimeoutError
 
 from .response import UploadResponse
 from .utility import User, is_active, create_token
-from ..celery import celery
+from ..celery import celery, get_stats
 from ..record.sync_parser import ParserNZSM
-from ..record.sync_record import create_task
+from ..record.sync_record import create_task, delete_task
 from ..utility.files import store, FileProxy
 
 router = APIRouter(tags=["New Zealand"])
+
+
+# noinspection DuplicatedCode
+def _parse_archive_local(archive_uri: str, user_id: str, task_id: str | None = None) -> list[str]:
+    try:
+        with FileProxy(archive_uri, None, always_delete_on_exit=True) as archive_file:
+            return ParserNZSM.parse_archive(
+                archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+            )
+    except Exception as exc:
+        # we need to handle the exception here
+        # throwing exception in background task queue will terminate all tasks
+        structlog.get_logger(__name__).error(f"Failed to parse archive {archive_uri}.", exc_info=exc)
+        if task_id is not None:
+            delete_task(task_id)
+        return []
 
 
 @celery.task(
@@ -48,8 +65,11 @@ def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: s
         raise exc
 
 
+# noinspection DuplicatedCode
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
-async def upload_archive(archives: list[UploadFile], user: User = Depends(is_active), wait_for_result: bool = False):
+async def upload_archive(
+    archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
+):
     """
     Upload a compressed archive.
 
@@ -64,6 +84,7 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
         raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload.")
 
     access_token: str = create_token(user.username).access_token
+    has_worker: bool = get_stats() is not None
 
     valid_uris: list[str] = []
     for archive in archives:
@@ -72,20 +93,30 @@ async def upload_archive(archives: list[UploadFile], user: User = Depends(is_act
 
     if not wait_for_result:
         task_id_pool: list[str] = []
-        for archive_uri in valid_uris:
-            task_id: str = create_task()
-            _parse_archive.delay(archive_uri, access_token, user.id, task_id)
-            task_id_pool.append(task_id)
+        if has_worker:
+            for archive_uri in valid_uris:
+                task_id: str = create_task()
+                _parse_archive.delay(archive_uri, access_token, user.id, task_id)
+                task_id_pool.append(task_id)
+        else:
+            for archive_uri in valid_uris:
+                task_id: str = create_task()
+                tasks.add_task(_parse_archive_local, archive_uri, user.id, task_id)
+                task_id_pool.append(task_id)
 
         return UploadResponse(
             message="Successfully uploaded and will be processed in the background.", task_ids=task_id_pool
         )
 
-    return UploadResponse(
-        message="Successfully uploaded and processed.",
-        records=list(
+    if has_worker:
+        records = list(
             itertools.chain.from_iterable(
                 [_parse_archive.delay(archive_uri, access_token, user.id).get() for archive_uri in valid_uris]
             )
-        ),
-    )
+        )
+    else:
+        records = list(
+            itertools.chain.from_iterable([_parse_archive_local(archive_uri, user.id) for archive_uri in valid_uris])
+        )
+
+    return UploadResponse(message="Successfully uploaded and processed.", records=records)
