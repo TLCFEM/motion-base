@@ -91,17 +91,35 @@ export default function AboutModal() {
                         Built with
                     </Typography>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <img src={mongodb_logo} alt="mongodb" height="40px" />
-                        <img src={mongoengine_logo} alt="mongoengine" height="40px" />
-                        <img src={beanie_logo} alt="beanie" height="40px" />
-                        <img src={celery_logo} alt="celery" height="40px" />
-                        <img src={fastapi_logo} alt="fastapi" height="40px" />
+                        <Link href="https://www.mongodb.com/">
+                            <img src={mongodb_logo} alt="mongodb" height="40px" />
+                        </Link>
+                        <Link href="http://mongoengine.org/">
+                            <img src={mongoengine_logo} alt="mongoengine" height="40px" />
+                        </Link>
+                        <Link href="https://beanie-odm.dev/">
+                            <img src={beanie_logo} alt="beanie" height="40px" />
+                        </Link>
+                        <Link href="https://docs.celeryq.dev/en/stable/">
+                            <img src={celery_logo} alt="celery" height="40px" />
+                        </Link>
+                        <Link href="https://fastapi.tiangolo.com/">
+                            <img src={fastapi_logo} alt="fastapi" height="40px" />
+                        </Link>
                     </Stack>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <img src={solid_logo} alt="solid" height="40px" />
-                        <img src={leafllet_logo} alt="leaflet" height="40px" />
-                        <img src={plotly_logo} alt="plotly" height="40px" />
-                        <img src={tippy_logo} alt="tippy" height="40px" />
+                        <Link href="https://www.solidjs.com/">
+                            <img src={solid_logo} alt="solid" height="40px" />
+                        </Link>
+                        <Link href="https://leafletjs.com/">
+                            <img src={leafllet_logo} alt="leaflet" height="40px" />
+                        </Link>
+                        <Link href="https://plotly.com/javascript/">
+                            <img src={plotly_logo} alt="plotly" height="40px" />
+                        </Link>
+                        <Link href="https://atomiks.github.io/tippyjs/">
+                            <img src={tippy_logo} alt="tippy" height="40px" />
+                        </Link>
                     </Stack>
                 </Box>
             </Modal>
