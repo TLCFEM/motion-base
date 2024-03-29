@@ -16,3 +16,19 @@ The following diagram illustrates the interactions among the five components.
 Each of those five components is a separate docker container(s) and can be deployed on different machines.
 
 ![components](./components.svg)
+
+## Deployment
+
+The provided docker compose file `docker/docker-compose-production.yaml` contains seven services:
+
+1. `mongo`: the database
+2. `rabbitmq`: the message broker
+3. `mb-back`: the backend
+4. `mb-front`: the frontend
+5. `mb-worker`: the celery worker(s)
+6. `mongo-express`: optional, a web-based MongoDB admin interface
+7. `flower`: optional, monitoring tool for `celery` workers
+
+The first four services provide the minimum setup for the application to run.
+The `mb-worker` enhances the performance by offloading heavy tasks to workers.
+By such, the system is more responsive and scalable.
