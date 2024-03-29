@@ -26,6 +26,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 
+from ..celery import celery
 from ..utility.env import MB_CELERY, MB_FS_ROOT
 
 if MB_CELERY:
@@ -38,7 +39,7 @@ else:
 
 from .user import router as user_router
 
-from .process import processing_record
+from .process import process_record_local, process_record_via_celery
 from .response import (
     ProcessConfig,
     ListMetadataResponse,
@@ -235,7 +236,13 @@ async def query_records(query: QueryConfig = Body(...), count_total: bool = Fals
 @app.post("/process", response_model=ProcessedResponse)
 async def process_record(record_id: UUID, process_config: ProcessConfig = Body(...)):
     if result := await Record.find_one(Record.id == str(record_id)):
-        return processing_record(result, process_config)
+        if celery.control.inspect().stats() is None:
+            return process_record_local(result, process_config)
+
+        return process_record_via_celery.delay(
+            result.dict(exclude_none=True, exclude_unset=True, exclude_defaults=True),
+            process_config.dict(exclude_none=True, exclude_unset=True, exclude_defaults=True),
+        ).get()
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")
 
