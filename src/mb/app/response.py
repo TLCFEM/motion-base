@@ -113,7 +113,18 @@ class ListMetadataResponse(BaseModel):
 
 
 class ProcessConfig(BaseModel):
-    ratio: int = Field(1, ge=1)
+    up_ratio: int = Field(
+        1,
+        ge=1,
+        description="Upsampling ratio, should be greater than one. "
+        "The effective resampling ratio should be `up_ratio/down_ratio`.",
+    )
+    down_ratio: int = Field(
+        1,
+        ge=1,
+        description="Downsampling ratio, should be greater than one. "
+        "The effective resampling ratio should be `up_ratio/down_ratio`.",
+    )
     filter_length: int = Field(16, ge=8)
     filter_type: str = Field(
         "bandpass", regex=filter_regex, description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`"

@@ -133,7 +133,8 @@ export async function total_api() {
 }
 
 export class ProcessConfig {
-    public ratio: number | undefined;
+    public up_ratio: number | undefined;
+    public down_ratio: number | undefined;
     public filter_length: number | undefined;
     public filter_type: string | undefined;
     public window_type: string | undefined;

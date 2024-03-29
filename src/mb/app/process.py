@@ -40,7 +40,7 @@ def process_record_local(result: Record, process_config: ProcessConfig):
     waveform = waveform[int(process_config.remove_head // time_interval) :]
 
     if process_config.with_filter:
-        new_interval = time_interval / process_config.ratio
+        new_interval = time_interval / process_config.up_ratio
 
         float_eps = float(np.finfo(np.float32).eps)
 
@@ -64,13 +64,17 @@ def process_record_local(result: Record, process_config: ProcessConfig):
                 process_config.window_type,
                 process_config.filter_length,
                 freq_list,
-                ratio=process_config.ratio,
+                ratio=process_config.up_ratio,
             ),
-            zero_stuff(process_config.ratio, waveform),
+            zero_stuff(process_config.up_ratio, waveform),
         )
     else:
         new_interval = time_interval
         new_waveform = waveform
+
+    if process_config.down_ratio > 1:
+        new_interval *= process_config.down_ratio
+        new_waveform = new_waveform[:: process_config.down_ratio]
 
     record.time_interval = new_interval
     record.waveform = new_waveform.tolist()

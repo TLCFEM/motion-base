@@ -36,7 +36,8 @@ const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
 
 const [lowCut, setLowCut] = createSignal("");
 const [highCut, setHighCut] = createSignal("");
-const [ratio, setRatio] = createSignal(0);
+const [upRatio, setUpRatio] = createSignal(0);
+const [downRatio, setDownRatio] = createSignal(0);
 const [filterLength, setFilterLength] = createSignal(0);
 const [filterType, setFilterType] = createSignal("lowpass");
 const [windowType, setWindowType] = createSignal("hann");
@@ -70,7 +71,8 @@ const Settings: Component<sxProps> = (props) => {
 
         setLowCut("");
         setHighCut("");
-        setRatio(0);
+        setUpRatio(0);
+        setDownRatio(0);
         setFilterLength(0);
         setFilterType("lowpass");
         setWindowType("hann");
@@ -92,7 +94,8 @@ const Settings: Component<sxProps> = (props) => {
         config.with_spectrum = withSpectrum();
 
         config.with_filter = withFilter();
-        if (ratio() > 0) config.ratio = ratio();
+        if (upRatio() > 1) config.up_ratio = upRatio();
+        if (downRatio() > 1) config.down_ratio = downRatio();
         if (isNumeric(lowCut()) && Number(lowCut()) > 0) config.low_cut = Number(lowCut());
         if (isNumeric(highCut()) && Number(highCut()) > 0) config.high_cut = Number(highCut());
         if (filterLength() > 0) config.filter_length = filterLength();
@@ -137,21 +140,25 @@ const Settings: Component<sxProps> = (props) => {
             content: "Assign a positive integer to upsample the record.",
             animation: "scale",
         });
+        tippy(`#downsampling-ratio`, {
+            content: "Assign a positive integer to downsample the record.",
+            animation: "scale",
+        });
         tippy(`#filter-length`, {
             content: "Assign a positive integer to set the filter window length.",
             animation: "scale",
         });
         tippy(`#low-cut`, {
-            content: "The low-cut frenquency for the highpass and bandpass filters.",
+            content: "The low-cut frequency for the highpass and bandpass filters.",
             animation: "scale",
         });
         tippy(`#high-cut`, {
-            content: "The high-cut frenquency for the lowpass and bandpass filters.",
+            content: "The high-cut frequency for the lowpass and bandpass filters.",
             animation: "scale",
         });
         tippy(`#damping-ratio`, {
             content:
-                "Assign a positive floating point number repserenting the damping ratio, the default value is 0.05.",
+                "Assign a positive floating point number representing the damping ratio, the default value is 0.05.",
             animation: "scale",
         });
         tippy(`#period-step`, {
@@ -290,9 +297,18 @@ const Settings: Component<sxProps> = (props) => {
                         id="upsampling-ratio"
                         label="Upsampling Ratio"
                         type="number"
-                        value={ratio() > 0 ? ratio() : ""}
-                        defaultValue={ratio() > 0 ? ratio() : ""}
-                        onChange={(_, value) => setRatio(Math.max(0, Math.round(Number(value))))}
+                        value={upRatio() > 0 ? upRatio() : ""}
+                        defaultValue={upRatio() > 0 ? upRatio() : ""}
+                        onChange={(_, value) => setUpRatio(Math.max(0, Math.round(Number(value))))}
+                        disabled={!withFilter()}
+                    />
+                    <TextField
+                        id="downsampling-ratio"
+                        label="Downsampling Ratio"
+                        type="number"
+                        value={downRatio() > 0 ? downRatio() : ""}
+                        defaultValue={downRatio() > 0 ? downRatio() : ""}
+                        onChange={(_, value) => setDownRatio(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
                     />
                     <TextField
