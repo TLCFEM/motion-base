@@ -98,7 +98,7 @@ const Settings: Component<sxProps> = (props) => {
         if (downRatio() > 1) config.down_ratio = downRatio();
         if (isNumeric(lowCut()) && Number(lowCut()) > 0) config.low_cut = Number(lowCut());
         if (isNumeric(highCut()) && Number(highCut()) > 0) config.high_cut = Number(highCut());
-        if (filterLength() > 0) config.filter_length = filterLength();
+        if (filterLength() > 8) config.filter_length = filterLength();
         config.filter_type = filterType();
         config.window_type = windowType();
 
@@ -133,41 +133,39 @@ const Settings: Component<sxProps> = (props) => {
             animation: "scale",
         });
         tippy(`#remove-head`, {
-            content: "Remove the first a few seconds.",
+            content: "Remove the first a few seconds, default is zero.",
             animation: "scale",
         });
         tippy(`#upsampling-ratio`, {
-            content: "Assign a positive integer to upsample the record.",
+            content: "Assign a positive integer to upsample the record, default is one (no upsampling).",
             animation: "scale",
         });
         tippy(`#downsampling-ratio`, {
-            content: "Assign a positive integer to downsample the record.",
+            content: "Assign a positive integer to downsample the record, default is one (no downsampling).",
             animation: "scale",
         });
         tippy(`#filter-length`, {
-            content: "Assign a positive integer to set the filter window length.",
+            content: "Assign a positive integer (at least eight) to set the filter window length, default is 16.",
             animation: "scale",
         });
         tippy(`#low-cut`, {
-            content: "The low-cut frequency for the highpass and bandpass filters.",
+            content: "The low-cut frequency for the highpass and bandpass filters, default is 0.05.",
             animation: "scale",
         });
         tippy(`#high-cut`, {
-            content: "The high-cut frequency for the lowpass and bandpass filters.",
+            content: "The high-cut frequency for the lowpass and bandpass filters, default is 40.0.",
             animation: "scale",
         });
         tippy(`#damping-ratio`, {
-            content:
-                "Assign a positive floating point number representing the damping ratio, the default value is 0.05.",
+            content: "Assign a positive floating point number representing the damping ratio, default is 0.05.",
             animation: "scale",
         });
         tippy(`#period-step`, {
-            content: "The period interval for the response spectrum computation, the default value is 0.05.",
+            content: "The period interval for the response spectrum computation, default is 0.05.",
             animation: "scale",
         });
         tippy(`#period-end`, {
-            content:
-                "The termination period (right bound) for the response spectrum computation, the default value is 20.",
+            content: "The termination period (right bound) for the response spectrum computation, default is 20.",
             animation: "scale",
         });
         tippy(`#chk-waveform`, {
