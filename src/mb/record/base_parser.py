@@ -75,7 +75,7 @@ class BaseParserNIED:
 class BaseParserNZSM:
     @staticmethod
     def validate_file(file_path: str):
-        if file_path.lower().endswith((".v2a", ".v1a")):
+        if file_path.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
             return
 
         raise ValueError("NZSM archive file should be a V2A/V1A file.")

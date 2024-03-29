@@ -162,7 +162,7 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             await task.save()
-                        if not f.name.endswith((".V2A", ".V1A")):
+                        if not f.name.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
                             continue
                         if target := archive.extractfile(f):
                             try:
@@ -181,7 +181,7 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             await task.save()
-                        if not f.endswith((".V2A", ".V1A")):
+                        if not f.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
                             continue
                         with archive.open(f) as target:
                             try:
@@ -228,7 +228,7 @@ class ParserNZSM(BaseParserNZSM):
             record.station_code = station_code
             record.uploaded_by = user_id
             record.file_name = os.path.basename(file_name if file_name else file_path).upper()
-            record.category = "processed" if record.file_name.endswith(".V2A") else "unprocessed"
+            record.category = "processed" if ".V2A" in record.file_name else "unprocessed"
             if last_update_time is not None:
                 record.last_update_time = last_update_time
             await record.save()
