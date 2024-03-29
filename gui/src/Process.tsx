@@ -20,7 +20,7 @@ import {
     Stack,
     TextField,
 } from "@suid/material";
-import { ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
+import { createDownloadLink, ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
 import Plotly from "plotly.js-dist-min";
 
 const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessResponse);
@@ -53,9 +53,7 @@ const Settings: Component<sxProps> = (props) => {
 
     function download() {
         if (processed() && processed().id) {
-            const element = document.createElement("a");
-            const file = new Blob([JSON.stringify(processed())], { type: "application/json" });
-            element.href = URL.createObjectURL(file);
+            const element = createDownloadLink(processed());
             element.download = `${processed().id}.json`;
             document.body.appendChild(element); // Required for this to work in FireFox
             element.click();
@@ -234,6 +232,7 @@ const Settings: Component<sxProps> = (props) => {
                         }
                     />
                     <TextField
+                        id="record-id"
                         sx={{ minWidth: "36ch" }}
                         label="ID"
                         value={currentRecord()}
@@ -249,14 +248,14 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={removeHead()}
                         onChange={(_, value) => setRemoveHead(value)}
                     />
-                    <ButtonGroup variant="outlined" orientation="horizontal">
+                    <ButtonGroup variant="contained" orientation="horizontal">
                         <Button onClick={process} id="btn-process" disabled={loading()}>
                             Process
                         </Button>
                         <Button onClick={clear} id="btn-reset" disabled={loading()}>
                             Reset
                         </Button>
-                        <Button onClick={download} id="btn-download" disabled={loading()}>
+                        <Button onClick={download} id="btn-download" disabled={loading() || !processed().id}>
                             Download
                         </Button>
                     </ButtonGroup>

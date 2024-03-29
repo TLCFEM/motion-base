@@ -36,7 +36,7 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
-import { ifError, isNumeric, query_api, QueryConfig, SeismicRecord, sxProps, toUTC } from "./API";
+import { createDownloadLink, ifError, isNumeric, query_api, QueryConfig, SeismicRecord, sxProps, toUTC } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
@@ -104,6 +104,15 @@ const Settings: Component<sxProps> = (props) => {
         // setRecords([] as SeismicRecord[]);
     }
 
+    function download() {
+        if (records().length > 0) {
+            const element = createDownloadLink(records());
+            element.download = "search.json";
+            document.body.appendChild(element); // Required for this to work in FireFox
+            element.click();
+        }
+    }
+
     onMount(() => {
         tippy(`#btn-search`, {
             content: "Search for records.",
@@ -111,6 +120,10 @@ const Settings: Component<sxProps> = (props) => {
         });
         tippy(`#btn-clear`, {
             content: "Clear searching criteria.",
+            animation: "scale",
+        });
+        tippy(`#btn-save`, {
+            content: "Save search results in json.",
             animation: "scale",
         });
         tippy(`#page-number`, {
@@ -278,12 +291,15 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                 </Stack>
-                <ButtonGroup variant="outlined" orientation="vertical">
+                <ButtonGroup variant="contained" orientation="vertical">
                     <Button onClick={fetch} id="btn-search" disabled={loading()}>
                         Search
                     </Button>
                     <Button onClick={clear} id="btn-clear" disabled={loading()}>
                         Clear
+                    </Button>
+                    <Button onClick={download} id="btn-save" disabled={loading() || records().length === 0}>
+                        Download
                     </Button>
                 </ButtonGroup>
                 <Modal open={error() !== ""} onClose={() => setError("")}>

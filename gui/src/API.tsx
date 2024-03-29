@@ -175,3 +175,17 @@ export const toUTC = (date: Date) => new Date(date.getTime() - date.getTimezoneO
 export interface sxProps {
     sx: object;
 }
+
+export function createDownloadLink(obj: any) {
+    const element = document.createElement("a");
+    const file = new Blob(
+        [
+            JSON.stringify(obj, (_, value) =>
+                value === null || value === undefined || value?.length === 0 ? undefined : value,
+            ),
+        ],
+        { type: "application/json" },
+    );
+    element.href = URL.createObjectURL(file);
+    return element;
+}
