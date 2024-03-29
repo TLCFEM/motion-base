@@ -35,7 +35,7 @@ def rabbitmq_uri():
     if RABBITMQ_USERNAME is None or RABBITMQ_PASSWORD is None or RABBITMQ_HOST is None or RABBITMQ_PORT is None:
         raise RuntimeError("Missing rabbitmq related environment variables.")
 
-    return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:${RABBITMQ_PORT}/vhost"
+    return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/vhost"
 
 
 def mongo_uri():
