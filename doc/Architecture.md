@@ -32,3 +32,5 @@ The provided docker compose file `docker/docker-compose-production.yaml` contain
 The first four services provide the minimum setup for the application to run.
 The `mb-worker` enhances the performance by offloading heavy tasks to workers.
 By such, the system is more responsive and scalable.
+
+It is possible to deploy the backend behind a reverse proxy, see `docker/docker-compose-production-nginx.yaml`.

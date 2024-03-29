@@ -33,6 +33,9 @@ if __name__ == "__main__":
         elif sys.argv[index].startswith("c"):
             arg_dict["celery"] = True
             index += 1
+        elif sys.argv[index].startswith("d"):
+            arg_dict["debug"] = True
+            index += 1
         else:
             index += 1
 

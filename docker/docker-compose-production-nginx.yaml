@@ -50,12 +50,13 @@ services:
   mb-back:
     image: tlcfem/motion-base-back
     container_name: mb-back
+#    scale: 1
     restart: 'always'
     depends_on:
       - mongo
       - rabbitmq
     ports:
-      - '${MB_PORT}:${MB_PORT}'
+      - ${MB_PORT}
     volumes:
       - motion_cache:${MB_FS_ROOT}
     environment:
@@ -118,6 +119,19 @@ services:
       - mb-back
     ports:
       - '4173:4173'
+  nginx:
+    image: nginx
+    container_name: nginx
+    restart: 'always'
+    ports:
+      - '80:80'
+    volumes:
+      - ./nginx.conf:/tmp/nginx.conf
+    environment:
+      MB_PORT: ${MB_PORT}
+    command: /bin/bash -c "envsubst < /tmp/nginx.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+    depends_on:
+      - mb-back
 
 volumes:
   motion_mongo:

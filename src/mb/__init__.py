@@ -46,7 +46,7 @@ def run_app(**kwargs):
         if workers > 1:
             config["workers"] = workers
             config["log_level"] = "info"
-        else:
+        elif kwargs.get("debug", False):
             config["reload"] = True
             config["log_level"] = "debug"
 
