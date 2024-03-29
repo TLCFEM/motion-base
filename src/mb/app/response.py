@@ -128,6 +128,7 @@ class ProcessConfig(BaseModel):
     with_filter: bool = Field(False)
     with_spectrum: bool = Field(False)
     with_response_spectrum: bool = Field(False)
+    remove_head: float = Field(0.0, ge=0)
 
 
 class ProcessedResponse(RecordResponse):

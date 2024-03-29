@@ -45,6 +45,8 @@ const [dampingRatio, setDampingRatio] = createSignal("");
 const [periodStep, setPeriodStep] = createSignal("");
 const [periodEnd, setPeriodEnd] = createSignal("");
 
+const [removeHead, setRemoveHead] = createSignal("");
+
 const Settings: Component<sxProps> = (props) => {
     const [currentRecord, setCurrentRecord] = createSignal("");
 
@@ -102,6 +104,8 @@ const Settings: Component<sxProps> = (props) => {
         if (isNumeric(periodStep()) && Number(periodStep()) > 0) config.period_step = Number(periodStep());
         if (isNumeric(periodEnd()) && Number(periodEnd()) > 0) config.period_end = Number(periodEnd());
 
+        if (isNumeric(removeHead()) && Number(removeHead()) > 0) config.remove_head = Number(removeHead());
+
         try {
             setProcessed(await process_api(currentRecord(), config));
         } catch (e) {
@@ -123,6 +127,10 @@ const Settings: Component<sxProps> = (props) => {
         });
         tippy(`#btn-download`, {
             content: "Download the processed record in json.",
+            animation: "scale",
+        });
+        tippy(`#remove-head`, {
+            content: "Remove the first a few seconds.",
             animation: "scale",
         });
         tippy(`#upsampling-ratio`, {
@@ -226,6 +234,15 @@ const Settings: Component<sxProps> = (props) => {
                         value={currentRecord()}
                         defaultValue={currentRecord()}
                         onChange={(_, value) => setCurrentRecord(value)}
+                    />
+                    <TextField
+                        id="remove-head"
+                        error={ifError(removeHead())}
+                        label="Remove Head (s)"
+                        type="number"
+                        value={removeHead()}
+                        defaultValue={removeHead()}
+                        onChange={(_, value) => setRemoveHead(value)}
                     />
                     <ButtonGroup variant="outlined" orientation="horizontal">
                         <Button onClick={process} id="btn-process" disabled={loading()}>

@@ -146,6 +146,7 @@ export class ProcessConfig {
     public with_filter: Boolean | undefined;
     public with_spectrum: Boolean | undefined;
     public with_response_spectrum: Boolean | undefined;
+    public remove_head: number | undefined;
 }
 
 export class ProcessResponse extends SeismicRecord {

@@ -35,6 +35,8 @@ def processing_record(result: Record, process_config: ProcessConfig):
 
     time_interval, waveform = result.to_waveform(normalised=process_config.normalised, unit="cm/s/s")
 
+    waveform = waveform[process_config.remove_head // time_interval :]
+
     if process_config.with_filter:
         new_interval = time_interval / process_config.ratio
 
