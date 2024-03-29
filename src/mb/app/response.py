@@ -89,6 +89,10 @@ class RecordResponse(MetadataResponse):
     acceleration_spectrum: list[float] | None = Field(None)
 
 
+class ListRecordResponse(BaseModel):
+    records: list[RecordResponse] = Field(None)
+
+
 class PaginationResponse(BaseModel):
     """
     Pagination response.

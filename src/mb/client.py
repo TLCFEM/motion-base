@@ -25,6 +25,7 @@ import httpx
 import matplotlib.pyplot as plt
 import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
+from matplotlib.figure import Figure
 from rich.console import Console
 from rich.progress import track
 
@@ -40,27 +41,35 @@ class MBRecord(RecordResponse):
         # noinspection PyTypeChecker
         self.waveform = new_waveform.tolist()
 
-    def plot_waveform(self):
-        fig = plt.figure()
+    def plot_waveform(self, fig: Figure | None = None):
+        if fig is None:
+            fig = plt.figure()
+            gca = fig.add_subplot(111)
+            gca.set_xlabel("Frequency (Hz)")
+            gca.set_ylabel("Acceleration Magnitude (Gal)")
+        else:
+            gca = fig.gca()
+
         x_axis = np.arange(0, self.time_interval * len(self.waveform), self.time_interval)
-        plt.plot(x_axis, self.waveform)
-        plt.title(f"{self.id}")
-        plt.xlabel("Time (s)")
-        plt.ylabel("Acceleration (Gal)")
-        fig.tight_layout()
+        gca.plot(x_axis, self.waveform, label=self.id)
+
         return fig
 
-    def plot_spectrum(self):
+    def plot_spectrum(self, fig: Figure | None = None):
         if self.frequency_interval is None or self.spectrum is None:
             self.to_spectrum()
 
-        fig = plt.figure()
+        if fig is None:
+            fig = plt.figure()
+            gca = fig.add_subplot(111)
+            gca.set_xlabel("Frequency (Hz)")
+            gca.set_ylabel("Acceleration Magnitude (Gal)")
+        else:
+            gca = fig.gca()
+
         x_axis = np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval)
-        plt.plot(x_axis, self.spectrum)
-        plt.title(f"{self.id}")
-        plt.xlabel("Frequency (Hz)")
-        plt.ylabel("Acceleration Magnitude (Gal)")
-        fig.tight_layout()
+        gca.plot(x_axis, self.spectrum, label=self.id)
+
         return fig
 
     def plot_response_spectrum(self):
@@ -156,28 +165,31 @@ class MBClient:
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
 
-    async def download(self, record_id: str | uuid | list[str | uuid], normalised: bool = False):
+    async def download(self, record_id: str | uuid | list[str | uuid]):
         if isinstance(record_id, list):
             self.download_pool = []
             self.download_size = len(record_id)
             self.current_download_size = 0
             async with anyio.create_task_group() as tg:
                 for r in record_id:
-                    tg.start_soon(self.download, r, normalised)
+                    tg.start_soon(self.download, r)
 
             return
 
         async with self.semaphore:
+            result = await self.client.post("/waveform", json=[str(record_id)])
             self.current_download_size += 1
-            result = await self.client.post(f"/waveform?normalised={str(normalised).lower()}", json=[str(record_id)])
             if result.status_code != HTTPStatus.OK:
+                self.print(
+                    f"Fail to download file [green]{record_id}[/]. "
+                    f"[[red]{self.current_download_size}/{self.download_size}[/]]."
+                )
                 return
 
-            record = MBRecord(**result.json()["records"][0])
-            self.download_pool.append(record)
+            self.download_pool.append(MBRecord(**result.json()["records"][0]))
             self.print(
-                f"Successfully downloaded file [green]{record.file_name}[/]. "
-                f"[[red]{self.current_download_size}/1[/]]."
+                f"Successfully downloaded file [green]{record_id}[/]. "
+                f"[[red]{self.current_download_size}/{self.download_size}[/]]."
             )
 
     async def upload(self, region: str, path: str | Generator, wait_for_result: bool = False):
@@ -259,11 +271,15 @@ class MBClient:
 
 
 async def main():
-    async with MBClient("http://localhost:8000", "admin", "admin") as client:
-        for _ in range(5):
-            result = await client.jackpot()
-            fig = result.plot_spectrum()
-            fig.show()
+    async with MBClient("http://localhost:8000", "test", "password") as client:
+        results = await client.search(QueryConfig())
+        await client.download([r.id for r in results])
+        fig: Figure = None
+        for result in client.download_pool:
+            fig = result.plot_spectrum(fig)
+        fig.legend()
+        fig.tight_layout()
+        fig.savefig("spectrum.png")
 
 
 if __name__ == "__main__":

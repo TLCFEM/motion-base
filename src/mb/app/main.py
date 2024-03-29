@@ -13,11 +13,14 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import os.path
 from contextlib import asynccontextmanager
 from http import HTTPStatus
 from uuid import UUID
 
+from beanie.operators import In
 from fastapi import Body, Depends, FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -46,6 +49,7 @@ from .response import (
     PaginationResponse,
     UploadTasksResponse,
     UploadTaskResponse,
+    ListRecordResponse,
 )
 from .utility import (
     User,
@@ -149,6 +153,23 @@ async def download_single_random_waveform(normalised: bool = False):
     return RecordResponse(
         **result.dict(), endpoint="/waveform/jackpot", time_interval=interval, waveform=record.tolist()
     )
+
+
+@app.post("/waveform", response_model=ListRecordResponse)
+async def download_waveform(record_id: UUID | list[UUID]):
+    """
+    Retrieve waveform from the database by given IDs.
+    """
+
+    results: list[Record] = await Record.find(
+        In(Record.id, [str(x) for x in record_id] if isinstance(record_id, list) else [str(record_id)])
+    ).to_list()
+
+    def _populate_waveform(result: Record):
+        interval, record = result.to_waveform(unit="cm/s/s")
+        return RecordResponse(**result.dict(), endpoint="/waveform", time_interval=interval, waveform=record.tolist())
+
+    return ListRecordResponse(records=[_populate_waveform(result) for result in results])
 
 
 @app.get("/spectrum/jackpot", response_model=RecordResponse)
