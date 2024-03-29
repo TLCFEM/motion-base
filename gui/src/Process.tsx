@@ -236,7 +236,7 @@ const Settings: Component<sxProps> = (props) => {
                         }
                     />
                     <TextField
-                        sx={{ minWidth: "34ch" }}
+                        sx={{ minWidth: "36ch" }}
                         label="ID"
                         value={currentRecord()}
                         defaultValue={currentRecord()}
@@ -295,21 +295,23 @@ const Settings: Component<sxProps> = (props) => {
                     />
                     <TextField
                         id="upsampling-ratio"
-                        label="Upsampling Ratio"
+                        label="Upsampling"
                         type="number"
                         value={upRatio() > 0 ? upRatio() : ""}
                         defaultValue={upRatio() > 0 ? upRatio() : ""}
                         onChange={(_, value) => setUpRatio(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="downsampling-ratio"
-                        label="Downsampling Ratio"
+                        label="Downsampling"
                         type="number"
                         value={downRatio() > 0 ? downRatio() : ""}
                         defaultValue={downRatio() > 0 ? downRatio() : ""}
                         onChange={(_, value) => setDownRatio(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="filter-length"
@@ -319,6 +321,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={filterLength() > 0 ? filterLength() : ""}
                         onChange={(_, value) => setFilterLength(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="low-cut"
@@ -329,6 +332,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={lowCut()}
                         onChange={(_, value) => setLowCut(value)}
                         disabled={!withFilter() || filterType() === "lowpass"}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="high-cut"
@@ -339,6 +343,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={highCut()}
                         onChange={(_, value) => setHighCut(value)}
                         disabled={!withFilter() || filterType() === "highpass"}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <FormControl sx={{ minWidth: "14ch" }} disabled={!withFilter()}>
                         <InputLabel>Filter Type</InputLabel>
@@ -404,6 +409,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={dampingRatio()}
                         onChange={(_, value) => setDampingRatio(value)}
                         disabled={!withResponseSpectrum()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="period-step"
@@ -414,6 +420,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={periodStep()}
                         onChange={(_, value) => setPeriodStep(value)}
                         disabled={!withResponseSpectrum()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
                         id="period-end"
@@ -424,6 +431,7 @@ const Settings: Component<sxProps> = (props) => {
                         defaultValue={periodEnd()}
                         onChange={(_, value) => setPeriodEnd(value)}
                         disabled={!withResponseSpectrum()}
+                        sx={{ maxWidth: "10rem" }}
                     />
                 </Box>
             </CardContent>
