@@ -40,6 +40,7 @@ def convert_to(quantity: pint.Quantity, unit: pint.Unit | None):
     return quantity.to(unit).magnitude if unit else quantity.magnitude
 
 
+@njit
 def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
     return np.convolve(waveform, window, mode="same")
 
