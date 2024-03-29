@@ -432,7 +432,7 @@ const QueryDatabase: Component = () => {
         <>
             <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
-                <Settings sx={{ border: "1px solid darkgrey", minHeight: "7rem" }} />
+                <Settings sx={{ border: "1px solid darkgrey", minHeight: "11rem" }} />
                 <BasicTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>
         </>
