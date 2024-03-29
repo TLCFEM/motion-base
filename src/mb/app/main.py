@@ -236,9 +236,13 @@ async def query_records(query: QueryConfig = Body(...), count_total: bool = Fals
 @app.post("/process", response_model=ProcessedResponse)
 async def process_record(record_id: UUID, process_config: ProcessConfig = Body(...)):
     if result := await Record.find_one(Record.id == str(record_id)):
-        if celery.control.inspect().stats() is None:
+        light_work: bool = not process_config.with_filter and not process_config.with_response_spectrum
+        if (stats := celery.control.inspect().stats()) is None or len(stats) == 1 or light_work:
+            # consider only calculating frequency spectrum is not so expensive and can be done locally
+            # assuming the only worker is deployed on the same machine so that do not pay the cost of serialization
             return process_record_local(result, process_config)
 
+        # if filtering, or response spectra, is required, offload the task to workers
         return process_record_via_celery.delay(
             result.dict(exclude_none=True, exclude_unset=True, exclude_defaults=True),
             process_config.dict(exclude_none=True, exclude_unset=True, exclude_defaults=True),
