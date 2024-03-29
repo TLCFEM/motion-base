@@ -19,22 +19,23 @@ from motor.motor_asyncio import AsyncIOMotorClient
 
 from .env import (
     MONGO_HOST,
-    MONGO_PASSWORD,
     MONGO_PORT,
     MONGO_USERNAME,
+    MONGO_PASSWORD,
     RABBITMQ_HOST,
-    RABBITMQ_PASSWORD,
+    RABBITMQ_PORT,
     RABBITMQ_USERNAME,
+    RABBITMQ_PASSWORD,
 )
 from ..app.utility import User
 from ..record.async_record import Record, UploadTask
 
 
 def rabbitmq_uri():
-    if RABBITMQ_USERNAME is None or RABBITMQ_PASSWORD is None or RABBITMQ_HOST is None:
+    if RABBITMQ_USERNAME is None or RABBITMQ_PASSWORD is None or RABBITMQ_HOST is None or RABBITMQ_PORT is None:
         raise RuntimeError("Missing rabbitmq related environment variables.")
 
-    return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:5672/vhost"
+    return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:${RABBITMQ_PORT}/vhost"
 
 
 def mongo_uri():
