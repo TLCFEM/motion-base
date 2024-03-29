@@ -3,7 +3,7 @@ services:
     image: mongo
     container_name: mongo
     restart: 'always'
-    command: --wiredTigerCacheSizeGB 2 --port ${MONGO_PORT}
+    command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
     ports:
       - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
@@ -33,9 +33,10 @@ services:
     container_name: rabbitmq
     restart: 'always'
     ports:
-      - '5672:5672'
+      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
       - '15672:15672'
     environment:
+      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: vhost
@@ -44,13 +45,13 @@ services:
     container_name: flower
     depends_on:
       - rabbitmq
-    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:5672/vhost flower --broker_api="http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost"
+    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api="http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost"
     ports:
       - '5555:5555'
   mb-back:
     image: tlcfem/motion-base-back
-    container_name: mb-back
-#    scale: 1
+    #    container_name: mb-back
+    scale: ${MB_REPLICA}
     restart: 'always'
     depends_on:
       - mongo
@@ -69,15 +70,15 @@ services:
       MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
-      MB_FASTAPI_WORKERS: 2
+      MB_FASTAPI_WORKERS: 1 # using only one process for each container
       MB_FS_ROOT: ${MB_FS_ROOT}
       MB_MAIN_SITE: ${MB_MAIN_SITE}
-      MB_CELERY: ${MB_CELERY}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
   mb-worker:
@@ -103,12 +104,12 @@ services:
       MB_FASTAPI_WORKERS: 2
       MB_FS_ROOT: ${MB_FS_ROOT}
       MB_MAIN_SITE: ${MB_MAIN_SITE}
-      MB_CELERY: ${MB_CELERY}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
       MONGO_USERNAME: ${MONGO_USERNAME}
       MONGO_PASSWORD: ${MONGO_PASSWORD}
       RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
   mb-front:
@@ -126,10 +127,11 @@ services:
     ports:
       - '80:80'
     volumes:
-      - ./nginx.conf:/tmp/nginx.conf
+      - ./nginx.conf.sh:/tmp/nginx.conf.sh
     environment:
       MB_PORT: ${MB_PORT}
-    command: /bin/bash -c "envsubst < /tmp/nginx.conf > /etc/nginx/conf.d/default.conf && nginx -g 'daemon off;'"
+      MB_REPLICA: ${MB_REPLICA}
+    command: /tmp/nginx.conf.sh
     depends_on:
       - mb-back
 

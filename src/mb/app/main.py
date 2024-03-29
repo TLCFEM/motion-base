@@ -26,19 +26,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 
-from ..celery import get_stats
-from ..utility.env import MB_CELERY, MB_FS_ROOT
-
-if MB_CELERY:
-    from .jp_sync import router as jp_router
-    from .nz_sync import router as nz_router
-else:
-    from .jp_async import router as jp_router
-    from .nz_async import router as nz_router
-
-
-from .user import router as user_router
-
+from .jp_sync import router as jp_router
+from .nz_sync import router as nz_router
 from .process import process_record_local, process_record_via_celery
 from .response import (
     ProcessConfig,
@@ -52,13 +41,16 @@ from .response import (
     UploadTaskResponse,
     ListRecordResponse,
 )
+from .user import router as user_router
 from .utility import (
     User,
     create_superuser,
     is_active,
 )
+from ..celery import get_stats
 from ..record.async_record import Record, MetadataRecord, UploadTask
 from ..utility.config import init_mongo, shutdown_mongo
+from ..utility.env import MB_FS_ROOT
 
 
 @asynccontextmanager

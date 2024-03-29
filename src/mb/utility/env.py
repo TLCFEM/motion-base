@@ -31,7 +31,6 @@ if not LOADED:
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "./files")
-MB_CELERY: str = os.getenv("MB_CELERY", "1")
 MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
 while MB_MAIN_SITE.endswith("/"):
     MB_MAIN_SITE = MB_MAIN_SITE[:-1]
@@ -57,10 +56,5 @@ MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
 
 if not LOADED:
     _logger.info(f"Hosting on {MB_MAIN_SITE}.")
-
-    if MB_CELERY:
-        _logger.info("Using celery.")
-    else:
-        _logger.info("Using self process as worker.")
 
 LOADED = True
