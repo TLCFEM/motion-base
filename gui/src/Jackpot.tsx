@@ -16,7 +16,6 @@
 import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
 import { jackpot_waveform_api, sxProps, toUTC } from "./API";
 import {
-    Box,
     Button,
     Card,
     CardActions,
