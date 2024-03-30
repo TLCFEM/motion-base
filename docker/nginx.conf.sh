@@ -16,6 +16,7 @@ CONF_PATH="/etc/nginx/conf.d/default.conf"
 echo "Generating nginx configuration file..."
 
 echo "upstream backends {" > "${CONF_PATH}"
+echo "  least_conn;" >> "${CONF_PATH}"
 for i in $(seq 1 "${MB_REPLICA}")
 do
   echo "  server docker-mb-back-${i}:${MB_PORT};" >> "${CONF_PATH}"
