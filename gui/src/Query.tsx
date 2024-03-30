@@ -24,6 +24,7 @@ import {
     ButtonGroup,
     Card,
     CardContent,
+    IconButton,
     LinearProgress,
     Modal,
     Paper,
@@ -36,10 +37,25 @@ import {
     TableRow,
     TextField,
 } from "@suid/material";
+import KeyboardArrowRightIcon from "@suid/icons-material/KeyboardArrowRight";
+import KeyboardArrowLeftIcon from "@suid/icons-material/KeyboardArrowLeft";
+import KeyboardDoubleArrowRightIcon from "@suid/icons-material/KeyboardDoubleArrowRight";
+import KeyboardDoubleArrowLeftIcon from "@suid/icons-material/KeyboardDoubleArrowLeft";
+import AddIcon from "@suid/icons-material/Add";
+import RemoveIcon from "@suid/icons-material/Remove";
 import { createDownloadLink, ifError, isNumeric, query_api, QueryConfig, SeismicRecord, sxProps, toUTC } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
+import {
+    ColumnDef,
+    createSolidTable,
+    flexRender,
+    getCoreRowModel,
+    getPaginationRowModel,
+    getSortedRowModel,
+    SortingState,
+} from "@tanstack/solid-table";
 
 const [eventLocation, setEventLocation] = createSignal<[number, number]>();
 const [maxEventDistance, setMaxEventDistance] = createSignal(0);
@@ -162,7 +178,7 @@ const Settings: Component<sxProps> = (props) => {
             content: "Regular expression to filter file names.",
             animation: "scale",
         });
-        tippy(`station-code`, {
+        tippy(`#station-code`, {
             content: "Regular expression to filter station codes.",
             animation: "scale",
         });
@@ -318,8 +334,175 @@ const Settings: Component<sxProps> = (props) => {
                     </Alert>
                 </Modal>
             </CardContent>
-            <Box sx={{ width: "100%" }}>
-                {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
+            {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
+        </Card>
+    );
+};
+
+const TanStackTable: Component<sxProps> = (props) => {
+    const [sorting, setSorting] = createSignal<SortingState>([]);
+
+    const [pageSize, setPageSize] = createSignal(10);
+    const [pagination, setPagination] = createSignal({ pageIndex: 0, pageSize: pageSize() });
+
+    createEffect(() => setPagination({ pageIndex: 0, pageSize: pageSize() }));
+
+    const columns: ColumnDef<SeismicRecord>[] = [
+        {
+            accessorKey: "id",
+            header: "ID",
+        },
+        // {
+        //     accessorKey: "file_name",
+        //     header: "File Name",
+        // },
+        {
+            accessorKey: "magnitude",
+            header: "Magnitude",
+        },
+        {
+            accessorKey: "maximum_acceleration",
+            header: "PGA (Gal)",
+            cell: (info) => Math.abs(info.getValue<number>()).toFixed(2),
+        },
+        {
+            accessorKey: "depth",
+            header: "Depth (km)",
+        },
+        {
+            accessorKey: "duration",
+            header: "Duration (s)",
+            cell: (info) => Math.abs(info.getValue<number>()).toFixed(2),
+        },
+        {
+            accessorKey: "event_time",
+            header: "Event Time",
+            cell: (info) => toUTC(info.getValue<Date>()),
+        },
+        {
+            accessorKey: "station_code",
+            header: "Station",
+            cell: (info) => info.getValue<string>().toUpperCase(),
+        },
+    ];
+
+    const table = createSolidTable({
+        get data() {
+            return records();
+        },
+        columns: columns,
+        getCoreRowModel: getCoreRowModel(),
+        onSortingChange: setSorting,
+        getSortedRowModel: getSortedRowModel(),
+        onPaginationChange: setPagination,
+        getPaginationRowModel: getPaginationRowModel(),
+        state: {
+            get sorting() {
+                return sorting();
+            },
+            get pagination() {
+                return pagination();
+            },
+        },
+    });
+
+    const rowProps = {
+        "&:last-child td, &:last-child th": {
+            border: 0,
+        },
+    };
+
+    onMount(() => {
+        tippy(`#table-header`, {
+            content: "Click header cells to sort results.",
+            animation: "scale",
+        });
+    });
+
+    return (
+        <Card sx={{ ...props.sx, display: "flex", flexDirection: "column" }}>
+            <TableContainer sx={{ overflow: "auto", flexGrow: 1 }}>
+                <Table stickyHeader>
+                    <TableHead id="table-header">
+                        <For each={table.getHeaderGroups()}>
+                            {(headerGroup) => (
+                                <TableRow>
+                                    <For each={headerGroup.headers}>
+                                        {(header) => (
+                                            <TableCell onClick={header.column.getToggleSortingHandler()}>
+                                                {header.isPlaceholder
+                                                    ? null
+                                                    : flexRender(header.column.columnDef.header, header.getContext())}
+                                            </TableCell>
+                                        )}
+                                    </For>
+                                </TableRow>
+                            )}
+                        </For>
+                    </TableHead>
+                    <TableBody>
+                        <For each={table.getRowModel().rows}>
+                            {(row) => (
+                                <TableRow sx={rowProps}>
+                                    <For each={row.getVisibleCells()}>
+                                        {(cell) => (
+                                            <TableCell>
+                                                {flexRender(cell.column.columnDef.cell, cell.getContext())}
+                                            </TableCell>
+                                        )}
+                                    </For>
+                                </TableRow>
+                            )}
+                        </For>
+                    </TableBody>
+                </Table>
+            </TableContainer>
+            <Box
+                sx={{
+                    display: "flex",
+                    flexDirection: "row",
+                    justifyContent: "center",
+                    alignContent: "center",
+                    alignItems: "center",
+                    // gap: "1rem",
+                }}
+            >
+                <IconButton color="secondary" onClick={() => setPageSize(pageSize() - 1)} disabled={pageSize() <= 1}>
+                    <RemoveIcon></RemoveIcon>
+                </IconButton>
+                <IconButton
+                    color="secondary"
+                    onClick={() => setPageSize(pageSize() + 1)}
+                    disabled={pageSize() >= records().length}
+                >
+                    <AddIcon></AddIcon>
+                </IconButton>
+                <LinearProgress
+                    sx={{ flexGrow: 1 }}
+                    variant="determinate"
+                    color="secondary"
+                    value={
+                        table.getPageCount() === 0
+                            ? 0
+                            : (100 * (table.getState().pagination.pageIndex + 1)) / table.getPageCount()
+                    }
+                />
+                <IconButton color="secondary" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
+                    <KeyboardDoubleArrowLeftIcon></KeyboardDoubleArrowLeftIcon>
+                </IconButton>
+                <IconButton
+                    color="secondary"
+                    onClick={() => table.previousPage()}
+                    disabled={!table.getCanPreviousPage()}
+                >
+                    <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
+                </IconButton>
+                <IconButton color="secondary" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                    <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
+                </IconButton>
+                <IconButton color="secondary" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+                    <KeyboardDoubleArrowRightIcon></KeyboardDoubleArrowRightIcon>
+                </IconButton>
             </Box>
         </Card>
     );
@@ -449,7 +632,7 @@ const QueryDatabase: Component = () => {
             <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
                 <Settings sx={{ border: "1px solid darkgrey", minHeight: "11rem" }} />
-                <BasicTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
+                <TanStackTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>
         </>
     );

@@ -127,9 +127,7 @@ const MetadataCard: Component<sxProps> = (props) => {
                     </>
                 ))}
             </CardContent>
-            <Box sx={{ width: "100%" }}>
-                {data.loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
-            </Box>
+            {data.loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
             <CardActions
                 sx={{
                     justifyContent: "flex-end",

@@ -432,9 +432,7 @@ const Settings: Component<sxProps> = (props) => {
                     />
                 </Box>
             </CardContent>
-            <Box sx={{ width: "100%" }}>
-                {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
-            </Box>
+            {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
         </Card>
     );
 };
