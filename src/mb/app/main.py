@@ -180,7 +180,7 @@ async def download_waveform(record_id: UUID | list[UUID]):
 
 
 @app.post("/query", response_model=ListMetadataResponse)
-async def query_records(query: QueryConfig = Body(...), count_total: bool = True):
+async def query_records(query: QueryConfig = Body(...), count_total: bool = False):
     """
     Query records from the database.
 

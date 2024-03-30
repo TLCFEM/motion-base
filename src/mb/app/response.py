@@ -108,7 +108,7 @@ class PaginationConfig(BaseModel):
 
     page_size: int = Field(10, ge=1, le=1000)
     page_number: int = Field(0, ge=0)
-    sort_by: str = Field(None)
+    sort_by: str = Field("-maximum_acceleration")
 
     @validator("sort_by")
     def validate_sort_by(cls, v: str) -> str:

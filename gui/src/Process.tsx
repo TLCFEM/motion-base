@@ -27,6 +27,7 @@ const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessRes
 const [error, setError] = createSignal("");
 const [loading, setLoading] = createSignal(false);
 
+const [currentRecord, setCurrentRecord] = createSignal("");
 const [normalised, setNormalised] = createSignal(false);
 
 const [withWaveform, setWithWaveform] = createSignal(true);
@@ -49,8 +50,6 @@ const [periodEnd, setPeriodEnd] = createSignal("");
 const [removeHead, setRemoveHead] = createSignal("");
 
 const Settings: Component<sxProps> = (props) => {
-    const [currentRecord, setCurrentRecord] = createSignal("");
-
     function download() {
         if (processed() && processed().id) {
             const element = createDownloadLink(processed());
