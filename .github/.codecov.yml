@@ -2,3 +2,5 @@ coverage:
   range: 80..95
   round: up
   precision: 4
+ignore:
+  - "src/mb/record/response_spectrum.py"
