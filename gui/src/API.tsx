@@ -79,6 +79,12 @@ export async function jackpot_waveform_api() {
     return new SeismicRecord((await axios.get("/waveform/jackpot")).data);
 }
 
+export class PaginationConfig {
+    public page_size: number | undefined;
+    public page_number: number | undefined;
+    public sort_by: string | undefined;
+}
+
 export class QueryConfig {
     public min_magnitude: number | undefined;
     public max_magnitude: number | undefined;
@@ -95,8 +101,8 @@ export class QueryConfig {
     public file_name: string | undefined;
     public station_code: string | undefined;
     public direction: string | undefined;
-    public page_size: number | undefined;
-    public page_number: number | undefined;
+
+    public pagination: PaginationConfig = new PaginationConfig();
 }
 
 class PaginationResponse {
@@ -110,15 +116,15 @@ interface QueryResponse {
     pagination: PaginationResponse;
 }
 
+function stringify(obj: any) {
+    return JSON.stringify(obj, (_, value) => (value === null || value === undefined ? undefined : value));
+}
+
 export async function query_api(config: QueryConfig) {
     const response = (
-        await axios.post<QueryResponse>(
-            "/query",
-            JSON.stringify(config, (_, value) => (value === null || value === undefined ? undefined : value)),
-            {
-                headers: { "Content-Type": "application/json" },
-            },
-        )
+        await axios.post<QueryResponse>("/query", stringify(config), {
+            headers: { "Content-Type": "application/json" },
+        })
     ).data;
 
     return response.records.map((record) => new SeismicRecord(record));
@@ -156,13 +162,9 @@ export class ProcessResponse extends SeismicRecord {
 
 export async function process_api(record_id: string, config: ProcessConfig) {
     return (
-        await axios.post<ProcessResponse>(
-            `/process?record_id=${record_id}`,
-            JSON.stringify(config, (_, value) => (value === null || value === undefined ? undefined : value)),
-            {
-                headers: { "Content-Type": "application/json" },
-            },
-        )
+        await axios.post<ProcessResponse>(`/process?record_id=${record_id}`, stringify(config), {
+            headers: { "Content-Type": "application/json" },
+        })
     ).data;
 }
 

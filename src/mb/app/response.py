@@ -15,8 +15,9 @@
 from __future__ import annotations
 
 from datetime import datetime
+from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, validator
 
 from ..record.utility import filter_regex, window_regex
 
@@ -93,14 +94,39 @@ class ListRecordResponse(BaseModel):
     records: list[RecordResponse] = Field(None)
 
 
-class PaginationResponse(BaseModel):
+class SortBy(str, Enum):
+    magnitude = "magnitude"
+    maximum_acceleration = "maximum_acceleration"
+    event_time = "event_time"
+    depth = "depth"
+
+
+class PaginationConfig(BaseModel):
+    """
+    Pagination response.
+    """
+
+    page_size: int = Field(10, ge=1, le=1000)
+    page_number: int = Field(0, ge=0)
+    sort_by: str = Field(None)
+
+    @validator("sort_by")
+    def validate_sort_by(cls, v: str) -> str:
+        if v is None:
+            return "-maximum_acceleration"
+
+        if v.startswith(("+", "-")) and v[1:].lower() in SortBy.__members__:
+            return v.lower()
+
+        raise ValueError(f"Invalid sort_by value: {v}")
+
+
+class PaginationResponse(PaginationConfig):
     """
     Pagination response.
     """
 
     total: int = Field(...)
-    page_size: int = Field(...)
-    page_number: int = Field(...)
 
 
 class ListMetadataResponse(BaseModel):
@@ -161,10 +187,14 @@ class QueryConfig(BaseModel):
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
     category: str = Field(None)
-    event_location: list[float, float] = Field(None, min_items=2, max_items=2)
-    station_location: list[float, float] = Field(None, min_items=2, max_items=2)
-    max_event_distance: float = Field(None, ge=0)
-    max_station_distance: float = Field(None, ge=0)
+    event_location: list[float, float] = Field(None, min_items=2, max_items=2, description="[longitude, latitude]")
+    station_location: list[float, float] = Field(None, min_items=2, max_items=2, description="[longitude, latitude]")
+    max_event_distance: float = Field(
+        None, ge=0, description="Maximum distance in meters from the event location to the desired location."
+    )
+    max_station_distance: float = Field(
+        None, ge=0, description="Maximum distance in meters from the station location to the desired location."
+    )
     from_date: datetime = Field(None)
     to_date: datetime = Field(None)
     min_pga: float = Field(None)
@@ -172,15 +202,13 @@ class QueryConfig(BaseModel):
     file_name: str = Field(None)
     station_code: str = Field(None)
     direction: str = Field(None)
-    page_size: int = Field(10, ge=1, le=1000)
-    page_number: int = Field(0, ge=0)
+    pagination: PaginationConfig = Field(PaginationConfig())
 
-    def generate_query_string(self) -> tuple[dict, dict]:
-        geo_query: dict = {}
-        other_query: dict = {}
+    def generate_query_string(self) -> dict:
+        query_dict: dict = {}
 
         if self.region is not None:
-            other_query["region"] = self.region
+            query_dict["region"] = self.region
 
         magnitude: dict = {}
         if self.min_magnitude is not None:
@@ -188,22 +216,30 @@ class QueryConfig(BaseModel):
         if self.max_magnitude is not None:
             magnitude["$lte"] = self.max_magnitude
         if magnitude:
-            other_query["magnitude"] = magnitude
+            query_dict["magnitude"] = magnitude
 
         if self.category is not None:
-            other_query["category"] = self.category.lower()
+            query_dict["category"] = self.category.lower()
 
         if self.event_location is not None:
-            geo_json = {"$nearSphere": self.event_location, "$maxDistance": 10 / 6371}
-            if self.max_event_distance is not None:
-                geo_json["$maxDistance"] = self.max_event_distance / 6371 / 1000
-            geo_query["event_location"] = geo_json
+            # geo_json = {"$nearSphere": self.event_location, "$maxDistance": 10 / 6371}
+            # if self.max_event_distance is not None:
+            #     geo_json["$maxDistance"] = self.max_event_distance / 6371 / 1000
+            # geo_query["event_location"] = geo_json
+            max_distance = self.max_event_distance if self.max_event_distance is not None else 100000.0
+            query_dict["event_location"] = {
+                "$geoWithin": {"$centerSphere": [self.event_location, max_distance / 6378100.0]}
+            }
 
         if self.station_location is not None:
-            geo_json = {"$nearSphere": self.station_location, "$maxDistance": 10 / 6371}
-            if self.max_station_distance is not None:
-                geo_json["$maxDistance"] = self.max_station_distance / 6371 / 1000
-            geo_query["station_location"] = geo_json
+            # geo_json = {"$nearSphere": self.station_location, "$maxDistance": 10 / 6371}
+            # if self.max_station_distance is not None:
+            #     geo_json["$maxDistance"] = self.max_station_distance / 6371 / 1000
+            # geo_query["station_location"] = geo_json
+            max_distance = self.max_station_distance if self.max_station_distance is not None else 100000.0
+            query_dict["station_location"] = {
+                "$geoWithin": {"$centerSphere": [self.station_location, max_distance / 6378100.0]}
+            }
 
         date_range: dict = {}
         if self.from_date is not None:
@@ -211,7 +247,7 @@ class QueryConfig(BaseModel):
         if self.to_date is not None:
             date_range["$lte"] = self.to_date
         if date_range:
-            other_query["event_time"] = date_range
+            query_dict["event_time"] = date_range
 
         pga: dict = {}
         if self.min_pga is not None:
@@ -219,18 +255,18 @@ class QueryConfig(BaseModel):
         if self.max_pga is not None:
             pga["$lte"] = self.max_pga
         if pga:
-            other_query["maximum_acceleration"] = pga
+            query_dict["maximum_acceleration"] = pga
 
         if self.direction is not None:
-            other_query["direction"] = {"$regex": self.direction, "$options": "i"}
+            query_dict["direction"] = {"$regex": self.direction, "$options": "i"}
 
         if self.file_name is not None:
-            other_query["file_name"] = {"$regex": self.file_name, "$options": "i"}
+            query_dict["file_name"] = {"$regex": self.file_name, "$options": "i"}
 
         if self.station_code is not None:
-            other_query["station_code"] = {"$regex": self.station_code, "$options": "i"}
+            query_dict["station_code"] = {"$regex": self.station_code, "$options": "i"}
 
-        return geo_query, other_query
+        return query_dict
 
 
 class UploadTaskResponse(BaseModel):

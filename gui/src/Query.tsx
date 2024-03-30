@@ -82,8 +82,8 @@ const Settings: Component<sxProps> = (props) => {
         setLoading(true);
 
         let config = new QueryConfig();
-        if (pageSize() > 0) config.page_size = pageSize();
-        if (pageNumber() > 0) config.page_number = pageNumber();
+        if (pageSize() > 0) config.pagination.page_size = pageSize();
+        if (pageNumber() > 0) config.pagination.page_number = pageNumber();
         if (isNumeric(minMagnitude()) && Number(minMagnitude()) > 0) config.min_magnitude = Number(minMagnitude());
         if (isNumeric(maxMagnitude()) && Number(maxMagnitude()) > 0) config.max_magnitude = Number(maxMagnitude());
         if (isNumeric(minPGA()) && Number(minPGA()) > 0) config.min_pga = Number(minPGA());
@@ -504,53 +504,6 @@ const TanStackTable: Component<sxProps> = (props) => {
                     <KeyboardDoubleArrowRightIcon></KeyboardDoubleArrowRightIcon>
                 </IconButton>
             </Box>
-        </Card>
-    );
-};
-
-const BasicTable: Component<sxProps> = (props) => {
-    return (
-        <Card sx={{ ...props.sx }}>
-            <TableContainer sx={{ maxHeight: "100%", overflow: "auto" }}>
-                <Table stickyHeader>
-                    <TableHead>
-                        <TableRow>
-                            <TableCell>ID</TableCell>
-                            <TableCell>File Name</TableCell>
-                            <TableCell align="right">Magnitude</TableCell>
-                            <TableCell align="right">PGA (Gal, cm/s^2)</TableCell>
-                            <TableCell align="right">Depth (km)</TableCell>
-                            <TableCell align="right">Duration (s)</TableCell>
-                            <TableCell align="right">Event Time</TableCell>
-                            <TableCell align="right">Station</TableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        <For each={records()}>
-                            {(row) => (
-                                <TableRow
-                                    sx={{
-                                        "&:last-child td, &:last-child th": {
-                                            border: 0,
-                                        },
-                                    }}
-                                >
-                                    <TableCell component="th" scope="row">
-                                        {row.id}
-                                    </TableCell>
-                                    <TableCell>{row.file_name}</TableCell>
-                                    <TableCell align="right">{row.magnitude}</TableCell>
-                                    <TableCell align="right">{Math.abs(row.maximum_acceleration).toFixed(2)}</TableCell>
-                                    <TableCell align="right">{row.depth}</TableCell>
-                                    <TableCell align="right">{row.duration}</TableCell>
-                                    <TableCell align="right">{toUTC(row.event_time)}</TableCell>
-                                    <TableCell align="right">{row.station_code.toUpperCase()}</TableCell>
-                                </TableRow>
-                            )}
-                        </For>
-                    </TableBody>
-                </Table>
-            </TableContainer>
         </Card>
     );
 };
