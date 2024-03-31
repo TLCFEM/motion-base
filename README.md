@@ -24,9 +24,11 @@ import anyio
 
 from mb.client import MBClient
 
+api_url = "http://somewhere.the.application.is.hosted"
+
 
 async def search():
-    async with MBClient("http://localhost:8000") as client:
+    async with MBClient(api_url) as client:
         results = await client.search({"min_magnitude": 6.0, "min_pga": 200.0})
         for r in results:
             print(r)
@@ -109,8 +111,10 @@ import anyio
 
 from mb.client import MBClient
 
+# assuming the application is running locally
 api_url = "http://localhost:8000"
-username = "username"
+# using the default credentials
+username = "test"
 password = "password"
 region = "jp"
 
