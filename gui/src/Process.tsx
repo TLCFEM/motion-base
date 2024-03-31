@@ -33,6 +33,7 @@ const [normalised, setNormalised] = createSignal(false);
 const [withWaveform, setWithWaveform] = createSignal(true);
 const [withFilter, setWithFilter] = createSignal(false);
 const [withSpectrum, setWithSpectrum] = createSignal(false);
+const [withLogScale, setWithLogScale] = createSignal(false);
 const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
 
 const [lowCut, setLowCut] = createSignal("");
@@ -221,6 +222,14 @@ const Settings: Component<sxProps> = (props) => {
                             <Checkbox checked={withSpectrum()} onChange={(_, checked) => setWithSpectrum(checked)} />
                         }
                     />
+                    <FormControlLabel
+                        id="chk-logscale"
+                        name="chk-logscale"
+                        label="Logscale"
+                        control={
+                            <Checkbox checked={withLogScale()} onChange={(_, checked) => setWithLogScale(checked)} />
+                        }
+                    />
                     <TextField
                         id="record-id"
                         sx={{ minWidth: "36ch" }}
@@ -236,41 +245,6 @@ const Settings: Component<sxProps> = (props) => {
                         value={removeHead()}
                         onChange={(_, value) => setRemoveHead(value)}
                     />
-                    <ButtonGroup variant="contained" orientation="horizontal">
-                        <Button onClick={process} id="btn-process" disabled={loading()}>
-                            Process
-                        </Button>
-                        <Button onClick={clear} id="btn-reset" disabled={loading()}>
-                            Reset
-                        </Button>
-                        <Button
-                            onClick={() => {
-                                const element = createDownloadLink(processed());
-                                element.download = `${processed().id}.json`;
-                                document.body.appendChild(element); // Required for this to work in FireFox
-                                element.click();
-                            }}
-                            id="btn-download"
-                            disabled={loading() || !processed().id}
-                        >
-                            Download
-                        </Button>
-                    </ButtonGroup>
-                    <Modal open={error() !== ""} onClose={() => setError("")}>
-                        <Alert
-                            severity="error"
-                            sx={{
-                                position: "absolute",
-                                top: "50%",
-                                left: "50%",
-                                transform: "translate(-50%, -50%)",
-                                width: "40%",
-                            }}
-                        >
-                            <AlertTitle>Error</AlertTitle>
-                            {error()}
-                        </Alert>
-                    </Modal>
                 </Box>
                 <Box
                     sx={{
@@ -419,6 +393,41 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={!withResponseSpectrum()}
                         sx={{ maxWidth: "10rem" }}
                     />
+                    <ButtonGroup variant="contained" orientation="horizontal">
+                        <Button onClick={process} id="btn-process" disabled={loading()}>
+                            Process
+                        </Button>
+                        <Button onClick={clear} id="btn-reset" disabled={loading()}>
+                            Reset
+                        </Button>
+                        <Button
+                            onClick={() => {
+                                const element = createDownloadLink(processed());
+                                element.download = `${processed().id}.json`;
+                                document.body.appendChild(element); // Required for this to work in FireFox
+                                element.click();
+                            }}
+                            id="btn-download"
+                            disabled={loading() || !processed().id}
+                        >
+                            Download
+                        </Button>
+                    </ButtonGroup>
+                    <Modal open={error() !== ""} onClose={() => setError("")}>
+                        <Alert
+                            severity="error"
+                            sx={{
+                                position: "absolute",
+                                top: "50%",
+                                left: "50%",
+                                transform: "translate(-50%, -50%)",
+                                width: "40%",
+                            }}
+                        >
+                            <AlertTitle>Error</AlertTitle>
+                            {error()}
+                        </Alert>
+                    </Modal>
                 </Box>
             </CardContent>
             {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
@@ -490,6 +499,7 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
+                    type: withLogScale() ? "log" : "linear",
                     autorange: true,
                     automargin: true,
                 },
