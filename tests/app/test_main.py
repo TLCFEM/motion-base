@@ -18,6 +18,8 @@ from http import HTTPStatus
 
 import pytest
 
+from mb.record.sync_parser import ParserNZSM
+from mb.record.sync_record import Record
 from mb.record.utility import str_factory
 
 
@@ -44,17 +46,22 @@ async def test_for_test_only(mock_client):
 
 @pytest.fixture(scope="function")
 def sample_data(pwd):
-    from mb.record.sync_parser import ParserNZSM
+    ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
 
-    yield ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
+    yield Record.objects()
 
 
 @pytest.mark.parametrize(
     "data_type",
     [pytest.param("raw", id="raw"), pytest.param("waveform", id="waveform"), pytest.param("spectrum", id="spectrum")],
 )
-async def test_jackpot(mock_client, sample_data, data_type):
+async def test_jackpot(sample_data, mock_client, data_type):
     response = await mock_client.get(f"/{data_type}/jackpot")
+    assert response.status_code == HTTPStatus.OK
+
+
+async def test_waveform(sample_data, mock_client):
+    response = await mock_client.post("/waveform", json=sample_data[0].id)
     assert response.status_code == HTTPStatus.OK
 
 
@@ -65,13 +72,8 @@ async def test_query(mock_client, count_total):
 
 
 async def test_process(sample_data, mock_celery, mock_client):
-    from mb.record.async_record import Record
-
-    record = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
-    await Record.find_one(Record.id == record[0].id)
-
     response = await mock_client.post(
-        f"/process?record_id={record[0].id}",
+        f"/process?record_id={sample_data[0].id}",
         json={"with_filter": True, "with_spectrum": True, "with_response_spectrum": True},
     )
     assert response.status_code == HTTPStatus.OK
