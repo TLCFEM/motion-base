@@ -104,14 +104,14 @@ export default function AboutModal() {
                         </Link>
                     </Stack>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Link href="https://fastapi.tiangolo.com/">
-                            <img src={fastapi_logo} alt="fastapi" height="40px" />
-                        </Link>
                         <Link href="https://docs.celeryq.dev/en/stable/">
                             <img src={celery_logo} alt="celery" height="40px" />
                         </Link>
                         <Link href="https://scipy.org/">
                             <img src={scipy_logo} alt="scipy" height="40px" />
+                        </Link>
+                        <Link href="https://fastapi.tiangolo.com/">
+                            <img src={fastapi_logo} alt="fastapi" height="40px" />
                         </Link>
                     </Stack>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
