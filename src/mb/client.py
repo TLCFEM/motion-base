@@ -30,17 +30,9 @@ from rich.console import Console
 from rich.progress import track
 
 from mb.app.response import QueryConfig, RecordResponse
-from mb.record.response_spectrum import response_spectrum
-from mb.record.utility import apply_filter, zero_stuff
 
 
 class MBRecord(RecordResponse):
-    def filter(self, window, upsampling: int = 1):
-        new_waveform: np.ndarray = apply_filter(window * upsampling, zero_stuff(upsampling, self.waveform))
-        self.time_interval /= upsampling
-        # noinspection PyTypeChecker
-        self.waveform = new_waveform.tolist()
-
     def plot_waveform(self, fig: Figure | None = None):
         if fig is None:
             fig = plt.figure()
@@ -92,27 +84,6 @@ class MBRecord(RecordResponse):
         plt.ylabel("SA")
         fig.tight_layout()
         return fig
-
-    def to_spectrum(self):
-        if self.time_interval is None or self.waveform is None:
-            raise RuntimeError("Cannot convert to spectrum.")
-
-        self.frequency_interval = 1 / (self.time_interval * len(self.waveform))
-        self.spectrum = 2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
-
-    def to_response_spectrum(self, damping_ratio: float, period: list[float] | np.ndarray):
-        if isinstance(period, np.ndarray):
-            # noinspection PyTypeChecker
-            self.period = period.tolist()
-            spectra = response_spectrum(damping_ratio, self.time_interval, np.array(self.waveform), period)
-        else:
-            self.period = period
-            spectra = response_spectrum(
-                damping_ratio, self.time_interval, np.array(self.waveform), np.array(self.period)
-            )
-        self.displacement_spectrum = spectra[:, 0].tolist()
-        self.velocity_spectrum = spectra[:, 1].tolist()
-        self.acceleration_spectrum = spectra[:, 2].tolist()
 
     def print(self):
         Console().print(self)
@@ -274,7 +245,7 @@ async def main():
     async with MBClient("http://localhost:8000", "test", "password") as client:
         results = await client.search(QueryConfig())
         await client.download([r.id for r in results])
-        fig: Figure = None
+        fig: Figure = None  # type: ignore
         for result in client.download_pool:
             fig = result.plot_spectrum(fig)
         fig.legend()

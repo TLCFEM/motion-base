@@ -17,9 +17,11 @@ from __future__ import annotations
 from datetime import datetime
 from enum import Enum
 
+import numpy as np
 from pydantic import BaseModel, Field, validator
 
-from ..record.utility import filter_regex, window_regex
+from ..record.response_spectrum import response_spectrum
+from ..record.utility import filter_regex, window_regex, apply_filter, zero_stuff
 
 
 class MetadataResponse(BaseModel):
@@ -88,6 +90,33 @@ class RecordResponse(MetadataResponse):
     displacement_spectrum: list[float] | None = Field(None)
     velocity_spectrum: list[float] | None = Field(None)
     acceleration_spectrum: list[float] | None = Field(None)
+
+    def filter(self, window, upsampling: int = 1):
+        new_waveform: np.ndarray = apply_filter(window * upsampling, zero_stuff(upsampling, self.waveform))
+        self.time_interval /= upsampling
+        # noinspection PyTypeChecker
+        self.waveform = new_waveform.tolist()
+
+    def to_spectrum(self):
+        if self.time_interval is None or self.waveform is None:
+            raise RuntimeError("Cannot convert to spectrum.")
+
+        self.frequency_interval = 1 / (self.time_interval * len(self.waveform))
+        self.spectrum = 2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
+
+    def to_response_spectrum(self, damping_ratio: float, period: list[float] | np.ndarray):
+        if isinstance(period, np.ndarray):
+            # noinspection PyTypeChecker
+            self.period = period.tolist()
+            spectra = response_spectrum(damping_ratio, self.time_interval, np.array(self.waveform), period)
+        else:
+            self.period = period
+            spectra = response_spectrum(
+                damping_ratio, self.time_interval, np.array(self.waveform), np.array(self.period)
+            )
+        self.displacement_spectrum = spectra[:, 0].tolist()
+        self.velocity_spectrum = spectra[:, 1].tolist()
+        self.acceleration_spectrum = spectra[:, 2].tolist()
 
 
 class ListRecordResponse(BaseModel):
