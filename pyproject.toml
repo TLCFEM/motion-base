@@ -33,7 +33,7 @@ dependencies = [
     "mongoengine",
     "numba",
     "Pint",
-    "pydantic<2",
+    "pydantic<3",
     "python-dotenv",
     "python-multipart",
     "requests",
