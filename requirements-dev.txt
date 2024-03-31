@@ -68,7 +68,7 @@ platformdirs==4.2.0       # via black
 pluggy==1.4.0             # via pytest
 prompt-toolkit==3.0.43    # via click-repl
 psutil==5.9.8             # via locust
-pycparser==2.21           # via cffi
+pycparser==2.22           # via cffi
 pydantic==1.10.14         # via beanie, fastapi, lazy-model, motion-base (pyproject.toml)
 pygments==2.17.2          # via rich
 pymongo==4.6.3            # via mongoengine, motor
