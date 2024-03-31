@@ -385,6 +385,11 @@ const TanStackTable: Component<sxProps> = (props) => {
             header: "Station",
             cell: (info) => info.getValue<string>().toUpperCase(),
         },
+        {
+            accessorKey: "direction",
+            header: "Component",
+            cell: (info) => info.getValue<string>().toUpperCase(),
+        },
     ];
 
     const table = createSolidTable({
