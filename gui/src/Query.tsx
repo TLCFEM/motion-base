@@ -474,7 +474,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 2px 4px 4px" }}
                     size="small"
                 >
-                    <RemoveIcon></RemoveIcon>
+                    <RemoveIcon />
                 </IconButton>
                 <IconButton
                     color="secondary"
@@ -483,7 +483,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 2px" }}
                     size="small"
                 >
-                    <AddIcon></AddIcon>
+                    <AddIcon />
                 </IconButton>
                 <LinearProgress
                     color="secondary"
@@ -502,7 +502,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 2px" }}
                     size="small"
                 >
-                    <KeyboardDoubleArrowLeftIcon></KeyboardDoubleArrowLeftIcon>
+                    <KeyboardDoubleArrowLeftIcon />
                 </IconButton>
                 <IconButton
                     color="secondary"
@@ -511,7 +511,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 2px" }}
                     size="small"
                 >
-                    <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
+                    <KeyboardArrowLeftIcon />
                 </IconButton>
                 <IconButton
                     color="secondary"
@@ -520,7 +520,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 2px" }}
                     size="small"
                 >
-                    <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
+                    <KeyboardArrowRightIcon />
                 </IconButton>
                 <IconButton
                     color="secondary"
@@ -529,7 +529,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     sx={{ margin: "4px 4px 4px 2px" }}
                     size="small"
                 >
-                    <KeyboardDoubleArrowRightIcon></KeyboardDoubleArrowRightIcon>
+                    <KeyboardDoubleArrowRightIcon />
                 </IconButton>
             </Box>
         </Card>

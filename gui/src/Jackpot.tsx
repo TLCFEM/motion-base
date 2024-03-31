@@ -16,16 +16,17 @@
 import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
 import { jackpot_waveform_api, sxProps, toUTC } from "./API";
 import {
-    Button,
     Card,
     CardActions,
     CardContent,
     Checkbox,
     FormControlLabel,
+    IconButton,
     LinearProgress,
     Paper,
     Typography,
 } from "@suid/material";
+import ShuffleOnIcon from "@suid/icons-material/ShuffleOn";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-dist-min";
@@ -166,9 +167,9 @@ const MetadataCard: Component<sxProps> = (props) => {
                         />
                     }
                 />
-                <Button id="btn-next" variant="contained" onClick={refetch} disabled={data.loading}>
-                    Next
-                </Button>
+                <IconButton id="btn-next" size="large" color="primary" onClick={refetch} disabled={data.loading}>
+                    <ShuffleOnIcon />
+                </IconButton>
             </CardActions>
         </Card>
     );
