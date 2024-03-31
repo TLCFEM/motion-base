@@ -32,9 +32,7 @@ export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
     const theme = useTheme();
 
-    const commit_link = (
-        <Link href="https://github.com/TLCFEM/motion-base/commit/git-commit-long">git-commit-short</Link>
-    );
+    const commit_link = <Link href="https://github.com/TLCFEM/motion-base/tree/git-commit-long">git-commit-short</Link>;
     const repo_link = <Link href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</Link>;
     const nied_link = <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>;
     const nzsm_link = <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand Strong-Motion</Link>;
