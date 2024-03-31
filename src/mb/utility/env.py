@@ -38,6 +38,7 @@ MB_SUPERUSER_LAST_NAME: str = os.getenv("MB_SUPERUSER_LAST_NAME", "admin")
 MB_SUPERUSER_USERNAME: str = os.getenv("MB_SUPERUSER_USERNAME", "test")
 MB_SUPERUSER_PASSWORD: str = os.getenv("MB_SUPERUSER_PASSWORD", "password")
 
+MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "StrongMotion")
 MONGO_HOST: str = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
 MONGO_USERNAME: str = os.getenv("MONGO_USERNAME", "test")

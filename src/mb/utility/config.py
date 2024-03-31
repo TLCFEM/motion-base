@@ -18,6 +18,7 @@ from mongoengine import connect, disconnect
 from motor.motor_asyncio import AsyncIOMotorClient
 
 from .env import (
+    MONGO_DB_NAME,
     MONGO_HOST,
     MONGO_PORT,
     MONGO_USERNAME,
@@ -32,24 +33,18 @@ from ..record.async_record import Record, UploadTask
 
 
 def rabbitmq_uri():
-    if RABBITMQ_USERNAME is None or RABBITMQ_PASSWORD is None or RABBITMQ_HOST is None or RABBITMQ_PORT is None:
-        raise RuntimeError("Missing rabbitmq related environment variables.")
-
     return f"amqp://{RABBITMQ_USERNAME}:{RABBITMQ_PASSWORD}@{RABBITMQ_HOST}:{RABBITMQ_PORT}/vhost"
 
 
 def mongo_uri():
-    if MONGO_USERNAME is None or MONGO_PASSWORD is None or MONGO_HOST is None or MONGO_PORT is None:
-        raise RuntimeError("Missing mongo related environment variables.")
-
     return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
 async def init_mongo():
     uri = mongo_uri()
-    mongo_client = connect(host=f"{uri}StrongMotion?authSource=admin", uuidrepresentation="standard")
+    mongo_client = connect(host=f"{uri}{MONGO_DB_NAME}?authSource=admin", uuidrepresentation="standard")
     await init_beanie(
-        database=AsyncIOMotorClient(uri, uuidRepresentation="standard")["StrongMotion"],
+        database=AsyncIOMotorClient(uri, uuidRepresentation="standard")[MONGO_DB_NAME],
         document_models=[Record, User, UploadTask],
     )
     return mongo_client

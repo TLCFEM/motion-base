@@ -14,12 +14,14 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
+from uuid import uuid4
 
 import pytest
 from httpx import AsyncClient, ASGITransport
 
 from mb.app.main import app
 from mb.app.utility import User, is_active, bcrypt_hash
+from mb.utility import env
 from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
 
@@ -34,10 +36,13 @@ def mock_celery(celery_session_worker):
 
 
 @pytest.fixture(scope="function", autouse=True)
-async def mongo_connection():
-    mongo_client = await init_mongo()
-    yield
-    mongo_client.drop_database("StrongMotion")
+async def mongo_connection(monkeypatch):
+    with monkeypatch.context() as m:
+        random_db: str = uuid4().hex
+        m.setattr(env, "MONGO_DB_NAME", random_db)
+        mongo_client = await init_mongo()
+        yield
+        mongo_client.drop_database(random_db)
 
 
 @pytest.fixture(scope="function", autouse=True)

@@ -26,6 +26,7 @@ import leafllet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
+import scipy_logo from "./assets/scipy.svg";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
@@ -67,7 +68,7 @@ export default function AboutModal() {
                         </Typography>
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        This is a demo of the strong motion database.
+                        This is a demo of the ground motion database.
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The source code is available in this repository {repo_link}.
@@ -100,11 +101,16 @@ export default function AboutModal() {
                         <Link href="https://beanie-odm.dev/">
                             <img src={beanie_logo} alt="beanie" height="40px" />
                         </Link>
+                    </Stack>
+                    <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
+                        <Link href="https://fastapi.tiangolo.com/">
+                            <img src={fastapi_logo} alt="fastapi" height="40px" />
+                        </Link>
                         <Link href="https://docs.celeryq.dev/en/stable/">
                             <img src={celery_logo} alt="celery" height="40px" />
                         </Link>
-                        <Link href="https://fastapi.tiangolo.com/">
-                            <img src={fastapi_logo} alt="fastapi" height="40px" />
+                        <Link href="https://scipy.org/">
+                            <img src={scipy_logo} alt="scipy" height="40px" />
                         </Link>
                     </Stack>
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">

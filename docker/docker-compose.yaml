@@ -7,9 +7,9 @@ services:
     ports:
       - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_INITDB_DATABASE: StrongMotion
       MONGO_DATA_DIR: /data/db
     volumes:
       - motion_mongo:/data/db
