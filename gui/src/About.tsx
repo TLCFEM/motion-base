@@ -32,6 +32,9 @@ export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
     const theme = useTheme();
 
+    const commit_link = (
+        <Link href="https://github.com/TLCFEM/motion-base/commit/git-commit-long">git-commit-short</Link>
+    );
     const repo_link = <Link href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</Link>;
     const nied_link = <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>;
     const nzsm_link = <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand Strong-Motion</Link>;
@@ -68,7 +71,7 @@ export default function AboutModal() {
                         </Typography>
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        This is a demo of the ground motion database.
+                        This is a demo of the ground motion database ({commit_link}).
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The source code is available in this repository {repo_link}.

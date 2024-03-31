@@ -10,6 +10,8 @@ if ! [ -x "$(command -v git)" ]; then
   exit 1
 fi
 
-COMMIT_HASH=$(git rev-parse --short HEAD)
+COMMIT_LONG=$(git rev-parse HEAD)
+COMMIT_SHORT=$(git rev-parse --short HEAD)
 
-sed -i "s/git-commit-id/${COMMIT_HASH}/g" gui/src/About.tsx
+sed -i "s/git-commit-long/${COMMIT_LONG}/g" gui/src/About.tsx
+sed -i "s/git-commit-short/${COMMIT_SHORT}/g" gui/src/About.tsx
