@@ -15,7 +15,7 @@
 
 import { Component, createEffect, createSignal, For, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
-import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
+import { DefaultMap, epicenterIcon, selectedStationIcon, stationIcon } from "./Map";
 import {
     Alert,
     AlertTitle,
@@ -419,6 +419,8 @@ const TanStackTable: Component<sxProps> = (props) => {
         });
     });
 
+    let marker: L.Marker;
+
     return (
         <Card sx={{ ...props.sx, display: "flex", flexDirection: "column" }}>
             <TableContainer sx={{ overflow: "auto", flexGrow: 1 }}>
@@ -443,7 +445,37 @@ const TanStackTable: Component<sxProps> = (props) => {
                     <TableBody>
                         <For each={table.getRowModel().rows}>
                             {(row) => (
-                                <StyledTableRow>
+                                <StyledTableRow
+                                    onClick={() => {
+                                        if (marker) {
+                                            if (marker.getPopup().getContent() === row.original.id) {
+                                                marker.remove();
+                                                marker = undefined;
+                                                return;
+                                            }
+
+                                            marker.setLatLng(
+                                                new LatLng(
+                                                    row.original.station_location[1],
+                                                    row.original.station_location[0],
+                                                ),
+                                            );
+                                        } else {
+                                            marker = L.marker(
+                                                new LatLng(
+                                                    row.original.station_location[1],
+                                                    row.original.station_location[0],
+                                                ),
+                                                {
+                                                    icon: selectedStationIcon,
+                                                },
+                                            ).addTo(map);
+                                        }
+                                        marker.bindPopup(row.original.id);
+                                        marker.setZIndexOffset(1000);
+                                        map.flyTo(marker.getLatLng(), map.getZoom());
+                                    }}
+                                >
                                     <For each={row.getVisibleCells()}>
                                         {(cell) => (
                                             <TableCell>
@@ -536,9 +568,9 @@ const TanStackTable: Component<sxProps> = (props) => {
     );
 };
 
-const QueryDatabase: Component = () => {
-    let map: L.Map;
+let map: L.Map;
 
+const QueryDatabase: Component = () => {
     const normalize_longitude = (lon: number) => {
         while (lon < -180) lon += 360;
         while (lon > 180) lon -= 360;

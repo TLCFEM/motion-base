@@ -19,6 +19,8 @@ import "leaflet/dist/images/layers.png";
 import "leaflet/dist/images/layers-2x.png";
 import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import marker from "leaflet/dist/images/marker-icon.png";
+import markerRetina2 from "./assets/marker-icon2-2x.png";
+import marker2 from "./assets/marker-icon2.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
 import earthquake from "./assets/earthquake.svg";
 
@@ -50,6 +52,18 @@ export const epicenterIcon = new LeafIcon({
 export const stationIcon = L.icon({
     iconUrl: marker,
     iconRetinaUrl: markerRetina,
+    shadowUrl: shadow,
+    iconSize: [25, 41],
+    iconAnchor: [12, 41],
+    popupAnchor: [1, -34],
+    tooltipAnchor: [16, -28],
+    shadowSize: [41, 41],
+});
+
+// @ts-ignore
+export const selectedStationIcon = L.icon({
+    iconUrl: marker2,
+    iconRetinaUrl: markerRetina2,
     shadowUrl: shadow,
     iconSize: [25, 41],
     iconAnchor: [12, 41],
