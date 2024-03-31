@@ -38,7 +38,7 @@ class MBRecord(RecordResponse):
             fig = plt.figure()
             gca = fig.add_subplot(111)
             gca.set_xlabel("Frequency (Hz)")
-            gca.set_ylabel("Acceleration Magnitude (Gal)")
+            gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
         else:
             gca = fig.gca()
 
@@ -55,7 +55,7 @@ class MBRecord(RecordResponse):
             fig = plt.figure()
             gca = fig.add_subplot(111)
             gca.set_xlabel("Frequency (Hz)")
-            gca.set_ylabel("Acceleration Magnitude (Gal)")
+            gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
         else:
             gca = fig.gca()
 

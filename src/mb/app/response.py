@@ -18,7 +18,7 @@ from datetime import datetime
 from enum import Enum
 
 import numpy as np
-from pydantic import BaseModel, Field, validator
+from pydantic import BaseModel, Field, validator, root_validator
 
 from ..record.response_spectrum import response_spectrum
 from ..record.utility import filter_regex, window_regex, apply_filter, zero_stuff
@@ -80,6 +80,8 @@ class RecordResponse(MetadataResponse):
     Response represents a record which can be either waveform or spectrum.
     """
 
+    processed_data_unit: str | None = Field(None)
+
     time_interval: float | None = Field(None)
     waveform: list[float] | None = Field(None)
 
@@ -91,9 +93,16 @@ class RecordResponse(MetadataResponse):
     velocity_spectrum: list[float] | None = Field(None)
     acceleration_spectrum: list[float] | None = Field(None)
 
-    def filter(self, window, upsampling: int = 1):
-        new_waveform: np.ndarray = apply_filter(window * upsampling, zero_stuff(upsampling, self.waveform))
-        self.time_interval /= upsampling
+    @root_validator
+    def normalise(cls, values):
+        if values.get("processed_data_unit", None):
+            values["processed_data_unit"] = values["raw_data_unit"]
+
+        return values
+
+    def filter(self, window, up_ratio: int = 1):
+        new_waveform: np.ndarray = apply_filter(window * up_ratio, zero_stuff(up_ratio, self.waveform))
+        self.time_interval /= up_ratio
         # noinspection PyTypeChecker
         self.waveform = new_waveform.tolist()
 
