@@ -42,5 +42,4 @@ if __name__ == "__main__":
         else:
             index += 1
 
-    print(f"Run the app with the following arguments: {config.dict()}")
     run_app(config)

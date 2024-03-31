@@ -50,7 +50,6 @@ def run_app(setting: Config):
 
         if (workers := setting.workers if setting.overwrite_env else int(MB_FASTAPI_WORKERS)) > 1:
             config["workers"] = workers
-            config["log_level"] = "info"
         elif setting.debug:
             config["reload"] = True
             config["log_level"] = "debug"
@@ -63,4 +62,5 @@ def run_app(setting: Config):
 
         import uvicorn
 
+        print(f"Run the app with the following arguments: {config}.")
         uvicorn.run("mb.app.main:app", **config)
