@@ -29,6 +29,7 @@ import {
     Modal,
     Paper,
     Stack,
+    styled,
     Table,
     TableBody,
     TableCell,
@@ -57,6 +58,16 @@ import {
     SortingState,
 } from "@tanstack/solid-table";
 
+const [pageSize, setPageSize] = createSignal(0);
+const [pageNumber, setPageNumber] = createSignal(0);
+const [minMagnitude, setMinMagnitude] = createSignal("");
+const [maxMagnitude, setMaxMagnitude] = createSignal("");
+const [minPGA, setMinPGA] = createSignal("");
+const [maxPGA, setMaxPGA] = createSignal("");
+const [fromDate, setFromDate] = createSignal<Date>(new Date(0));
+const [toDate, setToDate] = createSignal<Date>(new Date(0));
+const [fileName, setFileName] = createSignal("");
+const [stationCode, setStationCode] = createSignal("");
 const [eventLocation, setEventLocation] = createSignal<[number, number]>();
 const [maxEventDistance, setMaxEventDistance] = createSignal(0);
 
@@ -66,17 +77,6 @@ const [error, setError] = createSignal("");
 
 const Settings: Component<sxProps> = (props) => {
     const [loading, setLoading] = createSignal<boolean>(false);
-
-    const [pageSize, setPageSize] = createSignal(0);
-    const [pageNumber, setPageNumber] = createSignal(0);
-    const [minMagnitude, setMinMagnitude] = createSignal("");
-    const [maxMagnitude, setMaxMagnitude] = createSignal("");
-    const [minPGA, setMinPGA] = createSignal("");
-    const [maxPGA, setMaxPGA] = createSignal("");
-    const [fromDate, setFromDate] = createSignal<Date>(new Date(0));
-    const [toDate, setToDate] = createSignal<Date>(new Date(0));
-    const [fileName, setFileName] = createSignal("");
-    const [stationCode, setStationCode] = createSignal("");
 
     async function fetch() {
         setLoading(true);
@@ -117,16 +117,7 @@ const Settings: Component<sxProps> = (props) => {
         setFileName("");
         setStationCode("");
 
-        // setRecords([] as SeismicRecord[]);
-    }
-
-    function download() {
-        if (records().length > 0) {
-            const element = createDownloadLink(records());
-            element.download = "search.json";
-            document.body.appendChild(element); // Required for this to work in FireFox
-            element.click();
-        }
+        setRecords([] as SeismicRecord[]);
     }
 
     onMount(() => {
@@ -211,7 +202,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Page Number"
                         type="number"
                         value={pageNumber()}
-                        defaultValue={pageNumber()}
                         onChange={(_, value) => setPageNumber(Math.max(Math.round(Number(value)), 0))}
                         disabled={loading()}
                     />
@@ -220,7 +210,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Page Size"
                         type="number"
                         value={pageSize() > 0 ? pageSize() : ""}
-                        defaultValue={pageSize() > 0 ? pageSize() : ""}
                         onChange={(_, value) =>
                             setPageSize(value ? Math.max(Math.min(1000, Math.round(Number(value))), 1) : 0)
                         }
@@ -234,8 +223,7 @@ const Settings: Component<sxProps> = (props) => {
                         label="Min Magnitude"
                         type="number"
                         value={minMagnitude()}
-                        defaultValue={minMagnitude()}
-                        onChange={(_, value) => setMinMagnitude(value)}
+                        onChange={(_, value) => setMinMagnitude(Number(value) > 10 ? "10" : value)}
                         disabled={loading()}
                     />
                     <TextField
@@ -244,8 +232,7 @@ const Settings: Component<sxProps> = (props) => {
                         label="Max Magnitude"
                         type="number"
                         value={maxMagnitude()}
-                        defaultValue={maxMagnitude()}
-                        onChange={(_, value) => setMaxMagnitude(value)}
+                        onChange={(_, value) => setMaxMagnitude(Number(value) > 10 ? "10" : value)}
                         disabled={loading()}
                     />
                 </Stack>
@@ -256,7 +243,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Min PGA (Gal)"
                         type="number"
                         value={minPGA()}
-                        defaultValue={minPGA()}
                         onChange={(_, value) => setMinPGA(value)}
                         disabled={loading()}
                     />
@@ -266,30 +252,29 @@ const Settings: Component<sxProps> = (props) => {
                         label="Max PGA (Gal)"
                         type="number"
                         value={maxPGA()}
-                        defaultValue={maxPGA()}
                         onChange={(_, value) => setMaxPGA(value)}
                         disabled={loading()}
                     />
                 </Stack>
                 <Stack sx={stackProps}>
                     <TextField
+                        sx={{ minWidth: "17ch" }}
                         id="from-date"
                         label="From"
                         type="date"
                         InputLabelProps={{ shrink: true }}
                         value={fromDate().getTime() === 0 ? "" : fromDate().toISOString().split("T")[0]}
                         onChange={(_, value) => setFromDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                        sx={{ minWidth: "17ch" }}
                         disabled={loading()}
                     />
                     <TextField
+                        sx={{ minWidth: "17ch" }}
                         id="to-date"
                         label="To"
                         type="date"
                         InputLabelProps={{ shrink: true }}
                         value={toDate().getTime() === 0 ? "" : toDate().toISOString().split("T")[0]}
                         onChange={(_, value) => setToDate(value ? new Date(Date.parse(value)) : new Date(0))}
-                        sx={{ minWidth: "17ch" }}
                         disabled={loading()}
                     />
                 </Stack>
@@ -297,12 +282,14 @@ const Settings: Component<sxProps> = (props) => {
                     <TextField
                         id="file-name"
                         label="File Name"
+                        value={fileName()}
                         onChange={(_, value) => setFileName(value)}
                         disabled={loading()}
                     />
                     <TextField
                         id="station-code"
                         label="Station Code"
+                        value={stationCode()}
                         onChange={(_, value) => setStationCode(value)}
                         disabled={loading()}
                     />
@@ -314,7 +301,16 @@ const Settings: Component<sxProps> = (props) => {
                     <Button onClick={clear} id="btn-clear" disabled={loading()}>
                         Clear
                     </Button>
-                    <Button onClick={download} id="btn-save" disabled={loading() || records().length === 0}>
+                    <Button
+                        onClick={() => {
+                            const element = createDownloadLink(records());
+                            element.download = "search.json";
+                            document.body.appendChild(element); // Required for this to work in FireFox
+                            element.click();
+                        }}
+                        id="btn-save"
+                        disabled={loading() || records().length === 0}
+                    >
                         Download
                     </Button>
                 </ButtonGroup>
@@ -340,22 +336,27 @@ const Settings: Component<sxProps> = (props) => {
 };
 
 const TanStackTable: Component<sxProps> = (props) => {
-    const [sorting, setSorting] = createSignal<SortingState>([]);
+    const [tableSorting, setTableSorting] = createSignal<SortingState>([]);
 
-    const [pageSize, setPageSize] = createSignal(10);
-    const [pagination, setPagination] = createSignal({ pageIndex: 0, pageSize: pageSize() });
+    const [tablePageSize, setTablePageSize] = createSignal(10);
+    const [tablePagination, setTablePagination] = createSignal({ pageIndex: 0, pageSize: tablePageSize() });
 
-    createEffect(() => setPagination({ pageIndex: 0, pageSize: pageSize() }));
+    createEffect(() => setTablePagination({ pageIndex: 0, pageSize: tablePageSize() }));
+
+    const StyledTableRow = styled(TableRow)(({ theme }) => ({
+        "&:nth-of-type(odd)": {
+            backgroundColor: theme.palette.action.hover,
+        },
+        // "&:last-child td, &:last-child th": {
+        //     border: 0,
+        // },
+    }));
 
     const columns: ColumnDef<SeismicRecord>[] = [
         {
             accessorKey: "id",
             header: "ID",
         },
-        // {
-        //     accessorKey: "file_name",
-        //     header: "File Name",
-        // },
         {
             accessorKey: "magnitude",
             header: "Magnitude",
@@ -392,25 +393,19 @@ const TanStackTable: Component<sxProps> = (props) => {
         },
         columns: columns,
         getCoreRowModel: getCoreRowModel(),
-        onSortingChange: setSorting,
+        onSortingChange: setTableSorting,
         getSortedRowModel: getSortedRowModel(),
-        onPaginationChange: setPagination,
+        onPaginationChange: setTablePagination,
         getPaginationRowModel: getPaginationRowModel(),
         state: {
             get sorting() {
-                return sorting();
+                return tableSorting();
             },
             get pagination() {
-                return pagination();
+                return tablePagination();
             },
         },
     });
-
-    const rowProps = {
-        "&:last-child td, &:last-child th": {
-            border: 0,
-        },
-    };
 
     onMount(() => {
         tippy(`#table-header`, {
@@ -443,7 +438,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                     <TableBody>
                         <For each={table.getRowModel().rows}>
                             {(row) => (
-                                <TableRow sx={rowProps}>
+                                <StyledTableRow>
                                     <For each={row.getVisibleCells()}>
                                         {(cell) => (
                                             <TableCell>
@@ -451,7 +446,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                                             </TableCell>
                                         )}
                                     </For>
-                                </TableRow>
+                                </StyledTableRow>
                             )}
                         </For>
                     </TableBody>
@@ -467,40 +462,68 @@ const TanStackTable: Component<sxProps> = (props) => {
                     // gap: "1rem",
                 }}
             >
-                <IconButton color="secondary" onClick={() => setPageSize(pageSize() - 1)} disabled={pageSize() <= 1}>
+                <IconButton
+                    color="secondary"
+                    onClick={() => setTablePageSize(tablePageSize() - 1)}
+                    disabled={tablePageSize() <= 1}
+                    sx={{ margin: "4px 2px 4px 4px" }}
+                    size="small"
+                >
                     <RemoveIcon></RemoveIcon>
                 </IconButton>
                 <IconButton
                     color="secondary"
-                    onClick={() => setPageSize(pageSize() + 1)}
-                    disabled={pageSize() >= records().length}
+                    onClick={() => setTablePageSize(tablePageSize() + 1)}
+                    disabled={tablePageSize() >= records().length}
+                    sx={{ margin: "4px 2px" }}
+                    size="small"
                 >
                     <AddIcon></AddIcon>
                 </IconButton>
                 <LinearProgress
-                    sx={{ flexGrow: 1 }}
-                    variant="determinate"
                     color="secondary"
+                    variant="determinate"
                     value={
                         table.getPageCount() === 0
                             ? 0
                             : (100 * (table.getState().pagination.pageIndex + 1)) / table.getPageCount()
                     }
+                    sx={{ flexGrow: 1, margin: "4px 2px" }}
                 />
-                <IconButton color="secondary" onClick={() => table.firstPage()} disabled={!table.getCanPreviousPage()}>
+                <IconButton
+                    color="secondary"
+                    onClick={() => table.firstPage()}
+                    disabled={!table.getCanPreviousPage()}
+                    sx={{ margin: "4px 2px" }}
+                    size="small"
+                >
                     <KeyboardDoubleArrowLeftIcon></KeyboardDoubleArrowLeftIcon>
                 </IconButton>
                 <IconButton
                     color="secondary"
                     onClick={() => table.previousPage()}
                     disabled={!table.getCanPreviousPage()}
+                    sx={{ margin: "4px 2px" }}
+                    size="small"
                 >
                     <KeyboardArrowLeftIcon></KeyboardArrowLeftIcon>
                 </IconButton>
-                <IconButton color="secondary" onClick={() => table.nextPage()} disabled={!table.getCanNextPage()}>
+                <IconButton
+                    color="secondary"
+                    onClick={() => table.nextPage()}
+                    disabled={!table.getCanNextPage()}
+                    sx={{ margin: "4px 2px" }}
+                    size="small"
+                >
                     <KeyboardArrowRightIcon></KeyboardArrowRightIcon>
                 </IconButton>
-                <IconButton color="secondary" onClick={() => table.lastPage()} disabled={!table.getCanNextPage()}>
+                <IconButton
+                    color="secondary"
+                    onClick={() => table.lastPage()}
+                    disabled={!table.getCanNextPage()}
+                    sx={{ margin: "4px 4px 4px 2px" }}
+                    size="small"
+                >
                     <KeyboardDoubleArrowRightIcon></KeyboardDoubleArrowRightIcon>
                 </IconButton>
             </Box>
@@ -553,13 +576,13 @@ const QueryDatabase: Component = () => {
             if (station_map.has(key)) {
                 const marker = station_map.get(key);
 
-                marker?.bindPopup(`${marker?.getPopup()?.getContent()}</br>${record.id}`);
+                marker?.bindPopup(`Station Designation: ${record.station_code.toUpperCase()}`);
             } else {
                 const marker = L.marker(new LatLng(record.station_location[1], record.station_location[0]), {
                     icon: stationIcon,
                 }).addTo(map);
 
-                marker.bindPopup(record.id);
+                marker.bindPopup(`Station Designation: ${record.station_code.toUpperCase()}`);
                 station_map.set(key, marker);
             }
 

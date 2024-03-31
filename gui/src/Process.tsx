@@ -50,15 +50,6 @@ const [periodEnd, setPeriodEnd] = createSignal("");
 const [removeHead, setRemoveHead] = createSignal("");
 
 const Settings: Component<sxProps> = (props) => {
-    function download() {
-        if (processed() && processed().id) {
-            const element = createDownloadLink(processed());
-            element.download = `${processed().id}.json`;
-            document.body.appendChild(element); // Required for this to work in FireFox
-            element.click();
-        }
-    }
-
     function clear() {
         setNormalised(false);
 
@@ -235,7 +226,6 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ minWidth: "36ch" }}
                         label="ID"
                         value={currentRecord()}
-                        defaultValue={currentRecord()}
                         onChange={(_, value) => setCurrentRecord(value)}
                     />
                     <TextField
@@ -244,7 +234,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Remove Head (s)"
                         type="number"
                         value={removeHead()}
-                        defaultValue={removeHead()}
                         onChange={(_, value) => setRemoveHead(value)}
                     />
                     <ButtonGroup variant="contained" orientation="horizontal">
@@ -254,7 +243,16 @@ const Settings: Component<sxProps> = (props) => {
                         <Button onClick={clear} id="btn-reset" disabled={loading()}>
                             Reset
                         </Button>
-                        <Button onClick={download} id="btn-download" disabled={loading() || !processed().id}>
+                        <Button
+                            onClick={() => {
+                                const element = createDownloadLink(processed());
+                                element.download = `${processed().id}.json`;
+                                document.body.appendChild(element); // Required for this to work in FireFox
+                                element.click();
+                            }}
+                            id="btn-download"
+                            disabled={loading() || !processed().id}
+                        >
                             Download
                         </Button>
                     </ButtonGroup>
@@ -294,7 +292,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Upsampling"
                         type="number"
                         value={upRatio() > 0 ? upRatio() : ""}
-                        defaultValue={upRatio() > 0 ? upRatio() : ""}
                         onChange={(_, value) => setUpRatio(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
                         sx={{ maxWidth: "10rem" }}
@@ -304,7 +301,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Downsampling"
                         type="number"
                         value={downRatio() > 0 ? downRatio() : ""}
-                        defaultValue={downRatio() > 0 ? downRatio() : ""}
                         onChange={(_, value) => setDownRatio(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
                         sx={{ maxWidth: "10rem" }}
@@ -314,7 +310,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Filter Length"
                         type="number"
                         value={filterLength() > 0 ? filterLength() : ""}
-                        defaultValue={filterLength() > 0 ? filterLength() : ""}
                         onChange={(_, value) => setFilterLength(Math.max(0, Math.round(Number(value))))}
                         disabled={!withFilter()}
                         sx={{ maxWidth: "10rem" }}
@@ -325,7 +320,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Low Cut"
                         type="number"
                         value={lowCut()}
-                        defaultValue={lowCut()}
                         onChange={(_, value) => setLowCut(value)}
                         disabled={!withFilter() || filterType() === "lowpass"}
                         sx={{ maxWidth: "10rem" }}
@@ -336,7 +330,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="High Cut"
                         type="number"
                         value={highCut()}
-                        defaultValue={highCut()}
                         onChange={(_, value) => setHighCut(value)}
                         disabled={!withFilter() || filterType() === "highpass"}
                         sx={{ maxWidth: "10rem" }}
@@ -402,7 +395,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Damping Ratio"
                         type="number"
                         value={dampingRatio()}
-                        defaultValue={dampingRatio()}
                         onChange={(_, value) => setDampingRatio(value)}
                         disabled={!withResponseSpectrum()}
                         sx={{ maxWidth: "10rem" }}
@@ -413,7 +405,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Period Step"
                         type="number"
                         value={periodStep()}
-                        defaultValue={periodStep()}
                         onChange={(_, value) => setPeriodStep(value)}
                         disabled={!withResponseSpectrum()}
                         sx={{ maxWidth: "10rem" }}
@@ -424,7 +415,6 @@ const Settings: Component<sxProps> = (props) => {
                         label="Period End"
                         type="number"
                         value={periodEnd()}
-                        defaultValue={periodEnd()}
                         onChange={(_, value) => setPeriodEnd(value)}
                         disabled={!withResponseSpectrum()}
                         sx={{ maxWidth: "10rem" }}
