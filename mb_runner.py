@@ -15,29 +15,32 @@
 
 import sys
 
-from mb import run_app
+from mb import run_app, Config
 
 if __name__ == "__main__":
-    arg_dict = {}
+    config = Config()
     index = 1
     while index < len(sys.argv):
         if sys.argv[index].startswith("w"):
-            arg_dict["workers"] = int(sys.argv[index + 1])
+            config.workers = int(sys.argv[index + 1])
             index += 2
         elif sys.argv[index].startswith("h"):
-            arg_dict["host"] = sys.argv[index + 1]
+            config.host = sys.argv[index + 1]
+            index += 2
+        elif sys.argv[index].startswith("p"):
+            config.port = int(sys.argv[index + 1])
             index += 2
         elif sys.argv[index].startswith("o"):
-            arg_dict["overwrite_env"] = True
+            config.overwrite_env = True
             index += 1
         elif sys.argv[index].startswith("c"):
-            arg_dict["celery"] = True
+            config.celery = True
             index += 1
         elif sys.argv[index].startswith("d"):
-            arg_dict["debug"] = True
+            config.debug = True
             index += 1
         else:
             index += 1
 
-    print(f"Run the app with the following arguments: {arg_dict}")
-    run_app(**arg_dict)
+    print(f"Run the app with the following arguments: {config.dict()}")
+    run_app(config)

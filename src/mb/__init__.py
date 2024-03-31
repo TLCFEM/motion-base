@@ -13,14 +13,25 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import sys
 from uuid import uuid4
 
-import click
+from pydantic import BaseModel, Field
 
 
-def run_app(**kwargs):
-    if kwargs.get("celery", False):
+class Config(BaseModel):
+    workers: int = Field(2, ge=1)
+    host: str | None = Field(None)
+    port: int = Field(8000, ge=1)
+    overwrite_env: bool = Field(False)
+    celery: bool = Field(False)
+    debug: bool = Field(False)
+
+
+def run_app(setting: Config):
+    if setting.celery:
         from mb.celery import celery
 
         from mb.utility.config import init_mongo
@@ -35,46 +46,21 @@ def run_app(**kwargs):
     else:
         from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
 
-        workers = MB_FASTAPI_WORKERS
-        if kwargs.get("overwrite_env", False) and "workers" in kwargs:
-            workers = kwargs["workers"]
-
-        workers = int(workers)
-
         config: dict = {}
 
-        if workers > 1:
+        if (workers := setting.workers if setting.overwrite_env else int(MB_FASTAPI_WORKERS)) > 1:
             config["workers"] = workers
             config["log_level"] = "info"
-        elif kwargs.get("debug", False):
+        elif setting.debug:
             config["reload"] = True
             config["log_level"] = "debug"
 
-        port = MB_PORT
-        if kwargs.get("overwrite_env", False) and "port" in kwargs:
-            port = kwargs["port"]
-        config["port"] = int(port)
+        if (port := setting.port if setting.overwrite_env else int(MB_PORT)) != 8000:
+            config["port"] = port
 
-        if "host" in kwargs:
-            config["host"] = kwargs["host"]
+        if setting.host:
+            config["host"] = setting.host
 
         import uvicorn
 
         uvicorn.run("mb.app.main:app", **config)
-
-
-@click.command()
-@click.option("--workers", default=1, show_default=True, type=int, help="Number of workers.")
-@click.option("--overwrite-env", is_flag=True, help="Overwrite environment variables.")
-def run(workers: int = 1, overwrite_env: bool = False):
-    params: dict = {}
-    if overwrite_env:
-        params["overwrite_env"] = overwrite_env
-    if workers > 1:
-        params["workers"] = workers
-
-    run_app(**params)
-
-
-if __name__ == "__main__":
-    run()
