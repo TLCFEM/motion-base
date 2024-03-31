@@ -25,7 +25,7 @@ import anyio
 from mb.client import MBClient
 
 
-async def main():
+async def search():
     async with MBClient("http://localhost:8000") as client:
         results = await client.search({"min_magnitude": 6.0, "min_pga": 200.0})
         for r in results:
@@ -33,7 +33,7 @@ async def main():
 
 
 if __name__ == "__main__":
-    anyio.run(main)
+    anyio.run(search)
 ```
 
 ### as a developer
@@ -99,3 +99,39 @@ docker compose -f docker-compose-production-nginx.yml up -d
 ```
 
 Please feel free to use other tools to deploy the application, such as Kubernetes, Docker Swarm, etc.
+
+## Raw Data Source
+
+The raw data, once downloaded from sources, can be uploaded to the application.
+
+```python
+import anyio
+
+from mb.client import MBClient
+
+api_url = "http://localhost:8000"
+username = "username"
+password = "password"
+region = "jp"
+
+
+# assume current folder contains the files to be uploaded
+async def upload():
+    async with MBClient(api_url, username, password) as client:
+        await client.upload(region, '.')
+
+
+if __name__ == "__main__":
+    anyio.run(upload)
+```
+
+### JP
+
+The raw data is available
+at [Strong Motion Seismograph Networks](https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html).
+The waveform files in ASCII format `*.EW`, `*.NS`, and `*.UD` can be uploaded and parsed.
+
+### NZ
+
+The raw data is available at [Strong Motion Data Products](https://www.geonet.org.nz/data/types/strong_motion).
+The waveform files `*.V1A` and `*.V2A` can be uploaded and parsed.
