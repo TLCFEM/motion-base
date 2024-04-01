@@ -49,15 +49,7 @@ const App: Component = () => {
     const variant = screen.height <= 1080 ? "dense" : "regular";
 
     return (
-        <Stack
-            sx={{
-                marginLeft: "1vw",
-                marginRight: "1vw",
-                marginTop: "1vh",
-                marginBottom: "1vh",
-            }}
-            spacing="1rem"
-        >
+        <Stack>
             <AppBar position="static" enableColorOnDark>
                 <Toolbar
                     variant={variant}
@@ -71,19 +63,19 @@ const App: Component = () => {
                     <Typography sx={{ flexGrow: 1 }} variant="h5">
                         {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
                     </Typography>
-                    <Button id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
+                    <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
                         Jackpot
                     </Button>
-                    <Button id="btn-query" onClick={() => setMode("query")} variant="contained">
+                    <Button size="small" id="btn-query" onClick={() => setMode("query")} variant="contained">
                         Query
                     </Button>
-                    <Button id="btn-process" onClick={() => setMode("process")} variant="contained">
+                    <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
                         Process
                     </Button>
                     <AboutModal />
                 </Toolbar>
             </AppBar>
-            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch" }}>
+            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
                         <Jackpot sx={{ border: "1px solid darkgrey", height: "90vh" }} />

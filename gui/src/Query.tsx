@@ -198,6 +198,7 @@ const Settings: Component<sxProps> = (props) => {
             >
                 <Stack sx={stackProps}>
                     <TextField
+                        size="small"
                         id="page-number"
                         label="Page Number"
                         type="number"
@@ -206,6 +207,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                     <TextField
+                        size="small"
                         id="page-size"
                         label="Page Size"
                         type="number"
@@ -218,6 +220,7 @@ const Settings: Component<sxProps> = (props) => {
                 </Stack>
                 <Stack sx={stackProps}>
                     <TextField
+                        size="small"
                         id="min-magnitude"
                         error={ifError(minMagnitude())}
                         label="Min Magnitude"
@@ -227,6 +230,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                     <TextField
+                        size="small"
                         id="max-magnitude"
                         error={ifError(maxMagnitude())}
                         label="Max Magnitude"
@@ -238,6 +242,7 @@ const Settings: Component<sxProps> = (props) => {
                 </Stack>
                 <Stack sx={stackProps}>
                     <TextField
+                        size="small"
                         id="min-pga"
                         error={ifError(minPGA())}
                         label="Min PGA (Gal)"
@@ -247,6 +252,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                     <TextField
+                        size="small"
                         id="max-pga"
                         error={ifError(maxPGA())}
                         label="Max PGA (Gal)"
@@ -258,6 +264,7 @@ const Settings: Component<sxProps> = (props) => {
                 </Stack>
                 <Stack sx={stackProps}>
                     <TextField
+                        size="small"
                         sx={{ minWidth: "17ch" }}
                         id="from-date"
                         label="From"
@@ -268,6 +275,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                     <TextField
+                        size="small"
                         sx={{ minWidth: "17ch" }}
                         id="to-date"
                         label="To"
@@ -280,6 +288,7 @@ const Settings: Component<sxProps> = (props) => {
                 </Stack>
                 <Stack sx={stackProps}>
                     <TextField
+                        size="small"
                         id="file-name"
                         label="File Name"
                         value={fileName()}
@@ -287,6 +296,7 @@ const Settings: Component<sxProps> = (props) => {
                         disabled={loading()}
                     />
                     <TextField
+                        size="small"
                         id="station-code"
                         label="Station Code"
                         value={stationCode()}
@@ -295,13 +305,14 @@ const Settings: Component<sxProps> = (props) => {
                     />
                 </Stack>
                 <ButtonGroup variant="contained" orientation="vertical">
-                    <Button onClick={fetch} id="btn-search" disabled={loading()}>
+                    <Button size="small" onClick={fetch} id="btn-search" disabled={loading()}>
                         Search
                     </Button>
-                    <Button onClick={clear} id="btn-clear" disabled={loading()}>
+                    <Button size="small" onClick={clear} id="btn-clear" disabled={loading()}>
                         Clear
                     </Button>
                     <Button
+                        size="small"
                         onClick={() => {
                             const element = createDownloadLink(records());
                             element.download = "search.json";
@@ -644,7 +655,7 @@ const QueryDatabase: Component = () => {
         <>
             <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
-                <Settings sx={{ border: "1px solid darkgrey", minHeight: "11rem" }} />
+                <Settings sx={{ border: "1px solid darkgrey", minHeight: "8rem" }} />
                 <TanStackTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>
         </>

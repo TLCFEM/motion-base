@@ -231,6 +231,7 @@ const Settings: Component<sxProps> = (props) => {
                         }
                     />
                     <TextField
+                        size="small"
                         id="record-id"
                         sx={{ minWidth: "36ch" }}
                         label="ID"
@@ -238,6 +239,7 @@ const Settings: Component<sxProps> = (props) => {
                         onChange={(_, value) => setCurrentRecord(value)}
                     />
                     <TextField
+                        size="small"
                         id="remove-head"
                         error={ifError(removeHead())}
                         label="Remove Head (s)"
@@ -262,6 +264,7 @@ const Settings: Component<sxProps> = (props) => {
                         control={<Checkbox checked={withFilter()} onChange={(_, value) => setWithFilter(value)} />}
                     />
                     <TextField
+                        size="small"
                         id="upsampling-ratio"
                         label="Upsampling"
                         type="number"
@@ -271,6 +274,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="downsampling-ratio"
                         label="Downsampling"
                         type="number"
@@ -280,6 +284,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="filter-length"
                         error={filterLength() !== 0 && filterLength() < 8}
                         label="Filter Length"
@@ -290,6 +295,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="low-cut"
                         error={ifError(lowCut())}
                         label="Low Cut"
@@ -300,6 +306,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="high-cut"
                         error={ifError(highCut())}
                         label="High Cut"
@@ -312,6 +319,7 @@ const Settings: Component<sxProps> = (props) => {
                     <FormControl sx={{ minWidth: "14ch" }} disabled={!withFilter()}>
                         <InputLabel>Filter Type</InputLabel>
                         <Select
+                            size="small"
                             id="select-filter"
                             name="select-filter"
                             label="Filter Type"
@@ -326,6 +334,7 @@ const Settings: Component<sxProps> = (props) => {
                     <FormControl sx={{ minWidth: "18ch" }} disabled={!withFilter()}>
                         <InputLabel>Window Type</InputLabel>
                         <Select
+                            size="small"
                             id="select-window"
                             name="select-window"
                             label="Window Type"
@@ -365,6 +374,7 @@ const Settings: Component<sxProps> = (props) => {
                         }
                     />
                     <TextField
+                        size="small"
                         id="damping-ratio"
                         error={ifError(dampingRatio())}
                         label="Damping Ratio"
@@ -375,6 +385,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="period-step"
                         error={ifError(periodStep())}
                         label="Period Step"
@@ -385,6 +396,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <TextField
+                        size="small"
                         id="period-end"
                         error={ifError(periodEnd())}
                         label="Period End"
@@ -395,13 +407,14 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <ButtonGroup variant="contained" orientation="horizontal">
-                        <Button onClick={process} id="btn-process" disabled={loading()}>
+                        <Button size="small" onClick={process} id="btn-process" disabled={loading()}>
                             Process
                         </Button>
-                        <Button onClick={clear} id="btn-reset" disabled={loading()}>
+                        <Button size="small" onClick={clear} id="btn-reset" disabled={loading()}>
                             Reset
                         </Button>
                         <Button
+                            size="small"
                             onClick={() => {
                                 const element = createDownloadLink(processed());
                                 element.download = `${processed().id}.json`;

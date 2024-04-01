@@ -39,7 +39,7 @@ export default function AboutModal() {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} variant="contained">
+            <Button size="small" onClick={() => setOpen(true)} variant="contained">
                 About
             </Button>
             <Modal
