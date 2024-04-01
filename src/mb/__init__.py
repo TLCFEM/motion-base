@@ -28,6 +28,7 @@ class Config(BaseModel):
     overwrite_env: bool = Field(False)
     celery: bool = Field(False)
     debug: bool = Field(False)
+    celery_config: list = Field([])
 
 
 def run_app(setting: Config):
@@ -38,6 +39,7 @@ def run_app(setting: Config):
         import asyncio
 
         args: list = ["worker"]
+        args.extend(setting.celery_config)
         if sys.platform == "win32":
             args.extend(["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "info"])
 

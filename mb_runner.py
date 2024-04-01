@@ -14,32 +14,44 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import sys
+from multiprocessing import freeze_support
 
 from mb import run_app, Config
 
-if __name__ == "__main__":
+
+def config_and_run():
     config = Config()
     index = 1
+
+    def next_arg():
+        nonlocal index
+        index += 1
+        if index >= len(sys.argv):
+            raise Exception("Missing argument.")
+        return sys.argv[index]
+
     while index < len(sys.argv):
+        if sys.argv[index].startswith("c"):
+            config.celery = True
+            config.celery_config = sys.argv[index + 1 :]
+            break
+
         if sys.argv[index].startswith("w"):
-            config.workers = int(sys.argv[index + 1])
-            index += 2
+            config.workers = int(next_arg())
         elif sys.argv[index].startswith("h"):
-            config.host = sys.argv[index + 1]
-            index += 2
+            config.host = next_arg()
         elif sys.argv[index].startswith("p"):
-            config.port = int(sys.argv[index + 1])
-            index += 2
+            config.port = int(next_arg())
         elif sys.argv[index].startswith("o"):
             config.overwrite_env = True
-            index += 1
-        elif sys.argv[index].startswith("c"):
-            config.celery = True
-            index += 1
         elif sys.argv[index].startswith("d"):
             config.debug = True
-            index += 1
-        else:
-            index += 1
+
+        index += 1
 
     run_app(config)
+
+
+if __name__ == "__main__":
+    freeze_support()
+    config_and_run()
