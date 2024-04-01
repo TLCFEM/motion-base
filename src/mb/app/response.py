@@ -189,7 +189,7 @@ class ProcessConfig(BaseModel):
         description="Downsampling ratio, should be greater than one. "
         "The effective resampling ratio should be `up_ratio/down_ratio`.",
     )
-    filter_length: int = Field(16, ge=8)
+    filter_length: int = Field(32, ge=8, description="Filter window length, at least eight, default is 32.")
     filter_type: str = Field(
         "bandpass", regex=filter_regex, description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`"
     )
@@ -198,11 +198,11 @@ class ProcessConfig(BaseModel):
         regex=window_regex,
         description="any window type of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`",
     )
-    low_cut: float = Field(0.05, ge=0)
-    high_cut: float = Field(40.0, ge=0)
+    low_cut: float = Field(0.01, gt=0)
+    high_cut: float = Field(50.0, gt=0)
     damping_ratio: float = Field(0.05, ge=0, le=1)
-    period_end: float = Field(20.0, ge=0)
-    period_step: float = Field(0.05, ge=0)
+    period_end: float = Field(10.0, ge=0)
+    period_step: float = Field(0.01, ge=0)
     normalised: bool = Field(False)
     with_filter: bool = Field(False)
     with_spectrum: bool = Field(False)

@@ -134,15 +134,15 @@ const Settings: Component<sxProps> = (props) => {
             animation: "scale",
         });
         tippy(`#filter-length`, {
-            content: "Assign a positive integer (at least eight) to set the filter window length, default is 16.",
+            content: "Assign a positive integer (at least eight) to set the filter window length, default is 32.",
             animation: "scale",
         });
         tippy(`#low-cut`, {
-            content: "The low-cut frequency for the highpass and bandpass filters, default is 0.05.",
+            content: "The low-cut frequency for the highpass and bandpass filters, default is 0.01.",
             animation: "scale",
         });
         tippy(`#high-cut`, {
-            content: "The high-cut frequency for the lowpass and bandpass filters, default is 40.0.",
+            content: "The high-cut frequency for the lowpass and bandpass filters, default is 50.0.",
             animation: "scale",
         });
         tippy(`#damping-ratio`, {
@@ -150,11 +150,11 @@ const Settings: Component<sxProps> = (props) => {
             animation: "scale",
         });
         tippy(`#period-step`, {
-            content: "The period interval for the response spectrum computation, default is 0.05.",
+            content: "The period interval for the response spectrum computation, default is 0.01.",
             animation: "scale",
         });
         tippy(`#period-end`, {
-            content: "The termination period (right bound) for the response spectrum computation, default is 20.",
+            content: "The termination period (right bound) for the response spectrum computation, default is 10.",
             animation: "scale",
         });
         tippy(`#chk-waveform`, {
@@ -281,6 +281,7 @@ const Settings: Component<sxProps> = (props) => {
                     />
                     <TextField
                         id="filter-length"
+                        error={filterLength() !== 0 && filterLength() < 8}
                         label="Filter Length"
                         type="number"
                         value={filterLength() > 0 ? filterLength() : ""}
