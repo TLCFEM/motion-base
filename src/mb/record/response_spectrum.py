@@ -14,7 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import numpy as np
-from numba import float64, njit
+from numba import float64, njit, prange
 from numba.experimental import jitclass
 
 
@@ -84,31 +84,27 @@ class Oscillator:
 
         return np.column_stack((displacement, velocity, acceleration))
 
-    def compute_maximum_response(self, interval: float, motion: np.ndarray) -> np.ndarray:
+    def compute_maximum_response(self, interval: float, motion: np.ndarray) -> tuple:
         self.compute_parameter(interval)
 
         displacement, velocity, acceleration = self.populate(motion)
 
-        return np.array(
-            [
-                self.amplitude(displacement) * self.factor * interval,
-                self.amplitude(velocity) * self.factor,
-                self.amplitude(acceleration * self.factor / interval + motion),
-            ]
+        return (
+            self.amplitude(displacement) * self.factor * interval,
+            self.amplitude(velocity) * self.factor,
+            self.amplitude(acceleration * self.factor / interval + motion),
         )
 
 
-@njit
+@njit(parallel=True)
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
-    def compute_task(p):
-        return Oscillator(2 * np.pi / p, damping_ratio).compute_maximum_response(interval, motion)
-
     results = np.empty((len(period), 3), dtype=np.float64)
     results[0, 0] = 0
     results[0, 1] = 0
     results[0, 2] = np.max(np.abs(motion))
-    for i in range(1, len(period)):
-        results[i] = compute_task(period[i])
+    frequency = 2 * np.pi / period
+    for i in prange(1, len(period)):
+        results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
 
     return results
 

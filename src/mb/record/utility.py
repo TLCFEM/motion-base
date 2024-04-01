@@ -28,7 +28,7 @@ def perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> (float, np.
     return sampling_frequency / magnitude.size, fft_magnitude
 
 
-@njit
+@njit(parallel=True)
 def normalise(magnitude: np.ndarray) -> np.ndarray:
     max_value: float = abs(np.max(magnitude))
     min_value: float = abs(np.min(magnitude))
