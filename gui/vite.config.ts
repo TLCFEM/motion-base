@@ -18,4 +18,5 @@ export default defineConfig({
         target: "esnext",
         chunkSizeWarningLimit: 5000,
     },
+    base: "./",
 });
