@@ -1,0 +1,89 @@
+name: Release
+on:
+  push:
+    branches: [ master ]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    strategy:
+      matrix:
+        python-version: [ '3.10', '3.11', '3.12' ]
+    services:
+      mongodb:
+        image: mongo:latest
+        env:
+          MONGO_INITDB_ROOT_USERNAME: test
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_DATABASE: StrongMotion
+        ports:
+          - 27017:27017
+      rabbitmq:
+        image: rabbitmq:latest
+        env:
+          RABBITMQ_DEFAULT_USER: test
+          RABBITMQ_DEFAULT_PASS: password
+          RABBITMQ_DEFAULT_VHOST: vhost
+        ports:
+          - 5672:5672
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Python
+        uses: actions/setup-python@v5.1.0
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: 'pip'
+      - name: Dependency
+        run: |
+          pip install --upgrade pip
+          pip install -e .[dev] pyinstaller
+          pytest --cov .
+      - name: Codecov
+        if: matrix.python-version == '3.10'
+        uses: codecov/codecov-action@v4
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
+          slug: TLCFEM/motion-base
+          plugin: pycoverage
+      - name: Binary
+        if: matrix.python-version == '3.11'
+        run: |
+          export PYTHONPATH=$PYTHONPATH:./src
+          /bin/bash ./scripts/pyinstaller.sh
+      - name: Artifact
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: mb_runner
+          path: dist/mb_runner
+  docker:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Clone
+        uses: actions/checkout@v4
+      - name: Update
+        run: /bin/bash ./scripts/git-commit.sh
+      - name: Login
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+      - name: Buildx
+        uses: docker/setup-buildx-action@v3
+      - name: Build Backend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: back.Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/motion-base-back:latest
+      - name: Build Frontend
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: front.Dockerfile
+          push: true
+          tags: ${{ secrets.DOCKERHUB_USERNAME }}/motion-base-front:latest

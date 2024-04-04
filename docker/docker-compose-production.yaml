@@ -1,0 +1,128 @@
+services:
+  mongo:
+    image: mongo
+    container_name: mongo
+    restart: 'always'
+    command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
+    ports:
+      - '${MONGO_PORT}:${MONGO_PORT}'
+    environment:
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_DATA_DIR: /data/db
+    volumes:
+      - motion_mongo:/data/db
+      - motion_mongoconfig:/data/configdb
+  mongo-express:
+    image: mongo-express
+    container_name: mongo-express
+    restart: 'always'
+    depends_on:
+      - mongo
+    ports:
+      - '8081:8081'
+    environment:
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:${MONGO_PORT}/
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+  rabbitmq:
+    image: rabbitmq:management
+    container_name: rabbitmq
+    restart: 'always'
+    ports:
+      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
+      - '15672:15672'
+    environment:
+      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
+  flower:
+    image: mher/flower
+    container_name: flower
+    depends_on:
+      - rabbitmq
+    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
+    ports:
+      - '5555:5555'
+  mb-back:
+    image: tlcfem/motion-base-back
+    container_name: mb-back
+    restart: 'always'
+    depends_on:
+      - mongo
+      - rabbitmq
+    ports:
+      - '${MB_PORT}:${MB_PORT}'
+    volumes:
+      - motion_cache:${MB_FS_ROOT}
+    environment:
+      MB_SECRET_KEY: ${MB_SECRET_KEY}
+      MB_ALGORITHM: ${MB_ALGORITHM}
+      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
+      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
+      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
+      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
+      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
+      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
+      MB_PORT: ${MB_PORT}
+      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
+      MB_FS_ROOT: ${MB_FS_ROOT}
+      MB_MAIN_SITE: ${MB_MAIN_SITE}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_HOST: mongo
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+  mb-worker:
+    image: tlcfem/motion-base-back
+    container_name: mb-worker
+    restart: 'always'
+    depends_on:
+      - mongo
+      - rabbitmq
+    command: celery
+    volumes:
+      - motion_cache:${MB_FS_ROOT}
+    environment:
+      MB_SECRET_KEY: ${MB_SECRET_KEY}
+      MB_ALGORITHM: ${MB_ALGORITHM}
+      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
+      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
+      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
+      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
+      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
+      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
+      MB_PORT: ${MB_PORT}
+      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
+      MB_FS_ROOT: ${MB_FS_ROOT}
+      MB_MAIN_SITE: ${MB_MAIN_SITE}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_HOST: mongo
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+  mb-front:
+    image: tlcfem/motion-base-front
+    container_name: mb-front
+    restart: 'always'
+    depends_on:
+      - mb-back
+    ports:
+      - '4173:4173'
+
+volumes:
+  motion_mongo:
+  motion_mongoconfig:
+  motion_cache:

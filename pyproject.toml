@@ -1,0 +1,77 @@
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[project]
+dynamic = ["version"]
+name = "motion-base"
+description = "a strong motion database"
+readme = "README.md"
+requires-python = ">=3.10"
+license = { file = "LICENSE" }
+keywords = ["earthquake"]
+authors = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
+maintainers = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
+classifiers = [
+    "Development Status :: 5 - Production/Stable",
+    "License :: OSI Approved :: GNU General Public License v3 or later (GPLv3+)",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3 :: Only",
+]
+dependencies = [
+    "aiofiles",
+    "bcrypt",
+    "beanie",
+    "celery",
+    "email-validator",
+    "fastapi",
+    "httpx",
+    "joserfc",
+    "mongoengine",
+    "numba",
+    "Pint",
+    "pydantic<2",
+    "python-dotenv",
+    "python-multipart",
+    "requests",
+    "scipy",
+    "structlog",
+    "tzdata",
+    "uvicorn",
+]
+
+[project.optional-dependencies]
+dev = [
+    "black",
+    "locust",
+    "pytest-asyncio",
+    "pytest-celery",
+    "pytest-cov",
+    #    "pylint",
+    #    "pylint-mongoengine",
+    #    "ruff",
+]
+client = [
+    "httpx-auth",
+    "matplotlib",
+    "rich",
+]
+
+[project.urls]
+"Homepage" = "https://github.com/TLCFEM/motion-base"
+"Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
+"Source" = "https://github.com/TLCFEM/motion-base"
+
+[tool.black]
+line-length = 120
+fast = true
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+
+[tool.pyright]
+venvPath = "."
+venv = ".venv"

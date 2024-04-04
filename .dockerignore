@@ -1,0 +1,8 @@
+.venv
+.idea
+*.egg-info
+__pycache__
+build
+gui/node_modules
+gui/dist
+gui/pnpm-lock.yaml

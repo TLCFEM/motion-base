@@ -1,0 +1,7 @@
+.venv
+.idea
+*.egg-info
+__pycache__
+build
+dist
+mb_runner.spec
