@@ -75,7 +75,7 @@ class RawRecordResponse(MetadataResponse):
     offset: float | None = Field(None)
 
 
-class RecordResponse(MetadataResponse):
+class RecordResponse(RawRecordResponse):
     """
     Response represents a record which can be either waveform or spectrum.
     """
