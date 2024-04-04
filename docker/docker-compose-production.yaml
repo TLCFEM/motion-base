@@ -44,6 +44,7 @@ services:
   flower:
     image: mher/flower
     container_name: flower
+    restart: 'always'
     depends_on:
       - rabbitmq
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
