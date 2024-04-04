@@ -4,6 +4,7 @@ services:
     container_name: mongo
     restart: 'always'
     command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
+    mem_limit: ${MONGO_MEM_LIMIT}
     ports:
       - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
