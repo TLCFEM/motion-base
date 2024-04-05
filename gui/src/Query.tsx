@@ -84,7 +84,7 @@ const Settings: Component<sxProps> = (props) => {
         let config = new QueryConfig();
         if (pageSize() > 0) config.pagination.page_size = pageSize();
         if (pageNumber() > 0) config.pagination.page_number = pageNumber();
-        config.pagination.sort_by = "+event_time";
+        // config.pagination.sort_by = "+event_time";
         if (isNumeric(minMagnitude()) && Number(minMagnitude()) > 0) config.min_magnitude = Number(minMagnitude());
         if (isNumeric(maxMagnitude()) && Number(maxMagnitude()) > 0) config.max_magnitude = Number(maxMagnitude());
         if (isNumeric(minPGA()) && Number(minPGA()) > 0) config.min_pga = Number(minPGA());
