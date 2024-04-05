@@ -7,8 +7,8 @@ cd "$SCRIPT_DIR" || exit
 
 if ! command -v pyinstaller &> /dev/null
 then
-  if [ -f ".venv/bin/activate" ]; then
-    source .venv/bin/activate
+  if [ -f "venv/bin/activate" ]; then
+    source venv/bin/activate
     pip install pyinstaller
   else
     echo "pip-compile could not be found"
