@@ -121,6 +121,9 @@ def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np
 
 @jitclass
 class Integrator:
+    def __init__(self):
+        pass
+
     def integrate(self, interval: float, data: list) -> tuple[list, list]:
         pass
 
