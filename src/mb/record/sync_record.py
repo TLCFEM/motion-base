@@ -62,7 +62,7 @@ class Record(Document):
         "collection": "Record",
         "allow_inheritance": True,
         "indexes": [
-            "file_name",
+            [("file_name", "text")],
             "category",
             "region",
             "-magnitude",

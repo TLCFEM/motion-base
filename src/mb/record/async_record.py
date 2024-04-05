@@ -31,7 +31,7 @@ GEOSPHERE = "2dsphere"
 class MetadataRecord(Document):
     id: str = Field(default_factory=str_factory)
 
-    file_name: Indexed(str) = Field(None, description="The original file name of the record.")
+    file_name: Indexed(str, "text") = Field(None, description="The original file name of the record.")
     category: Indexed(str) = Field(None, description="The category of the record.")
     region: Indexed(str) = Field(None, description="The region of the record.")
     uploaded_by: str = Field(None, description="The user who uploaded the record.")
