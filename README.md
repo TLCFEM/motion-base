@@ -7,36 +7,11 @@ records from different national databases.
 
 It comes with a web interface and a Python client that can be used to access the data programmatically.
 
+**Check out the [demo](http://67.219.101.176/) site.**
+
 ![screenshot](docs/screenshot.png)
 
 ## Installation
-
-### as an analyst
-
-```bash
-pip install motion-base[client]
-```
-
-It is then possible to use the client to access the data.
-
-```python
-import anyio
-
-from mb.client import MBClient
-
-api_url = "http://somewhere.the.application.is.hosted"
-
-
-async def search():
-    async with MBClient(api_url) as client:
-        results = await client.search({"min_magnitude": 6.0, "min_pga": 200.0})
-        for r in results:
-            print(r)
-
-
-if __name__ == "__main__":
-    anyio.run(search)
-```
 
 ### as a developer
 
@@ -101,6 +76,39 @@ docker compose -f docker-compose-production-nginx.yml up -d
 ```
 
 Please feel free to use other tools to deploy the application, such as Kubernetes, Docker Swarm, etc.
+
+### as an analyst
+
+```bash
+# 1. clone the project
+git clone https://github.com/TLCFEM/motion-base.git
+cd motion-base
+# 2. create a virtual environment and install python dependencies
+python -m venv .venv
+source .venv/bin/activate
+pip install .[client]
+```
+
+It is then possible to use the client to access the data.
+
+```python
+import anyio
+
+from mb.client import MBClient
+
+api_url = "http://somewhere.the.application.is.hosted"
+
+
+async def search():
+    async with MBClient(api_url) as client:
+        results = await client.search({"min_magnitude": 6.0, "min_pga": 200.0})
+        for r in results:
+            print(r)
+
+
+if __name__ == "__main__":
+    anyio.run(search)
+```
 
 ## Raw Data Source
 
