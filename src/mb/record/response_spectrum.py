@@ -117,3 +117,41 @@ def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np
             Oscillator(2 * np.pi * freq, damping_ratio).compute_response(interval, motion),
         )
     )
+
+
+@jitclass
+class Integrator:
+    def integrate(self, interval: float, data: list) -> tuple[list, list]:
+        pass
+
+
+@jitclass(
+    [
+        ("beta", float64),
+        ("gamma", float64),
+    ]
+)
+class Newmark(Integrator):
+    def __init__(self, gamma: float = 0.5, beta: float = 0.25):
+        self.gamma = gamma
+        self.beta = beta
+
+    def integrate(self, interval: float, acceleration: list) -> tuple[list, list]:
+        displacement: list = [None] * len(acceleration)
+        velocity: list = [None] * len(acceleration)
+
+        displacement[0] = 0.0
+        velocity[0] = 0.0
+
+        fa: float = interval * self.gamma
+        fb: float = interval - fa
+        fc: float = interval**2 * self.beta
+        fd: float = interval**2 * 0.5 - fc
+
+        for i in range(1, len(acceleration)):
+            velocity[i] = velocity[i - 1] + fb * acceleration[i - 1] + fa * acceleration[i]
+            displacement[i] = (
+                displacement[i - 1] + velocity[i - 1] * interval + fd * acceleration[i - 1] + fc * acceleration[i]
+            )
+
+        return displacement, velocity
