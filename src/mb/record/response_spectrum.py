@@ -119,22 +119,13 @@ def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np
     )
 
 
-@jitclass
-class Integrator:
-    def __init__(self):
-        pass
-
-    def integrate(self, interval: float, data: list) -> tuple[list, list]:
-        pass
-
-
 @jitclass(
     [
         ("beta", float64),
         ("gamma", float64),
     ]
 )
-class Newmark(Integrator):
+class Newmark:
     def __init__(self, gamma: float = 0.5, beta: float = 0.25):
         self.gamma = gamma
         self.beta = beta
