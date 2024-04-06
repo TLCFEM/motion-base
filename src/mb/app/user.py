@@ -29,7 +29,7 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
     if not (user := await authenticate_user(form_data.username, form_data.password)):
         raise HTTPException(
             HTTPStatus.UNAUTHORIZED,
-            detail="Incorrect username or password",
+            detail="Incorrect username or password.",
             headers={"WWW-Authenticate": "Bearer"},
         )
     return create_token(user.username)
