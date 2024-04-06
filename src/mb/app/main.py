@@ -26,8 +26,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
 
-from .jp_sync import router as jp_router
-from .nz_sync import router as nz_router
+from .jp import router as jp_router
+from .nz import router as nz_router
 from .process import process_record_local
 from .response import (
     ProcessConfig,

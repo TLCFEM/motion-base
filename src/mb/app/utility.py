@@ -144,8 +144,3 @@ async def is_active(user: User = Depends(current_user)):
     if user.disabled:
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Inactive user.")
     return user
-
-
-# noinspection PyUnusedLocal
-async def send_notification(mail: dict):  # pylint: disable=W0613
-    pass

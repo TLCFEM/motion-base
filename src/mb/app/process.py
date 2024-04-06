@@ -18,10 +18,8 @@ from http import HTTPStatus
 
 import numpy as np
 from fastapi import HTTPException
-from pymongo.errors import ServerSelectionTimeoutError
 
 from .response import ProcessConfig, ProcessedResponse
-from ..celery import celery
 from ..record.async_record import Record
 from ..record.response_spectrum import response_spectrum
 from ..record.utility import apply_filter, get_window, zero_stuff, perform_fft
@@ -93,14 +91,3 @@ def process_record_local(result: Record, process_config: ProcessConfig):
         record.acceleration_spectrum = spectrum[:, 2].tolist()
 
     return record
-
-
-@celery.task(
-    autoretry_for=(ServerSelectionTimeoutError,),
-    retry_kwargs={"max_retries": 3},
-    default_retry_delay=1,
-)
-def process_record_via_celery(result: dict, process_config: dict) -> dict:
-    return process_record_local(Record.parse_obj(result), ProcessConfig.parse_obj(process_config)).dict(
-        exclude_none=True, exclude_unset=True, exclude_defaults=True
-    )

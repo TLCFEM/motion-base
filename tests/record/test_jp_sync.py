@@ -17,7 +17,7 @@ import os
 
 import pytest
 
-from mb.record.sync_parser import ParserNIED
+from mb.record.parser import ParserNIED
 from mb.record.utility import str_factory
 
 

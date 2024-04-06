@@ -25,18 +25,18 @@ from pymongo.errors import ServerSelectionTimeoutError
 from .response import UploadResponse
 from .utility import User, is_active, create_token
 from ..celery import celery, get_stats
-from ..record.sync_parser import ParserNZSM
+from ..record.parser import ParserNIED
 from ..record.sync_record import create_task, delete_task
 from ..utility.files import store, FileProxy
 
-router = APIRouter(tags=["New Zealand"])
+router = APIRouter(tags=["Japan"])
 
 
 # noinspection DuplicatedCode
 def _parse_archive_local(archive_uri: str, user_id: str, task_id: str | None = None) -> list[str]:
     try:
         with FileProxy(archive_uri, None, always_delete_on_exit=True) as archive_file:
-            return ParserNZSM.parse_archive(
+            return ParserNIED.parse_archive(
                 archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
             )
     except Exception as exc:
@@ -56,7 +56,7 @@ def _parse_archive_local(archive_uri: str, user_id: str, task_id: str | None = N
 def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: str | None = None) -> list[str]:
     try:
         with FileProxy(archive_uri, access_token) as archive_file:
-            return ParserNZSM.parse_archive(
+            return ParserNIED.parse_archive(
                 archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
             )
     except Exception as exc:
@@ -73,8 +73,9 @@ async def upload_archive(
     """
     Upload a compressed archive.
 
-    The archive must be gzip-compressed tarball or zip archive.
-    All files will be checked and those with ".V2A" and/or ".V1A" extensions will be parsed.
+    The archive must be gzip-compressed tarball.
+    The zip-compressed archive is not supported due to some technical issues.
+    All valid files will be parsed.
 
     Two modes are supported, one can choose to wait for the result or not.
     If the result is not waited, the task ID will be returned.
@@ -88,8 +89,11 @@ async def upload_archive(
 
     valid_uris: list[str] = []
     for archive in archives:
-        if archive.filename.endswith((".tar.gz", ".zip")):
+        try:
+            ParserNIED.validate_archive(archive.filename)
             valid_uris.append(store(archive))
+        except ValueError:
+            pass
 
     if not wait_for_result:
         task_id_pool: list[str] = []

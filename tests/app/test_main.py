@@ -18,7 +18,7 @@ from http import HTTPStatus
 
 import pytest
 
-from mb.record.sync_parser import ParserNZSM
+from mb.record.parser import ParserNZSM
 from mb.record.sync_record import Record
 from mb.record.utility import str_factory
 
