@@ -19,5 +19,4 @@ from setuptools import setup
 
 setup(
     version=datetime.now().strftime("%y%m%d%H"),
-    entry_points={"console_scripts": ["mb = mb:run"]},
 )
