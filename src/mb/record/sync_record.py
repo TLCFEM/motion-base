@@ -28,6 +28,7 @@ class Record(Document):
     id = StringField(default=str_factory, primary_key=True)
 
     file_name = StringField(default=None, description="The original file name of the record.")
+    file_hash = StringField(default=None, description="The hash of the record.")
     category = StringField(default=None, description="The category of the record.")
     region = StringField(default=None, description="The region of the record.")
     uploaded_by = StringField(default=None, description="The user who uploaded the record.")
@@ -63,6 +64,7 @@ class Record(Document):
         "allow_inheritance": True,
         "indexes": [
             [("file_name", "text")],
+            "file_hash",
             "category",
             "region",
             "-magnitude",

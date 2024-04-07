@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import hashlib
 import os
 import tarfile
 import zipfile
@@ -36,7 +37,12 @@ _logger = structlog.get_logger(__name__)
 class ParserNIED(BaseParserNIED):
     @staticmethod
     def parse_archive(
-        *, archive_obj: str | BinaryIO, user_id: str, archive_name: str | None = None, task_id: str | None = None
+        *,
+        archive_obj: str | BinaryIO,
+        user_id: str,
+        archive_name: str | None = None,
+        task_id: str | None = None,
+        overwrite_existing: bool = True,
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -72,7 +78,7 @@ class ParserNIED(BaseParserNIED):
                     if not target:
                         continue
                     try:
-                        record = ParserNIED.parse_file(target)
+                        record = ParserNIED.parse_file(target, overwrite_existing)
                         record.uploaded_by = user_id
                         record.file_name = os.path.basename(f.name)
                         record.category = category
@@ -89,7 +95,7 @@ class ParserNIED(BaseParserNIED):
         return records
 
     @staticmethod
-    def parse_file(file_path: str | IO[bytes]) -> NIED:
+    def parse_file(file_path: str | IO[bytes], overwrite_existing: bool = True) -> NIED:
         if isinstance(file_path, str):
             with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -98,10 +104,15 @@ class ParserNIED(BaseParserNIED):
         else:
             lines = [line.decode("utf-8").strip() for line in file_path.readlines()]
 
+        file_hash = hashlib.sha256("".join(lines).encode("utf-8")).hexdigest()
+        if overwrite_existing and (record := NIED.objects(file_hash=file_hash).first()):
+            record.delete()
+
         def _parse_date(string: str) -> datetime:
             return datetime.strptime(string, "%Y/%m/%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Tokyo"))
 
         record = NIED()
+        record.file_hash = file_hash
         record.event_time = _parse_date(lines[0][18:])
         record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
         record.depth = pint.Quantity(float(lines[3][18:]), ParserNIED._normalise_unit(lines[3])).to("km").magnitude
@@ -129,7 +140,12 @@ class ParserNZSM(BaseParserNZSM):
 
     @staticmethod
     def parse_archive(
-        *, archive_obj: str | BinaryIO, user_id: str, archive_name: str | None = None, task_id: str | None = None
+        *,
+        archive_obj: str | BinaryIO,
+        user_id: str,
+        archive_name: str | None = None,
+        task_id: str | None = None,
+        overwrite_existing: bool = True,
     ) -> list[str]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
@@ -169,7 +185,9 @@ class ParserNZSM(BaseParserNZSM):
                             continue
                         if target := archive.extractfile(f):
                             try:
-                                records.extend(ParserNZSM.parse_file(target, user_id, os.path.basename(f.name)))
+                                records.extend(
+                                    ParserNZSM.parse_file(target, user_id, os.path.basename(f.name), overwrite_existing)
+                                )
                             except Exception as e:
                                 _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
             except tarfile.ReadError as e:
@@ -187,7 +205,9 @@ class ParserNZSM(BaseParserNZSM):
                             continue
                         with archive.open(f) as target:
                             try:
-                                records.extend(ParserNZSM.parse_file(target, user_id, os.path.basename(f)))
+                                records.extend(
+                                    ParserNZSM.parse_file(target, user_id, os.path.basename(f), overwrite_existing)
+                                )
                             except Exception as e:
                                 _logger.critical("Failed to parse.", file_name=f, exc_info=e)
             except zipfile.BadZipFile as e:
@@ -201,7 +221,9 @@ class ParserNZSM(BaseParserNZSM):
         pass
 
     @staticmethod
-    def parse_file(file_path: str | IO[bytes], user_id: str, file_name: str | None = None) -> list[str]:
+    def parse_file(
+        file_path: str | IO[bytes], user_id: str, file_name: str | None = None, overwrite_existing: bool = True
+    ) -> list[str]:
         if isinstance(file_path, str):
             with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -238,20 +260,26 @@ class ParserNZSM(BaseParserNZSM):
             record.save()
             record_names.append(record.file_name)
 
-        _populate_common_fields(ParserNZSM.parse_lines(lines[:num_lines]))
-        _populate_common_fields(ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines]))
-        _populate_common_fields(ParserNZSM.parse_lines(lines[2 * num_lines :]))
+        _populate_common_fields(ParserNZSM.parse_lines(lines[:num_lines], overwrite_existing))
+        _populate_common_fields(ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines], overwrite_existing))
+        _populate_common_fields(ParserNZSM.parse_lines(lines[2 * num_lines :], overwrite_existing))
 
         return record_names
 
     @staticmethod
-    def parse_lines(lines: list[str]) -> NZSM:
+    def parse_lines(lines: list[str], overwrite_existing: bool = True) -> NZSM:
         """
         Parse file according to the format shown in the following link.
 
         https://www.geonet.org.nz/data/supplementary/strong_motion_file_formats
         """
+        file_hash = hashlib.sha256("".join(lines).encode("utf-8")).hexdigest()
+        if overwrite_existing and (record := NZSM.objects(file_hash=file_hash).first()):
+            record.delete()
+
         record = NZSM()
+
+        record.file_hash = file_hash
 
         int_header, float_header = ParserNZSM._parse_header(lines)
 
