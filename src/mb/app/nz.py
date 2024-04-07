@@ -33,11 +33,17 @@ router = APIRouter(tags=["New Zealand"])
 
 
 # noinspection DuplicatedCode
-def _parse_archive_local(archive_uri: str, user_id: str, task_id: str | None = None) -> list[str]:
+def _parse_archive_local(
+    archive_uri: str, user_id: str, task_id: str | None = None, overwrite_existing: bool = True
+) -> list[str]:
     try:
         with FileProxy(archive_uri, None, always_delete_on_exit=True) as archive_file:
             return ParserNZSM.parse_archive(
-                archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+                archive_obj=archive_file.file,
+                user_id=user_id,
+                archive_name=archive_file.file_name,
+                task_id=task_id,
+                overwrite_existing=overwrite_existing,
             )
     except Exception as exc:
         # we need to handle the exception here
@@ -53,11 +59,17 @@ def _parse_archive_local(archive_uri: str, user_id: str, task_id: str | None = N
     retry_kwargs={"max_retries": 3},
     default_retry_delay=10,
 )
-def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: str | None = None) -> list[str]:
+def _parse_archive(
+    archive_uri: str, access_token: str, user_id: str, task_id: str | None = None, overwrite_existing: bool = True
+) -> list[str]:
     try:
         with FileProxy(archive_uri, access_token) as archive_file:
             return ParserNZSM.parse_archive(
-                archive_obj=archive_file.file, user_id=user_id, archive_name=archive_file.file_name, task_id=task_id
+                archive_obj=archive_file.file,
+                user_id=user_id,
+                archive_name=archive_file.file_name,
+                task_id=task_id,
+                overwrite_existing=overwrite_existing,
             )
     except Exception as exc:
         if task_id is not None:
@@ -68,7 +80,11 @@ def _parse_archive(archive_uri: str, access_token: str, user_id: str, task_id: s
 # noinspection DuplicatedCode
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
 async def upload_archive(
-    archives: list[UploadFile], tasks: BackgroundTasks, user: User = Depends(is_active), wait_for_result: bool = False
+    archives: list[UploadFile],
+    tasks: BackgroundTasks,
+    user: User = Depends(is_active),
+    wait_for_result: bool = False,
+    overwrite_existing: bool = True,
 ):
     """
     Upload a compressed archive.
@@ -96,12 +112,12 @@ async def upload_archive(
         if has_worker:
             for archive_uri in valid_uris:
                 task_id: str = create_task()
-                _parse_archive.delay(archive_uri, access_token, user.id, task_id)
+                _parse_archive.delay(archive_uri, access_token, user.id, task_id, overwrite_existing)
                 task_id_pool.append(task_id)
         else:
             for archive_uri in valid_uris:
                 task_id: str = create_task()
-                tasks.add_task(_parse_archive_local, archive_uri, user.id, task_id)
+                tasks.add_task(_parse_archive_local, archive_uri, user.id, task_id, overwrite_existing)
                 task_id_pool.append(task_id)
 
         return UploadResponse(
@@ -109,14 +125,13 @@ async def upload_archive(
         )
 
     if has_worker:
-        records = list(
-            itertools.chain.from_iterable(
-                [_parse_archive.delay(archive_uri, access_token, user.id).get() for archive_uri in valid_uris]
-            )
-        )
+        records = [
+            _parse_archive.delay(archive_uri, access_token, user.id, None, overwrite_existing).get()
+            for archive_uri in valid_uris
+        ]
     else:
-        records = list(
-            itertools.chain.from_iterable([_parse_archive_local(archive_uri, user.id) for archive_uri in valid_uris])
-        )
+        records = [_parse_archive_local(archive_uri, user.id, None, overwrite_existing) for archive_uri in valid_uris]
 
-    return UploadResponse(message="Successfully uploaded and processed.", records=records)
+    return UploadResponse(
+        message="Successfully uploaded and processed.", records=list(itertools.chain.from_iterable(records))
+    )

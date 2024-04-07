@@ -163,7 +163,9 @@ class MBClient:
                 f"[[red]{self.current_download_size}/{self.download_size}[/]]."
             )
 
-    async def upload(self, region: str, path: str | Generator, wait_for_result: bool = False):
+    async def upload(
+        self, region: str, path: str | Generator, wait_for_result: bool = False, overwrite_existing: bool = True
+    ):
         if isinstance(path, Generator):
             async with anyio.create_task_group() as tg:
                 for file in path:
@@ -191,7 +193,9 @@ class MBClient:
         async with self.semaphore:
             with open(path, "rb") as file:
                 result = await self.client.post(
-                    f"/{region}/upload?wait_for_result={'true' if wait_for_result else 'false'}",
+                    f"/{region}/upload"
+                    f"?wait_for_result={'true' if wait_for_result else 'false'}"
+                    f"&overwrite_existing={'true' if overwrite_existing else 'false'}",
                     files={"archives": (base_name, file, "multipart/form-data")},
                     auth=self.auth,
                 )
