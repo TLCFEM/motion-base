@@ -489,7 +489,7 @@ const TanStackTable: Component<sxProps> = (props) => {
                                             ).addTo(map);
                                         }
                                         marker.bindPopup(row.original.id);
-                                        marker.setZIndexOffset(1000);
+                                        marker.setZIndexOffset(9999);
                                         map.flyTo(marker.getLatLng(), map.getZoom());
                                     }}
                                 >
@@ -661,7 +661,7 @@ const QueryDatabase: Component = () => {
         <>
             <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
-                <Settings sx={{ border: "1px solid darkgrey", minHeight: "8rem" }} />
+                <Settings sx={{ border: "1px solid darkgrey", minHeight: "9rem" }} />
                 <TanStackTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>
         </>
