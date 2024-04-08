@@ -22,7 +22,6 @@ classifiers = [
     "Programming Language :: Python :: 3 :: Only",
 ]
 dependencies = [
-    "aiofiles",
     "bcrypt",
     "beanie",
     "celery",

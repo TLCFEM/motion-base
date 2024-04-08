@@ -4,7 +4,6 @@
 #
 #    pip-compile --annotation-style=line pyproject.toml
 #
-aiofiles==23.2.1          # via motion-base (pyproject.toml)
 amqp==5.2.0               # via kombu
 anyio==4.3.0              # via httpx, starlette
 bcrypt==4.1.2             # via motion-base (pyproject.toml)
