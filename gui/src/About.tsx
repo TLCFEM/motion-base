@@ -37,6 +37,7 @@ export default function AboutModal() {
     onMount(async () => {
         let configs = [] as QueryConfig[];
         let config = new QueryConfig();
+        config.min_magnitude = 0;
         configs.push(config);
         config = new QueryConfig();
         config.min_magnitude = 6;
@@ -88,8 +89,9 @@ export default function AboutModal() {
                         This is a demo of the ground motion database ({commit_link}).
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
-                        Currently this server contains in total {stats()[0]} records. Among them, {stats()[1]} records
-                        have a magnitude greater than six, {stats()[2]} records has a PGA greater than 100 Gal.
+                        Currently this server contains in total {stats()[0].toLocaleString()} records from various
+                        national database. Among them, {stats()[1].toLocaleString()} records have a magnitude greater
+                        than six, {stats()[2].toLocaleString()} records has a PGA greater than 100 Gal.
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The source code is available in this repository {repo_link}.
