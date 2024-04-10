@@ -131,11 +131,19 @@ export async function query_api(config: QueryConfig) {
 }
 
 interface TotalResponse {
-    total: number;
+    total: number[];
 }
 
-export async function total_api() {
-    return (await axios.get<TotalResponse>("/total")).data.total;
+export async function get_total_api() {
+    return (await axios.get<TotalResponse>("/total")).data.total[0];
+}
+
+export async function post_total_api(configs: QueryConfig[]) {
+    return (
+        await axios.post<TotalResponse>("/total", stringify(configs), {
+            headers: { "Content-Type": "application/json" },
+        })
+    ).data.total;
 }
 
 export class ProcessConfig {

@@ -235,8 +235,8 @@ class QueryConfig(BaseModel):
     )
     from_date: datetime = Field(None)
     to_date: datetime = Field(None)
-    min_pga: float = Field(None)
-    max_pga: float = Field(None)
+    min_pga: float = Field(None, ge=0)
+    max_pga: float = Field(None, ge=0)
     file_name: str = Field(None)
     station_code: str = Field(None)
     direction: str = Field(None)
@@ -329,3 +329,7 @@ class UserResponse(BaseModel):
 class Token(BaseModel):
     access_token: str
     token_type: str
+
+
+class TotalResponse(BaseModel):
+    total: list[int]

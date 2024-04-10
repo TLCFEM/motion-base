@@ -40,6 +40,7 @@ from .response import (
     UploadTasksResponse,
     UploadTaskResponse,
     ListRecordResponse,
+    TotalResponse,
 )
 from .user import router as user_router
 from .utility import (
@@ -89,9 +90,16 @@ async def alive():
     return {"message": "I'm alive!"}
 
 
-@app.get("/total", tags=["status"])
-async def total():
-    return {"total": await Record.find(Record.magnitude > 0).count()}
+@app.post("/total", tags=["status"], response_model=TotalResponse)
+async def post_total(query: QueryConfig | list[QueryConfig] = QueryConfig(min_magnitude=0)):
+    if isinstance(query, QueryConfig):
+        query = [query]
+    return {"total": [await Record.find(q.generate_query_string()).count() for q in query]}
+
+
+@app.get("/total", tags=["status"], response_model=TotalResponse)
+async def get_total():
+    return {"total": [await Record.find(QueryConfig(min_magnitude=0).generate_query_string()).count()]}
 
 
 @app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTaskResponse)
@@ -179,7 +187,7 @@ async def download_waveform(record_id: UUID | list[UUID]):
 
 
 @app.post("/query", response_model=ListMetadataResponse)
-async def query_records(query: QueryConfig = Body(...), count_total: bool = False):
+async def query_records(query: QueryConfig = QueryConfig(), count_total: bool = False):
     """
     Query records from the database.
 

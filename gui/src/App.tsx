@@ -21,11 +21,11 @@ import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
-import { total_api } from "./API";
+import { get_total_api } from "./API";
 import Process from "./Process";
 
 const [mode, setMode] = createSignal<"jackpot" | "query" | "process">("jackpot");
-const [total] = createResource<number>(total_api);
+const [total] = createResource<number>(get_total_api);
 
 const App: Component = () => {
     onMount(() => {

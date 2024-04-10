@@ -15,7 +15,7 @@
 
 import { Box, Button, Link, Modal, Stack, Typography } from "@suid/material";
 import useTheme from "@suid/material/styles/useTheme";
-import { createSignal } from "solid-js";
+import { createSignal, onMount } from "solid-js";
 import mongodb_logo from "./assets/mongodb.svg";
 import fastapi_logo from "./assets/fastapi.svg";
 import beanie_logo from "./assets/beanie.svg";
@@ -27,10 +27,26 @@ import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
+import { post_total_api, QueryConfig } from "./API";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
+    const [stats, setStats] = createSignal([] as number[]);
     const theme = useTheme();
+
+    onMount(async () => {
+        let configs = [] as QueryConfig[];
+        let config = new QueryConfig();
+        configs.push(config);
+        config = new QueryConfig();
+        config.min_magnitude = 6;
+        configs.push(config);
+        config = new QueryConfig();
+        config.min_pga = 100;
+        configs.push(config);
+
+        setStats(await post_total_api(configs));
+    });
 
     const commit_link = <Link href="https://github.com/TLCFEM/motion-base/tree/git-commit-long">git-commit-short</Link>;
     const repo_link = <Link href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</Link>;
@@ -70,6 +86,10 @@ export default function AboutModal() {
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         This is a demo of the ground motion database ({commit_link}).
+                    </Typography>
+                    <Typography variant="body1" sx={{ p: 1 }}>
+                        Currently this server contains in total {stats()[0]} records. Among them, {stats()[1]} records
+                        have a magnitude greater than six, {stats()[2]} records has a PGA greater than 100 Gal.
                     </Typography>
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The source code is available in this repository {repo_link}.
