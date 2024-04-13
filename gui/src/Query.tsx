@@ -660,7 +660,7 @@ const QueryDatabase: Component = () => {
     return (
         <>
             <Paper id="overview" sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
-            <Stack sx={{ display: "flex", width: "60%", height: "90vh" }} spacing="1rem">
+            <Stack sx={{ display: "flex", width: "60%", height: "calc(100vh - 6rem)" }} spacing="1rem">
                 <Settings sx={{ border: "1px solid darkgrey", minHeight: "9rem" }} />
                 <TanStackTable sx={{ border: "1px solid darkgrey", flexGrow: 1 }} />
             </Stack>

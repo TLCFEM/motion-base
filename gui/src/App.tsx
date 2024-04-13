@@ -58,6 +58,7 @@ const App: Component = () => {
                         alignItems: "center",
                         alignContent: "center",
                         gap: "1rem",
+                        height: "4rem",
                     }}
                 >
                     <Typography sx={{ flexGrow: 1 }} variant="h5">
@@ -78,7 +79,7 @@ const App: Component = () => {
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot sx={{ border: "1px solid darkgrey", height: "90vh" }} />
+                        <Jackpot sx={{ border: "1px solid darkgrey", height: "calc(100vh - 6rem)" }} />
                     </Match>
                     <Match when={mode() === "query"}>
                         <QueryDatabase />
