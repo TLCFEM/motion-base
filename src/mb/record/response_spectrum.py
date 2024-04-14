@@ -130,12 +130,9 @@ class Newmark:
         self.gamma = gamma
         self.beta = beta
 
-    def integrate(self, interval: float, acceleration: list) -> tuple[list, list]:
-        displacement: list = [None] * len(acceleration)
-        velocity: list = [None] * len(acceleration)
-
-        displacement[0] = 0.0
-        velocity[0] = 0.0
+    def integrate(self, interval: float, acceleration: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+        displacement: np.ndarray = np.zeros_like(acceleration)
+        velocity: np.ndarray = np.zeros_like(acceleration)
 
         fa: float = interval * self.gamma
         fb: float = interval - fa
