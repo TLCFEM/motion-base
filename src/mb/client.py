@@ -172,10 +172,20 @@ class MBClient:
                     tg.start_soon(self.upload, region, file, wait_for_result)
             return
 
+        def _include(file_name: str) -> bool:
+            file_name = file_name.lower()
+            if file_name.endswith((".tar.gz", ".zip")):
+                return True
+
+            if "v1a" in file_name or "v2a" in file_name:
+                return True
+
+            return False
+
         if os.path.isdir(path):
             file_list: list[str] = []
             for root, _, files in os.walk(path):
-                file_list.extend(os.path.join(root, f) for f in files if f.endswith(".tar.gz"))
+                file_list.extend(os.path.join(root, f) for f in files if _include(f))
             self.upload_size = len(file_list)
             self.current_upload_size = 0
             async with anyio.create_task_group() as tg:
@@ -184,7 +194,7 @@ class MBClient:
 
             return
 
-        if not path.endswith(".tar.gz") or not os.path.exists(path):
+        if not _include(path) or not os.path.exists(path):
             if self.upload_size > 0:
                 self.current_upload_size += 1
             return
