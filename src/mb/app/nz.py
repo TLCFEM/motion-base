@@ -27,7 +27,7 @@ from .utility import User, is_active, create_token
 from ..celery import celery, get_stats
 from ..record.parser import ParserNZSM
 from ..record.sync_record import create_task, delete_task
-from ..utility.files import store, FileProxy
+from ..utility.files import store, FileProxy, pack
 
 router = APIRouter(tags=["New Zealand"])
 
@@ -89,8 +89,10 @@ async def upload_archive(
     """
     Upload a compressed archive.
 
-    The archive must be gzip-compressed tarball or zip archive.
+    The archive shall be gzip-compressed tarball or zip archive.
     All files will be checked and those with ".V2A" and/or ".V1A" extensions will be parsed.
+    It is possible to upload ".V2A" and/or ".V1A" files directly.
+    In this case, those file will be packed into a tarball and then processed.
 
     Two modes are supported, one can choose to wait for the result or not.
     If the result is not waited, the task ID will be returned.
@@ -103,9 +105,15 @@ async def upload_archive(
     has_worker: bool = get_stats() is not None
 
     valid_uris: list[str] = []
+    plain_files: list[UploadFile] = []
     for archive in archives:
         if archive.filename.endswith((".tar.gz", ".zip")):
             valid_uris.append(store(archive))
+        else:
+            plain_files.append(archive)
+
+    if plain_files:
+        valid_uris.append(pack(plain_files))
 
     if not wait_for_result:
         task_id_pool: list[str] = []

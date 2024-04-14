@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import os
+import tarfile
 from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO
@@ -24,7 +25,7 @@ import structlog
 from fastapi import UploadFile
 from requests import delete, get
 
-from mb.record.utility import str_factory
+from mb.record.utility import str_factory, uuid5_str
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
 _logger = structlog.get_logger(__name__)
@@ -56,6 +57,18 @@ def store(upload: UploadFile) -> str:
     with open(local_path, "wb") as file:
         for chunk in _iter(upload.file):
             file.write(chunk)
+
+    return f"{MB_MAIN_SITE}/access/{fs_path}"
+
+
+def pack(uploads: list[UploadFile]):
+    local_path, fs_path = _local_path(f'{uuid5_str("".join(upload.filename for upload in uploads))}.tar.gz')
+
+    with tarfile.open(local_path, "w:gz") as archive:
+        for upload in uploads:
+            tar_info = tarfile.TarInfo(upload.filename.upper().rstrip(".BIN"))
+            tar_info.size = upload.size
+            archive.addfile(tar_info, upload.file)
 
     return f"{MB_MAIN_SITE}/access/{fs_path}"
 
