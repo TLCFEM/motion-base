@@ -24,9 +24,9 @@ fastapi==0.110.1          # via motion-base (pyproject.toml)
 h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.5           # via httpx
 httpx==0.27.0             # via motion-base (pyproject.toml)
-idna==3.6                 # via anyio, email-validator, httpx, requests
+idna==3.7                 # via anyio, email-validator, httpx, requests
 joserfc==0.9.0            # via motion-base (pyproject.toml)
-kombu==5.3.6              # via celery
+kombu==5.3.7              # via celery
 lazy-model==0.2.0         # via beanie
 llvmlite==0.42.0          # via numba
 mongoengine==0.28.2       # via motion-base (pyproject.toml)
