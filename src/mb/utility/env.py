@@ -49,6 +49,8 @@ RABBITMQ_PORT: str = os.getenv("RABBITMQ_PORT", "5672")
 RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME", "test")
 RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD", "password")
 
+ELASTIC_HOST: str = os.getenv("ELASTIC_HOST", "localhost")
+
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "/tmp")

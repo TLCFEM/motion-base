@@ -25,6 +25,7 @@ dependencies = [
     "bcrypt",
     "beanie",
     "celery",
+    "elasticsearch[async]",
     "email-validator",
     "fastapi",
     "httpx",

@@ -50,6 +50,16 @@ services:
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
     ports:
       - '5555:5555'
+  elasticsearch:
+    image: elasticsearch:${ELASTIC_VERSION}
+    container_name: elasticsearch
+    restart: 'always'
+    environment:
+      ES_JAVA_OPTS: "-Xms1g -Xmx4g"
+      discovery.type: single-node
+      xpack.security.enabled: false
+    volumes:
+      - motion_elasticsearch:/usr/share/elasticsearch/data
   mb-back:
     image: tlcfem/motion-base-back
     #    container_name: mb-back
@@ -58,6 +68,7 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+      - elasticsearch
     ports:
       - ${MB_PORT}
     volumes:
@@ -84,6 +95,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      ELASTIC_HOST: ${ELASTIC_HOST}
   mb-worker:
     image: tlcfem/motion-base-back
     container_name: mb-worker
@@ -91,6 +103,7 @@ services:
     depends_on:
       - mongo
       - rabbitmq
+      - elasticsearch
     command: celery
     volumes:
       - motion_cache:${MB_FS_ROOT}
@@ -116,6 +129,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      ELASTIC_HOST: ${ELASTIC_HOST}
   mb-front:
     image: tlcfem/motion-base-front
     container_name: mb-front
@@ -143,3 +157,4 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_cache:
+  motion_elasticsearch:

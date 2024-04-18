@@ -43,7 +43,7 @@ class ParserNIED(BaseParserNIED):
         archive_name: str | None = None,
         task_id: str | None = None,
         overwrite_existing: bool = True,
-    ) -> list[str]:
+    ) -> list[NIED]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
@@ -83,7 +83,7 @@ class ParserNIED(BaseParserNIED):
                         record.file_name = os.path.basename(f.name)
                         record.category = category
                         record.save()
-                        records.append(record.file_name)
+                        records.append(record)
                     except Exception as e:
                         _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
         except tarfile.ReadError as e:
@@ -146,7 +146,7 @@ class ParserNZSM(BaseParserNZSM):
         archive_name: str | None = None,
         task_id: str | None = None,
         overwrite_existing: bool = True,
-    ) -> list[str]:
+    ) -> list[NZSM]:
         if not isinstance(archive_obj, str) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
@@ -223,7 +223,7 @@ class ParserNZSM(BaseParserNZSM):
     @staticmethod
     def parse_file(
         file_path: str | IO[bytes], user_id: str, file_name: str | None = None, overwrite_existing: bool = True
-    ) -> list[str]:
+    ) -> list[NZSM]:
         if isinstance(file_path, str):
             with open(file_path, "r", encoding="utf-8") as f:
                 lines = f.readlines()
@@ -241,7 +241,7 @@ class ParserNZSM(BaseParserNZSM):
 
         assert 3 * num_lines == len(lines), "Number of lines should be a multiple of 3."
 
-        record_names: list[str] = []
+        records: list[NZSM] = []
         station_code = [x for x in lines[1].split(" ") if x][1]
 
         last_update_time: datetime | None = None
@@ -258,13 +258,13 @@ class ParserNZSM(BaseParserNZSM):
             if last_update_time is not None:
                 record.last_update_time = last_update_time
             record.save()
-            record_names.append(record.file_name)
+            records.append(record)
 
         _populate_common_fields(ParserNZSM.parse_lines(lines[:num_lines], overwrite_existing))
         _populate_common_fields(ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines], overwrite_existing))
         _populate_common_fields(ParserNZSM.parse_lines(lines[2 * num_lines :], overwrite_existing))
 
-        return record_names
+        return records
 
     @staticmethod
     def parse_lines(lines: list[str], overwrite_existing: bool = True) -> NZSM:

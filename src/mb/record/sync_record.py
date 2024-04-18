@@ -89,6 +89,7 @@ class Record(Document):
         if self.direction is not None:
             token += self.direction
         self.id = uuid5_str(token)
+
         return super().save(*args, **kwargs)
 
     def to_raw_waveform(self) -> tuple[float, list]:

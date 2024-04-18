@@ -38,13 +38,14 @@ def _parse_archive_local(
 ) -> list[str]:
     try:
         with FileProxy(archive_uri, None, always_delete_on_exit=True) as archive_file:
-            return ParserNIED.parse_archive(
+            results = ParserNIED.parse_archive(
                 archive_obj=archive_file.file,
                 user_id=user_id,
                 archive_name=archive_file.file_name,
                 task_id=task_id,
                 overwrite_existing=overwrite_existing,
             )
+            return archive_file.bulk(results)
     except Exception as exc:
         # we need to handle the exception here
         # throwing exception in background task queue will terminate all tasks
@@ -64,13 +65,14 @@ def _parse_archive(
 ) -> list[str]:
     try:
         with FileProxy(archive_uri, access_token) as archive_file:
-            return ParserNIED.parse_archive(
+            results = ParserNIED.parse_archive(
                 archive_obj=archive_file.file,
                 user_id=user_id,
                 archive_name=archive_file.file_name,
                 task_id=task_id,
                 overwrite_existing=overwrite_existing,
             )
+            return archive_file.bulk(results)
     except Exception as exc:
         if task_id is not None:
             create_task(task_id)

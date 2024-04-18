@@ -41,6 +41,7 @@ from .response import (
     UploadTaskResponse,
     ListRecordResponse,
     TotalResponse,
+    MetadataResponse,
 )
 from .user import router as user_router
 from .utility import (
@@ -50,15 +51,18 @@ from .utility import (
 )
 from ..record.async_record import Record, MetadataRecord, UploadTask
 from ..utility.config import init_mongo, shutdown_mongo
+from ..utility.elastic import async_elastic
 from ..utility.env import MB_FS_ROOT
 
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argument
+    client = await async_elastic()
     await init_mongo()
     await create_superuser()
     yield
     await shutdown_mongo()
+    await client.close()
 
 
 app = FastAPI(
@@ -212,6 +216,40 @@ async def query_records(query: QueryConfig = QueryConfig(), count_total: bool = 
     for item in response.records:
         item.endpoint = "/query"
     return response
+
+
+@app.post("/search", response_model=ListMetadataResponse)
+async def search_records(query: QueryConfig = QueryConfig()):
+    """
+    Query records from the database using elastic search.
+    """
+    pagination = query.pagination
+
+    client = await async_elastic()
+    results = await client.search(
+        index="record",
+        query=query.generate_elastic_query(),
+        from_=pagination.page_number * pagination.page_size,
+        size=pagination.page_size,
+    )
+
+    return ListMetadataResponse(
+        records=[MetadataResponse(endpoint="/search", **x["_source"]) for x in results["hits"]["hits"]],
+        pagination=PaginationResponse(total=results["hits"]["total"]["value"], **pagination.dict()),
+    )
+
+
+@app.post("/index")
+async def index_records(body=Body(...), user: User = Depends(is_active)):
+    """
+    Index records.
+    """
+    if not user.can_upload:
+        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload files.")
+
+    client = await async_elastic()
+
+    return await client.bulk(index="record", body=body)
 
 
 @app.post("/process", response_model=ProcessedResponse)

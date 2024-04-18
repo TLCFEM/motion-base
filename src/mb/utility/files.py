@@ -23,9 +23,10 @@ from typing import BinaryIO
 
 import structlog
 from fastapi import UploadFile
-from requests import delete, get
+from requests import delete, get, post
 
 from mb.record.utility import str_factory, uuid5_str
+from mb.utility.elastic import sync_elastic
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
 _logger = structlog.get_logger(__name__)
@@ -86,12 +87,43 @@ class FileProxy:
         return not self._file_uri.startswith(MB_MAIN_SITE)
 
     @property
+    def host_path(self):
+        return self._file_uri.split("access/")[0]
+
+    @property
     def fs_path(self):
         return self._file_uri.split("access/")[1]
 
     @property
     def file_name(self):
         return os.path.basename(self.fs_path)
+
+    def bulk(self, records: list):
+        def to_dict(record) -> dict:
+            dict_data = record.to_mongo()
+            for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "_id", "_cls"):
+                dict_data.pop(key, None)
+            dict_data["id"] = record.id
+            return dict_data
+
+        bulk_body: list = []
+        for r in records:
+            bulk_body.append({"index": {"_id": r.id}})
+            bulk_body.append(to_dict(r))
+
+        if bulk_body:
+            if not self.is_remote:
+                response = sync_elastic().bulk(index="record", body=bulk_body)
+                if response["errors"]:
+                    _logger.error(f"Failed to index file: {self._file_uri}")
+            else:
+                response = post(
+                    f"{self.host_path}/index", headers={"Authorization": f"Bearer {self._auth_token}"}, json=bulk_body
+                )
+                if response.status_code != 200:
+                    _logger.error(f"Failed to index file: {self._file_uri}")
+
+        return [record.file_name for record in records]
 
     def __enter__(self):
         if self.is_remote:

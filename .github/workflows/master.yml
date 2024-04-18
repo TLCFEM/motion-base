@@ -26,6 +26,14 @@ jobs:
           RABBITMQ_DEFAULT_VHOST: vhost
         ports:
           - 5672:5672
+      elasticsearch:
+        image: elasticsearch:8.13.0
+        ports:
+          - '9200:9200'
+        env:
+          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          discovery.type: single-node
+          xpack.security.enabled: false
     steps:
       - name: Clone
         uses: actions/checkout@v4

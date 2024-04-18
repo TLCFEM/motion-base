@@ -246,7 +246,10 @@ class QueryConfig(BaseModel):
         query_dict: dict = {}
 
         if self.region is not None:
-            query_dict["region"] = self.region
+            query_dict["region"] = self.region.lower()
+
+        if self.category is not None:
+            query_dict["category"] = self.category.lower()
 
         magnitude: dict = {}
         if self.min_magnitude is not None:
@@ -255,9 +258,6 @@ class QueryConfig(BaseModel):
             magnitude["$lte"] = self.max_magnitude
         if magnitude:
             query_dict["magnitude"] = magnitude
-
-        if self.category is not None:
-            query_dict["category"] = self.category.lower()
 
         if self.event_location is not None:
             # geo_json = {"$nearSphere": self.event_location, "$maxDistance": 10 / 6371}
@@ -303,6 +303,82 @@ class QueryConfig(BaseModel):
 
         if self.station_code is not None:
             query_dict["station_code"] = {"$regex": self.station_code, "$options": "i"}
+
+        return query_dict
+
+    def generate_elastic_query(self):
+        # generate a query dict that can be used in elastic search
+
+        query_dict: dict = {"bool": {"must": []}}
+
+        query_must = query_dict["bool"]["must"]
+
+        if self.region is not None:
+            query_must.append({"match": {"region": self.region.lower()}})
+
+        if self.category is not None:
+            query_must.append({"match": {"category": self.category.lower()}})
+
+        magnitude_range = {}
+        if self.min_magnitude is not None:
+            magnitude_range["gte"] = self.min_magnitude
+        if self.max_magnitude is not None:
+            magnitude_range["lte"] = self.max_magnitude
+        if magnitude_range:
+            query_must.append({"range": {"magnitude": magnitude_range}})
+
+        date_range = {}
+        if self.from_date is not None:
+            date_range["gte"] = self.from_date
+        if self.to_date is not None:
+            date_range["lte"] = self.to_date
+        if date_range:
+            query_must.append({"range": {"event_time": date_range}})
+
+        pga_range = {}
+        if self.min_pga is not None:
+            pga_range["gte"] = self.min_pga
+        if self.max_pga is not None:
+            pga_range["lte"] = self.max_pga
+        if pga_range:
+            query_must.append({"range": {"maximum_acceleration": pga_range}})
+
+        if self.event_location is not None:
+            max_distance = self.max_event_distance if self.max_event_distance is not None else 100000.0
+            query_must.append(
+                {
+                    "geo_distance": {
+                        "distance": f"{int(max_distance)}m",
+                        "event_location": {
+                            "lon": self.event_location[0],
+                            "lat": self.event_location[1],
+                        },
+                    }
+                }
+            )
+
+        if self.station_location is not None:
+            max_distance = self.max_station_distance if self.max_station_distance is not None else 100000.0
+            query_must.append(
+                {
+                    "geo_distance": {
+                        "distance": f"{int(max_distance)}m",
+                        "station_location": {
+                            "lon": self.station_location[0],
+                            "lat": self.station_location[1],
+                        },
+                    }
+                }
+            )
+
+        if self.direction is not None:
+            query_must.append({"regexp": {"direction": self.direction}})
+
+        if self.file_name is not None:
+            query_must.append({"regexp": {"file_name": self.file_name}})
+
+        if self.station_code is not None:
+            query_must.append({"regexp": {"station_code": self.station_code}})
 
         return query_dict
 
