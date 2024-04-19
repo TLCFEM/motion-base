@@ -120,9 +120,9 @@ function stringify(obj: any) {
     return JSON.stringify(obj, (_, value) => (value === null || value === undefined ? undefined : value));
 }
 
-export async function query_api(config: QueryConfig) {
+export async function query_api(config: QueryConfig, mongo: boolean) {
     const response = (
-        await axios.post<QueryResponse>("/query", stringify(config), {
+        await axios.post<QueryResponse>(mongo ? "/query" : "/search", stringify(config), {
             headers: { "Content-Type": "application/json" },
         })
     ).data;
