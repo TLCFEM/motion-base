@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import tarfile
+from datetime import datetime
 from io import BytesIO
 from pathlib import Path
 from typing import BinaryIO
@@ -104,6 +105,11 @@ class FileProxy:
             for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "_id", "_cls"):
                 dict_data.pop(key, None)
             dict_data["id"] = record.id
+            if self.is_remote:
+                for k, v in dict_data.items():
+                    if isinstance(v, datetime):
+                        dict_data[k] = v.isoformat()
+
             return dict_data
 
         bulk_body: list = []
@@ -118,7 +124,9 @@ class FileProxy:
                     _logger.error(f"Failed to index file: {self._file_uri}")
             else:
                 response = post(
-                    f"{self.host_path}/index", headers={"Authorization": f"Bearer {self._auth_token}"}, json=bulk_body
+                    f"{self.host_path}/index",
+                    headers={"Authorization": f"Bearer {self._auth_token}"},
+                    json={"records": bulk_body},
                 )
                 if response.status_code != 200:
                     _logger.error(f"Failed to index file: {self._file_uri}")

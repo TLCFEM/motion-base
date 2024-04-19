@@ -409,3 +409,7 @@ class Token(BaseModel):
 
 class TotalResponse(BaseModel):
     total: list[int]
+
+
+class BulkRequest(BaseModel):
+    records: list[dict]

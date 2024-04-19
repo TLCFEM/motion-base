@@ -42,6 +42,7 @@ from .response import (
     ListRecordResponse,
     TotalResponse,
     MetadataResponse,
+    BulkRequest,
 )
 from .user import router as user_router
 from .utility import (
@@ -240,7 +241,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
 
 @app.post("/index")
-async def index_records(body=Body(...), user: User = Depends(is_active)):
+async def index_records(body: BulkRequest = Body(...), user: User = Depends(is_active)):
     """
     Index records.
     """
@@ -249,7 +250,7 @@ async def index_records(body=Body(...), user: User = Depends(is_active)):
 
     client = await async_elastic()
 
-    return await client.bulk(index="record", body=body)
+    return await client.bulk(index="record", body=body.records)
 
 
 @app.post("/process", response_model=ProcessedResponse)
