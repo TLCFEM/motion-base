@@ -239,7 +239,12 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
     return ListMetadataResponse(
         records=[MetadataResponse(endpoint="/search", **x["_source"]) for x in results["hits"]["hits"]],
-        pagination=PaginationResponse(total=results["hits"]["total"]["value"], **pagination.dict()),
+        pagination=PaginationResponse(
+            total=results["hits"]["total"]["value"],
+            sort_by=pagination.sort_by,
+            page_size=page_size,
+            page_number=page_number,
+        ),
     )
 
 
