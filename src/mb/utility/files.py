@@ -89,11 +89,11 @@ class FileProxy:
 
     @property
     def host_path(self):
-        return self._file_uri.split("access/")[0]
+        return self._file_uri.split("/access/")[0]
 
     @property
     def fs_path(self):
-        return self._file_uri.split("access/")[1]
+        return self._file_uri.split("/access/")[1]
 
     @property
     def file_name(self):
