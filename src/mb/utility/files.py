@@ -17,6 +17,7 @@ from __future__ import annotations
 
 import os
 import tarfile
+import time
 from datetime import datetime
 from io import BytesIO
 from pathlib import Path
@@ -75,6 +76,15 @@ def pack(uploads: list[UploadFile]):
     return f"{MB_MAIN_SITE}/access/{fs_path}"
 
 
+def _retry(func, delay: int = 10, max_retries: int = 3):
+    for _ in range(max_retries):
+        try:
+            return func()
+        except Exception:  # noqa
+            time.sleep(delay)
+    raise ConnectionError(f"Failed to execute {func.__name__}.")
+
+
 class FileProxy:
     def __init__(self, file_uri: str, auth_token: str | None, *, always_delete_on_exit: bool = False):
         self._file_uri = file_uri
@@ -123,20 +133,26 @@ class FileProxy:
                 if response["errors"]:
                     _logger.error(f"Failed to index file: {self._file_uri}")
             else:
-                response = post(
-                    f"{self.host_path}/index",
-                    headers={"Authorization": f"Bearer {self._auth_token}"},
-                    json={"records": bulk_body},
-                )
-                if response.status_code != 200:
+
+                def _post():
+                    return post(
+                        f"{self.host_path}/index",
+                        headers={"Authorization": f"Bearer {self._auth_token}"},
+                        json={"records": bulk_body},
+                    )
+
+                if _retry(_post).status_code != 200:
                     _logger.error(f"Failed to index file: {self._file_uri}")
 
         return [record.file_name for record in records]
 
     def __enter__(self):
         if self.is_remote:
-            response = get(self._file_uri)
-            if response.status_code != 200:
+
+            def _get():
+                return get(self._file_uri)
+
+            if (response := _retry(_get)).status_code != 200:
                 raise ConnectionError(f"Failed to download file: {self._file_uri}")
 
             self.file = BytesIO(response.content)
@@ -150,8 +166,11 @@ class FileProxy:
         # the task will be retried
         if not exc_type or self._always_delete_on_exit:
             if self.is_remote and self._auth_token:
-                response = delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
-                if response.status_code != 200:
+
+                def _delete():
+                    return delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
+
+                if _retry(_delete).status_code != 200:
                     _logger.error(f"Failed to delete file: {self._file_uri}")
             else:
                 if os.path.exists(self.file):
