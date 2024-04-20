@@ -72,10 +72,11 @@ class ParserNIED(BaseParserNIED):
                     if task:
                         task.current_size += 1
                         task.save()
-                    if not f.isfile() or f.name.endswith(".ps.gz"):
-                        continue
-                    target = archive.extractfile(f)
-                    if not target:
+                    if (
+                        not f.isfile()
+                        or not f.name.endswith(("EW1", "EW2", "NS1", "NS2", "UD1", "UD2", "EW", "NS", "UD"))
+                        or not (target := archive.extractfile(f))
+                    ):
                         continue
                     try:
                         record = ParserNIED.parse_file(target, overwrite_existing)
