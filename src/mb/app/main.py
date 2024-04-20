@@ -226,12 +226,15 @@ async def search_records(query: QueryConfig = QueryConfig()):
     """
     pagination = query.pagination
 
+    page_size: int = pagination.page_size
+    page_number: int = min(pagination.page_number, 10000 // page_size - 1)
+
     client = await async_elastic()
     results = await client.search(
         index="record",
         query=query.generate_elastic_query(),
-        from_=pagination.page_number * pagination.page_size,
-        size=pagination.page_size,
+        from_=page_number * page_size,
+        size=page_size,
     )
 
     return ListMetadataResponse(
