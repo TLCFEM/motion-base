@@ -27,7 +27,7 @@ dependencies = [
     "celery",
     "elasticsearch[async]",
     "email-validator",
-    "fastapi",
+    "fastapi-slim",
     "httpx",
     "joserfc",
     "mongoengine",
