@@ -72,17 +72,17 @@ multidict==6.0.5          # via aiohttp, yarl
 mypy-extensions==1.0.0    # via black
 numba==0.59.1             # via motion-base (pyproject.toml)
 numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
-packaging==24.0           # via black, matplotlib, pytest
+packaging==24.1           # via black, matplotlib, pytest
 pathspec==0.12.1          # via black
 pillow==10.3.0            # via matplotlib
 pint==0.24                # via motion-base (pyproject.toml)
 platformdirs==4.2.2       # via black
 pluggy==1.5.0             # via pytest
-prompt-toolkit==3.0.46    # via click-repl
+prompt-toolkit==3.0.47    # via click-repl
 psutil==5.9.8             # via locust, pytest-celery
 py==1.11.0                # via retry
 pycparser==2.22           # via cffi
-pydantic==1.10.15         # via beanie, fastapi-slim, lazy-model, motion-base (pyproject.toml)
+pydantic==1.10.16         # via beanie, fastapi-slim, lazy-model, motion-base (pyproject.toml)
 pygments==2.18.0          # via rich
 pymongo==4.7.3            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
