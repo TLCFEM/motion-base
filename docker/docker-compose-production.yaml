@@ -41,6 +41,8 @@ services:
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
       RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
       RABBITMQ_DEFAULT_VHOST: vhost
+    volumes:
+      - motion_rabbitmq:/var/lib/rabbitmq
   flower:
     image: mher/flower
     container_name: flower
@@ -141,5 +143,6 @@ services:
 volumes:
   motion_mongo:
   motion_mongoconfig:
+  motion_rabbitmq:
   motion_cache:
   motion_elasticsearch:
