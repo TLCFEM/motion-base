@@ -51,6 +51,8 @@ services:
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
     ports:
       - '5555:5555'
+    volumes:
+      - motion_flower:/data
   dev-elasticsearch:
     image: elasticsearch:${ELASTIC_VERSION}
     container_name: dev-elasticsearch
@@ -68,4 +70,5 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_rabbitmq:
+  motion_flower:
   motion_elasticsearch:

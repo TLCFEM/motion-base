@@ -52,6 +52,8 @@ services:
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
     ports:
       - '5555:5555'
+    volumes:
+      - motion_flower:/data
   elasticsearch:
     image: elasticsearch:${ELASTIC_VERSION}
     container_name: elasticsearch
@@ -96,7 +98,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      ELASTIC_HOST: ${ELASTIC_HOST}
+      ELASTIC_HOST: elasticsearch
   mb-worker:
     image: tlcfem/motion-base-back
     container_name: mb-worker
@@ -130,7 +132,7 @@ services:
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      ELASTIC_HOST: ${ELASTIC_HOST}
+      ELASTIC_HOST: elasticsearch
   mb-front:
     image: tlcfem/motion-base-front
     container_name: mb-front
@@ -145,4 +147,5 @@ volumes:
   motion_mongoconfig:
   motion_rabbitmq:
   motion_cache:
+  motion_flower:
   motion_elasticsearch:
