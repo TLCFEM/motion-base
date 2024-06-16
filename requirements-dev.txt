@@ -55,11 +55,11 @@ idna==3.7                 # via anyio, email-validator, httpx, requests, yarl
 iniconfig==2.0.0          # via pytest
 itsdangerous==2.2.0       # via flask
 jinja2==3.1.4             # via flask
-joserfc==0.11.1           # via motion-base (pyproject.toml)
+joserfc==0.12.0           # via motion-base (pyproject.toml)
 kiwisolver==1.4.5         # via matplotlib
 kombu==5.3.7              # via celery
 lazy-model==0.2.0         # via beanie
-llvmlite==0.42.0          # via numba
+llvmlite==0.43.0          # via numba
 locust==2.29.0            # via motion-base (pyproject.toml)
 markdown-it-py==3.0.0     # via rich
 markupsafe==2.1.5         # via jinja2, werkzeug
@@ -70,8 +70,8 @@ motor==3.4.0              # via beanie
 msgpack==1.0.8            # via locust
 multidict==6.0.5          # via aiohttp, yarl
 mypy-extensions==1.0.0    # via black
-numba==0.59.1             # via motion-base (pyproject.toml)
-numpy==1.26.4             # via contourpy, matplotlib, numba, scipy
+numba==0.60.0             # via motion-base (pyproject.toml)
+numpy==2.0.0              # via contourpy, matplotlib, numba, scipy
 packaging==24.1           # via black, matplotlib, pytest
 pathspec==0.12.1          # via black
 pillow==10.3.0            # via matplotlib

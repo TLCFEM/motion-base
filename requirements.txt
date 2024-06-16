@@ -34,15 +34,15 @@ h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.5           # via httpx
 httpx==0.27.0             # via motion-base (pyproject.toml)
 idna==3.7                 # via anyio, email-validator, httpx, requests, yarl
-joserfc==0.11.1           # via motion-base (pyproject.toml)
+joserfc==0.12.0           # via motion-base (pyproject.toml)
 kombu==5.3.7              # via celery
 lazy-model==0.2.0         # via beanie
-llvmlite==0.42.0          # via numba
+llvmlite==0.43.0          # via numba
 mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.4.0              # via beanie
 multidict==6.0.5          # via aiohttp, yarl
-numba==0.59.1             # via motion-base (pyproject.toml)
-numpy==1.26.4             # via numba, scipy
+numba==0.60.0             # via motion-base (pyproject.toml)
+numpy==2.0.0              # via numba, scipy
 pint==0.24                # via motion-base (pyproject.toml)
 prompt-toolkit==3.0.47    # via click-repl
 pycparser==2.22           # via cffi
