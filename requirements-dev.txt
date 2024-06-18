@@ -35,7 +35,7 @@ dnspython==2.6.1          # via email-validator, pymongo
 docker==7.1.0             # via pytest-celery, pytest-docker-tools
 elastic-transport==8.13.1  # via elasticsearch
 elasticsearch[async]==8.14.0  # via motion-base (pyproject.toml)
-email-validator==2.1.1    # via motion-base (pyproject.toml)
+email-validator==2.1.2    # via motion-base (pyproject.toml)
 fastapi-slim==0.111.0     # via motion-base (pyproject.toml)
 flask==3.0.3              # via flask-cors, flask-login, locust
 flask-cors==4.0.1         # via locust
@@ -106,7 +106,7 @@ structlog==24.2.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.12.2  # via fastapi-slim, flexcache, flexparser, pint, pydantic
 tzdata==2024.1            # via celery, motion-base (pyproject.toml)
-urllib3==2.2.1            # via docker, elastic-transport, geventhttpclient, requests
+urllib3==2.2.2            # via docker, elastic-transport, geventhttpclient, requests
 uvicorn==0.30.1           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
