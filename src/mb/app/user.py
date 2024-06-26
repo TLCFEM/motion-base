@@ -59,6 +59,14 @@ async def create_new_user(form_data: UserForm):
     return {"message": "User created."}
 
 
+@router.post("/delete", status_code=HTTPStatus.OK)
+async def delete_user(form_data: UserForm):
+    if target_user := await User.find_one(User.username == form_data.username):
+        await target_user.delete()
+
+    return {"message": "User deleted."}
+
+
 @router.get("/whoami", response_model=UserResponse)
 async def retrieve_myself(user: User = Depends(is_active)):
     return UserResponse(**user.dict())

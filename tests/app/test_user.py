@@ -32,3 +32,9 @@ async def test_user_new(mock_client):
         json={"username": "tester1", "password": "teste2zAr", "email": "a@b.c", "last_name": "a", "first_name": "a"},
     )
     assert response.status_code == HTTPStatus.OK
+
+    response = await mock_client.post(
+        "/user/delete",
+        json={"username": "tester1", "password": "teste2zAr", "email": "a@b.c", "last_name": "a", "first_name": "a"},
+    )
+    assert response.status_code == HTTPStatus.OK
