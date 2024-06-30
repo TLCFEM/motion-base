@@ -1,4 +1,4 @@
-FROM python:3.11-slim as dependency
+FROM python:3.11-slim AS dependency
 
 COPY requirements.txt /mb/requirements.txt
 WORKDIR /mb
