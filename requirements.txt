@@ -14,7 +14,7 @@ bcrypt==4.1.3             # via motion-base (pyproject.toml)
 beanie==1.26.0            # via motion-base (pyproject.toml)
 billiard==4.2.0           # via celery
 celery==5.4.0             # via motion-base (pyproject.toml)
-certifi==2024.6.2         # via elastic-transport, httpcore, httpx, requests
+certifi==2024.7.4         # via elastic-transport, httpcore, httpx, requests
 cffi==1.16.0              # via cryptography
 charset-normalizer==3.3.2  # via requests
 click==8.1.7              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
