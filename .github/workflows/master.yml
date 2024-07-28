@@ -87,11 +87,11 @@ jobs:
           context: .
           file: back.Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/motion-base-back:latest
+          tags: tlcfem/motion-base-back:latest
       - name: Build Frontend
         uses: docker/build-push-action@v6
         with:
           context: .
           file: front.Dockerfile
           push: true
-          tags: ${{ secrets.DOCKERHUB_USERNAME }}/motion-base-front:latest
+          tags: tlcfem/motion-base-front:latest

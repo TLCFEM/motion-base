@@ -84,7 +84,7 @@ pydantic==1.10.17         # via beanie, fastapi-slim, lazy-model, motion-base (p
 pygments==2.18.0          # via rich
 pymongo==4.8.0            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
-pytest==8.3.1             # via pytest-asyncio, pytest-cov, pytest-docker-tools
+pytest==8.3.2             # via pytest-asyncio, pytest-cov, pytest-docker-tools
 pytest-asyncio==0.23.8    # via motion-base (pyproject.toml)
 pytest-celery==1.0.1      # via motion-base (pyproject.toml)
 pytest-cov==5.0.0         # via motion-base (pyproject.toml)
