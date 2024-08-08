@@ -318,6 +318,7 @@ const Settings: Component<sxProps> = (props) => {
                         id="chk-mongo"
                         name="chk-mongo"
                         label="mongoDB"
+                        disabled={true}
                         control={<Checkbox checked={mongo()} onChange={(_, checked) => setMongo(checked)} />}
                     />
                 </Stack>

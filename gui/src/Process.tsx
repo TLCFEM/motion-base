@@ -33,7 +33,7 @@ import {
     Paper,
     Select,
     Stack,
-    TextField,
+    TextField
 } from "@suid/material";
 import { createDownloadLink, ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
 import Plotly from "plotly.js-dist-min";
@@ -41,6 +41,7 @@ import Plotly from "plotly.js-dist-min";
 const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessResponse);
 const [error, setError] = createSignal("");
 const [loading, setLoading] = createSignal(false);
+const [history, setHistory] = createSignal<ProcessResponse[]>([]);
 
 const [currentRecord, setCurrentRecord] = createSignal("");
 const [normalised, setNormalised] = createSignal(false);
@@ -86,6 +87,7 @@ const Settings: Component<sxProps> = (props) => {
         setPeriodEnd("");
 
         setProcessed({} as ProcessResponse);
+        setHistory([]);
     }
 
     async function process() {
@@ -114,6 +116,7 @@ const Settings: Component<sxProps> = (props) => {
         if (isNumeric(removeHead()) && Number(removeHead()) > 0) config.remove_head = Number(removeHead());
 
         try {
+            if (processed().id) setHistory([...history(), processed()]);
             setProcessed(await process_api(currentRecord(), config));
         } catch (e) {
             // clear();
@@ -126,71 +129,71 @@ const Settings: Component<sxProps> = (props) => {
     onMount(() => {
         tippy(`#btn-process`, {
             content: "Process the record with the current settings.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#btn-reset`, {
             content: "Clear the current settings.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#btn-download`, {
             content: "Download the processed record in json.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#remove-head`, {
             content: "Remove the first a few seconds, default is zero.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#upsampling-ratio`, {
             content: "Assign a positive integer to upsample the record, default is one (no upsampling).",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#downsampling-ratio`, {
             content: "Assign a positive integer to downsample the record, default is one (no downsampling).",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#filter-length`, {
             content: "Assign a positive integer (at least eight) to set the filter window length, default is 32.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#low-cut`, {
             content: "The low-cut frequency for the highpass and bandpass filters, default is 0.01.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#high-cut`, {
             content: "The high-cut frequency for the lowpass and bandpass filters, default is 50.0.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#damping-ratio`, {
             content: "Assign a positive floating point number representing the damping ratio, default is 0.05.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#period-step`, {
             content: "The period interval for the response spectrum computation, default is 0.01.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#period-end`, {
             content: "The termination period (right bound) for the response spectrum computation, default is 10.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#chk-waveform`, {
             content: "Display the original waveform.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#chk-normalised`, {
             content: "Normalise the PGA to unity.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#chk-frequency-spectrum`, {
             content: "Compute the frequency spectrum of the original waveform.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#chk-filter`, {
             content: "Further process the record by applying a filter.",
-            animation: "scale",
+            animation: "scale"
         });
         tippy(`#chk-response-spectrum`, {
             content: "Compute response spectra of the original waveform.",
-            animation: "scale",
+            animation: "scale"
         });
     });
 
@@ -203,7 +206,7 @@ const Settings: Component<sxProps> = (props) => {
                     justifyContent: "center",
                     alignContent: "center",
                     alignItems: "flex-start",
-                    gap: "1rem",
+                    gap: "1rem"
                 }}
             >
                 <Box
@@ -212,7 +215,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem",
+                        gap: "1rem"
                     }}
                 >
                     <FormControlLabel
@@ -269,7 +272,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem",
+                        gap: "1rem"
                     }}
                 >
                     <FormControlLabel
@@ -372,7 +375,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem",
+                        gap: "1rem"
                     }}
                 >
                     <FormControlLabel
@@ -450,7 +453,7 @@ const Settings: Component<sxProps> = (props) => {
                                 top: "50%",
                                 left: "50%",
                                 transform: "translate(-50%, -50%)",
-                                width: "40%",
+                                width: "40%"
                             }}
                         >
                             <AlertTitle>Error</AlertTitle>
@@ -468,34 +471,51 @@ const Waveform: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading() || !processed().waveform) return;
 
+        let records: Plotly.Data[] = [];
+
+        for (const record of history()) {
+            if (!record.waveform) continue;
+            records.push({
+                x: Array<number>(record.waveform.length)
+                    .fill(0)
+                    .map((_, i) => i * record.time_interval),
+                y: record.waveform,
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" }
+            });
+        }
+
+        records.push({
+            x: Array<number>(processed().waveform.length)
+                .fill(0)
+                .map((_, i) => i * processed().time_interval),
+            y: processed().waveform,
+            type: "scatter",
+            mode: "lines",
+            name: processed().id
+        });
+
         await Plotly.newPlot(
             "time",
-            [
-                {
-                    x: Array<number>(processed().waveform.length)
-                        .fill(0)
-                        .map((_, i) => i * processed().time_interval),
-                    y: processed().waveform,
-                    type: "scatter",
-                    mode: "lines",
-                    name: processed().id,
-                },
-            ],
+            records,
             {
                 title: processed().file_name,
                 xaxis: {
                     title: "Time (s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 autosize: true,
+                showlegend: false
             },
-            { autosizable: true, responsive: true },
+            { autosizable: true, responsive: true }
         );
     });
 
@@ -506,35 +526,52 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading() || !withSpectrum()) return;
 
+        let records: Plotly.Data[] = [];
+
+        for (const record of history()) {
+            if (!record.spectrum) continue;
+            records.push({
+                x: Array<number>(record.spectrum.length)
+                    .fill(0)
+                    .map((_, i) => i * record.frequency_interval),
+                y: record.spectrum,
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" }
+            });
+        }
+
+        records.push({
+            x: Array<number>(processed().spectrum.length)
+                .fill(0)
+                .map((_, i) => i * processed().frequency_interval),
+            y: processed().spectrum,
+            type: "scatter",
+            mode: "lines",
+            name: processed().id
+        });
+
         await Plotly.newPlot(
             "spectrum",
-            [
-                {
-                    x: Array<number>(processed().spectrum.length)
-                        .fill(0)
-                        .map((_, i) => i * processed().frequency_interval),
-                    y: processed().spectrum,
-                    type: "scatter",
-                    mode: "lines",
-                    name: processed().id,
-                },
-            ],
+            records,
             {
                 title: processed().file_name,
                 xaxis: {
                     title: "Frequency (Hz)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
                     type: withLogScale() ? "log" : "linear",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 autosize: true,
+                showlegend: false
             },
-            { autosizable: true, responsive: true },
+            { autosizable: true, responsive: true }
         );
     });
 
@@ -545,88 +582,120 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading() || !withResponseSpectrum()) return;
 
+        let acceleration_records: Plotly.Data[] = [];
+        let velocity_records: Plotly.Data[] = [];
+        let displacement_records: Plotly.Data[] = [];
+
+        for (const record of history()) {
+            if (record.acceleration_spectrum) acceleration_records.push({
+                x: record.period,
+                y: record.acceleration_spectrum,
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" }
+            });
+            if (record.velocity_spectrum) velocity_records.push({
+                x: record.period,
+                y: record.velocity_spectrum,
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" }
+            });
+            if (record.displacement_spectrum) displacement_records.push({
+                x: record.period,
+                y: record.displacement_spectrum,
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" }
+            });
+        }
+
+        acceleration_records.push({
+            x: processed().period,
+            y: processed().acceleration_spectrum,
+            type: "scatter",
+            mode: "lines",
+            name: processed().id
+        });
+        velocity_records.push({
+            x: processed().period,
+            y: processed().velocity_spectrum,
+            type: "scatter",
+            mode: "lines",
+            name: processed().id
+        });
+        displacement_records.push({
+            x: processed().period,
+            y: processed().displacement_spectrum,
+            type: "scatter",
+            mode: "lines",
+            name: processed().id
+        });
+
         await Plotly.newPlot(
             "a_spectrum",
-            [
-                {
-                    x: processed().period,
-                    y: processed().acceleration_spectrum,
-                    type: "scatter",
-                    mode: "lines",
-                    name: processed().id,
-                },
-            ],
+            acceleration_records,
             {
                 title: processed().file_name,
                 xaxis: {
                     title: "Period (s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 autosize: true,
+                showlegend: false
             },
-            { autosizable: true, responsive: true },
+            { autosizable: true, responsive: true }
         );
 
         await Plotly.newPlot(
             "v_spectrum",
-            [
-                {
-                    x: processed().period,
-                    y: processed().velocity_spectrum,
-                    type: "scatter",
-                    mode: "lines",
-                    name: processed().id,
-                },
-            ],
+            velocity_records,
             {
                 title: processed().file_name,
                 xaxis: {
                     title: "Period (s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Velocity (cm/s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 autosize: true,
+                showlegend: false
             },
-            { autosizable: true, responsive: true },
+            { autosizable: true, responsive: true }
         );
 
         await Plotly.newPlot(
             "u_spectrum",
-            [
-                {
-                    x: processed().period,
-                    y: processed().displacement_spectrum,
-                    type: "scatter",
-                    mode: "lines",
-                    name: processed().id,
-                },
-            ],
+            displacement_records,
             {
                 title: processed().file_name,
                 xaxis: {
                     title: "Period (s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Displacement (cm)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 autosize: true,
+                showlegend: false
             },
-            { autosizable: true, responsive: true },
+            { autosizable: true, responsive: true }
         );
     });
 
