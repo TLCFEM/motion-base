@@ -1,11 +1,11 @@
-FROM node:20-slim AS build
+FROM node:22-slim AS build
 
 COPY gui /mb/gui
 WORKDIR /mb/gui
 
 RUN npm install -g npm@latest pnpm && pnpm install && pnpm build
 
-FROM node:20-slim
+FROM node:22-slim
 
 COPY --from=build /mb/gui/dist /mb/gui/dist
 COPY scripts/gui.sh /mb/gui/gui.sh
