@@ -5,7 +5,7 @@
 #    pip-compile --all-extras --annotation-style=line --output-file=requirements-dev.txt pyproject.toml
 #
 aiohappyeyeballs==2.3.5   # via aiohttp
-aiohttp==3.10.2           # via elasticsearch
+aiohttp==3.10.3           # via elasticsearch
 aiosignal==1.3.1          # via aiohttp
 amqp==5.2.0               # via kombu
 anyio==4.4.0              # via httpx, starlette
@@ -33,8 +33,8 @@ cycler==0.12.1            # via matplotlib
 debugpy==1.8.5            # via pytest-celery
 dnspython==2.6.1          # via email-validator, pymongo
 docker==7.1.0             # via pytest-celery, pytest-docker-tools
-elastic-transport==8.13.1  # via elasticsearch
-elasticsearch[async]==8.14.0  # via motion-base (pyproject.toml)
+elastic-transport==8.15.0  # via elasticsearch
+elasticsearch[async]==8.15.0  # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
 fastapi-slim==0.112.0     # via motion-base (pyproject.toml)
 flask==3.0.3              # via flask-cors, flask-login, locust
@@ -63,7 +63,7 @@ llvmlite==0.43.0          # via numba
 locust==2.31.2            # via motion-base (pyproject.toml)
 markdown-it-py==3.0.0     # via rich
 markupsafe==2.1.5         # via jinja2, werkzeug
-matplotlib==3.9.1.post1   # via motion-base (pyproject.toml)
+matplotlib==3.9.2         # via motion-base (pyproject.toml)
 mdurl==0.1.2              # via markdown-it-py
 mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.5.1              # via beanie
@@ -87,7 +87,7 @@ pymongo==4.8.0            # via mongoengine, motor
 pyparsing==3.1.2          # via matplotlib
 pytest==8.3.2             # via pytest-asyncio, pytest-cov, pytest-docker-tools
 pytest-asyncio==0.23.8    # via motion-base (pyproject.toml)
-pytest-celery==1.0.1      # via motion-base (pyproject.toml)
+pytest-celery==1.1.1      # via motion-base (pyproject.toml)
 pytest-cov==5.0.0         # via motion-base (pyproject.toml)
 pytest-docker-tools==3.1.3  # via pytest-celery
 python-dateutil==2.9.0.post0  # via celery, matplotlib
@@ -106,7 +106,7 @@ toml==0.10.2              # via beanie
 typing-extensions==4.12.2  # via fastapi-slim, flexcache, flexparser, pint, pydantic
 tzdata==2024.1            # via celery, motion-base (pyproject.toml)
 urllib3==2.2.2            # via docker, elastic-transport, geventhttpclient, requests
-uvicorn==0.30.5           # via motion-base (pyproject.toml)
+uvicorn==0.30.6           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
 werkzeug==3.0.3           # via flask, flask-login, locust
