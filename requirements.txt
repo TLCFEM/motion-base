@@ -4,8 +4,8 @@
 #
 #    pip-compile --annotation-style=line pyproject.toml
 #
-aiohappyeyeballs==2.3.7   # via aiohttp
-aiohttp==3.10.4           # via elasticsearch
+aiohappyeyeballs==2.4.0   # via aiohttp
+aiohttp==3.10.5           # via elasticsearch
 aiosignal==1.3.1          # via aiohttp
 amqp==5.2.0               # via kombu
 anyio==4.4.0              # via httpx, starlette
@@ -53,7 +53,7 @@ python-dateutil==2.9.0.post0  # via celery
 python-dotenv==1.0.1      # via motion-base (pyproject.toml)
 python-multipart==0.0.9   # via motion-base (pyproject.toml)
 requests==2.32.3          # via motion-base (pyproject.toml)
-scipy==1.14.0             # via motion-base (pyproject.toml)
+scipy==1.14.1             # via motion-base (pyproject.toml)
 six==1.16.0               # via python-dateutil
 sniffio==1.3.1            # via anyio, httpx
 starlette==0.38.2         # via fastapi-slim
