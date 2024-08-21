@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+from enum import Enum
 from uuid import uuid4, NAMESPACE_OID, uuid5
 
 import numpy as np
@@ -23,7 +24,9 @@ from numba import njit
 from scipy import signal
 
 
-def perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> (float, np.ndarray):
+def perform_fft(
+    sampling_frequency: float, magnitude: np.ndarray
+) -> tuple[float, np.ndarray]:
     fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
     return sampling_frequency / magnitude.size, fft_magnitude
 
@@ -58,7 +61,13 @@ filter_regex = "^(lowpass|highpass|bandpass|bandstop)$"
 window_regex = "^(flattop|blackmanharris|nuttall|hann|hamming|kaiser|chebwin)$"
 
 
-def get_window(filter_type: str, window_type: str, length: int, cutoff: float | list[float], **kwargs) -> np.ndarray:
+def get_window(
+    filter_type: str,
+    window_type: str,
+    length: int,
+    cutoff: float | list[float],
+    **kwargs,
+) -> np.ndarray:
     if window_type == "flattop":
         window = ("flattop",)
     elif window_type == "blackmanharris":
@@ -76,7 +85,9 @@ def get_window(filter_type: str, window_type: str, length: int, cutoff: float | 
     else:
         raise ValueError(f"Unknown window type: {window_type}.")
 
-    return signal.firwin(2 * length + 1, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)
+    return signal.firwin(
+        2 * length + 1, cutoff, window=window, pass_zero=filter_type
+    ) * kwargs.get("ratio", 1)
 
 
 def str_factory():
@@ -85,3 +96,29 @@ def str_factory():
 
 def uuid5_str(token: str) -> str:
     return str(uuid5(NAMESPACE_OID, token))
+
+
+class IntegrationType(Enum):
+    Newmark = "Newmark"
+
+
+@njit
+def integrate_newmark(
+    interval: float, acceleration: np.ndarray, params: tuple
+) -> np.ndarray:
+    gamma, beta = params
+    displacement: np.ndarray = np.zeros_like(acceleration)
+    velocity: np.ndarray = np.zeros_like(acceleration)
+    for i in range(1, len(acceleration)):
+        velocity[i] = (
+            velocity[i - 1]
+            + (1.0 - gamma) * interval * acceleration[i - 1]
+            + gamma * interval * acceleration[i]
+        )
+        displacement[i] = (
+            displacement[i - 1]
+            + interval * velocity[i - 1]
+            + (0.5 - beta) * interval**2 * acceleration[i - 1]
+            + beta * interval**2 * acceleration[i]
+        )
+    return np.column_stack((displacement, velocity, acceleration))
