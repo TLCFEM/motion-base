@@ -46,7 +46,7 @@ jobs:
         run: |
           pip install --upgrade pip
           pip install -e .[dev] pyinstaller
-          pytest --cov .
+          pytest --cov --junitxml=junit.xml .
       - name: Codecov
         if: matrix.python-version == '3.10'
         uses: codecov/codecov-action@v4
@@ -54,6 +54,11 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: TLCFEM/motion-base
           plugin: pycoverage
+      - name: Result
+        if: matrix.python-version == '3.10'
+        uses: codecov/test-results-action@v1
+        with:
+          token: ${{ secrets.CODECOV_TOKEN }}
       - name: Binary
         if: matrix.python-version == '3.11'
         run: |
