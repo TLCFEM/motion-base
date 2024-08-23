@@ -14,8 +14,13 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import axios from "axios";
+import { createSignal } from "solid-js";
 
-axios.defaults.baseURL = "http://127.0.0.1:8000";
+const [server, setServer] = createSignal("http://127.0.0.1:8000");
+
+export { server, setServer };
+
+axios.defaults.baseURL = server();
 
 export class SeismicRecord {
     public endpoint: string = "";
@@ -123,7 +128,7 @@ function stringify(obj: any) {
 export async function query_api(config: QueryConfig, mongo: boolean) {
     const response = (
         await axios.post<QueryResponse>(mongo ? "/query" : "/search", stringify(config), {
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" }
         })
     ).data;
 
@@ -141,7 +146,7 @@ export async function get_total_api() {
 export async function post_total_api(configs: QueryConfig[]) {
     return (
         await axios.post<TotalResponse>("/total", stringify(configs), {
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" }
         })
     ).data.total;
 }
@@ -171,7 +176,7 @@ export class ProcessResponse extends SeismicRecord {
 export async function process_api(record_id: string, config: ProcessConfig) {
     return (
         await axios.post<ProcessResponse>(`/process?record_id=${record_id}`, stringify(config), {
-            headers: { "Content-Type": "application/json" },
+            headers: { "Content-Type": "application/json" }
         })
     ).data;
 }
@@ -191,10 +196,10 @@ export function createDownloadLink(obj: any) {
     const file = new Blob(
         [
             JSON.stringify(obj, (_, value) =>
-                value === null || value === undefined || value?.length === 0 ? undefined : value,
-            ),
+                value === null || value === undefined || value?.length === 0 ? undefined : value
+            )
         ],
-        { type: "application/json" },
+        { type: "application/json" }
     );
     element.href = URL.createObjectURL(file);
     return element;
