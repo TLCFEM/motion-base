@@ -34,7 +34,7 @@ frozenlist==1.4.1         # via aiohttp, aiosignal
 h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.5           # via httpx
 httpx==0.27.0             # via motion-base (pyproject.toml)
-idna==3.7                 # via anyio, email-validator, httpx, requests, yarl
+idna==3.8                 # via anyio, email-validator, httpx, requests, yarl
 joserfc==1.0.0            # via motion-base (pyproject.toml)
 kombu==5.4.0              # via celery
 lazy-model==0.2.0         # via beanie
@@ -47,7 +47,7 @@ numpy==2.0.1              # via numba, scipy
 pint==0.24.3              # via motion-base (pyproject.toml)
 prompt-toolkit==3.0.47    # via click-repl
 pycparser==2.22           # via cffi
-pydantic==1.10.17         # via beanie, fastapi-slim, lazy-model, motion-base (pyproject.toml)
+pydantic==1.10.18         # via beanie, fastapi-slim, lazy-model, motion-base (pyproject.toml)
 pymongo==4.8.0            # via mongoengine, motor
 python-dateutil==2.9.0.post0  # via celery
 python-dotenv==1.0.1      # via motion-base (pyproject.toml)
