@@ -14,13 +14,8 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import axios from "axios";
-import { createSignal } from "solid-js";
 
-const [server, setServer] = createSignal("http://127.0.0.1:8000");
-
-export { server, setServer };
-
-axios.defaults.baseURL = server();
+axios.defaults.baseURL = "http://127.0.0.1:8000";
 
 export class SeismicRecord {
     public endpoint: string = "";

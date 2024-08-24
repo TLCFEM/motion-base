@@ -23,6 +23,7 @@ import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
 import { get_total_api } from "./API";
 import Process from "./Process";
+import ServerModal from "./Server";
 
 const [mode, setMode] = createSignal<"jackpot" | "query" | "process">("jackpot");
 const [total] = createResource<number>(get_total_api);
@@ -32,17 +33,17 @@ const App: Component = () => {
         tippy(`#btn-jackpot`, {
             content: "Get a random record from the database.",
             animation: "scale",
-            theme: "translucent",
+            theme: "translucent"
         });
         tippy(`#btn-query`, {
             content: "Query the database according to certain criteria.",
             animation: "scale",
-            theme: "translucent",
+            theme: "translucent"
         });
         tippy(`#btn-process`, {
             content: "Apply further processing to records.",
             animation: "scale",
-            theme: "translucent",
+            theme: "translucent"
         });
     });
 
@@ -58,7 +59,7 @@ const App: Component = () => {
                         alignItems: "center",
                         alignContent: "center",
                         gap: "1rem",
-                        height: "4rem",
+                        height: "4rem"
                     }}
                 >
                     <Typography sx={{ flexGrow: 1 }} variant="h5">
@@ -74,6 +75,7 @@ const App: Component = () => {
                         Process
                     </Button>
                     <AboutModal />
+                    <ServerModal />
                 </Toolbar>
             </AppBar>
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
