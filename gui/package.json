@@ -19,7 +19,7 @@
     "vite-plugin-solid": "^2.10.2"
   },
   "dependencies": {
-    "@suid/icons-material": "^0.7.0",
+    "@suid/icons-material": "^0.8.0",
     "@suid/material": "^0.16.0",
     "@suid/vite-plugin": "^0.2.0",
     "@tanstack/solid-table": "^8.20.5",
