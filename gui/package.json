@@ -22,7 +22,7 @@
     "@suid/icons-material": "^0.7.0",
     "@suid/material": "^0.16.0",
     "@suid/vite-plugin": "^0.2.0",
-    "@tanstack/solid-table": "^8.20.1",
+    "@tanstack/solid-table": "^8.20.5",
     "axios": "^1.7.5",
     "leaflet": "^1.9.4",
     "plotly.js-dist-min": "^2.34.0",

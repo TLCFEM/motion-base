@@ -27,7 +27,7 @@ dnspython==2.6.1          # via email-validator, pymongo
 elastic-transport==8.15.0  # via elasticsearch
 elasticsearch[async]==8.15.0  # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
-fastapi-slim==0.112.1     # via motion-base (pyproject.toml)
+fastapi-slim==0.112.2     # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.3.1         # via pint
 frozenlist==1.4.1         # via aiohttp, aiosignal
@@ -43,7 +43,7 @@ mongoengine==0.28.2       # via motion-base (pyproject.toml)
 motor==3.5.1              # via beanie
 multidict==6.0.5          # via aiohttp, yarl
 numba==0.60.0             # via motion-base (pyproject.toml)
-numpy==2.0.1              # via numba, scipy
+numpy==2.0.2              # via numba, scipy
 pint==0.24.3              # via motion-base (pyproject.toml)
 prompt-toolkit==3.0.47    # via click-repl
 pycparser==2.22           # via cffi
