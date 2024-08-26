@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@suid/icons-material": "^0.8.0",
-    "@suid/material": "^0.16.0",
+    "@suid/material": "^0.17.0",
     "@suid/vite-plugin": "^0.2.0",
     "@tanstack/solid-table": "^8.20.5",
     "axios": "^1.7.5",
