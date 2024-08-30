@@ -18,7 +18,7 @@ black==24.8.0             # via motion-base (pyproject.toml)
 blinker==1.8.2            # via flask
 brotli==1.1.0             # via geventhttpclient
 celery==5.4.0             # via motion-base (pyproject.toml), pytest-celery
-certifi==2024.7.4         # via elastic-transport, geventhttpclient, httpcore, httpx, requests
+certifi==2024.8.30        # via elastic-transport, geventhttpclient, httpcore, httpx, requests
 cffi==1.17.0              # via cryptography
 charset-normalizer==3.3.2  # via requests
 click==8.1.7              # via beanie, black, celery, click-didyoumean, click-plugins, click-repl, flask, uvicorn
@@ -26,7 +26,7 @@ click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1      # via celery
 click-repl==0.3.0         # via celery
 configargparse==1.7       # via locust
-contourpy==1.2.1          # via matplotlib
+contourpy==1.3.0          # via matplotlib
 coverage[toml]==7.6.1     # via pytest-cov
 cryptography==43.0.0      # via joserfc
 cycler==0.12.1            # via matplotlib
@@ -38,7 +38,7 @@ elasticsearch[async]==8.15.0  # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
 fastapi-slim==0.112.2     # via motion-base (pyproject.toml)
 flask==3.0.3              # via flask-cors, flask-login, locust
-flask-cors==4.0.1         # via locust
+flask-cors==4.0.2         # via locust
 flask-login==0.6.3        # via locust
 flexcache==0.3            # via pint
 flexparser==0.3.1         # via pint
@@ -49,7 +49,7 @@ geventhttpclient==2.3.1   # via locust
 greenlet==3.0.3           # via gevent
 h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.5           # via httpx
-httpx==0.27.0             # via httpx-auth, motion-base (pyproject.toml)
+httpx==0.27.2             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.22.0        # via motion-base (pyproject.toml)
 idna==3.8                 # via anyio, email-validator, httpx, requests, yarl
 iniconfig==2.0.0          # via pytest
@@ -65,7 +65,7 @@ markdown-it-py==3.0.0     # via rich
 markupsafe==2.1.5         # via jinja2, werkzeug
 matplotlib==3.9.2         # via motion-base (pyproject.toml)
 mdurl==0.1.2              # via markdown-it-py
-mongoengine==0.28.2       # via motion-base (pyproject.toml)
+mongoengine==0.29.0       # via motion-base (pyproject.toml)
 motor==3.5.1              # via beanie
 msgpack==1.0.8            # via locust
 multidict==6.0.5          # via aiohttp, yarl
@@ -112,7 +112,7 @@ wcwidth==0.2.13           # via prompt-toolkit
 werkzeug==3.0.4           # via flask, flask-login, locust
 yarl==1.9.4               # via aiohttp
 zope-event==5.0           # via gevent
-zope-interface==7.0.2     # via gevent
+zope-interface==7.0.3     # via gevent
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools
