@@ -11,6 +11,13 @@ It comes with a web interface and a Python client that can be used to access the
 
 ![screenshot](docs/screenshot.png)
 
+## Main Functionalities
+
+- [x] Parse and index ground motion records from different databases in a uniform format.
+- [x] Search and select ground motion records based on different criteria, including magnitude, PGA, event time, event location, etc.
+- [x] Provide ad hoc processing, including up-/down-sampling, normalization, filtering and computation of response spectra.
+- [x] Converting acceleration record to velocity/displacement record that is consistent with specific time integration methods.
+
 ## Installation
 
 ### as a developer
