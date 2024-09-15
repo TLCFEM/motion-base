@@ -13,6 +13,9 @@ COPY src/mb /mb/mb
 COPY mb_runner.py /mb
 WORKDIR /mb
 
+RUN useradd -m runner
+USER runner
+
 ENTRYPOINT ["python3", "mb_runner.py"]
 
 CMD ["host", "0.0.0.0"]
