@@ -22,6 +22,7 @@ import pytest
 from mb.record.parser import ParserNZSM
 from mb.record.sync_record import Record
 from mb.record.utility import str_factory
+from mb.utility.elastic import sync_elastic
 
 
 async def test_redirect_to_docs(mock_client):
@@ -51,7 +52,7 @@ async def test_for_test_only(mock_client):
 
 
 @pytest.fixture(scope="function")
-def sample_data(pwd, mock_client):
+def sample_data(pwd):
     results = ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
 
     def to_dict(record) -> dict:
@@ -70,7 +71,7 @@ def sample_data(pwd, mock_client):
         bulk_body.append({"index": {"_id": r.id}})
         bulk_body.append(to_dict(r))
 
-    mock_client.post("/index", json={"records": bulk_body})
+    sync_elastic().bulk(index="record", body=bulk_body)
 
     yield Record.objects()
 
