@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timedelta, UTC
+from datetime import datetime, timedelta
 from http import HTTPStatus
 
 import bcrypt
@@ -125,7 +125,7 @@ def create_token(sub: str):
     return Token(
         access_token=jwt.encode(
             {"alg": MB_ALGORITHM},
-            {"sub": sub, "exp": datetime.now(UTC) + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES)},
+            {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES)},
             OCT_KEY,
         ),
         token_type="bearer",
