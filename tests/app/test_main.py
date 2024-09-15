@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
+from datetime import datetime
 from http import HTTPStatus
 
 import pytest
@@ -34,8 +35,13 @@ async def test_alive(mock_client):
     assert response.json() == {"message": "I'm alive!"}
 
 
-async def test_total(mock_client):
+async def test_get_total(mock_client):
     response = await mock_client.get("/total")
+    assert response.status_code == HTTPStatus.OK
+
+
+async def test_post_total(mock_client):
+    response = await mock_client.post("/total")
     assert response.status_code == HTTPStatus.OK
 
 
@@ -45,8 +51,26 @@ async def test_for_test_only(mock_client):
 
 
 @pytest.fixture(scope="function")
-def sample_data(pwd):
-    ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
+def sample_data(pwd, mock_client):
+    results = ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
+
+    def to_dict(record) -> dict:
+        dict_data = record.to_mongo()
+        for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "_id", "_cls"):
+            dict_data.pop(key, None)
+        dict_data["id"] = record.id
+        for k, v in dict_data.items():
+            if isinstance(v, datetime):
+                dict_data[k] = v.isoformat()
+
+        return dict_data
+
+    bulk_body: list = []
+    for r in results:
+        bulk_body.append({"index": {"_id": r.id}})
+        bulk_body.append(to_dict(r))
+
+    mock_client.post("/index", json={"records": bulk_body})
 
     yield Record.objects()
 
@@ -76,4 +100,9 @@ async def test_process(sample_data, mock_celery, mock_client):
         f"/process?record_id={sample_data[0].id}",
         json={"with_filter": True, "with_spectrum": True, "with_response_spectrum": True},
     )
+    assert response.status_code == HTTPStatus.OK
+
+
+async def test_search(sample_data, mock_client):
+    response = await mock_client.post(f"/search")
     assert response.status_code == HTTPStatus.OK
