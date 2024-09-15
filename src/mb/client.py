@@ -231,7 +231,7 @@ class MBClient:
         return MBRecord(**result.json())
 
     async def search(self, query: QueryConfig | dict) -> list[MBRecord] | None:
-        result = await self.client.post("/query", json=query.dict() if isinstance(query, QueryConfig) else query)
+        result = await self.client.post("/query", json=query.model_dump() if isinstance(query, QueryConfig) else query)
         if result.status_code != HTTPStatus.OK:
             self.print("[red]Failed to perform query.[/]")
             return None

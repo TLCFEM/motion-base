@@ -18,7 +18,7 @@ from datetime import datetime
 from enum import Enum
 
 import numpy as np
-from pydantic import BaseModel, Field, validator, root_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..record.response_spectrum import response_spectrum
 from ..record.utility import filter_regex, window_regex, apply_filter, zero_stuff
@@ -93,7 +93,8 @@ class RecordResponse(RawRecordResponse):
     velocity_spectrum: list[float] | None = Field(None)
     acceleration_spectrum: list[float] | None = Field(None)
 
-    @root_validator
+    @model_validator(mode="before")
+    @classmethod
     def normalise(cls, values):
         if values.get("processed_data_unit", None):
             values["processed_data_unit"] = values["raw_data_unit"]
@@ -148,7 +149,8 @@ class PaginationConfig(BaseModel):
     page_number: int = Field(0, ge=0)
     sort_by: str = Field("-maximum_acceleration")
 
-    @validator("sort_by")
+    @field_validator("sort_by")
+    @classmethod
     def validate_sort_by(cls, v: str) -> str:
         if v is None:
             return "-maximum_acceleration"
@@ -191,11 +193,13 @@ class ProcessConfig(BaseModel):
     )
     filter_length: int = Field(32, ge=8, description="Filter window length, at least eight, default is 32.")
     filter_type: str = Field(
-        "bandpass", regex=filter_regex, description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`"
+        "bandpass",
+        pattern=filter_regex,
+        description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`",
     )
     window_type: str = Field(
         "nuttall",
-        regex=window_regex,
+        pattern=window_regex,
         description="any window type of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`",
     )
     low_cut: float = Field(0.01, gt=0)
@@ -221,12 +225,12 @@ class UploadResponse(BaseModel):
 
 
 class QueryConfig(BaseModel):
-    region: str = Field(None, regex="^(jp|nz)$")
+    region: str = Field(None, pattern="^(jp|nz)$")
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
     category: str = Field(None)
-    event_location: list[float, float] = Field(None, min_items=2, max_items=2, description="[longitude, latitude]")
-    station_location: list[float, float] = Field(None, min_items=2, max_items=2, description="[longitude, latitude]")
+    event_location: list[float, float] = Field(None, min_length=2, max_length=2, description="[longitude, latitude]")
+    station_location: list[float, float] = Field(None, min_length=2, max_length=2, description="[longitude, latitude]")
     max_event_distance: float = Field(
         None, ge=0, description="Maximum distance in meters from the event location to the desired location."
     )

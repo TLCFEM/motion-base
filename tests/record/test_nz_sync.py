@@ -18,8 +18,8 @@ import os.path
 import numpy as np
 import pytest
 
-from mb.record.response_spectrum import response_spectrum
 from mb.record.parser import ParserNZSM
+from mb.record.response_spectrum import response_spectrum
 from mb.record.utility import str_factory
 
 

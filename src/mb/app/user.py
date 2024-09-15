@@ -69,4 +69,4 @@ async def delete_user(form_data: UserForm):
 
 @router.get("/whoami", response_model=UserResponse)
 async def retrieve_myself(user: User = Depends(is_active)):
-    return UserResponse(**user.dict())
+    return UserResponse(**user.model_dump())

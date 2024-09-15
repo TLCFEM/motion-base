@@ -111,7 +111,7 @@ async def get_total():
 async def get_task_status(task_id: UUID) -> UploadTaskResponse:
     if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is None:
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished.")
-    return UploadTaskResponse(**task.dict())
+    return UploadTaskResponse(**task.model_dump())
 
 
 @app.post("/task/status/", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTasksResponse)
@@ -119,7 +119,7 @@ async def post_task_status(task_ids: list[UUID]) -> UploadTasksResponse:
     tasks: list = [None] * len(task_ids)
     for i, task_id in enumerate(task_ids):
         if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is not None:
-            tasks[i] = task.dict()
+            tasks[i] = task.model_dump()
 
     return UploadTasksResponse(tasks=tasks)
 
@@ -143,7 +143,7 @@ async def download_single_random_raw_record():
     Retrieve a single random record from the database.
     """
     result: Record = await get_random_record()
-    return RawRecordResponse(**result.dict(), endpoint="/raw/jackpot")
+    return RawRecordResponse(**result.model_dump(), endpoint="/raw/jackpot")
 
 
 @app.get("/waveform/jackpot", response_model=RecordResponse)
@@ -156,7 +156,7 @@ async def download_single_random_waveform(normalised: bool = False):
     interval, record = result.to_waveform(normalised=normalised, unit="cm/s/s")
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.dict(), endpoint="/waveform/jackpot", time_interval=interval, waveform=record.tolist()
+        **result.model_dump(), endpoint="/waveform/jackpot", time_interval=interval, waveform=record.tolist()
     )
 
 
@@ -170,7 +170,7 @@ async def download_single_random_spectrum():
     frequency, record = result.to_spectrum()
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.dict(), endpoint="/spectrum/jackpot", frequency_interval=frequency, spectrum=record.tolist()
+        **result.model_dump(), endpoint="/spectrum/jackpot", frequency_interval=frequency, spectrum=record.tolist()
     )
 
 
@@ -186,7 +186,9 @@ async def download_waveform(record_id: UUID | list[UUID]):
 
     def _populate_waveform(result: Record):
         interval, record = result.to_waveform(unit="cm/s/s")
-        return RecordResponse(**result.dict(), endpoint="/waveform", time_interval=interval, waveform=record.tolist())
+        return RecordResponse(
+            **result.model_dump(), endpoint="/waveform", time_interval=interval, waveform=record.tolist()
+        )
 
     return ListRecordResponse(records=[_populate_waveform(result) for result in results])
 
@@ -211,8 +213,8 @@ async def query_records(query: QueryConfig = QueryConfig(), count_total: bool = 
     result = filtered.skip(skip_size).limit(pagination.page_size).project(MetadataRecord)
 
     response: ListMetadataResponse = ListMetadataResponse(
-        records=await result.to_list(),
-        pagination=PaginationResponse(total=record_count, **pagination.dict()),
+        records=[MetadataResponse(**(x.model_dump())) for x in await result.to_list()],
+        pagination=PaginationResponse(total=record_count, **pagination.model_dump()),
     )
     for item in response.records:
         item.endpoint = "/query"

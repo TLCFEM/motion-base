@@ -5,16 +5,16 @@ SCRIPT_DIR=$(dirname "$SCRIPT_DIR")
 SCRIPT_DIR=$(dirname "$SCRIPT_DIR")
 cd "$SCRIPT_DIR" || exit
 
-if ! command -v pip-compile &> /dev/null
+if ! command -v uv &> /dev/null
 then
   if [ -f "venv/bin/activate" ]; then
     source venv/bin/activate
-    pip install pip-tools
+    pip install uv
   else
-    echo "pip-compile could not be found"
+    echo "uv could not be found"
     exit
   fi
 fi
 
-pip-compile -r -U --annotation-style=line pyproject.toml
-pip-compile -r -U --annotation-style=line --all-extras --output-file=requirements-dev.txt pyproject.toml
+uv pip compile --refresh -U --annotation-style=line --output-file=requirements.txt pyproject.toml
+uv pip compile --refresh -U --annotation-style=line --all-extras --output-file=requirements-dev.txt pyproject.toml

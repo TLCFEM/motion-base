@@ -14,9 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
-from mb.record.utility import integrate_newmark
-
 import numpy as np
+
+from mb.record.utility import integrate_newmark
 
 
 def test_integrate_newmark():

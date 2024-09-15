@@ -24,9 +24,7 @@ from numba import njit
 from scipy import signal
 
 
-def perform_fft(
-    sampling_frequency: float, magnitude: np.ndarray
-) -> tuple[float, np.ndarray]:
+def perform_fft(sampling_frequency: float, magnitude: np.ndarray) -> tuple[float, np.ndarray]:
     fft_magnitude: np.ndarray = 2 * np.abs(np.fft.rfft(magnitude)) / len(magnitude)
     return sampling_frequency / magnitude.size, fft_magnitude
 
@@ -85,9 +83,7 @@ def get_window(
     else:
         raise ValueError(f"Unknown window type: {window_type}.")
 
-    return signal.firwin(
-        2 * length + 1, cutoff, window=window, pass_zero=filter_type
-    ) * kwargs.get("ratio", 1)
+    return signal.firwin(2 * length + 1, cutoff, window=window, pass_zero=filter_type) * kwargs.get("ratio", 1)
 
 
 def str_factory():
@@ -103,17 +99,13 @@ class IntegrationType(Enum):
 
 
 @njit
-def integrate_newmark(
-    interval: float, acceleration: np.ndarray, params: tuple
-) -> np.ndarray:
+def integrate_newmark(interval: float, acceleration: np.ndarray, params: tuple) -> np.ndarray:
     gamma, beta = params
     displacement: np.ndarray = np.zeros_like(acceleration)
     velocity: np.ndarray = np.zeros_like(acceleration)
     for i in range(1, len(acceleration)):
         velocity[i] = (
-            velocity[i - 1]
-            + (1.0 - gamma) * interval * acceleration[i - 1]
-            + gamma * interval * acceleration[i]
+            velocity[i - 1] + (1.0 - gamma) * interval * acceleration[i - 1] + gamma * interval * acceleration[i]
         )
         displacement[i] = (
             displacement[i - 1]

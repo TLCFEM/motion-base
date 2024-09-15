@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import re
 from datetime import datetime, timedelta
 from http import HTTPStatus
 
@@ -60,7 +61,7 @@ class CredentialException(HTTPException):
 class UserForm(BaseModel):
     username: str
     password: str = Field(
-        regex=r"(?=\D*\d)(?=[^A-Z]*[A-Z])(?=[^a-z]*[a-z])[A-Za-z0-9]{8,}$",
+        pattern=re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"),
         description="At least 8 characters, with at least one uppercase letter, one lowercase letter, and one number.",
     )
     email: EmailStr

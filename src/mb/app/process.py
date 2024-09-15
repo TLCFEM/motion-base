@@ -31,7 +31,7 @@ def process_record_local(result: Record, process_config: ProcessConfig):
             HTTPStatus.BAD_REQUEST, detail="Low cut frequency should be smaller than high cut frequency."
         )
 
-    record = ProcessedResponse(**result.dict(), endpoint="/process", process_config=process_config)
+    record = ProcessedResponse(**result.model_dump(), endpoint="/process", process_config=process_config)
 
     time_interval, waveform = result.to_waveform(normalised=process_config.normalised, unit="cm/s/s")
 
