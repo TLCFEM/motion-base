@@ -47,7 +47,7 @@ jobs:
           pip install --upgrade pip
           pip install -e .[dev] pyinstaller
           export NUMBA_DISABLE_JIT=1
-          pytest --cov --junitxml=junit.xml .
+          pytest -n auto --cov --junitxml=junit.xml .
       - name: Codecov
         if: matrix.python-version == '3.10'
         uses: codecov/codecov-action@v4

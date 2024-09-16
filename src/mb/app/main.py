@@ -58,12 +58,11 @@ from ..utility.env import MB_FS_ROOT
 
 @asynccontextmanager
 async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argument
-    client = await async_elastic()
-    await init_mongo()
-    await create_superuser()
-    yield
-    await shutdown_mongo()
-    await client.close()
+    async with async_elastic():
+        await init_mongo()
+        await create_superuser()
+        yield
+        await shutdown_mongo()
 
 
 app = FastAPI(

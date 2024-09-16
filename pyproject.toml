@@ -50,6 +50,7 @@ dev = [
     "pytest-asyncio",
     "pytest-celery",
     "pytest-cov",
+    "pytest-xdist"
     #    "pylint",
     #    "pylint-mongoengine",
     #    "ruff",
@@ -72,6 +73,9 @@ fast = true
 [tool.pytest.ini_options]
 asyncio_mode = "auto"
 asyncio_default_fixture_loop_scope = "function"
+filterwarnings = [
+    "ignore::DeprecationWarning:",
+]
 
 [tool.pyright]
 venvPath = "."

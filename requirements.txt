@@ -31,7 +31,7 @@ frozenlist==1.4.1         # via aiohttp, aiosignal
 h11==0.14.0               # via httpcore, uvicorn
 httpcore==1.0.5           # via httpx
 httpx==0.27.2             # via motion-base (pyproject.toml)
-idna==3.9                 # via anyio, email-validator, httpx, requests, yarl
+idna==3.10                # via anyio, email-validator, httpx, requests, yarl
 joserfc==1.0.0            # via motion-base (pyproject.toml)
 kombu==5.4.1              # via celery
 lazy-model==0.2.0         # via beanie

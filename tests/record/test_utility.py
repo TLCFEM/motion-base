@@ -16,8 +16,12 @@
 
 import numpy as np
 
-from mb.record.utility import integrate_newmark
+from mb.record.response_spectrum import Newmark, sdof_response
 
 
 def test_integrate_newmark():
-    integrate_newmark(0.05, np.random.rand(10), (0.5, 0.25))
+    Newmark().integrate(0.05, np.random.rand(10))
+
+
+def test_sdof():
+    sdof_response(0.05, 0.01, 12.0, np.random.rand(1000))

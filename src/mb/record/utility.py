@@ -96,21 +96,3 @@ def uuid5_str(token: str) -> str:
 
 class IntegrationType(Enum):
     Newmark = "Newmark"
-
-
-@njit
-def integrate_newmark(interval: float, acceleration: np.ndarray, params: tuple) -> np.ndarray:
-    gamma, beta = params
-    displacement: np.ndarray = np.zeros_like(acceleration)
-    velocity: np.ndarray = np.zeros_like(acceleration)
-    for i in range(1, len(acceleration)):
-        velocity[i] = (
-            velocity[i - 1] + (1.0 - gamma) * interval * acceleration[i - 1] + gamma * interval * acceleration[i]
-        )
-        displacement[i] = (
-            displacement[i - 1]
-            + interval * velocity[i - 1]
-            + (0.5 - beta) * interval**2 * acceleration[i - 1]
-            + beta * interval**2 * acceleration[i]
-        )
-    return np.column_stack((displacement, velocity, acceleration))
