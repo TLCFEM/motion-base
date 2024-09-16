@@ -45,7 +45,8 @@ jobs:
       - name: Dependency
         run: |
           pip install --upgrade pip
-          pip install -e .[dev] pyinstaller
+          pip install uv
+          uv pip install -e .[dev] pyinstaller
           export NUMBA_DISABLE_JIT=1
           pytest -n auto --cov --junitxml=junit.xml .
       - name: Codecov
