@@ -99,12 +99,17 @@ class Oscillator:
 @njit(parallel=True)
 def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
     results = np.empty((len(period), 3), dtype=np.float64)
-    results[0, 0] = 0
-    results[0, 1] = 0
-    results[0, 2] = np.max(np.abs(motion))
-    frequency = 2 * np.pi / period
-    for i in prange(1, len(period)):
-        results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
+    if period[0] == 0.0:
+        results[0, 0] = 0
+        results[0, 1] = 0
+        results[0, 2] = np.max(np.abs(motion))
+        frequency = 2 * np.pi / period.clip(min=1e-6)
+        for i in prange(1, len(period)):
+            results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
+    else:
+        frequency = 2 * np.pi / period
+        for i in prange(0, len(period)):
+            results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
 
     return results
 
