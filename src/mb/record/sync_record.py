@@ -92,26 +92,6 @@ class Record(Document):
 
         return super().save(*args, **kwargs)
 
-    def to_raw_waveform(self) -> tuple[float, list]:
-        return 1 / self.sampling_frequency, self.raw_data
-
-    def to_waveform(self, **kwargs) -> tuple[float, np.ndarray]:
-        sampling_interval: float = 1 / self.sampling_frequency
-
-        numpy_array: np.ndarray = np.array(self.raw_data, dtype=float) + self.offset
-        if kwargs.get("normalised", False):
-            numpy_array = normalise(numpy_array)
-            unit = None
-        else:
-            numpy_array *= self.scale_factor
-            unit = kwargs.get("unit", None)
-
-        return sampling_interval, convert_to(pint.Quantity(numpy_array, self.raw_data_unit), unit)
-
-    def to_spectrum(self, **kwargs) -> tuple[float, np.ndarray]:
-        _, waveform = self.to_waveform(**kwargs)
-        return perform_fft(self.sampling_frequency, waveform)
-
 
 class NIED(Record):
     def __init__(self, *args, **kwargs):

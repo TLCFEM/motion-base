@@ -103,7 +103,9 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         results[0, 0] = 0
         results[0, 1] = 0
         results[0, 2] = np.max(np.abs(motion))
-        frequency = 2 * np.pi / period.clip(min=1e-6)
+        new_period = period.copy()
+        new_period[0] = 1e-6
+        frequency = 2 * np.pi / new_period
         for i in prange(1, len(period)):
             results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
     else:

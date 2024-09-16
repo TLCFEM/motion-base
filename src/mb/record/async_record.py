@@ -63,19 +63,6 @@ class MetadataRecord(Document):
     direction: Indexed(str) = Field(None, description="The direction of the record.")
     scale_factor: float = Field(None, description="The scale factor of the record.")
 
-    async def save(self, *args, **kwargs):
-        token: str = self.file_name
-        if self.region is not None:
-            token += self.region
-        if self.category is not None:
-            token += self.category
-        if self.last_update_time is not None:
-            token += self.last_update_time.isoformat()
-        if self.direction is not None:
-            token += self.direction
-        self.id = uuid5_str(token)
-        return await super().save(*args, **kwargs)
-
 
 class Record(MetadataRecord):
     raw_data: list[int] = Field(None, description="The raw acceleration data of the record.")
