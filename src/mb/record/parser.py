@@ -219,8 +219,6 @@ class ParserNZSM(BaseParserNZSM):
 
         return records
 
-        pass
-
     @staticmethod
     def parse_file(
         file_path: str | IO[bytes], user_id: str, file_name: str | None = None, overwrite_existing: bool = True
