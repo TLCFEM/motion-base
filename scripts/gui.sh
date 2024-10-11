@@ -10,4 +10,9 @@ for file in dist/assets/*.js; do
 done
 
 shift
-npx serve -n -s dist "$@"
+
+if command -v npx &> /dev/null; then
+    npx serve -n -s dist "$@"
+elif command -v bunx &> /dev/null; then
+    bunx serve -n -s dist "$@"
+fi

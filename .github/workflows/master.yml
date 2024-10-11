@@ -99,6 +99,6 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: front.Dockerfile
+          file: front.bun.Dockerfile
           push: true
           tags: tlcfem/motion-base-front:latest
