@@ -11,7 +11,7 @@ jobs:
     - name: Clone
       uses: actions/checkout@v4
     - name: Python
-      uses: actions/setup-python@v5.2.0
+      uses: actions/setup-python@v5
       with:
         python-version: '3.11'
         cache: 'pip'
@@ -21,6 +21,7 @@ jobs:
         node-version: '22'
     - name: Dependency
       run: |
+        pip install uv
         bash scripts/pip.sh
         npm install -g pnpm
         cd gui && pnpm up && cd ..
