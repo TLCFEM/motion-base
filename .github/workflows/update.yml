@@ -30,3 +30,4 @@ jobs:
       uses: peter-evans/create-pull-request@v7
       with:
         delete-branch: true
+        title: Update Python and Node dependencies
