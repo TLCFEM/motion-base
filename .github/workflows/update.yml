@@ -1,0 +1,31 @@
+name: Package
+on:
+  schedule:
+    - cron: '0 5 * * *'
+  workflow_dispatch:
+jobs:
+  linux:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+    - name: Clone
+      uses: actions/checkout@v4
+    - name: Python
+      uses: actions/setup-python@v5.2.0
+      with:
+        python-version: '3.11'
+        cache: 'pip'
+    - name: Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: '22'
+    - name: Dependency
+      run: |
+        bash scripts/pip.sh
+        npm install -g pnpm
+        cd gui && pnpm up && cd ..
+        cd electron && pnpm up && cd ..
+    - name: PR
+      uses: peter-evans/create-pull-request@v7
+      with:
+        delete-branch: true
