@@ -42,7 +42,9 @@ def mongo_uri():
 
 async def init_mongo():
     uri = mongo_uri()
-    mongo_client = connect(host=f"{uri}{MONGO_DB_NAME}?authSource=admin", uuidrepresentation="standard")
+    mongo_client = connect(
+        host=f"{uri}{MONGO_DB_NAME}?authSource=admin", uuidrepresentation="standard"
+    )
     await init_beanie(
         database=AsyncIOMotorClient(uri, uuidRepresentation="standard")[MONGO_DB_NAME],
         document_models=[Record, User, UploadTask],

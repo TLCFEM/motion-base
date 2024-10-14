@@ -42,7 +42,9 @@ class MBRecord(RecordResponse):
         else:
             gca = fig.gca()
 
-        x_axis = np.arange(0, self.time_interval * len(self.waveform), self.time_interval)
+        x_axis = np.arange(
+            0, self.time_interval * len(self.waveform), self.time_interval
+        )
         gca.plot(x_axis, self.waveform, label=self.id)
 
         return fig
@@ -59,13 +61,20 @@ class MBRecord(RecordResponse):
         else:
             gca = fig.gca()
 
-        x_axis = np.arange(0, self.frequency_interval * len(self.spectrum), self.frequency_interval)
+        x_axis = np.arange(
+            0, self.frequency_interval * len(self.spectrum), self.frequency_interval
+        )
         gca.plot(x_axis, self.spectrum, label=self.id)
 
         return fig
 
     def plot_response_spectrum(self):
-        if None in (self.period, self.displacement_spectrum, self.velocity_spectrum, self.acceleration_spectrum):
+        if None in (
+            self.period,
+            self.displacement_spectrum,
+            self.velocity_spectrum,
+            self.acceleration_spectrum,
+        ):
             self.to_response_spectrum(0.05, np.arange(0, 10, 0.01))
 
         fig = plt.figure()
@@ -90,7 +99,13 @@ class MBRecord(RecordResponse):
 
 
 class MBClient:
-    def __init__(self, host_url: str | None = None, username: str | None = None, password: str | None = None, **kwargs):
+    def __init__(
+        self,
+        host_url: str | None = None,
+        username: str | None = None,
+        password: str | None = None,
+        **kwargs,
+    ):
         self.host_url: str = host_url if host_url else "http://localhost:8000"
         while self.host_url.endswith("/"):
             self.host_url = self.host_url[:-1]
@@ -164,7 +179,11 @@ class MBClient:
             )
 
     async def upload(
-        self, region: str, path: str | Generator, wait_for_result: bool = False, overwrite_existing: bool = True
+        self,
+        region: str,
+        path: str | Generator,
+        wait_for_result: bool = False,
+        overwrite_existing: bool = True,
     ):
         if isinstance(path, Generator):
             async with anyio.create_task_group() as tg:
@@ -231,7 +250,10 @@ class MBClient:
         return MBRecord(**result.json())
 
     async def search(self, query: QueryConfig | dict) -> list[MBRecord] | None:
-        result = await self.client.post("/query", json=query.model_dump() if isinstance(query, QueryConfig) else query)
+        result = await self.client.post(
+            "/query",
+            json=query.model_dump() if isinstance(query, QueryConfig) else query,
+        )
         if result.status_code != HTTPStatus.OK:
             self.print("[red]Failed to perform query.[/]")
             return None
@@ -250,7 +272,11 @@ class MBClient:
 
     async def status(self):
         while self.tasks:
-            for task_id in track(list(self.tasks.keys()), description="Checking status...", console=self.console):
+            for task_id in track(
+                list(self.tasks.keys()),
+                description="Checking status...",
+                console=self.console,
+            ):
                 await self.task_status(task_id)
             await anyio.sleep(2)
 

@@ -41,7 +41,9 @@ def run_app(setting: Config):
         args: list = ["worker"]
         args.extend(setting.celery_config)
         if sys.platform == "win32":
-            args.extend(["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "info"])
+            args.extend(
+                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "info"]
+            )
 
         asyncio.run(init_mongo())
         celery.start(args)
@@ -50,7 +52,11 @@ def run_app(setting: Config):
 
         config: dict = {}
 
-        if (workers := setting.workers if setting.overwrite_env else int(MB_FASTAPI_WORKERS)) > 1:
+        if (
+            workers := setting.workers
+            if setting.overwrite_env
+            else int(MB_FASTAPI_WORKERS)
+        ) > 1:
             config["workers"] = workers
         elif setting.debug:
             config["reload"] = True

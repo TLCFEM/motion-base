@@ -31,42 +31,67 @@ GEOSPHERE = "2dsphere"
 class MetadataRecord(Document):
     id: str = Field(default_factory=str_factory)
 
-    file_name: Indexed(str, "text") = Field(None, description="The original file name of the record.")
+    file_name: Indexed(str, "text") = Field(
+        None, description="The original file name of the record."
+    )
     file_hash: Indexed(str) = Field(None, description="The hash of the record.")
     category: Indexed(str) = Field(None, description="The category of the record.")
     region: Indexed(str) = Field(None, description="The region of the record.")
     uploaded_by: str = Field(None, description="The user who uploaded the record.")
 
-    magnitude: Indexed(float, DESCENDING) = Field(None, description="The magnitude of the record.")
-    maximum_acceleration: Indexed(float, DESCENDING) = Field(None, description="PGA in Gal.")
+    magnitude: Indexed(float, DESCENDING) = Field(
+        None, description="The magnitude of the record."
+    )
+    maximum_acceleration: Indexed(float, DESCENDING) = Field(
+        None, description="PGA in Gal."
+    )
 
-    event_time: Indexed(datetime, DESCENDING) = Field(None, description="The origin time of the record.")
+    event_time: Indexed(datetime, DESCENDING) = Field(
+        None, description="The origin time of the record."
+    )
     event_location: Indexed(list[float, float], GEOSPHERE) = Field(
         None, description="The geolocation of the earthquake event."
     )
-    depth: Indexed(float) = Field(None, description="The depth of the earthquake event in kilometer.")
+    depth: Indexed(float) = Field(
+        None, description="The depth of the earthquake event in kilometer."
+    )
 
-    station_code: Indexed(str) = Field(None, description="The code of the station recording the record.")
+    station_code: Indexed(str) = Field(
+        None, description="The code of the station recording the record."
+    )
     station_location: Indexed(list[float, float], GEOSPHERE) = Field(
         None, description="The geolocation of the station recording the record."
     )
-    station_elevation: float = Field(None, description="The elevation of the station recording the record.")
+    station_elevation: float = Field(
+        None, description="The elevation of the station recording the record."
+    )
     station_elevation_unit: str = Field(
-        None, description="The unit of the elevation of the station recording the record."
+        None,
+        description="The unit of the elevation of the station recording the record.",
     )
     record_time: datetime = Field(None, description="The time the record was recorded.")
-    last_update_time: datetime = Field(None, description="The time the record was last updated.")
+    last_update_time: datetime = Field(
+        None, description="The time the record was last updated."
+    )
 
-    sampling_frequency: float = Field(None, description="The sampling frequency of the record.")
-    sampling_frequency_unit: str = Field(None, description="The unit of the sampling frequency of the record.")
+    sampling_frequency: float = Field(
+        None, description="The sampling frequency of the record."
+    )
+    sampling_frequency_unit: str = Field(
+        None, description="The unit of the sampling frequency of the record."
+    )
     duration: float = Field(None, description="The duration of the record in seconds.")
     direction: Indexed(str) = Field(None, description="The direction of the record.")
     scale_factor: float = Field(None, description="The scale factor of the record.")
 
 
 class Record(MetadataRecord):
-    raw_data: list[int] = Field(None, description="The raw acceleration data of the record.")
-    raw_data_unit: str = Field(None, description="The unit of the raw acceleration data of the record.")
+    raw_data: list[int] = Field(
+        None, description="The raw acceleration data of the record."
+    )
+    raw_data_unit: str = Field(
+        None, description="The unit of the raw acceleration data of the record."
+    )
     offset: float = Field(0, description="The offset of the record.")
 
     def to_raw_waveform(self) -> tuple[float, list]:
@@ -83,7 +108,9 @@ class Record(MetadataRecord):
             numpy_array *= self.scale_factor
             unit = kwargs.get("unit", None)
 
-        return sampling_interval, convert_to(pint.Quantity(numpy_array, self.raw_data_unit), unit)
+        return sampling_interval, convert_to(
+            pint.Quantity(numpy_array, self.raw_data_unit), unit
+        )
 
     def to_spectrum(self, **kwargs) -> tuple[float, np.ndarray]:
         _, waveform = self.to_waveform(**kwargs)

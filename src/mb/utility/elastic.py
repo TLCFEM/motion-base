@@ -75,7 +75,9 @@ async def async_elastic():
             continue
 
     if not await async_client.indices.exists(index="record"):
-        await async_client.indices.create(index="record", mappings=generate_elastic_mapping())
+        await async_client.indices.create(
+            index="record", mappings=generate_elastic_mapping()
+        )
 
     return async_client
 

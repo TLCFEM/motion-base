@@ -63,7 +63,11 @@ class Oscillator:
         displacement[1] = self.b * displacement[0] - motion[0]
 
         for i in range(2, len(motion)):
-            displacement[i] = self.b * displacement[i - 1] - self.c * displacement[i - 2] - motion[i - 1]
+            displacement[i] = (
+                self.b * displacement[i - 1]
+                - self.c * displacement[i - 2]
+                - motion[i - 1]
+            )
 
         velocity: np.ndarray = np.zeros_like(motion, dtype=np.float64)
         velocity[1:] = np.diff(displacement)
@@ -97,7 +101,9 @@ class Oscillator:
 
 
 @njit(parallel=True)
-def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray) -> np.ndarray:
+def response_spectrum(
+    damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray
+) -> np.ndarray:
     results = np.empty((len(period), 3), dtype=np.float64)
     if period[0] == 0.0:
         results[0, 0] = 0
@@ -107,21 +113,29 @@ def response_spectrum(damping_ratio: float, interval: float, motion: np.ndarray,
         new_period[0] = 1e-6
         frequency = 2 * np.pi / new_period
         for i in prange(1, len(period)):
-            results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
+            results[i] = Oscillator(
+                frequency[i], damping_ratio
+            ).compute_maximum_response(interval, motion)
     else:
         frequency = 2 * np.pi / period
         for i in prange(0, len(period)):
-            results[i] = Oscillator(frequency[i], damping_ratio).compute_maximum_response(interval, motion)
+            results[i] = Oscillator(
+                frequency[i], damping_ratio
+            ).compute_maximum_response(interval, motion)
 
     return results
 
 
 @njit
-def sdof_response(damping_ratio: float, interval: float, freq: float, motion: np.ndarray) -> np.ndarray:
+def sdof_response(
+    damping_ratio: float, interval: float, freq: float, motion: np.ndarray
+) -> np.ndarray:
     return np.column_stack(
         (
             interval * np.arange(len(motion)),
-            Oscillator(2 * np.pi * freq, damping_ratio).compute_response(interval, motion),
+            Oscillator(2 * np.pi * freq, damping_ratio).compute_response(
+                interval, motion
+            ),
         )
     )
 
@@ -137,7 +151,9 @@ class Newmark:
         self.gamma = gamma
         self.beta = beta
 
-    def integrate(self, interval: float, acceleration: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
+    def integrate(
+        self, interval: float, acceleration: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:
         displacement: np.ndarray = np.zeros_like(acceleration)
         velocity: np.ndarray = np.zeros_like(acceleration)
 
@@ -147,9 +163,14 @@ class Newmark:
         fd: float = interval**2 * 0.5 - fc
 
         for i in range(1, len(acceleration)):
-            velocity[i] = velocity[i - 1] + fb * acceleration[i - 1] + fa * acceleration[i]
+            velocity[i] = (
+                velocity[i - 1] + fb * acceleration[i - 1] + fa * acceleration[i]
+            )
             displacement[i] = (
-                displacement[i - 1] + velocity[i - 1] * interval + fd * acceleration[i - 1] + fc * acceleration[i]
+                displacement[i - 1]
+                + velocity[i - 1] * interval
+                + fd * acceleration[i - 1]
+                + fc * acceleration[i]
             )
 
         return displacement, velocity

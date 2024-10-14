@@ -102,7 +102,9 @@ class RecordResponse(RawRecordResponse):
         return values
 
     def filter(self, window, up_ratio: int = 1):
-        new_waveform: np.ndarray = apply_filter(window * up_ratio, zero_stuff(up_ratio, self.waveform))
+        new_waveform: np.ndarray = apply_filter(
+            window * up_ratio, zero_stuff(up_ratio, self.waveform)
+        )
         self.time_interval /= up_ratio
         # noinspection PyTypeChecker
         self.waveform = new_waveform.tolist()
@@ -114,15 +116,22 @@ class RecordResponse(RawRecordResponse):
         self.frequency_interval = 1 / (self.time_interval * len(self.waveform))
         self.spectrum = 2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
 
-    def to_response_spectrum(self, damping_ratio: float, period: list[float] | np.ndarray):
+    def to_response_spectrum(
+        self, damping_ratio: float, period: list[float] | np.ndarray
+    ):
         if isinstance(period, np.ndarray):
             # noinspection PyTypeChecker
             self.period = period.tolist()
-            spectra = response_spectrum(damping_ratio, self.time_interval, np.array(self.waveform), period)
+            spectra = response_spectrum(
+                damping_ratio, self.time_interval, np.array(self.waveform), period
+            )
         else:
             self.period = period
             spectra = response_spectrum(
-                damping_ratio, self.time_interval, np.array(self.waveform), np.array(self.period)
+                damping_ratio,
+                self.time_interval,
+                np.array(self.waveform),
+                np.array(self.period),
             )
         self.displacement_spectrum = spectra[:, 0].tolist()
         self.velocity_spectrum = spectra[:, 1].tolist()
@@ -191,7 +200,9 @@ class ProcessConfig(BaseModel):
         description="Downsampling ratio, should be greater than one. "
         "The effective resampling ratio should be `up_ratio/down_ratio`.",
     )
-    filter_length: int = Field(32, ge=8, description="Filter window length, at least eight, default is 32.")
+    filter_length: int = Field(
+        32, ge=8, description="Filter window length, at least eight, default is 32."
+    )
     filter_type: str = Field(
         "bandpass",
         pattern=filter_regex,
@@ -229,13 +240,21 @@ class QueryConfig(BaseModel):
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
     category: str = Field(None)
-    event_location: list[float, float] = Field(None, min_length=2, max_length=2, description="[longitude, latitude]")
-    station_location: list[float, float] = Field(None, min_length=2, max_length=2, description="[longitude, latitude]")
+    event_location: list[float, float] = Field(
+        None, min_length=2, max_length=2, description="[longitude, latitude]"
+    )
+    station_location: list[float, float] = Field(
+        None, min_length=2, max_length=2, description="[longitude, latitude]"
+    )
     max_event_distance: float = Field(
-        None, ge=0, description="Maximum distance in meters from the event location to the desired location."
+        None,
+        ge=0,
+        description="Maximum distance in meters from the event location to the desired location.",
     )
     max_station_distance: float = Field(
-        None, ge=0, description="Maximum distance in meters from the station location to the desired location."
+        None,
+        ge=0,
+        description="Maximum distance in meters from the station location to the desired location.",
     )
     from_date: datetime = Field(None)
     to_date: datetime = Field(None)
@@ -268,9 +287,15 @@ class QueryConfig(BaseModel):
             # if self.max_event_distance is not None:
             #     geo_json["$maxDistance"] = self.max_event_distance / 6371 / 1000
             # geo_query["event_location"] = geo_json
-            max_distance = self.max_event_distance if self.max_event_distance is not None else 100000.0
+            max_distance = (
+                self.max_event_distance
+                if self.max_event_distance is not None
+                else 100000.0
+            )
             query_dict["event_location"] = {
-                "$geoWithin": {"$centerSphere": [self.event_location, max_distance / 6378100.0]}
+                "$geoWithin": {
+                    "$centerSphere": [self.event_location, max_distance / 6378100.0]
+                }
             }
 
         if self.station_location is not None:
@@ -278,9 +303,15 @@ class QueryConfig(BaseModel):
             # if self.max_station_distance is not None:
             #     geo_json["$maxDistance"] = self.max_station_distance / 6371 / 1000
             # geo_query["station_location"] = geo_json
-            max_distance = self.max_station_distance if self.max_station_distance is not None else 100000.0
+            max_distance = (
+                self.max_station_distance
+                if self.max_station_distance is not None
+                else 100000.0
+            )
             query_dict["station_location"] = {
-                "$geoWithin": {"$centerSphere": [self.station_location, max_distance / 6378100.0]}
+                "$geoWithin": {
+                    "$centerSphere": [self.station_location, max_distance / 6378100.0]
+                }
             }
 
         date_range: dict = {}
@@ -348,7 +379,11 @@ class QueryConfig(BaseModel):
             query_must.append({"range": {"maximum_acceleration": pga_range}})
 
         if self.event_location is not None:
-            max_distance = self.max_event_distance if self.max_event_distance is not None else 100000.0
+            max_distance = (
+                self.max_event_distance
+                if self.max_event_distance is not None
+                else 100000.0
+            )
             query_must.append(
                 {
                     "geo_distance": {
@@ -362,7 +397,11 @@ class QueryConfig(BaseModel):
             )
 
         if self.station_location is not None:
-            max_distance = self.max_station_distance if self.max_station_distance is not None else 100000.0
+            max_distance = (
+                self.max_station_distance
+                if self.max_station_distance is not None
+                else 100000.0
+            )
             query_must.append(
                 {
                     "geo_distance": {

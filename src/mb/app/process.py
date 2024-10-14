@@ -28,12 +28,17 @@ from ..record.utility import apply_filter, get_window, zero_stuff, perform_fft
 def process_record_local(result: Record, process_config: ProcessConfig):
     if process_config.low_cut >= process_config.high_cut:
         raise HTTPException(
-            HTTPStatus.BAD_REQUEST, detail="Low cut frequency should be smaller than high cut frequency."
+            HTTPStatus.BAD_REQUEST,
+            detail="Low cut frequency should be smaller than high cut frequency.",
         )
 
-    record = ProcessedResponse(**result.model_dump(), endpoint="/process", process_config=process_config)
+    record = ProcessedResponse(
+        **result.model_dump(), endpoint="/process", process_config=process_config
+    )
 
-    time_interval, waveform = result.to_waveform(normalised=process_config.normalised, unit="cm/s/s")
+    time_interval, waveform = result.to_waveform(
+        normalised=process_config.normalised, unit="cm/s/s"
+    )
 
     waveform = waveform[int(process_config.remove_head // time_interval) :]
 
@@ -42,8 +47,13 @@ def process_record_local(result: Record, process_config: ProcessConfig):
 
         float_eps = float(np.finfo(np.float32).eps)
 
-        f0 = min(max(2 * process_config.low_cut * new_interval, float_eps), 1 - float_eps)
-        f1 = min(max(2 * process_config.high_cut * new_interval, f0 + float_eps), 1 - float_eps)
+        f0 = min(
+            max(2 * process_config.low_cut * new_interval, float_eps), 1 - float_eps
+        )
+        f1 = min(
+            max(2 * process_config.high_cut * new_interval, f0 + float_eps),
+            1 - float_eps,
+        )
 
         freq_list: float | list[float]
         if process_config.filter_type in ("bandpass", "bandstop"):
@@ -54,7 +64,8 @@ def process_record_local(result: Record, process_config: ProcessConfig):
             freq_list = f0
         else:
             raise HTTPException(
-                HTTPStatus.BAD_REQUEST, detail="Filter type should be one of bandpass, bandstop, lowpass and highpass."
+                HTTPStatus.BAD_REQUEST,
+                detail="Filter type should be one of bandpass, bandstop, lowpass and highpass.",
             )
         new_waveform: np.ndarray = apply_filter(
             get_window(
@@ -83,8 +94,14 @@ def process_record_local(result: Record, process_config: ProcessConfig):
         record.spectrum = spectrum.tolist()
 
     if process_config.with_response_spectrum:
-        period = np.arange(0, process_config.period_end + process_config.period_step, process_config.period_step)
-        spectrum = response_spectrum(process_config.damping_ratio, new_interval, new_waveform, period)
+        period = np.arange(
+            0,
+            process_config.period_end + process_config.period_step,
+            process_config.period_step,
+        )
+        spectrum = response_spectrum(
+            process_config.damping_ratio, new_interval, new_waveform, period
+        )
         record.period = period.tolist()
         record.displacement_spectrum = spectrum[:, 0].tolist()
         record.velocity_spectrum = spectrum[:, 1].tolist()

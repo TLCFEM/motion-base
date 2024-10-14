@@ -96,29 +96,53 @@ async def alive():
 
 
 @app.post("/total", tags=["status"], response_model=TotalResponse)
-async def post_total(query: QueryConfig | list[QueryConfig] = QueryConfig(min_magnitude=0)):
+async def post_total(
+    query: QueryConfig | list[QueryConfig] = QueryConfig(min_magnitude=0),
+):
     if isinstance(query, QueryConfig):
         query = [query]
-    return {"total": [await Record.find(q.generate_query_string()).count() for q in query]}
+    return {
+        "total": [await Record.find(q.generate_query_string()).count() for q in query]
+    }
 
 
 @app.get("/total", tags=["status"], response_model=TotalResponse)
 async def get_total():
-    return {"total": [await Record.find(QueryConfig(min_magnitude=0).generate_query_string()).count()]}
+    return {
+        "total": [
+            await Record.find(
+                QueryConfig(min_magnitude=0).generate_query_string()
+            ).count()
+        ]
+    }
 
 
-@app.get("/task/status/{task_id}", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTaskResponse)
+@app.get(
+    "/task/status/{task_id}",
+    tags=["status"],
+    status_code=HTTPStatus.OK,
+    response_model=UploadTaskResponse,
+)
 async def get_task_status(task_id: UUID) -> UploadTaskResponse:
     if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is None:
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished.")
+        raise HTTPException(
+            HTTPStatus.NOT_FOUND, detail="Task not found. It may have finished."
+        )
     return UploadTaskResponse(**task.model_dump())
 
 
-@app.post("/task/status/", tags=["status"], status_code=HTTPStatus.OK, response_model=UploadTasksResponse)
+@app.post(
+    "/task/status/",
+    tags=["status"],
+    status_code=HTTPStatus.OK,
+    response_model=UploadTasksResponse,
+)
 async def post_task_status(task_ids: list[UUID]) -> UploadTasksResponse:
     tasks: list = [None] * len(task_ids)
     for i, task_id in enumerate(task_ids):
-        if (task := await UploadTask.find_one(UploadTask.id == str(task_id))) is not None:
+        if (
+            task := await UploadTask.find_one(UploadTask.id == str(task_id))
+        ) is not None:
             tasks[i] = task.model_dump()
 
     return UploadTasksResponse(tasks=tasks)
@@ -130,7 +154,9 @@ async def for_test_only():
 
 
 async def get_random_record() -> Record:
-    result: list[Record] = await Record.aggregate([{"$sample": {"size": 1}}], projection_model=Record).to_list()
+    result: list[Record] = await Record.aggregate(
+        [{"$sample": {"size": 1}}], projection_model=Record
+    ).to_list()
     if result:
         return result[0]
 
@@ -156,7 +182,10 @@ async def download_single_random_waveform(normalised: bool = False):
     interval, record = result.to_waveform(normalised=normalised, unit="cm/s/s")
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.model_dump(), endpoint="/waveform/jackpot", time_interval=interval, waveform=record.tolist()
+        **result.model_dump(),
+        endpoint="/waveform/jackpot",
+        time_interval=interval,
+        waveform=record.tolist(),
     )
 
 
@@ -170,7 +199,10 @@ async def download_single_random_spectrum():
     frequency, record = result.to_spectrum()
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.model_dump(), endpoint="/spectrum/jackpot", frequency_interval=frequency, spectrum=record.tolist()
+        **result.model_dump(),
+        endpoint="/spectrum/jackpot",
+        frequency_interval=frequency,
+        spectrum=record.tolist(),
     )
 
 
@@ -181,16 +213,26 @@ async def download_waveform(record_id: UUID | list[UUID]):
     """
 
     results: list[Record] = await Record.find(
-        In(Record.id, [str(x) for x in record_id] if isinstance(record_id, list) else [str(record_id)])
+        In(
+            Record.id,
+            [str(x) for x in record_id]
+            if isinstance(record_id, list)
+            else [str(record_id)],
+        )
     ).to_list()
 
     def _populate_waveform(result: Record):
         interval, record = result.to_waveform(unit="cm/s/s")
         return RecordResponse(
-            **result.model_dump(), endpoint="/waveform", time_interval=interval, waveform=record.tolist()
+            **result.model_dump(),
+            endpoint="/waveform",
+            time_interval=interval,
+            waveform=record.tolist(),
         )
 
-    return ListRecordResponse(records=[_populate_waveform(result) for result in results])
+    return ListRecordResponse(
+        records=[_populate_waveform(result) for result in results]
+    )
 
 
 @app.post("/query", response_model=ListMetadataResponse)
@@ -210,7 +252,9 @@ async def query_records(query: QueryConfig = QueryConfig(), count_total: bool = 
     record_count: int = 0 if not count_total else await filtered.count()
 
     skip_size: int = pagination.page_number * pagination.page_size
-    result = filtered.skip(skip_size).limit(pagination.page_size).project(MetadataRecord)
+    result = (
+        filtered.skip(skip_size).limit(pagination.page_size).project(MetadataRecord)
+    )
 
     response: ListMetadataResponse = ListMetadataResponse(
         records=[MetadataResponse(**(x.model_dump())) for x in await result.to_list()],
@@ -240,7 +284,10 @@ async def search_records(query: QueryConfig = QueryConfig()):
     )
 
     return ListMetadataResponse(
-        records=[MetadataResponse(endpoint="/search", **x["_source"]) for x in results["hits"]["hits"]],
+        records=[
+            MetadataResponse(endpoint="/search", **x["_source"])
+            for x in results["hits"]["hits"]
+        ],
         pagination=PaginationResponse(
             total=results["hits"]["total"]["value"],
             sort_by=pagination.sort_by,
@@ -256,7 +303,9 @@ async def index_records(body: BulkRequest = Body(...), user: User = Depends(is_a
     Index records.
     """
     if not user.can_upload:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload files.")
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload files."
+        )
 
     client = await async_elastic()
 
@@ -274,7 +323,9 @@ async def process_record(record_id: UUID, process_config: ProcessConfig = Body(.
 @app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
 async def download_file(file_path: str):
     if not MB_FS_ROOT:
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File system is not available.")
+        raise HTTPException(
+            HTTPStatus.NOT_FOUND, detail="File system is not available."
+        )
 
     local_path = os.path.join(MB_FS_ROOT, file_path)
     if not os.path.exists(local_path):
@@ -286,10 +337,14 @@ async def download_file(file_path: str):
 @app.delete("/access/{file_path:path}", tags=["misc"])
 async def delete_file(file_path: str, user: User = Depends(is_active)):
     if not user.can_delete:
-        raise HTTPException(HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files.")
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files."
+        )
 
     if not MB_FS_ROOT:
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File system is not available.")
+        raise HTTPException(
+            HTTPStatus.NOT_FOUND, detail="File system is not available."
+        )
 
     local_path = os.path.join(MB_FS_ROOT, file_path)
     if not os.path.exists(local_path):
@@ -300,6 +355,8 @@ async def delete_file(file_path: str, user: User = Depends(is_active)):
         if not os.listdir(parent := os.path.dirname(local_path)):
             os.rmdir(parent)
     except OSError:
-        raise HTTPException(HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file.")
+        raise HTTPException(
+            HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file."
+        )
 
     return {"message": "File deleted."}

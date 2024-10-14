@@ -61,7 +61,9 @@ class CredentialException(HTTPException):
 class UserForm(BaseModel):
     username: str
     password: str = Field(
-        pattern=re.compile(r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"),
+        pattern=re.compile(
+            r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
+        ),
         description="At least 8 characters, with at least one uppercase letter, one lowercase letter, and one number.",
     )
     email: EmailStr
@@ -125,7 +127,11 @@ def create_token(sub: str):
     return Token(
         access_token=jwt.encode(
             {"alg": MB_ALGORITHM},
-            {"sub": sub, "exp": datetime.utcnow() + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES)},
+            {
+                "sub": sub,
+                "exp": datetime.utcnow()
+                + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES),
+            },
             OCT_KEY,
         ),
         token_type="bearer",

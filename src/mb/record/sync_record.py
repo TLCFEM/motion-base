@@ -17,7 +17,14 @@ from datetime import datetime
 import numpy as np
 import pint
 import structlog
-from mongoengine import Document, StringField, FloatField, DateTimeField, ListField, IntField
+from mongoengine import (
+    Document,
+    StringField,
+    FloatField,
+    DateTimeField,
+    ListField,
+    IntField,
+)
 
 from .utility import normalise, convert_to, perform_fft, str_factory, uuid5_str
 
@@ -27,36 +34,69 @@ _logger = structlog.get_logger(__name__)
 class Record(Document):
     id = StringField(default=str_factory, primary_key=True)
 
-    file_name = StringField(default=None, description="The original file name of the record.")
+    file_name = StringField(
+        default=None, description="The original file name of the record."
+    )
     file_hash = StringField(default=None, description="The hash of the record.")
     category = StringField(default=None, description="The category of the record.")
     region = StringField(default=None, description="The region of the record.")
-    uploaded_by = StringField(default=None, description="The user who uploaded the record.")
+    uploaded_by = StringField(
+        default=None, description="The user who uploaded the record."
+    )
 
     magnitude = FloatField(default=None, description="The magnitude of the record.")
     maximum_acceleration = FloatField(default=None, description="PGA in Gal.")
 
-    event_time = DateTimeField(default=None, description="The origin time of the record.")
-    event_location = ListField(default=None, description="The geolocation of the earthquake event.")
-    depth = FloatField(default=None, description="The depth of the earthquake event in kilometer.")
-
-    station_code = StringField(default=None, description="The code of the station recording the record.")
-    station_location = ListField(default=None, description="The geolocation of the station recording the record.")
-    station_elevation = FloatField(default=None, description="The elevation of the station recording the record.")
-    station_elevation_unit = StringField(
-        default=None, description="The unit of the elevation of the station recording the record."
+    event_time = DateTimeField(
+        default=None, description="The origin time of the record."
     )
-    record_time = DateTimeField(default=None, description="The time the record was recorded.")
-    last_update_time = DateTimeField(default=None, description="The time the record was last updated.")
+    event_location = ListField(
+        default=None, description="The geolocation of the earthquake event."
+    )
+    depth = FloatField(
+        default=None, description="The depth of the earthquake event in kilometer."
+    )
 
-    sampling_frequency = FloatField(default=None, description="The sampling frequency of the record.")
-    sampling_frequency_unit = StringField(default=None, description="The unit of the sampling frequency of the record.")
-    duration = FloatField(default=None, description="The duration of the record in seconds.")
+    station_code = StringField(
+        default=None, description="The code of the station recording the record."
+    )
+    station_location = ListField(
+        default=None, description="The geolocation of the station recording the record."
+    )
+    station_elevation = FloatField(
+        default=None, description="The elevation of the station recording the record."
+    )
+    station_elevation_unit = StringField(
+        default=None,
+        description="The unit of the elevation of the station recording the record.",
+    )
+    record_time = DateTimeField(
+        default=None, description="The time the record was recorded."
+    )
+    last_update_time = DateTimeField(
+        default=None, description="The time the record was last updated."
+    )
+
+    sampling_frequency = FloatField(
+        default=None, description="The sampling frequency of the record."
+    )
+    sampling_frequency_unit = StringField(
+        default=None, description="The unit of the sampling frequency of the record."
+    )
+    duration = FloatField(
+        default=None, description="The duration of the record in seconds."
+    )
     direction = StringField(default=None, description="The direction of the record.")
-    scale_factor = FloatField(default=None, description="The scale factor of the record.")
+    scale_factor = FloatField(
+        default=None, description="The scale factor of the record."
+    )
 
-    raw_data = ListField(default=None, description="The raw acceleration data of the record.")
-    raw_data_unit = StringField(default=None, description="The unit of the raw acceleration data of the record.")
+    raw_data = ListField(
+        default=None, description="The raw acceleration data of the record."
+    )
+    raw_data_unit = StringField(
+        default=None, description="The unit of the raw acceleration data of the record."
+    )
     offset = FloatField(default=0, description="The offset of the record.")
 
     meta = {

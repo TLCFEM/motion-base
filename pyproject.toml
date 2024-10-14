@@ -45,15 +45,12 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "black",
     "locust",
     "pytest-asyncio",
     "pytest-celery",
     "pytest-cov",
-    "pytest-xdist"
-    #    "pylint",
-    #    "pylint-mongoengine",
-    #    "ruff",
+    "pytest-xdist",
+    "ruff",
 ]
 client = [
     "httpx-auth",
@@ -65,10 +62,6 @@ client = [
 "Homepage" = "https://github.com/TLCFEM/motion-base"
 "Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
 "Source" = "https://github.com/TLCFEM/motion-base"
-
-[tool.black]
-line-length = 120
-fast = true
 
 [tool.pytest.ini_options]
 asyncio_mode = "auto"

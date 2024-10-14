@@ -96,6 +96,10 @@ class BaseParserNZSM:
 
     @staticmethod
     def _parse_header(lines: list[str]) -> tuple[list, list]:
-        int_header = [int(v) for line in lines[16:20] for v in BaseParserNZSM._split(line)]
-        float_header = [float(v) for line in lines[20:26] for v in BaseParserNZSM._split(line)]
+        int_header = [
+            int(v) for line in lines[16:20] for v in BaseParserNZSM._split(line)
+        ]
+        float_header = [
+            float(v) for line in lines[20:26] for v in BaseParserNZSM._split(line)
+        ]
         return int_header, float_header

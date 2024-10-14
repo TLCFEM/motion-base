@@ -74,7 +74,9 @@ class ParserNIED(BaseParserNIED):
                         task.save()
                     if (
                         not f.isfile()
-                        or not f.name.endswith(("EW1", "EW2", "NS1", "NS2", "UD1", "UD2", "EW", "NS", "UD"))
+                        or not f.name.endswith(
+                            ("EW1", "EW2", "NS1", "NS2", "UD1", "UD2", "EW", "NS", "UD")
+                        )
                         or not (target := archive.extractfile(f))
                     ):
                         continue
@@ -86,7 +88,9 @@ class ParserNIED(BaseParserNIED):
                         record.save()
                         records.append(record)
                     except Exception as e:
-                        _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
+                        _logger.critical(
+                            "Failed to parse.", file_name=f.name, exc_info=e
+                        )
         except tarfile.ReadError as e:
             _logger.critical("Failed to open the archive.", exc_info=e)
 
@@ -110,13 +114,19 @@ class ParserNIED(BaseParserNIED):
             record.delete()
 
         def _parse_date(string: str) -> datetime:
-            return datetime.strptime(string, "%Y/%m/%d %H:%M:%S").replace(tzinfo=ZoneInfo("Asia/Tokyo"))
+            return datetime.strptime(string, "%Y/%m/%d %H:%M:%S").replace(
+                tzinfo=ZoneInfo("Asia/Tokyo")
+            )
 
         record = NIED()
         record.file_hash = file_hash
         record.event_time = _parse_date(lines[0][18:])
         record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
-        record.depth = pint.Quantity(float(lines[3][18:]), ParserNIED._normalise_unit(lines[3])).to("km").magnitude
+        record.depth = (
+            pint.Quantity(float(lines[3][18:]), ParserNIED._normalise_unit(lines[3]))
+            .to("km")
+            .magnitude
+        )
         record.magnitude = float(lines[4][18:])
         record.station_code = lines[5][18:]
         record.station_location = [float(lines[7][18:]), float(lines[6][18:])]
@@ -125,7 +135,11 @@ class ParserNIED(BaseParserNIED):
         record.record_time = _parse_date(lines[9][18:])
         record.sampling_frequency = float(ParserNIED._parse_value(lines[10][18:]))
         record.sampling_frequency_unit = ParserNIED._normalise_unit(lines[10])
-        record.duration = pint.Quantity(float(lines[11][18:]), ParserNIED._normalise_unit(lines[11])).to("s").magnitude
+        record.duration = (
+            pint.Quantity(float(lines[11][18:]), ParserNIED._normalise_unit(lines[11]))
+            .to("s")
+            .magnitude
+        )
         record.direction = ParserNIED._parse_direction(lines[12][18:])
         record.scale_factor = float(ParserNIED._strip_unit(lines[13][18:]))
         record.maximum_acceleration = abs(float(lines[14][18:]))
@@ -138,7 +152,6 @@ class ParserNIED(BaseParserNIED):
 
 
 class ParserNZSM(BaseParserNZSM):
-
     @staticmethod
     def parse_archive(
         *,
@@ -182,15 +195,24 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             task.save()
-                        if not f.name.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
+                        if not f.name.upper().endswith(
+                            (".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")
+                        ):
                             continue
                         if target := archive.extractfile(f):
                             try:
                                 records.extend(
-                                    ParserNZSM.parse_file(target, user_id, os.path.basename(f.name), overwrite_existing)
+                                    ParserNZSM.parse_file(
+                                        target,
+                                        user_id,
+                                        os.path.basename(f.name),
+                                        overwrite_existing,
+                                    )
                                 )
                             except Exception as e:
-                                _logger.critical("Failed to parse.", file_name=f.name, exc_info=e)
+                                _logger.critical(
+                                    "Failed to parse.", file_name=f.name, exc_info=e
+                                )
             except tarfile.ReadError as e:
                 _logger.critical("Failed to open the archive.", exc_info=e)
         elif name_string.endswith(".zip"):
@@ -202,15 +224,24 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             task.save()
-                        if not f.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
+                        if not f.upper().endswith(
+                            (".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")
+                        ):
                             continue
                         with archive.open(f) as target:
                             try:
                                 records.extend(
-                                    ParserNZSM.parse_file(target, user_id, os.path.basename(f), overwrite_existing)
+                                    ParserNZSM.parse_file(
+                                        target,
+                                        user_id,
+                                        os.path.basename(f),
+                                        overwrite_existing,
+                                    )
                                 )
                             except Exception as e:
-                                _logger.critical("Failed to parse.", file_name=f, exc_info=e)
+                                _logger.critical(
+                                    "Failed to parse.", file_name=f, exc_info=e
+                                )
             except zipfile.BadZipFile as e:
                 _logger.critical("Failed to open the archive.", exc_info=e)
 
@@ -221,7 +252,10 @@ class ParserNZSM(BaseParserNZSM):
 
     @staticmethod
     def parse_file(
-        file_path: str | IO[bytes], user_id: str, file_name: str | None = None, overwrite_existing: bool = True
+        file_path: str | IO[bytes],
+        user_id: str,
+        file_name: str | None = None,
+        overwrite_existing: bool = True,
     ) -> list[NZSM]:
         if isinstance(file_path, str):
             with open(file_path, "r", encoding="utf-8") as f:
@@ -245,23 +279,33 @@ class ParserNZSM(BaseParserNZSM):
 
         last_update_time: datetime | None = None
         if len(last_processed := lines[5].upper().split("PROCESSED")) == 2:
-            last_update_time = datetime.strptime(last_processed[1].strip(), "%Y %B %d").replace(
-                tzinfo=ZoneInfo("Pacific/Auckland")
-            )
+            last_update_time = datetime.strptime(
+                last_processed[1].strip(), "%Y %B %d"
+            ).replace(tzinfo=ZoneInfo("Pacific/Auckland"))
 
         def _populate_common_fields(record: NZSM):
             record.station_code = station_code
             record.uploaded_by = user_id
-            record.file_name = os.path.basename(file_name if file_name else file_path).upper()
-            record.category = "processed" if ".V2A" in record.file_name else "unprocessed"
+            record.file_name = os.path.basename(
+                file_name if file_name else file_path
+            ).upper()
+            record.category = (
+                "processed" if ".V2A" in record.file_name else "unprocessed"
+            )
             if last_update_time is not None:
                 record.last_update_time = last_update_time
             record.save()
             records.append(record)
 
-        _populate_common_fields(ParserNZSM.parse_lines(lines[:num_lines], overwrite_existing))
-        _populate_common_fields(ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines], overwrite_existing))
-        _populate_common_fields(ParserNZSM.parse_lines(lines[2 * num_lines :], overwrite_existing))
+        _populate_common_fields(
+            ParserNZSM.parse_lines(lines[:num_lines], overwrite_existing)
+        )
+        _populate_common_fields(
+            ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines], overwrite_existing)
+        )
+        _populate_common_fields(
+            ParserNZSM.parse_lines(lines[2 * num_lines :], overwrite_existing)
+        )
 
         return records
 
@@ -283,11 +327,18 @@ class ParserNZSM(BaseParserNZSM):
         int_header, float_header = ParserNZSM._parse_header(lines)
 
         record.event_time = datetime(
-            int_header[0], int_header[1], int_header[2], int_header[3], int_header[4], int(int_header[5] / 10)
+            int_header[0],
+            int_header[1],
+            int_header[2],
+            int_header[3],
+            int_header[4],
+            int(int_header[5] / 10),
         )
         record.event_location = [float_header[13], -float_header[12]]
         record.depth = int_header[16]
-        record.magnitude = float_header[14] if float_header[14] > 0 else float_header[16]
+        record.magnitude = (
+            float_header[14] if float_header[14] > 0 else float_header[16]
+        )
 
         date_tuple: tuple = (
             int_header[8],
@@ -303,7 +354,9 @@ class ParserNZSM(BaseParserNZSM):
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
-        record.maximum_acceleration = abs(pint.Quantity(float_header[35], "mm/s/s").to("Gal").magnitude)
+        record.maximum_acceleration = abs(
+            pint.Quantity(float_header[35], "mm/s/s").to("Gal").magnitude
+        )
 
         offset: int = 26
         a_samples = int_header[33]

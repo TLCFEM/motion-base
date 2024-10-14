@@ -65,7 +65,9 @@ def store(upload: UploadFile) -> str:
 
 
 def pack(uploads: list[UploadFile]):
-    local_path, fs_path = _local_path(f'{uuid5_str("".join(upload.filename for upload in uploads))}.tar.gz')
+    local_path, fs_path = _local_path(
+        f'{uuid5_str("".join(upload.filename for upload in uploads))}.tar.gz'
+    )
 
     with tarfile.open(local_path, "w:gz") as archive:
         for upload in uploads:
@@ -86,7 +88,13 @@ def _retry(func, delay: int = 10, max_retries: int = 3):
 
 
 class FileProxy:
-    def __init__(self, file_uri: str, auth_token: str | None, *, always_delete_on_exit: bool = False):
+    def __init__(
+        self,
+        file_uri: str,
+        auth_token: str | None,
+        *,
+        always_delete_on_exit: bool = False,
+    ):
         self._file_uri = file_uri
         self._auth_token = auth_token
         self._always_delete_on_exit = always_delete_on_exit
@@ -112,7 +120,14 @@ class FileProxy:
     def bulk(self, records: list):
         def to_dict(record) -> dict:
             dict_data = record.to_mongo()
-            for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "_id", "_cls"):
+            for key in (
+                "scale_factor",
+                "raw_data",
+                "raw_data_unit",
+                "offset",
+                "_id",
+                "_cls",
+            ):
                 dict_data.pop(key, None)
             dict_data["id"] = record.id
             if self.is_remote:
@@ -168,7 +183,10 @@ class FileProxy:
             if self.is_remote and self._auth_token:
 
                 def _delete():
-                    return delete(self._file_uri, headers={"Authorization": f"Bearer {self._auth_token}"})
+                    return delete(
+                        self._file_uri,
+                        headers={"Authorization": f"Bearer {self._auth_token}"},
+                    )
 
                 if _retry(_delete).status_code != 200:
                     _logger.error(f"Failed to delete file: {self._file_uri}")

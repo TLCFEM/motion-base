@@ -28,9 +28,13 @@ if not LOADED:
     else:
         _logger.info("No .env file found.")
 
-MB_SECRET_KEY: str = os.getenv("MB_SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7")
+MB_SECRET_KEY: str = os.getenv(
+    "MB_SECRET_KEY", "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
+)
 MB_ALGORITHM: str = os.getenv("MB_ALGORITHM", "HS256")
-MB_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "300"))
+MB_ACCESS_TOKEN_EXPIRE_MINUTES: int = int(
+    os.getenv("MB_ACCESS_TOKEN_EXPIRE_MINUTES", "300")
+)
 
 MB_SUPERUSER_EMAIL: str = os.getenv("MB_SUPERUSER_EMAIL", "admin@admin.admin")
 MB_SUPERUSER_FIRST_NAME: str = os.getenv("MB_SUPERUSER_FIRST_NAME", "admin")
