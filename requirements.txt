@@ -19,7 +19,7 @@ click==8.1.7              # via beanie, celery, click-didyoumean, click-plugins,
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1      # via celery
 click-repl==0.3.0         # via celery
-cryptography==43.0.1      # via joserfc
+cryptography==43.0.3      # via joserfc
 dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==8.15.1  # via elasticsearch
 elasticsearch==8.15.1     # via motion-base (pyproject.toml)
@@ -64,4 +64,4 @@ urllib3==2.2.3            # via elastic-transport, requests
 uvicorn==0.32.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
-yarl==1.15.4              # via aiohttp
+yarl==1.15.5              # via aiohttp
