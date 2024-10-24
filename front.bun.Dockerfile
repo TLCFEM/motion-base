@@ -14,4 +14,4 @@ WORKDIR /mb/gui
 
 ENTRYPOINT ["/bin/sh", "gui.sh"]
 
-CMD ["170.64.176.26", "-l", "4173"]
+CMD ["170.64.176.26"]

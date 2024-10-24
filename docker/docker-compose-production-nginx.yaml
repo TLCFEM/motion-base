@@ -141,7 +141,7 @@ services:
     depends_on:
       - mb-back
     ports:
-      - '4173:4173'
+      - '3000:3000'
   nginx:
     image: nginx
     container_name: nginx
