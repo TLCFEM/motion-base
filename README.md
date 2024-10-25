@@ -28,6 +28,8 @@ It will pull the images and upload the example data to the application.
 curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/scripts/example.sh -o example.sh && bash example.sh
 ```
 
+[![asciicast](https://asciinema.org/a/is6w6zodKtKM1BZyZpgNKfheE.svg)](https://asciinema.org/a/is6w6zodKtKM1BZyZpgNKfheE)
+
 ## Installation
 
 ### as a developer
