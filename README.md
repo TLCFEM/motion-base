@@ -31,7 +31,7 @@ curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/s
 Please always check the content of the script (especially from the Internet) before executing it.
 The following is a walkthrough of the script.
 
-[![walkthrough](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ.svg)](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)
+[![walkthrough](docs/demo.gif)](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)
 
 ## Installation
 
