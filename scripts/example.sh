@@ -68,6 +68,20 @@ services:
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
+  mb-rabbitmq:
+    image: rabbitmq:management
+    container_name: mb-rabbitmq
+    restart: 'always'
+    ports:
+      - '\${RABBITMQ_PORT}:\${RABBITMQ_PORT}'
+      - '15672:15672'
+    environment:
+      RABBITMQ_NODE_PORT: \${RABBITMQ_PORT}
+      RABBITMQ_DEFAULT_USER: \${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_PASS: \${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_VHOST: vhost
+    volumes:
+      - motion_rabbitmq:/var/lib/rabbitmq
   mb-elasticsearch:
     image: elasticsearch:\${ELASTIC_VERSION}
     container_name: mb-elasticsearch
@@ -84,6 +98,7 @@ services:
     restart: 'always'
     depends_on:
       - mb-mongo
+      - mb-rabbitmq
       - mb-elasticsearch
     ports:
       - '\${MB_PORT}:8000'
@@ -125,6 +140,7 @@ services:
 volumes:
   motion_mongo:
   motion_mongoconfig:
+  motion_rabbitmq:
   motion_cache:
   motion_elasticsearch:
 " > docker-compose.yml

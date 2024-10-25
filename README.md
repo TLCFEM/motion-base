@@ -25,7 +25,7 @@ The following command will download the `example.sh` script and execute it.
 It will pull the images and upload the example data to the application.
 
 ```bash
-curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/scripts/example.sh | bash
+curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/scripts/example.sh -o example.sh && bash example.sh
 ```
 
 ## Installation
