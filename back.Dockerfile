@@ -16,6 +16,8 @@ WORKDIR /mb
 RUN useradd -m runner
 USER runner
 
+ENV PYTHONOPTIMIZE=2
+
 ENTRYPOINT ["python3", "mb_runner.py"]
 
 CMD ["host", "0.0.0.0"]
