@@ -18,6 +18,16 @@ It comes with a web interface and a Python client that can be used to access the
 - [x] Provide ad hoc processing, including up-/down-sampling, normalization, filtering and computation of response spectra.
 - [x] Converting acceleration record to velocity/displacement record that is consistent with specific time integration methods.
 
+## Quick Start
+
+Please ensure `docker`, `curl`, and `jq` are installed on the system.
+The following command will download the `example.sh` script and execute it.
+It will pull the images and upload the example data to the application.
+
+```bash
+curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/scripts/example.sh | bash
+```
+
 ## Installation
 
 ### as a developer

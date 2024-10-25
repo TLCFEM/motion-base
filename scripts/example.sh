@@ -45,9 +45,9 @@ curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/master/docker/.env 
 
 echo "
 services:
-  mongo:
+  mb-mongo:
     image: mongo
-    container_name: mongo
+    container_name: mb-mongo
     restart: 'always'
     command: --wiredTigerCacheSizeGB \${MONGO_CACHE_SIZE} --port \${MONGO_PORT}
     mem_limit: \${MONGO_MEM_LIMIT}
@@ -61,9 +61,9 @@ services:
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
-  rabbitmq:
+  mb-rabbitmq:
     image: rabbitmq:management
-    container_name: rabbitmq
+    container_name: mb-rabbitmq
     restart: 'always'
     ports:
       - '\${RABBITMQ_PORT}:\${RABBITMQ_PORT}'
@@ -75,9 +75,9 @@ services:
       RABBITMQ_DEFAULT_VHOST: vhost
     volumes:
       - motion_rabbitmq:/var/lib/rabbitmq
-  elasticsearch:
+  mb-elasticsearch:
     image: elasticsearch:\${ELASTIC_VERSION}
-    container_name: elasticsearch
+    container_name: mb-elasticsearch
     restart: 'always'
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx4g"
@@ -90,9 +90,9 @@ services:
     container_name: mb-back
     restart: 'always'
     depends_on:
-      - mongo
-      - rabbitmq
-      - elasticsearch
+      - mb-mongo
+      - mb-rabbitmq
+      - mb-elasticsearch
     ports:
       - '\${MB_PORT}:8000'
     volumes:
@@ -111,15 +111,15 @@ services:
       MB_FS_ROOT: \${MB_FS_ROOT}
       MB_MAIN_SITE: \${MB_MAIN_SITE}
       MONGO_DB_NAME: \${MONGO_DB_NAME}
-      MONGO_HOST: mongo
+      MONGO_HOST: mb-mongo
       MONGO_PORT: \${MONGO_PORT}
       MONGO_USERNAME: \${MONGO_USERNAME}
       MONGO_PASSWORD: \${MONGO_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_HOST: mb-rabbitmq
       RABBITMQ_PORT: \${RABBITMQ_PORT}
       RABBITMQ_USERNAME: \${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: \${RABBITMQ_PASSWORD}
-      ELASTIC_HOST: elasticsearch
+      ELASTIC_HOST: mb-elasticsearch
   mb-front:
     image: tlcfem/motion-base-front
     container_name: mb-front
@@ -142,23 +142,46 @@ docker compose -f docker-compose.yml up -d
 
 curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/tests/data/jp_test.knt.tar.gz -o jp_test.knt.tar.gz
 
-token="$(curl -s -X 'POST' \
-  'http://localhost:8000/user/token' \
+echo ">>> Waiting for the application to start..."
+response=""
+while [ "$response" != "200" ]; do
+    sleep 4
+    response="$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/alive)"
+done
+
+token="$(curl -s -X 'POST' 'http://localhost:8000/user/token' \
   -H 'accept: application/json' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'grant_type=password&username=test&password=password' | jq -r '.access_token')"
 
-curl -s -X 'POST' \
-  'http://localhost:8000/jp/upload' \
+curl -s -X 'POST' 'http://localhost:8000/jp/upload' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
   -H 'Content-Type: multipart/form-data' \
   -F 'archives=@jp_test.knt.tar.gz;type=application/gzip' > /dev/null
 
-echo "
-The application is now running at http://localhost:3000
-You can open the url in your browser to access the application.
+total=0
+while [ "$total" -lt 1 ]; do
+    sleep 2
+    total="$(curl -s -X 'GET' 'http://localhost:8000/total' -H 'accept: application/json' | jq -r '.total | .[0]')"
+done
 
-To stop the application, run the following command:
-  docker compose -f docker-compose.yml down
-"
+cleanup() {
+    echo "
+>>> Shutdown docker..."
+    docker compose -f docker-compose.yml down
+}
+
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
+
+echo "The application is now running at http://localhost:3000
+You can open the url in your browser to access the application.
+There shall be six records in the database.
+
+To stop the application, please press 'Ctrl + C'.
+To clean up, please remove the 'mb-example' directory and docker volumes."
+
+while true; do
+    sleep 10
+done
