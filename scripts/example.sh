@@ -6,6 +6,13 @@ This script requires Internet access and 'curl' and 'jq' to download files and i
 This script also requires 'docker' and 'docker-compose' to be installed on your system.
 It is assumed that the current user has permission to run docker commands without sudo.
 
+Please be informed that this script is for demonstration purposes only.
+It means the setup only includes the minimum simplest configuration required to run the application.
+Typically, most docker services shall be run behind a reverse proxy.
+Only the necessary ports and services shall be exposed to the public.
+Also, a production setup shall deploy celery workers to handle processing tasks in the background.
+These are not included in this script.
+
 This script will create a new directory called 'mb-example' in the current directory.
 All files will be downloaded to this directory.
 
@@ -61,20 +68,6 @@ services:
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
-  mb-rabbitmq:
-    image: rabbitmq:management
-    container_name: mb-rabbitmq
-    restart: 'always'
-    ports:
-      - '\${RABBITMQ_PORT}:\${RABBITMQ_PORT}'
-      - '15672:15672'
-    environment:
-      RABBITMQ_NODE_PORT: \${RABBITMQ_PORT}
-      RABBITMQ_DEFAULT_USER: \${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: \${RABBITMQ_PASSWORD}
-      RABBITMQ_DEFAULT_VHOST: vhost
-    volumes:
-      - motion_rabbitmq:/var/lib/rabbitmq
   mb-elasticsearch:
     image: elasticsearch:\${ELASTIC_VERSION}
     container_name: mb-elasticsearch
@@ -91,7 +84,6 @@ services:
     restart: 'always'
     depends_on:
       - mb-mongo
-      - mb-rabbitmq
       - mb-elasticsearch
     ports:
       - '\${MB_PORT}:8000'
@@ -133,7 +125,6 @@ services:
 volumes:
   motion_mongo:
   motion_mongoconfig:
-  motion_rabbitmq:
   motion_cache:
   motion_elasticsearch:
 " > docker-compose.yml
@@ -170,6 +161,7 @@ cleanup() {
     echo "
 >>> Shutdown docker..."
     docker compose -f docker-compose.yml down
+    echo ">>> To clean up, please remove the 'mb-example' directory and docker volumes."
 }
 
 trap 'cleanup; exit 130' INT
@@ -179,8 +171,7 @@ echo "The application is now running at http://localhost:3000
 You can open the url in your browser to access the application.
 There shall be six records in the database.
 
-To stop the application, please press 'Ctrl + C'.
-To clean up, please remove the 'mb-example' directory and docker volumes."
+To stop the application, please press 'Ctrl + C'."
 
 while true; do
     sleep 10
