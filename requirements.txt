@@ -64,4 +64,4 @@ urllib3==2.2.3            # via elastic-transport, requests
 uvicorn==0.32.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
-yarl==1.16.0              # via aiohttp
+yarl==1.17.0              # via aiohttp
