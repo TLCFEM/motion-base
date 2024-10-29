@@ -145,7 +145,7 @@ volumes:
   motion_elasticsearch:
 " > docker-compose.yml
 
-docker compose -f docker-compose.yml up -d
+docker compose -f docker-compose.yml up -d || exit 0
 
 curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/tests/data/jp_test.knt.tar.gz -o jp_test.knt.tar.gz
 
