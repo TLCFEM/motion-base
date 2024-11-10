@@ -22,9 +22,10 @@ from uuid import UUID
 
 from beanie.operators import In
 from fastapi import Body, Depends, FastAPI, HTTPException
-from fastapi.middleware.cors import CORSMiddleware
-from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import RedirectResponse, FileResponse
+from starlette.middleware import Middleware
+from starlette.middleware.cors import CORSMiddleware
+from starlette.middleware.gzip import GZipMiddleware
 
 from .jp import router as jp_router
 from .nz import router as nz_router
@@ -73,16 +74,16 @@ app = FastAPI(
     description="A database for strong motion records.",
     license_info={"name": "GNU General Public License v3.0"},
     lifespan=lifespan,
+    middleware=[
+        Middleware(GZipMiddleware, minimum_size=1024),
+        Middleware(
+            CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST", "DELETE"]
+        ),
+    ],
 )
 app.include_router(jp_router, prefix="/jp")
 app.include_router(nz_router, prefix="/nz")
 app.include_router(user_router, prefix="/user")
-app.add_middleware(GZipMiddleware, minimum_size=1024)
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],
-    allow_methods=["GET", "POST", "DELETE"],
-)
 
 
 @app.get("/", response_class=RedirectResponse)
