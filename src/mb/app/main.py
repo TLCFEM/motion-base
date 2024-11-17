@@ -96,6 +96,11 @@ async def alive():
     return {"message": "I'm alive!"}
 
 
+@app.get("/.well-known/pki-validation/{file_name}", tags=["status"])
+async def cert(file_name: str):
+    return FileResponse(f"/cert/{file_name}")
+
+
 @app.post("/total", tags=["status"], response_model=TotalResponse)
 async def post_total(
     query: QueryConfig | list[QueryConfig] = QueryConfig(min_magnitude=0),
