@@ -13,6 +13,11 @@ export default defineConfig({
     ],
     server: {
         port: 3000,
+        https: {
+            key: '/cert/private.key',
+            cert: '/cert/certificate.crt',
+            ca: '/cert/ca_bundle.crt',
+        }
     },
     build: {
         target: "esnext",
