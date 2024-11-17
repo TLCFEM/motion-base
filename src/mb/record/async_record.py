@@ -93,7 +93,6 @@ class MetadataRecord(Document):
                 ("event_time", DESCENDING),
                 ("direction", ASCENDING),
                 ("event_location", DESCENDING),
-                ("station_location", DESCENDING),
             ],
         ]
 

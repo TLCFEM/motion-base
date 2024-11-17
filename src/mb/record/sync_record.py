@@ -120,7 +120,6 @@ class Record(Document):
                 "-event_time",
                 "direction",
                 "event_location",
-                "station_location",
             ),
         ],
     }
