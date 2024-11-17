@@ -14,7 +14,6 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 from datetime import datetime
 
-import numpy as np
 import pint
 import structlog
 from mongoengine import (
@@ -26,7 +25,7 @@ from mongoengine import (
     IntField,
 )
 
-from .utility import normalise, convert_to, perform_fft, str_factory, uuid5_str
+from .utility import str_factory, uuid5_str
 
 _logger = structlog.get_logger(__name__)
 
@@ -115,6 +114,14 @@ class Record(Document):
             "station_code",
             [("station_location", "2dsphere")],
             "direction",
+            (
+                "-magnitude",
+                "-maximum_acceleration",
+                "-event_time",
+                "direction",
+                "event_location",
+                "station_location",
+            ),
         ],
     }
 

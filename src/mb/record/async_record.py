@@ -22,8 +22,9 @@ import pint
 from beanie import Document, Indexed
 from pydantic import Field
 
-from .utility import normalise, convert_to, perform_fft, str_factory, uuid5_str
+from .utility import normalise, convert_to, perform_fft, str_factory
 
+ASCENDING = 1
 DESCENDING = -1
 GEOSPHERE = "2dsphere"
 
@@ -49,7 +50,7 @@ class MetadataRecord(Document):
     event_time: Indexed(datetime, DESCENDING) = Field(
         None, description="The origin time of the record."
     )
-    event_location: Indexed(list[float, float], GEOSPHERE) = Field(
+    event_location: Indexed(list[float], GEOSPHERE) = Field(
         None, description="The geolocation of the earthquake event."
     )
     depth: Indexed(float) = Field(
@@ -59,7 +60,7 @@ class MetadataRecord(Document):
     station_code: Indexed(str) = Field(
         None, description="The code of the station recording the record."
     )
-    station_location: Indexed(list[float, float], GEOSPHERE) = Field(
+    station_location: Indexed(list[float], GEOSPHERE) = Field(
         None, description="The geolocation of the station recording the record."
     )
     station_elevation: float = Field(
@@ -83,6 +84,18 @@ class MetadataRecord(Document):
     duration: float = Field(None, description="The duration of the record in seconds.")
     direction: Indexed(str) = Field(None, description="The direction of the record.")
     scale_factor: float = Field(None, description="The scale factor of the record.")
+
+    class Settings:
+        indexes = [
+            [
+                ("magnitude", DESCENDING),
+                ("maximum_acceleration", DESCENDING),
+                ("event_time", DESCENDING),
+                ("direction", ASCENDING),
+                ("event_location", DESCENDING),
+                ("station_location", DESCENDING),
+            ],
+        ]
 
 
 class Record(MetadataRecord):
