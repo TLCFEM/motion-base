@@ -77,7 +77,6 @@ services:
       - ${MB_PORT}
     volumes:
       - motion_cache:${MB_FS_ROOT}
-      - ./cert:/cert
     environment:
       MB_SECRET_KEY: ${MB_SECRET_KEY}
       MB_ALGORITHM: ${MB_ALGORITHM}
