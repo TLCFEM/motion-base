@@ -17,7 +17,7 @@ jobs:
           MONGO_INITDB_ROOT_PASSWORD: password
           MONGO_INITDB_DATABASE: StrongMotion
         ports:
-          - 27017:27017
+          - '27017:27017'
       rabbitmq:
         image: rabbitmq:latest
         env:
@@ -25,7 +25,7 @@ jobs:
           RABBITMQ_DEFAULT_PASS: password
           RABBITMQ_DEFAULT_VHOST: vhost
         ports:
-          - 5672:5672
+          - '5672:5672'
       elasticsearch:
         image: elasticsearch:8.16.0
         ports:
