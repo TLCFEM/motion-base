@@ -297,6 +297,21 @@ async def search_records(query: QueryConfig = QueryConfig()):
         ),
     )
 
+@app.post("/stats")
+async def aggregation_stats():
+    client = await async_elastic()
+    results = await client.search(
+        index="record",
+        query={"range": {"magnitude": {"gte": 1, "lte": 10}}},
+        aggs={
+            "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
+            "pga": {"histogram": {"field": "pga", "interval": 100}},
+        },
+        size=0,
+    )
+
+    return results["aggregations"]
+
 
 @app.post("/index")
 async def index_records(body: BulkRequest = Body(...), user: User = Depends(is_active)):
