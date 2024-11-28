@@ -147,7 +147,7 @@ class AggregationBucket {
     public buckets: AggregationItem[];
 }
 
-class AggregationItem {
+export class AggregationItem {
     public key: number;
     public doc_count: number;
 }

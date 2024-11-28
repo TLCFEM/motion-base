@@ -13,16 +13,65 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Box, Button, CircularProgress, LinearProgress, Modal, Stack, TextField } from "@suid/material";
+import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField } from "@suid/material";
 import useTheme from "@suid/material/styles/useTheme";
-import { createSignal } from "solid-js";
+import { Component, createEffect, createSignal, onMount } from "solid-js";
 import axios from "axios";
+import { AggregationItem, get_stats } from "./API";
+import Plotly from "plotly.js-dist-min";
+
+interface HistogramProps {
+    id: string;
+    item: string;
+    data: AggregationItem[];
+}
+
+const Histogram: Component<HistogramProps> = (props) => {
+    createEffect(async () => {
+        await Plotly.newPlot(
+            props.id,
+            [
+                {
+                    x: props.data.map(item => item.key),
+                    y: props.data.map(item => item.doc_count),
+                    type: "bar"
+                }
+            ],
+            {
+                title: props.item + " Histogram",
+                xaxis: {
+                    title: props.item,
+                    autorange: true,
+                    automargin: true
+                },
+                yaxis: {
+                    title: "Counts",
+                    autorange: true,
+                    automargin: true
+                },
+                width: 450,
+                height: 400
+            },
+            { autosizable: true, responsive: true }
+        );
+    });
+
+    return <Paper id={props.id} sx={{ width: 450, height: 400 }} />;
+};
 
 export default function ServerModal() {
     const [open, setOpen] = createSignal(false);
     const [newServer, setNewServer] = createSignal(axios.defaults.baseURL);
     const [loading, setLoading] = createSignal(false);
     const theme = useTheme();
+    const [magnitudeHist, setMagnitudeHist] = createSignal([] as AggregationItem[]);
+    const [pgaHist, setPgaHist] = createSignal([] as AggregationItem[]);
+
+    onMount(async () => {
+        const allStats = await get_stats();
+        setMagnitudeHist(allStats.magnitude.buckets);
+        setPgaHist(allStats.pga.buckets);
+    });
 
     return (
         <>
@@ -41,7 +90,7 @@ export default function ServerModal() {
                         top: "50%",
                         left: "50%",
                         transform: "translate(-50%, -50%)",
-                        width: "60ch",
+                        // width: "60ch",
                         bgcolor: theme.palette.background.paper,
                         border: "1px solid lightgrey",
                         borderRadius: "4px",
@@ -74,6 +123,10 @@ export default function ServerModal() {
                         </Button>
                     </Stack>
                     {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
+                    <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
+                        <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} />
+                        <Histogram id="pga-hist" item="PGA" data={pgaHist()} />
+                    </Stack>
                 </Box>
             </Modal>
         </>

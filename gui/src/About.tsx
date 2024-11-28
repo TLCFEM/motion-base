@@ -22,12 +22,12 @@ import beanie_logo from "./assets/beanie.svg";
 import solid_logo from "./assets/solid.svg";
 import tippy_logo from "./assets/tippy.svg";
 import plotly_logo from "./assets/plotly.svg";
-import leafllet_logo from "./assets/leaflet.svg";
+import leaflet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
-import { get_stats, post_total_api, QueryConfig } from "./API";
+import { post_total_api, QueryConfig } from "./API";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
@@ -47,8 +47,6 @@ export default function AboutModal() {
         configs.push(config);
 
         setStats(await post_total_api(configs));
-
-        console.log(await get_stats());
     });
 
     const commit_link = <Link href="https://github.com/TLCFEM/motion-base/tree/git-commit-long">git-commit-short</Link>;
@@ -78,7 +76,7 @@ export default function AboutModal() {
                         border: "1px solid lightgrey",
                         borderRadius: "4px",
                         boxShadow: "24px",
-                        p: 4,
+                        p: 4
                     }}
                 >
                     <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
@@ -143,7 +141,7 @@ export default function AboutModal() {
                             <img src={solid_logo} alt="solid" height="40px" />
                         </Link>
                         <Link href="https://leafletjs.com/">
-                            <img src={leafllet_logo} alt="leaflet" height="40px" />
+                            <img src={leaflet_logo} alt="leaflet" height="40px" />
                         </Link>
                         <Link href="https://plotly.com/javascript/">
                             <img src={plotly_logo} alt="plotly" height="40px" />
