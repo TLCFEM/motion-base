@@ -24,7 +24,7 @@ import {
     IconButton,
     LinearProgress,
     Paper,
-    Typography,
+    Typography
 } from "@suid/material";
 import ShuffleOnIcon from "@suid/icons-material/ShuffleOn";
 import L, { LatLng } from "leaflet";
@@ -50,38 +50,38 @@ const MetadataCard: Component<sxProps> = (props) => {
         { label: "File Name", value: data.loading ? "---" : data().file_name },
         {
             label: "Region",
-            value: data.loading ? "---" : data().region.toUpperCase(),
+            value: data.loading ? "---" : data().region.toUpperCase()
         },
         {
             label: "Category",
-            value: data.loading ? "---" : data().category.toUpperCase(),
+            value: data.loading ? "---" : data().category.toUpperCase()
         },
         {
             label: "Direction",
-            value: data.loading ? "---" : data().direction.toUpperCase(),
+            value: data.loading ? "---" : data().direction.toUpperCase()
         },
         { label: "Magnitude", value: data.loading ? "---" : data().magnitude },
         { label: "Depth (km)", value: data.loading ? "---" : data().depth },
         {
             label: "PGA (Gal, cm/s^2)",
-            value: data.loading ? "---" : Math.abs(data().maximum_acceleration).toFixed(2),
+            value: data.loading ? "---" : Math.abs(data().maximum_acceleration).toFixed(2)
         },
         {
             label: `Sampling Frequency (${data.loading ? "---" : data().sampling_frequency_unit})`,
-            value: data.loading ? "---" : data().sampling_frequency,
+            value: data.loading ? "---" : data().sampling_frequency
         },
         {
             label: "Event Time",
-            value: data.loading || data().event_time.getTime() === 0 ? "---" : toUTC(data().event_time),
+            value: data.loading || data().event_time.getTime() === 0 ? "---" : toUTC(data().event_time)
         },
         {
             label: "Record Time",
-            value: data.loading || data().record_time.getTime() === 0 ? "---" : toUTC(data().record_time),
+            value: data.loading || data().record_time.getTime() === 0 ? "---" : toUTC(data().record_time)
         },
         {
             label: "Last Update Time",
-            value: data.loading || data().last_update_time.getTime() === 0 ? "---" : toUTC(data().last_update_time),
-        },
+            value: data.loading || data().last_update_time.getTime() === 0 ? "---" : toUTC(data().last_update_time)
+        }
         // {
         //     tooltip: "Distance between event and station locations over the delay between event and record times.",
         //     label: "Approximated Speed (km/s)",
@@ -99,7 +99,7 @@ const MetadataCard: Component<sxProps> = (props) => {
         tippy(`#btn-next`, {
             content: "Get another random record from the database.",
             animation: "scale",
-            theme: "translucent",
+            theme: "translucent"
         });
     });
 
@@ -108,7 +108,7 @@ const MetadataCard: Component<sxProps> = (props) => {
             sx={{
                 ...props.sx,
                 display: "flex",
-                flexDirection: "column",
+                flexDirection: "column"
             }}
         >
             <CardContent sx={{ flexGrow: 1 }}>
@@ -132,7 +132,7 @@ const MetadataCard: Component<sxProps> = (props) => {
                 sx={{
                     justifyContent: "flex-end",
                     alignItems: "center",
-                    alignContent: "center",
+                    alignContent: "center"
                 }}
             >
                 <FormControlLabel
@@ -189,7 +189,7 @@ const Epicenter: Component<sxProps> = (props) => {
 
         event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(map);
         station_marker = L.marker(station_location, {
-            icon: stationIcon,
+            icon: stationIcon
         }).addTo(map);
     });
 
@@ -224,24 +224,26 @@ const Waveform: Component<sxProps> = (props) => {
                     y: data().waveform,
                     type: "scatter",
                     mode: "lines",
-                    name: data().id,
-                },
+                    name: data().id
+                }
             ],
             {
                 title: data().file_name,
                 xaxis: {
                     title: "Time (s)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
                 yaxis: {
                     title: "Acceleration (cm/s^2)",
                     autorange: true,
-                    automargin: true,
+                    automargin: true
                 },
-                autosize: true,
+                autosize: true
             },
-            { autosizable: true, responsive: true },
+            {
+                autosizable: true, responsive: true, modeBarButtonsToRemove: ["lasso2d"], displaylogo: false
+            }
         );
     });
 
