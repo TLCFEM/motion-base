@@ -27,7 +27,7 @@ import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
-import { post_total_api, QueryConfig } from "./API";
+import { get_stats, post_total_api, QueryConfig } from "./API";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);
@@ -47,6 +47,8 @@ export default function AboutModal() {
         configs.push(config);
 
         setStats(await post_total_api(configs));
+
+        console.log(await get_stats());
     });
 
     const commit_link = <Link href="https://github.com/TLCFEM/motion-base/tree/git-commit-long">git-commit-short</Link>;

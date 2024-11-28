@@ -120,9 +120,9 @@ function stringify(obj: any) {
     return JSON.stringify(obj, (_, value) => (value === null || value === undefined ? undefined : value));
 }
 
-export async function query_api(config: QueryConfig, mongo: boolean) {
+export async function query_api(config: QueryConfig) {
     const response = (
-        await axios.post<QueryResponse>(mongo ? "/query" : "/search", stringify(config), {
+        await axios.post<QueryResponse>("/search", stringify(config), {
             headers: { "Content-Type": "application/json" }
         })
     ).data;
@@ -136,6 +136,24 @@ interface TotalResponse {
 
 export async function get_total_api() {
     return (await axios.get<TotalResponse>("/total")).data.total[0];
+}
+
+interface StatsResponse {
+    magnitude: AggregationBucket;
+    pga: AggregationBucket;
+}
+
+class AggregationBucket {
+    public buckets: AggregationItem[];
+}
+
+class AggregationItem {
+    public key: number;
+    public doc_count: number;
+}
+
+export async function get_stats() {
+    return (await axios.get<StatsResponse>("/stats")).data;
 }
 
 export async function post_total_api(configs: QueryConfig[]) {

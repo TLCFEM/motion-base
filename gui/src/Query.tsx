@@ -79,7 +79,6 @@ const [error, setError] = createSignal("");
 
 const Settings: Component<sxProps> = (props) => {
     const [loading, setLoading] = createSignal(false);
-    const [mongo, setMongo] = createSignal(false);
 
     async function fetch() {
         setLoading(true);
@@ -100,7 +99,7 @@ const Settings: Component<sxProps> = (props) => {
         if (stationCode()) config.station_code = stationCode();
 
         try {
-            setRecords(await query_api(config, mongo()));
+            setRecords(await query_api(config));
         } catch (e) {
             // clear();
             setError((e as Error).message);
@@ -311,15 +310,6 @@ const Settings: Component<sxProps> = (props) => {
                         value={stationCode()}
                         onChange={(_, value) => setStationCode(value)}
                         disabled={loading()}
-                    />
-                </Stack>
-                <Stack sx={stackProps}>
-                    <FormControlLabel
-                        id="chk-mongo"
-                        name="chk-mongo"
-                        label="mongoDB"
-                        disabled={true}
-                        control={<Checkbox checked={mongo()} onChange={(_, checked) => setMongo(checked)} />}
                     />
                 </Stack>
                 <ButtonGroup variant="contained" orientation="vertical">
