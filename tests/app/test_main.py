@@ -40,6 +40,9 @@ async def test_get_total(mock_client):
     response = await mock_client.get("/total")
     assert response.status_code == HTTPStatus.OK
 
+async def test_get_stats(mock_client):
+    response = await mock_client.get("/stats")
+    assert response.status_code == HTTPStatus.OK
 
 async def test_post_total(mock_client):
     response = await mock_client.post("/total")
