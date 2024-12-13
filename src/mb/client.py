@@ -148,19 +148,26 @@ class MBClient:
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         await self.client.aclose()
 
+    def __iter__(self):
+        return self.download_pool.__iter__()
+
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
 
-    async def download(self, record_id: str | uuid | list[str | uuid]):
-        if isinstance(record_id, list):
+    async def download(
+        self, record: str | uuid | list[str | uuid] | MBRecord | list[MBRecord]
+    ):
+        if isinstance(record, list):
             self.download_pool = []
-            self.download_size = len(record_id)
+            self.download_size = len(record)
             self.current_download_size = 0
             async with anyio.create_task_group() as tg:
-                for r in record_id:
+                for r in record:
                     tg.start_soon(self.download, r)
 
             return
+
+        record_id: str = record.id if isinstance(record, MBRecord) else record
 
         async with self.semaphore:
             result = await self.client.post("/waveform", json=[str(record_id)])
@@ -284,9 +291,9 @@ class MBClient:
 async def main():
     async with MBClient("http://localhost:8000", "test", "password") as client:
         results = await client.search(QueryConfig())
-        await client.download([r.id for r in results])
+        await client.download(results)
         fig: Figure = None  # type: ignore
-        for result in client.download_pool:
+        for result in client:
             fig = result.plot_spectrum(fig)
         fig.legend()
         fig.tight_layout()
