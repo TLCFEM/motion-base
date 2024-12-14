@@ -68,14 +68,18 @@ class MBRecord(RecordResponse):
 
         return fig
 
-    def plot_response_spectrum(self):
+    def plot_response_spectrum(
+        self,
+        damping_ratio: float = 0.05,
+        period_bracket: np.ndarray = np.arange(0, 10, 0.01),
+    ):
         if None in (
             self.period,
             self.displacement_spectrum,
             self.velocity_spectrum,
             self.acceleration_spectrum,
         ):
-            self.to_response_spectrum(0.05, np.arange(0, 10, 0.01))
+            self.to_response_spectrum(damping_ratio, period_bracket)
 
         fig = plt.figure()
         fig.add_subplot(311)
