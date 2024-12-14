@@ -26,6 +26,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from matplotlib.figure import Figure
+import pint
 from rich.console import Console
 from rich.progress import track
 
@@ -33,6 +34,10 @@ from mb.app.response import QueryConfig, RecordResponse, PaginationConfig
 
 
 class MBRecord(RecordResponse):
+    @staticmethod
+    def new_record(data: dict):
+        return MBRecord(**{k: v for k, v in data.items() if v is not None})
+
     def plot_waveform(self, fig: Figure | None = None):
         if fig is None:
             fig = plt.figure()
@@ -110,6 +115,19 @@ class MBClient:
         password: str | None = None,
         **kwargs,
     ):
+        """
+        To create a new instance, provide the `host_url` such as `http://localhost:8000`.
+        Apart from uploading new records, no need to assign `username` and `password`.
+        Provide `semaphore` to limit the number of concurrent requests.
+
+        All other keyword arguments are passed to `httpx.AsyncClient`.
+        For example, to set a timeout of 10 seconds, use `timeout=10`.
+
+        :param host_url: The URL of the server.
+        :param username: The username for authentication.
+        :param password: The password for authentication.
+        :param kwargs: Additional arguments for `httpx.AsyncClient`.
+        """
         self.host_url: str = host_url if host_url else "http://localhost:8000"
         while self.host_url.endswith("/"):
             self.host_url = self.host_url[:-1]
@@ -159,7 +177,8 @@ class MBClient:
         self.console.print(*args, **kwargs)
 
     async def download(
-        self, record: str | uuid | list[str | uuid] | MBRecord | list[MBRecord]
+        self,
+        record: str | uuid.UUID | list[str | uuid.UUID] | MBRecord | list[MBRecord],
     ):
         if isinstance(record, list):
             self.download_pool = []
@@ -169,7 +188,9 @@ class MBClient:
                 for r in record:
                     tg.start_soon(self.download, r)
         else:
-            record_id: str = record.id if isinstance(record, MBRecord) else record
+            record_id: str | uuid.UUID = (
+                record.id if isinstance(record, MBRecord) else record
+            )
 
             async with self.semaphore:
                 result = await self.client.post("/waveform", json=[str(record_id)])
@@ -180,7 +201,9 @@ class MBClient:
                         f"[[red]{self.current_download_size}/{self.download_size}[/]]."
                     )
                 else:
-                    self.download_pool.append(MBRecord(**result.json()["records"][0]))
+                    self.download_pool.append(
+                        MBRecord.new_record(result.json()["records"][0])
+                    )
                     self.print(
                         f"Successfully downloaded file [green]{record_id}[/]. "
                         f"[[red]{self.current_download_size}/{self.download_size}[/]]."
@@ -257,7 +280,7 @@ class MBClient:
             self.print("[red]Failed to get jackpot waveform.[/]")
             return None
 
-        return MBRecord(**result.json())
+        return MBRecord.new_record(result.json())
 
     async def search(self, query: QueryConfig | dict) -> list[MBRecord] | None:
         result = await self.client.post(
@@ -270,7 +293,7 @@ class MBClient:
             self.print("[red]Failed to perform query.[/]")
             return None
 
-        return [MBRecord(**r) for r in result.json()["records"]]
+        return [MBRecord.new_record(r) for r in result.json()["records"]]
 
     async def task_status(self, task_id: str):
         result = await self.client.get(f"/task/status/{task_id}")

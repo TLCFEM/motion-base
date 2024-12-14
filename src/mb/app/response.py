@@ -39,30 +39,30 @@ class MetadataResponse(BaseModel):
     endpoint: str = Field(None)
 
     id: str = Field(...)
-    file_name: str | None = Field(None)
-    category: str | None = Field(None)
-    region: str | None = Field(None)
-    uploaded_by: str | None = Field(None)
+    file_name: str = Field(None)
+    category: str = Field(None)
+    region: str = Field(None)
+    uploaded_by: str = Field(None)
 
-    magnitude: float | None = Field(None)
-    maximum_acceleration: float | None = Field(None)
+    magnitude: float = Field(None)
+    maximum_acceleration: float = Field(None)
 
-    event_time: datetime | None = Field(None)
-    event_location: list[float, float] | None = Field(None)
-    depth: float | None = Field(None)
+    event_time: datetime = Field(None)
+    event_location: list[float] = Field(None)
+    depth: float = Field(None)
 
-    station_code: str | None = Field(None)
-    station_location: list[float, float] | None = Field(None)
-    station_elevation: float | None = Field(None)
-    station_elevation_unit: str | None = Field(None)
-    record_time: datetime | None = Field(None)
-    last_update_time: datetime | None = Field(None)
+    station_code: str = Field(None)
+    station_location: list[float] = Field(None)
+    station_elevation: float = Field(None)
+    station_elevation_unit: str = Field(None)
+    record_time: datetime = Field(None)
+    last_update_time: datetime = Field(None)
 
-    sampling_frequency: float | None = Field(None)
-    sampling_frequency_unit: str | None = Field(None)
-    duration: float | None = Field(None)
-    direction: str | None = Field(None)
-    scale_factor: float | None = Field(None)
+    sampling_frequency: float = Field(None)
+    sampling_frequency_unit: str = Field(None)
+    duration: float = Field(None)
+    direction: str = Field(None)
+    scale_factor: float = Field(None)
 
 
 class RawRecordResponse(MetadataResponse):
@@ -70,9 +70,9 @@ class RawRecordResponse(MetadataResponse):
     Response represents a record which can be either waveform or spectrum.
     """
 
-    raw_data: list[int] | None = Field(None)
-    raw_data_unit: str | None = Field(None)
-    offset: float | None = Field(None)
+    raw_data: list[int] = Field(None)
+    raw_data_unit: str = Field(None)
+    offset: float = Field(None)
 
 
 class RecordResponse(RawRecordResponse):
@@ -80,18 +80,18 @@ class RecordResponse(RawRecordResponse):
     Response represents a record which can be either waveform or spectrum.
     """
 
-    processed_data_unit: str | None = Field(None)
+    processed_data_unit: str = Field(None)
 
-    time_interval: float | None = Field(None)
-    waveform: list[float] | None = Field(None)
+    time_interval: float = Field(None)
+    waveform: list[float] = Field(None)
 
-    frequency_interval: float | None = Field(None)
-    spectrum: list[float] | None = Field(None)
+    frequency_interval: float = Field(None)
+    spectrum: list[float] = Field(None)
 
-    period: list[float] | None = Field(None)
-    displacement_spectrum: list[float] | None = Field(None)
-    velocity_spectrum: list[float] | None = Field(None)
-    acceleration_spectrum: list[float] | None = Field(None)
+    period: list[float] = Field(None)
+    displacement_spectrum: list[float] = Field(None)
+    velocity_spectrum: list[float] = Field(None)
+    acceleration_spectrum: list[float] = Field(None)
 
     @model_validator(mode="before")
     @classmethod
@@ -243,8 +243,8 @@ class ProcessedResponse(RecordResponse):
 
 class UploadResponse(BaseModel):
     message: str
-    task_ids: list | None = Field(None)
-    records: list | None = Field(None)
+    task_ids: list = Field(None)
+    records: list = Field(None)
 
 
 class QueryConfig(BaseModel):
