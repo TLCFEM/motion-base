@@ -187,6 +187,7 @@ async def download_single_random_waveform(normalised: bool = False):
         endpoint="/waveform/jackpot",
         time_interval=interval,
         waveform=record.tolist(),
+        processed_data_unit="cm/s/s",
     )
 
 
@@ -229,6 +230,7 @@ async def download_waveform(record_id: UUID | list[UUID]):
             endpoint="/waveform",
             time_interval=interval,
             waveform=record.tolist(),
+            processed_data_unit="cm/s/s",
         )
 
     return ListRecordResponse(

@@ -164,26 +164,25 @@ class MBClient:
             async with anyio.create_task_group() as tg:
                 for r in record:
                     tg.start_soon(self.download, r)
+        else:
+            record_id: str = record.id if isinstance(record, MBRecord) else record
 
-            return
+            async with self.semaphore:
+                result = await self.client.post("/waveform", json=[str(record_id)])
+                self.current_download_size += 1
+                if result.status_code != HTTPStatus.OK:
+                    self.print(
+                        f"Fail to download file [green]{record_id}[/]. "
+                        f"[[red]{self.current_download_size}/{self.download_size}[/]]."
+                    )
+                else:
+                    self.download_pool.append(MBRecord(**result.json()["records"][0]))
+                    self.print(
+                        f"Successfully downloaded file [green]{record_id}[/]. "
+                        f"[[red]{self.current_download_size}/{self.download_size}[/]]."
+                    )
 
-        record_id: str = record.id if isinstance(record, MBRecord) else record
-
-        async with self.semaphore:
-            result = await self.client.post("/waveform", json=[str(record_id)])
-            self.current_download_size += 1
-            if result.status_code != HTTPStatus.OK:
-                self.print(
-                    f"Fail to download file [green]{record_id}[/]. "
-                    f"[[red]{self.current_download_size}/{self.download_size}[/]]."
-                )
-                return
-
-            self.download_pool.append(MBRecord(**result.json()["records"][0]))
-            self.print(
-                f"Successfully downloaded file [green]{record_id}[/]. "
-                f"[[red]{self.current_download_size}/{self.download_size}[/]]."
-            )
+        return self
 
     async def upload(
         self,
@@ -259,7 +258,9 @@ class MBClient:
     async def search(self, query: QueryConfig | dict) -> list[MBRecord] | None:
         result = await self.client.post(
             "/query",
-            json=query.model_dump() if isinstance(query, QueryConfig) else query,
+            json=query.model_dump(exclude_none=True)
+            if isinstance(query, QueryConfig)
+            else query,
         )
         if result.status_code != HTTPStatus.OK:
             self.print("[red]Failed to perform query.[/]")
@@ -289,11 +290,10 @@ class MBClient:
 
 
 async def main():
-    async with MBClient("http://localhost:8000", "test", "password") as client:
+    async with MBClient("http://170.64.176.26:8000") as client:
         results = await client.search(QueryConfig())
-        await client.download(results)
         fig: Figure = None  # type: ignore
-        for result in client:
+        for result in await client.download(results):
             fig = result.plot_spectrum(fig)
         fig.legend()
         fig.tight_layout()

@@ -102,12 +102,11 @@ class RecordResponse(RawRecordResponse):
         return values
 
     def filter(self, window, up_ratio: int = 1):
-        new_waveform: np.ndarray = apply_filter(
-            window * up_ratio, zero_stuff(up_ratio, self.waveform)
-        )
         self.time_interval /= up_ratio
         # noinspection PyTypeChecker
-        self.waveform = new_waveform.tolist()
+        self.waveform = apply_filter(
+            window * up_ratio, zero_stuff(up_ratio, self.waveform)
+        ).tolist()
 
     def to_spectrum(self):
         if self.time_interval is None or self.waveform is None:

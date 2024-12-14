@@ -33,7 +33,10 @@ def process_record_local(result: Record, process_config: ProcessConfig):
         )
 
     record = ProcessedResponse(
-        **result.model_dump(), endpoint="/process", process_config=process_config
+        **result.model_dump(),
+        endpoint="/process",
+        process_config=process_config,
+        processed_data_unit="cm/s/s",
     )
 
     time_interval, waveform = result.to_waveform(
