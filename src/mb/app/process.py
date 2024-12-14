@@ -33,7 +33,7 @@ def process_record_local(result: Record, process_config: ProcessConfig):
         )
 
     record = ProcessedResponse(
-        **result.model_dump(),
+        **result.model_dump(exclude_none=True),
         endpoint="/process",
         process_config=process_config,
         processed_data_unit="cm/s/s",

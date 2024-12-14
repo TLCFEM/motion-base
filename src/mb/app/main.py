@@ -170,7 +170,9 @@ async def download_single_random_raw_record():
     Retrieve a single random record from the database.
     """
     result: Record = await get_random_record()
-    return RawRecordResponse(**result.model_dump(), endpoint="/raw/jackpot")
+    return RawRecordResponse(
+        **result.model_dump(exclude_none=True), endpoint="/raw/jackpot"
+    )
 
 
 @app.get("/waveform/jackpot", response_model=RecordResponse)
@@ -183,7 +185,7 @@ async def download_single_random_waveform(normalised: bool = False):
     interval, record = result.to_waveform(normalised=normalised, unit="cm/s/s")
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.model_dump(),
+        **result.model_dump(exclude_none=True),
         endpoint="/waveform/jackpot",
         time_interval=interval,
         waveform=record.tolist(),
@@ -201,7 +203,7 @@ async def download_single_random_spectrum():
     frequency, record = result.to_spectrum()
     # noinspection PyTypeChecker
     return RecordResponse(
-        **result.model_dump(),
+        **result.model_dump(exclude_none=True),
         endpoint="/spectrum/jackpot",
         frequency_interval=frequency,
         spectrum=record.tolist(),
@@ -226,7 +228,7 @@ async def download_waveform(record_id: UUID | list[UUID]):
     def _populate_waveform(result: Record):
         interval, record = result.to_waveform(unit="cm/s/s")
         return RecordResponse(
-            **result.model_dump(),
+            **result.model_dump(exclude_none=True),
             endpoint="/waveform",
             time_interval=interval,
             waveform=record.tolist(),
@@ -260,7 +262,10 @@ async def query_records(query: QueryConfig = QueryConfig(), count_total: bool = 
     )
 
     response: ListMetadataResponse = ListMetadataResponse(
-        records=[MetadataResponse(**(x.model_dump())) for x in await result.to_list()],
+        records=[
+            MetadataResponse(**(x.model_dump(exclude_none=True)))
+            for x in await result.to_list()
+        ],
         pagination=PaginationResponse(total=record_count, **pagination.model_dump()),
     )
     for item in response.records:
