@@ -95,11 +95,22 @@ class RecordResponse(RawRecordResponse):
 
     @model_validator(mode="before")
     @classmethod
-    def normalise(cls, values):
+    def default_unit(cls, values):
         if values.get("processed_data_unit", None):
             values["processed_data_unit"] = values["raw_data_unit"]
 
         return values
+
+    def normalise(self):
+        if self.waveform is None:
+            raise RuntimeError("Cannot normalise the waveform.")
+
+        wave_array = np.array(self.waveform)
+        self.waveform = (wave_array / np.max(np.abs(wave_array))).tolist()
+
+        self.processed_data_unit = "1"
+
+        return self
 
     def filter(self, window, up_ratio: int = 1):
         self.time_interval /= up_ratio
@@ -107,6 +118,8 @@ class RecordResponse(RawRecordResponse):
         self.waveform = apply_filter(
             window * up_ratio, zero_stuff(up_ratio, self.waveform)
         ).tolist()
+
+        return self
 
     def to_spectrum(self):
         if self.time_interval is None or self.waveform is None:

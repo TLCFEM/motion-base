@@ -29,7 +29,7 @@ from matplotlib.figure import Figure
 from rich.console import Console
 from rich.progress import track
 
-from mb.app.response import QueryConfig, RecordResponse
+from mb.app.response import QueryConfig, RecordResponse, PaginationConfig
 
 
 class MBRecord(RecordResponse):
@@ -37,7 +37,7 @@ class MBRecord(RecordResponse):
         if fig is None:
             fig = plt.figure()
             gca = fig.add_subplot(111)
-            gca.set_xlabel("Frequency (Hz)")
+            gca.set_xlabel("Time (s)")
             gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
         else:
             gca = fig.gca()
@@ -290,14 +290,16 @@ class MBClient:
 
 
 async def main():
-    async with MBClient("http://170.64.176.26:8000") as client:
-        results = await client.search(QueryConfig())
+    async with MBClient("http://170.64.176.26:8000", timeout=100) as client:
+        results = await client.search(
+            QueryConfig(pagination=PaginationConfig(page_size=100))
+        )
         fig: Figure = None  # type: ignore
         for result in await client.download(results):
-            fig = result.plot_spectrum(fig)
-        fig.legend()
+            fig = result.normalise().plot_waveform(fig)
+        # fig.legend()
         fig.tight_layout()
-        fig.savefig("spectrum.png")
+        fig.savefig("waveform.png")
 
 
 if __name__ == "__main__":
