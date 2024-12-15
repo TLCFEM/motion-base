@@ -9,7 +9,7 @@ FROM oven/bun:alpine
 
 COPY --from=build /mb/gui/dist /mb/gui/dist
 
-RUN for file in /mb/gui/dist/*.js; do sed -i "s#src/assets/client#./assets/client#g" "$file"; done
+RUN for file in /mb/gui/dist/assets/*.js; do sed -i "s#src/assets/client#./assets/client#g" "$file"; done
 
 COPY gui/src/assets/client.md /mb/gui/dist/assets/client.md
 COPY gui/src/assets/client_files /mb/gui/dist/assets/client_files
