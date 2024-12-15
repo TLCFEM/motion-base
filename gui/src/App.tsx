@@ -24,8 +24,9 @@ import "tippy.js/animations/scale.css";
 import { get_total_api } from "./API";
 import Process from "./Process";
 import ServerModal from "./Server";
+import { marked } from "marked"; 
 
-const [mode, setMode] = createSignal<"jackpot" | "query" | "process">("jackpot");
+const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting">("jackpot");
 const [total] = createResource<number>(get_total_api);
 
 const App: Component = () => {
@@ -42,6 +43,11 @@ const App: Component = () => {
         });
         tippy(`#btn-process`, {
             content: "Apply further processing to records.",
+            animation: "scale",
+            theme: "translucent"
+        });
+        tippy(`#btn-scripting`, {
+            content: "Guides to programmatic usage.",
             animation: "scale",
             theme: "translucent"
         });
@@ -74,6 +80,9 @@ const App: Component = () => {
                     <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
                         Process
                     </Button>
+                    <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
+                        Scripting
+                    </Button>
                     <AboutModal />
                     <ServerModal />
                 </Toolbar>
@@ -89,10 +98,27 @@ const App: Component = () => {
                     <Match when={mode() === "process"}>
                         <Process sx={{ border: "1px solid darkgrey" }} />
                     </Match>
+                    <Match when={mode() === "scripting"}>
+                        <Guide />
+                    </Match>
                 </Switch>
             </Box>
         </Stack>
     );
 };
+
+const Guide = () => {
+    const [html, setHtml] = createSignal<string>("");
+
+    onMount(async () => {
+        const response = await fetch("/src/assets/client.md");
+
+        marked.use({ async: true });
+
+        setHtml(await marked.parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")));
+    });
+
+    return <div innerHTML={html()} />;
+}
 
 export default App;
