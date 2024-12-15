@@ -2,16 +2,16 @@
 #    uv pip compile --refresh --annotation-style=line --output-file=requirements.txt pyproject.toml
 aiohappyeyeballs==2.4.4   # via aiohttp
 aiohttp==3.11.10          # via elasticsearch
-aiosignal==1.3.1          # via aiohttp
+aiosignal==1.3.2          # via aiohttp
 amqp==5.3.1               # via kombu
 annotated-types==0.7.0    # via pydantic
 anyio==4.7.0              # via httpx, starlette
 attrs==24.2.0             # via aiohttp
 bcrypt==4.2.1             # via motion-base (pyproject.toml)
-beanie==1.27.0            # via motion-base (pyproject.toml)
+beanie==1.28.0            # via motion-base (pyproject.toml)
 billiard==4.2.1           # via celery
 celery==5.4.0             # via motion-base (pyproject.toml)
-certifi==2024.8.30        # via elastic-transport, httpcore, httpx, requests
+certifi==2024.12.14       # via elastic-transport, httpcore, httpx, requests
 cffi==1.17.1              # via cryptography
 charset-normalizer==3.4.0  # via requests
 click==8.1.7              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
@@ -61,7 +61,7 @@ toml==0.10.2              # via beanie
 typing-extensions==4.12.2  # via anyio, beanie, fastapi-slim, flexcache, flexparser, pint, pydantic, pydantic-core
 tzdata==2024.2            # via celery, kombu
 urllib3==2.2.3            # via elastic-transport, requests
-uvicorn==0.32.1           # via motion-base (pyproject.toml)
+uvicorn==0.33.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
 yarl==1.18.3              # via aiohttp
