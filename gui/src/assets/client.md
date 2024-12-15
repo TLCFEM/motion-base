@@ -183,7 +183,7 @@ async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=10) as cl
     await client.download(results[0].id)
     for r in client:
         example_record = r
-        pprint(r,max_length=10)
+        pprint(r, max_length=10)
 ```
 
 
