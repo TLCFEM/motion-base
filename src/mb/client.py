@@ -26,7 +26,6 @@ import matplotlib.pyplot as plt
 import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
 from matplotlib.figure import Figure
-import pint
 from rich.console import Console
 from rich.progress import track
 
@@ -40,7 +39,7 @@ class MBRecord(RecordResponse):
 
     def plot_waveform(self, fig: Figure | None = None):
         if fig is None:
-            fig = plt.figure()
+            fig = plt.figure(figsize=(10,6), dpi=100)
             gca = fig.add_subplot(111)
             gca.set_xlabel("Time (s)")
             gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
@@ -52,6 +51,7 @@ class MBRecord(RecordResponse):
         )
         gca.plot(x_axis, self.waveform, label=self.id)
 
+        fig.tight_layout()
         return fig
 
     def plot_spectrum(self, fig: Figure | None = None):
@@ -59,7 +59,7 @@ class MBRecord(RecordResponse):
             self.to_spectrum()
 
         if fig is None:
-            fig = plt.figure()
+            fig = plt.figure(figsize=(10,6), dpi=100)
             gca = fig.add_subplot(111)
             gca.set_xlabel("Frequency (Hz)")
             gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
@@ -71,6 +71,7 @@ class MBRecord(RecordResponse):
         )
         gca.plot(x_axis, self.spectrum, label=self.id)
 
+        fig.tight_layout()
         return fig
 
     def plot_response_spectrum(
@@ -86,7 +87,7 @@ class MBRecord(RecordResponse):
         ):
             self.to_response_spectrum(damping_ratio, period_bracket)
 
-        fig = plt.figure()
+        fig = plt.figure(figsize=(10,6), dpi=100)
         fig.add_subplot(311)
         plt.title(f"{self.id}")
         plt.plot(self.period, self.displacement_spectrum)

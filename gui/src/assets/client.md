@@ -107,7 +107,8 @@ It returns a `matplotlib` figure object.
 
 
 ```python
-example_record.plot_waveform().show()
+example_record.plot_waveform()
+pass
 ```
 
 
@@ -120,7 +121,8 @@ To plot frequency spectrum, one can call the `plot_spectrum` method.
 
 
 ```python
-example_record.plot_spectrum().show()
+example_record.plot_spectrum()
+pass
 ```
 
 
@@ -133,7 +135,8 @@ To plot response spectra, one can call the `plot_response_spectrum` method.
 
 
 ```python
-example_record.plot_response_spectrum().show()
+example_record.plot_response_spectrum()
+pass
 
 ```
 
