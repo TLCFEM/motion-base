@@ -112,13 +112,14 @@ const Guide = () => {
 
     onMount(async () => {
         const response = await fetch("/src/assets/client.md");
+        const content = await marked.parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/"));
 
         marked.use({ async: true });
 
-        setHtml(await marked.parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")));
+        setHtml(content);
     });
 
-    return <div innerHTML={html()} />;
+    return <div id="md-content" style={{width:"100%"}} innerHTML={html()} />;
 }
 
 export default App;

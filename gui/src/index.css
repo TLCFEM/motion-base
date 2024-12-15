@@ -12,3 +12,13 @@ code {
     font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
     monospace;
 }
+
+pre {
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+    word-break: break-word;
+    background-color: #d5d5d5;
+    padding: 1rem;
+    border-radius: 8px;
+}
