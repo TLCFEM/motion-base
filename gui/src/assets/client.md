@@ -5,6 +5,17 @@ But it is not convenient for programmatic usage.
 
 A Python client is also provided to interact with the server.
 
+Currently, the package is not published to PyPI.
+To use the client, one shall clone the repository and install the package locally.
+
+```bash
+git clone https://github.com/TLCFEM/motion-base.git
+cd motion-base
+pip install .[client]
+```
+
+Then one can import the client and start using it.
+
 ## Creation
 
 The client is designed in an asynchronous way, using the `aiohttp` library.
