@@ -55,8 +55,7 @@ class MBRecord(RecordResponse):
         return fig
 
     def plot_spectrum(self, fig: Figure | None = None):
-        if self.frequency_interval is None or self.spectrum is None:
-            self.to_spectrum()
+        self.to_spectrum()
 
         if fig is None:
             fig = plt.figure(figsize=(10,6), dpi=100)
@@ -79,13 +78,7 @@ class MBRecord(RecordResponse):
         damping_ratio: float = 0.05,
         period_bracket: np.ndarray = np.arange(0, 10, 0.01),
     ):
-        if None in (
-            self.period,
-            self.displacement_spectrum,
-            self.velocity_spectrum,
-            self.acceleration_spectrum,
-        ):
-            self.to_response_spectrum(damping_ratio, period_bracket)
+        self.to_response_spectrum(damping_ratio, period_bracket)
 
         fig = plt.figure(figsize=(10,6), dpi=100)
         fig.add_subplot(311)

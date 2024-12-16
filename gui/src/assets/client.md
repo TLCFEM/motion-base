@@ -136,7 +136,10 @@ The download method accepts a record ID as found in the metadata.
 
 
 ```python
-example_record = None
+from mb.client import MBRecord
+
+
+example_record: MBRecord
 async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=10) as client:
     await client.download(results[0].id)
     for r in client:
@@ -243,3 +246,52 @@ pass
 
 Since only waveform is retrieved from the server, all necessary processing is done locally on the client side.
 It means one can also apply custom processing to the waveform data.
+
+For example, one can customise the computation of response spectra by providing a damping ratio and a list of periods.
+
+
+```python
+import numpy as np
+
+
+example_record.plot_response_spectrum(0.1, np.arange(0, 2, 0.01))
+pass
+```
+
+
+    
+![png](client_files/client_15_0.png)
+    
+
+
+It shall be pointed out that, the frequency spectrum and response spectra are computed from the current waveform data.
+The waveform data can be modified by applying filters or other processing.
+
+For example, one can normalise the record to have a unit amplitude.
+
+
+```python
+example_record.normalise()
+example_record.plot_waveform()
+example_record.plot_spectrum()
+example_record.plot_response_spectrum(0.1, np.arange(0, 2, 0.01))
+pass
+```
+
+
+    
+![png](client_files/client_17_0.png)
+    
+
+
+
+    
+![png](client_files/client_17_1.png)
+    
+
+
+
+    
+![png](client_files/client_17_2.png)
+    
+
