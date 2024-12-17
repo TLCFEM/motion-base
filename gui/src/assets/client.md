@@ -32,11 +32,17 @@ async with MBClient('http://localhost:8000', timeout=20, semaphore=10) as client
     ...
 ```
 
+Here we use the [demo](http://170.64.176.26) server for demonstration.
+Please note that this server is only for demonstration purposes and the performance is expected to be poor.
+Thus, it is not recommended to use it for massive data processing.
+
 
 ```python
 from rich.pretty import pprint
 
 from mb.client import MBClient
+
+server_url = "http://170.64.176.26:8000"
 ```
 
 
@@ -51,7 +57,7 @@ For example, to search for 100 records with PGA no less than 200 Gal, one can do
 ```python
 from mb.app.response import PaginationConfig, QueryConfig
 
-async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=10) as client:
+async with MBClient(server_url, timeout=20, semaphore=10) as client:
     results = await client.search(
         QueryConfig(min_pga=200, pagination=PaginationConfig(page_size=100))
     )
@@ -115,7 +121,7 @@ The actual amount of records returned may be less than the specified amount, if 
 
 
 ```python
-async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=10) as client:
+async with MBClient(server_url, timeout=20, semaphore=10) as client:
     results = await client.search(
         QueryConfig(
             min_pga=300, min_magnitude=7, pagination=PaginationConfig(page_size=800)
@@ -140,7 +146,7 @@ from mb.client import MBRecord
 
 
 example_record: MBRecord
-async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=10) as client:
+async with MBClient(server_url, timeout=20, semaphore=10) as client:
     await client.download(results[0].id)
     for r in client:
         example_record = r
@@ -203,7 +209,7 @@ The downloaded records are stored in the client object.
 
 
 ```python
-async with MBClient("http://170.64.176.26:8000", timeout=20, semaphore=2) as client:
+async with MBClient(server_url, timeout=20, semaphore=2) as client:
     page: int = 0
     while results := await client.search(
         QueryConfig(
@@ -225,19 +231,19 @@ pprint(f"Downloaded {len(client)} records with {page} pages.")
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">37c59a4f-26b2-5ac0-b831-fe89d0d7d1f3</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">2</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">768ee435-fccc-55ae-877e-36adbba217a6</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">2</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">36811a3f-4510-5417-9b28-ea056e55e7aa</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">3</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">37c59a4f-26b2-5ac0-b831-fe89d0d7d1f3</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">3</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">768ee435-fccc-55ae-877e-36adbba217a6</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">4</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">36811a3f-4510-5417-9b28-ea056e55e7aa</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">4</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
@@ -249,13 +255,13 @@ pprint(f"Downloaded {len(client)} records with {page} pages.")
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">b851c73f-3124-5df7-ae25-e23b17b7defa</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">6</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">119ccd74-d185-515d-b9d9-92eae86e6d2c</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">6</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">119ccd74-d185-515d-b9d9-92eae86e6d2c</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">7</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">b851c73f-3124-5df7-ae25-e23b17b7defa</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">7</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
@@ -267,13 +273,13 @@ pprint(f"Downloaded {len(client)} records with {page} pages.")
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">5280dad2-b80e-57de-a0e9-2243209fbf2d</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">9</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">b27d7ed6-47ee-52d4-83c6-a2f0651b8d37</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">9</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
 
 
-<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">b27d7ed6-47ee-52d4-83c6-a2f0651b8d37</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">10</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
+<pre style="white-space:pre;overflow-x:auto;line-height:normal;font-family:Menlo,'DejaVu Sans Mono',consolas,'Courier New',monospace">Successfully downloaded file <span style="color: #008000; text-decoration-color: #008000">5280dad2-b80e-57de-a0e9-2243209fbf2d</span>. <span style="font-weight: bold">[</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">10</span><span style="color: #800000; text-decoration-color: #800000">/</span><span style="color: #800000; text-decoration-color: #800000; font-weight: bold">20</span><span style="font-weight: bold">]</span>.
 </pre>
 
 
@@ -453,7 +459,7 @@ pass
 
 
     
-![png](client_files/client_11_0.png)
+![png](client_files/client_12_0.png)
     
 
 
@@ -467,7 +473,7 @@ pass
 
 
     
-![png](client_files/client_13_0.png)
+![png](client_files/client_14_0.png)
     
 
 
@@ -482,7 +488,7 @@ pass
 
 
     
-![png](client_files/client_15_0.png)
+![png](client_files/client_16_0.png)
     
 
 
@@ -502,7 +508,7 @@ pass
 
 
     
-![png](client_files/client_17_0.png)
+![png](client_files/client_18_0.png)
     
 
 
@@ -522,18 +528,18 @@ pass
 
 
     
-![png](client_files/client_19_0.png)
+![png](client_files/client_20_0.png)
     
 
 
 
     
-![png](client_files/client_19_1.png)
+![png](client_files/client_20_1.png)
     
 
 
 
     
-![png](client_files/client_19_2.png)
+![png](client_files/client_20_2.png)
     
 
