@@ -167,6 +167,14 @@ class MBClient:
     def __iter__(self):
         return self.download_pool.__iter__()
 
+    def __len__(self):
+        return self.download_pool.__len__()
+
+    def clear(self):
+        self.download_pool.clear()
+        self.download_size = 0
+        self.current_download_size = 0
+
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
 
@@ -175,9 +183,7 @@ class MBClient:
         record: str | uuid.UUID | list[str | uuid.UUID] | MBRecord | list[MBRecord],
     ):
         if isinstance(record, list):
-            self.download_pool = []
-            self.download_size = len(record)
-            self.current_download_size = 0
+            self.download_size += len(record)
             async with anyio.create_task_group() as tg:
                 for r in record:
                     tg.start_soon(self.download, r)
