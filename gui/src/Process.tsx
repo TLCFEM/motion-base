@@ -425,7 +425,7 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <ButtonGroup variant="contained" orientation="horizontal">
-                        <Button size="small" onClick={process} id="btn-process" disabled={loading()}>
+                        <Button size="small" onClick={process} id="btn-process" disabled={loading() || !currentRecord()}>
                             Process
                         </Button>
                         <Button size="small" onClick={clear} id="btn-reset" disabled={loading()}>
