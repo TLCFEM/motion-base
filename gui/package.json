@@ -28,7 +28,7 @@
     "leaflet": "^1.9.4",
     "marked": "^15.0.6",
     "marked-highlight": "^2.2.1",
-    "plotly.js-dist-min": "^2.35.3",
+    "plotly.js-dist-min": "^3.0.0",
     "solid-js": "^1.9.4",
     "tippy.js": "^6.3.7"
   },
