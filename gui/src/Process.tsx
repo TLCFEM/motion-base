@@ -36,7 +36,7 @@ import {
     TextField
 } from "@suid/material";
 import { createDownloadLink, ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
-import Plotly from "plotly.js-dist-min";
+import Plotly from "plotly.js-basic-dist-min";
 
 const [processed, setProcessed] = createSignal<ProcessResponse>({} as ProcessResponse);
 const [error, setError] = createSignal("");

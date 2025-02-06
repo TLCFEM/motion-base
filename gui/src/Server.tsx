@@ -18,7 +18,7 @@ import useTheme from "@suid/material/styles/useTheme";
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import axios from "axios";
 import { AggregationItem, get_stats } from "./API";
-import Plotly from "plotly.js-dist-min";
+import Plotly from "plotly.js-basic-dist-min";
 
 interface HistogramProps {
     id: string;
@@ -118,7 +118,7 @@ export default function ServerModal() {
                             setLoading(false);
                         }} disabled={loading()} id="btn-change">Change</Button>
                         <Button variant="contained" size="small" onClick={() => setOpen(false)} disabled={loading()}
-                                id="btn-cancel">
+                            id="btn-cancel">
                             Cancel
                         </Button>
                     </Stack>
