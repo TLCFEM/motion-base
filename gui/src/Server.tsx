@@ -18,8 +18,7 @@ import useTheme from "@suid/material/styles/useTheme";
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import axios from "axios";
 import { AggregationItem, get_stats } from "./API";
-
-const Plotly = await import("plotly.js-basic-dist-min");
+import Plotly from "plotly.js-dist-min";
 
 interface HistogramProps {
     id: string;
