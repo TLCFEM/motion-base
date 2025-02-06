@@ -29,10 +29,11 @@ import {
 import ShuffleOnIcon from "@suid/icons-material/ShuffleOn";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
-import Plotly from "plotly.js-dist-min";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
+
+const Plotly = await import("plotly.js-basic-dist-min");
 
 const [data, { refetch }] = createResource(jackpot_waveform_api);
 
