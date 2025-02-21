@@ -13,17 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import asyncio
-import random
 import time
 
 from elasticsearch import AsyncElasticsearch, Elasticsearch
 
 from mb.utility.env import ELASTIC_HOST
 
-async_client: AsyncElasticsearch = None  # type: ignore
-sync_client: Elasticsearch = None  # type: ignore
-
+async_client: AsyncElasticsearch | None = None
+sync_client: Elasticsearch | None = None
 
 delay: int = 5
 
@@ -65,7 +65,6 @@ async def async_elastic():
     counter: int = 0
     while True:
         if await async_client.ping():
-            await asyncio.sleep(random.random() * 4 + 1)
             break
         else:
             counter += delay
@@ -91,7 +90,6 @@ def sync_elastic():
     counter: int = 0
     while True:
         if sync_client.ping():
-            time.sleep(random.random() * 4 + 1)
             break
         else:
             counter += delay
