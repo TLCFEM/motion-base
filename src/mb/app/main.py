@@ -22,8 +22,10 @@ from uuid import UUID
 
 from beanie.operators import In
 from fastapi import Body, Depends, FastAPI, HTTPException
-from fastapi.responses import RedirectResponse, FileResponse
+from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
+from pyinstrument import Profiler
 from starlette.middleware import Middleware
+from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
@@ -67,6 +69,16 @@ async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argum
     await client.close()
 
 
+async def profile_request(request, call_next):
+    if not request.query_params.get("__profile__", False):
+        return await call_next(request)
+
+    with Profiler(async_mode="enabled") as profiler:
+        await call_next(request)
+
+    return HTMLResponse(profiler.output_html())
+
+
 app = FastAPI(
     docs_url="/docs",
     title="Strong Motion Database",
@@ -79,6 +91,7 @@ app = FastAPI(
         Middleware(
             CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST", "DELETE"]
         ),
+        Middleware(BaseHTTPMiddleware, dispatch=profile_request),
     ],
 )
 app.include_router(jp_router, prefix="/jp")
