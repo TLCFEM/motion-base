@@ -10,13 +10,13 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.16",
-    "@types/node": "^22.13.4",
+    "@types/node": "^22.13.5",
     "@types/plotly.js-basic-dist-min": "^2.12.4",
     "prettier": "^3.5.1",
     "solid-devtools": "^0.33.0",
     "typescript": "^5.7.3",
     "vite": "^5.4.14",
-    "vite-plugin-solid": "^2.11.1"
+    "vite-plugin-solid": "^2.11.2"
   },
   "dependencies": {
     "@suid/icons-material": "^0.8.1",
@@ -28,8 +28,8 @@
     "leaflet": "^1.9.4",
     "marked": "^15.0.7",
     "marked-highlight": "^2.2.1",
-    "plotly.js-basic-dist-min": "^3.0.0",
-    "solid-js": "^1.9.4",
+    "plotly.js-basic-dist-min": "^3.0.1",
+    "solid-js": "^1.9.5",
     "tippy.js": "^6.3.7"
   },
   "volta": {
