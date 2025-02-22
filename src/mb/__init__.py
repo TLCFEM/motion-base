@@ -33,10 +33,10 @@ class Config(BaseModel):
 
 def run_app(setting: Config):
     if setting.celery:
-        from mb.celery import celery
-
-        from mb.utility.config import init_mongo
         import asyncio
+
+        from mb.celery import celery
+        from mb.utility.config import init_mongo
 
         args: list = ["worker"]
         args.extend(setting.celery_config)
@@ -48,7 +48,10 @@ def run_app(setting: Config):
         asyncio.run(init_mongo())
         celery.start(args)
     else:
-        from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT  # pylint: disable=import-outside-toplevel
+        from mb.utility.env import (  # pylint: disable=import-outside-toplevel
+            MB_FASTAPI_WORKERS,
+            MB_PORT,
+        )
 
         config: dict = {}
 

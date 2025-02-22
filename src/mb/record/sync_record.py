@@ -17,12 +17,12 @@ from datetime import datetime
 import pint
 import structlog
 from mongoengine import (
-    Document,
-    StringField,
-    FloatField,
     DateTimeField,
-    ListField,
+    Document,
+    FloatField,
     IntField,
+    ListField,
+    StringField,
 )
 
 from .utility import str_factory, uuid5_str

@@ -17,8 +17,8 @@ from __future__ import annotations
 
 import os.path
 import uuid
+from collections.abc import Generator
 from http import HTTPStatus
-from typing import Generator
 
 import anyio
 import httpx
@@ -29,7 +29,7 @@ from matplotlib.figure import Figure
 from rich.console import Console
 from rich.progress import track
 
-from mb.app.response import QueryConfig, RecordResponse, PaginationConfig
+from mb.app.response import PaginationConfig, QueryConfig, RecordResponse
 
 
 class MBRecord(RecordResponse):
@@ -39,7 +39,7 @@ class MBRecord(RecordResponse):
 
     def plot_waveform(self, fig: Figure | None = None):
         if fig is None:
-            fig = plt.figure(figsize=(10,6), dpi=100)
+            fig = plt.figure(figsize=(10, 6), dpi=100)
             gca = fig.add_subplot(111)
             gca.set_xlabel("Time (s)")
             gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
@@ -58,7 +58,7 @@ class MBRecord(RecordResponse):
         self.to_spectrum()
 
         if fig is None:
-            fig = plt.figure(figsize=(10,6), dpi=100)
+            fig = plt.figure(figsize=(10, 6), dpi=100)
             gca = fig.add_subplot(111)
             gca.set_xlabel("Frequency (Hz)")
             gca.set_ylabel(f"Acceleration Magnitude ({self.processed_data_unit})")
@@ -80,7 +80,7 @@ class MBRecord(RecordResponse):
     ):
         self.to_response_spectrum(damping_ratio, period_bracket)
 
-        fig = plt.figure(figsize=(10,6), dpi=100)
+        fig = plt.figure(figsize=(10, 6), dpi=100)
         fig.add_subplot(311)
         plt.title(f"{self.id}")
         plt.plot(self.period, self.displacement_spectrum)
@@ -229,10 +229,7 @@ class MBClient:
             if file_name.endswith((".tar.gz", ".zip")):
                 return True
 
-            if "v1a" in file_name or "v2a" in file_name:
-                return True
-
-            return False
+            return "v1a" in file_name or "v2a" in file_name
 
         if os.path.isdir(path):
             file_list: list[str] = []

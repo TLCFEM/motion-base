@@ -15,11 +15,11 @@
 
 from http import HTTPStatus
 
-from fastapi import Depends, HTTPException, APIRouter
+from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.response import Token, UserResponse
-from mb.app.utility import authenticate_user, create_token, UserForm, User, is_active
+from mb.app.utility import User, UserForm, authenticate_user, create_token, is_active
 
 router = APIRouter(tags=["account"])
 

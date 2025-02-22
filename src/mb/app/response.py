@@ -21,7 +21,7 @@ import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..record.response_spectrum import response_spectrum
-from ..record.utility import filter_regex, window_regex, apply_filter, zero_stuff
+from ..record.utility import apply_filter, filter_regex, window_regex, zero_stuff
 
 
 class MetadataResponse(BaseModel):

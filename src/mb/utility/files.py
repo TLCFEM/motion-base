@@ -66,7 +66,7 @@ def store(upload: UploadFile) -> str:
 
 def pack(uploads: list[UploadFile]):
     local_path, fs_path = _local_path(
-        f'{uuid5_str("".join(upload.filename for upload in uploads))}.tar.gz'
+        f"{uuid5_str(''.join(upload.filename for upload in uploads))}.tar.gz"
     )
 
     with tarfile.open(local_path, "w:gz") as archive:

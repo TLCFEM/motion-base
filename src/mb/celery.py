@@ -15,7 +15,7 @@
 
 from celery import Celery
 
-from mb.utility.config import rabbitmq_uri, mongo_uri
+from mb.utility.config import mongo_uri, rabbitmq_uri
 
 celery = Celery(
     "mb",

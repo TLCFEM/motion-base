@@ -17,19 +17,19 @@ from beanie import init_beanie
 from mongoengine import connect, disconnect
 from motor.motor_asyncio import AsyncIOMotorClient
 
+from ..app.utility import User
+from ..record.async_record import Record, UploadTask
 from .env import (
     MONGO_DB_NAME,
     MONGO_HOST,
+    MONGO_PASSWORD,
     MONGO_PORT,
     MONGO_USERNAME,
-    MONGO_PASSWORD,
     RABBITMQ_HOST,
+    RABBITMQ_PASSWORD,
     RABBITMQ_PORT,
     RABBITMQ_USERNAME,
-    RABBITMQ_PASSWORD,
 )
-from ..app.utility import User
-from ..record.async_record import Record, UploadTask
 
 
 def rabbitmq_uri():

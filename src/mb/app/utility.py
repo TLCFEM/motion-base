@@ -25,7 +25,7 @@ from fastapi import Depends, HTTPException
 from fastapi.security import OAuth2PasswordBearer
 from joserfc import jwt
 from joserfc.jwk import OctKey
-from pydantic import BaseModel, Field, EmailStr
+from pydantic import BaseModel, EmailStr, Field
 
 from mb.app.response import Token
 from mb.record.utility import uuid5_str

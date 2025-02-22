@@ -21,7 +21,7 @@ import tarfile
 import zipfile
 from datetime import datetime
 from math import ceil
-from typing import BinaryIO, IO
+from typing import IO, BinaryIO
 from zoneinfo import ZoneInfo  # noqa
 
 import pint
@@ -102,7 +102,7 @@ class ParserNIED(BaseParserNIED):
     @staticmethod
     def parse_file(file_path: str | IO[bytes], overwrite_existing: bool = True) -> NIED:
         if isinstance(file_path, str):
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
 
             lines = [line.strip() for line in lines]
@@ -258,7 +258,7 @@ class ParserNZSM(BaseParserNZSM):
         overwrite_existing: bool = True,
     ) -> list[NZSM]:
         if isinstance(file_path, str):
-            with open(file_path, "r", encoding="utf-8") as f:
+            with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
         else:
             if file_name is None:

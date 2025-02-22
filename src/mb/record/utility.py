@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from enum import Enum
-from uuid import uuid4, NAMESPACE_OID, uuid5
+from uuid import NAMESPACE_OID, uuid4, uuid5
 
 import numpy as np
 import pint

@@ -22,7 +22,7 @@ import pint
 from beanie import Document, Indexed
 from pydantic import Field
 
-from .utility import normalise, convert_to, perform_fft, str_factory
+from .utility import convert_to, normalise, perform_fft, str_factory
 
 ASCENDING = 1
 DESCENDING = -1
@@ -118,7 +118,7 @@ class Record(MetadataRecord):
             unit = None
         else:
             numpy_array *= self.scale_factor
-            unit = kwargs.get("unit", None)
+            unit = kwargs.get("unit")
 
         return sampling_interval, convert_to(
             pint.Quantity(numpy_array, self.raw_data_unit), unit

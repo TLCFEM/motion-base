@@ -22,30 +22,34 @@ from uuid import UUID
 
 from beanie.operators import In
 from fastapi import Body, Depends, FastAPI, HTTPException
-from fastapi.responses import RedirectResponse, FileResponse, HTMLResponse
+from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pyinstrument import Profiler
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
+from ..record.async_record import MetadataRecord, Record, UploadTask
+from ..utility.config import init_mongo, shutdown_mongo
+from ..utility.elastic import async_elastic
+from ..utility.env import MB_FS_ROOT
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import process_record_local
 from .response import (
-    ProcessConfig,
-    ListMetadataResponse,
-    QueryConfig,
-    ProcessedResponse,
-    RecordResponse,
-    RawRecordResponse,
-    PaginationResponse,
-    UploadTasksResponse,
-    UploadTaskResponse,
-    ListRecordResponse,
-    TotalResponse,
-    MetadataResponse,
     BulkRequest,
+    ListMetadataResponse,
+    ListRecordResponse,
+    MetadataResponse,
+    PaginationResponse,
+    ProcessConfig,
+    ProcessedResponse,
+    QueryConfig,
+    RawRecordResponse,
+    RecordResponse,
+    TotalResponse,
+    UploadTaskResponse,
+    UploadTasksResponse,
 )
 from .user import router as user_router
 from .utility import (
@@ -53,10 +57,6 @@ from .utility import (
     create_superuser,
     is_active,
 )
-from ..record.async_record import Record, MetadataRecord, UploadTask
-from ..utility.config import init_mongo, shutdown_mongo
-from ..utility.elastic import async_elastic
-from ..utility.env import MB_FS_ROOT
 
 
 @asynccontextmanager
@@ -391,9 +391,9 @@ async def delete_file(file_path: str, user: User = Depends(is_active)):
         os.remove(local_path)
         if not os.listdir(parent := os.path.dirname(local_path)):
             os.rmdir(parent)
-    except OSError:
+    except OSError as error:
         raise HTTPException(
             HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file."
-        )
+        ) from error
 
     return {"message": "File deleted."}
