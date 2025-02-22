@@ -40,9 +40,11 @@ async def test_get_total(mock_client):
     response = await mock_client.get("/total")
     assert response.status_code == HTTPStatus.OK
 
+
 async def test_get_stats(mock_client):
     response = await mock_client.get("/stats")
     assert response.status_code == HTTPStatus.OK
+
 
 async def test_post_total(mock_client):
     response = await mock_client.post("/total")
@@ -56,11 +58,20 @@ async def test_for_test_only(mock_client):
 
 @pytest.fixture(scope="function")
 def sample_data(pwd):
-    results = ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory())
+    results = ParserNZSM.parse_archive(
+        archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
+    )
 
     def to_dict(record) -> dict:
         dict_data = record.to_mongo()
-        for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "_id", "_cls"):
+        for key in (
+            "scale_factor",
+            "raw_data",
+            "raw_data_unit",
+            "offset",
+            "_id",
+            "_cls",
+        ):
             dict_data.pop(key, None)
         dict_data["id"] = record.id
         for k, v in dict_data.items():
@@ -81,7 +92,11 @@ def sample_data(pwd):
 
 @pytest.mark.parametrize(
     "data_type",
-    [pytest.param("raw", id="raw"), pytest.param("waveform", id="waveform"), pytest.param("spectrum", id="spectrum")],
+    [
+        pytest.param("raw", id="raw"),
+        pytest.param("waveform", id="waveform"),
+        pytest.param("spectrum", id="spectrum"),
+    ],
 )
 async def test_jackpot(sample_data, mock_client, data_type):
     response = await mock_client.get(f"/{data_type}/jackpot")
@@ -102,11 +117,15 @@ async def test_query(mock_client, count_total):
 async def test_process(sample_data, mock_celery, mock_client):
     response = await mock_client.post(
         f"/process?record_id={sample_data[0].id}",
-        json={"with_filter": True, "with_spectrum": True, "with_response_spectrum": True},
+        json={
+            "with_filter": True,
+            "with_spectrum": True,
+            "with_response_spectrum": True,
+        },
     )
     assert response.status_code == HTTPStatus.OK
 
 
 async def test_search(sample_data, mock_client):
-    response = await mock_client.post(f"/search")
+    response = await mock_client.post("/search")
     assert response.status_code == HTTPStatus.OK

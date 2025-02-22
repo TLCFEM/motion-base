@@ -28,4 +28,6 @@ def test_jp_parse_file(pwd, file_path):
 
 @pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
 def test_jp_parse_archive(pwd, file_path):
-    ParserNIED.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=str_factory())
+    ParserNIED.parse_archive(
+        archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
+    )

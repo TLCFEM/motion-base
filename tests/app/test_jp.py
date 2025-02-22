@@ -28,9 +28,24 @@ from mb import celery
         pytest.param("wrong_name", HTTPStatus.ACCEPTED, id="wrong-name"),
     ],
 )
-@pytest.mark.parametrize("if_wait", [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")])
-@pytest.mark.parametrize("if_celery", [pytest.param(True, id="with-celery"), pytest.param(False, id="no-celery")])
-async def test_upload_jp(monkeypatch, mock_celery, mock_client_superuser, pwd, file_name, status, if_wait, if_celery):
+@pytest.mark.parametrize(
+    "if_wait",
+    [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")],
+)
+@pytest.mark.parametrize(
+    "if_celery",
+    [pytest.param(True, id="with-celery"), pytest.param(False, id="no-celery")],
+)
+async def test_upload_jp(
+    monkeypatch,
+    mock_celery,
+    mock_client_superuser,
+    pwd,
+    file_name,
+    status,
+    if_wait,
+    if_celery,
+):
     if if_celery:
 
         def return_none():
@@ -40,6 +55,7 @@ async def test_upload_jp(monkeypatch, mock_celery, mock_client_superuser, pwd, f
 
     with open(os.path.join(pwd, "data/jp_test.knt.tar.gz"), "rb") as file:
         response = await mock_client_superuser.post(
-            f"/jp/upload?wait_for_result={if_wait}", files={"archives": (file_name, file, "multipart/form-data")}
+            f"/jp/upload?wait_for_result={if_wait}",
+            files={"archives": (file_name, file, "multipart/form-data")},
         )
         assert response.status_code == status

@@ -23,14 +23,18 @@ from mb.record.response_spectrum import response_spectrum
 from mb.record.utility import str_factory
 
 
-@pytest.mark.parametrize("file_path", ["data/20110222_015029_MQZ.V2A", "data/I06465B10.V2A"])
+@pytest.mark.parametrize(
+    "file_path", ["data/20110222_015029_MQZ.V2A", "data/I06465B10.V2A"]
+)
 def test_nz_parse_file(mock_celery, pwd, file_path):
     ParserNZSM.parse_file(os.path.join(pwd, file_path), str_factory())
 
 
 @pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
 def test_nz_parse_archive(pwd, file_path):
-    ParserNZSM.parse_archive(archive_obj=os.path.join(pwd, file_path), user_id=str_factory())
+    ParserNZSM.parse_archive(
+        archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
+    )
 
 
 def test_nz_response_spectrum():

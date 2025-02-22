@@ -17,10 +17,10 @@ import os.path
 from uuid import uuid4
 
 import pytest
-from httpx import AsyncClient, ASGITransport
+from httpx import ASGITransport, AsyncClient
 
 from mb.app.main import app
-from mb.app.utility import User, is_active, bcrypt_hash
+from mb.app.utility import User, bcrypt_hash, is_active
 from mb.utility import env
 from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
@@ -47,7 +47,9 @@ async def mongo_connection(monkeypatch):
 
 @pytest.fixture(scope="function", autouse=True)
 async def mock_client():
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
 
 
@@ -69,7 +71,9 @@ async def mock_client_superuser(mongo_connection):
     user = await always_active()
     await user.save()
     app.dependency_overrides[is_active] = always_active
-    async with AsyncClient(transport=ASGITransport(app=app), base_url="http://test") as ac:
+    async with AsyncClient(
+        transport=ASGITransport(app=app), base_url="http://test"
+    ) as ac:
         yield ac
     app.dependency_overrides = {}
     await user.delete()
