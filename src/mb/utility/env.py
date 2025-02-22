@@ -59,8 +59,7 @@ MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "/tmp")
 MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
-while MB_MAIN_SITE.endswith("/"):
-    MB_MAIN_SITE = MB_MAIN_SITE[:-1]
+MB_MAIN_SITE = MB_MAIN_SITE.rstrip("/")
 
 if not LOADED:
     _logger.info(f"Hosting on {MB_MAIN_SITE}.")

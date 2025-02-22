@@ -87,7 +87,7 @@ app = FastAPI(
     license_info={"name": "GNU General Public License v3.0"},
     lifespan=lifespan,
     middleware=[
-        Middleware(GZipMiddleware, minimum_size=1024, compresslevel=6),
+        Middleware(GZipMiddleware, minimum_size=1024, compresslevel=8),
         Middleware(
             CORSMiddleware, allow_origins=["*"], allow_methods=["GET", "POST", "DELETE"]
         ),

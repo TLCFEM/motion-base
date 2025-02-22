@@ -28,7 +28,7 @@ class Config(BaseModel):
     overwrite_env: bool = Field(False)
     celery: bool = Field(False)
     debug: bool = Field(False)
-    celery_config: list = Field([])
+    celery_config: list = Field(default_factory=list)
 
 
 def run_app(setting: Config):

@@ -252,10 +252,10 @@ class QueryConfig(BaseModel):
     min_magnitude: float = Field(None, ge=0, le=10)
     max_magnitude: float = Field(None, ge=0, le=10)
     category: str = Field(None)
-    event_location: list[float, float] = Field(
+    event_location: list[float] = Field(
         None, min_length=2, max_length=2, description="[longitude, latitude]"
     )
-    station_location: list[float, float] = Field(
+    station_location: list[float] = Field(
         None, min_length=2, max_length=2, description="[longitude, latitude]"
     )
     max_event_distance: float = Field(

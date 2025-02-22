@@ -63,15 +63,11 @@ async def async_elastic():
         async_client = AsyncElasticsearch(f"http://{ELASTIC_HOST}:9200")
 
     counter: int = 0
-    while True:
-        if await async_client.ping():
-            break
-        else:
-            counter += delay
-            if counter > 600:
-                raise ConnectionError("Elasticsearch is not available.")
-            await asyncio.sleep(delay)
-            continue
+    while not await async_client.ping():
+        counter += delay
+        if counter > 600:
+            raise ConnectionError("Elasticsearch is not available.")
+        await asyncio.sleep(delay)
 
     if not await async_client.indices.exists(index="record"):
         await async_client.indices.create(
@@ -88,15 +84,11 @@ def sync_elastic():
         sync_client = Elasticsearch(f"http://{ELASTIC_HOST}:9200")
 
     counter: int = 0
-    while True:
-        if sync_client.ping():
-            break
-        else:
-            counter += delay
-            if counter > 600:
-                raise ConnectionError("Elasticsearch is not available.")
-            time.sleep(delay)
-            continue
+    while not sync_client.ping():
+        counter += delay
+        if counter > 600:
+            raise ConnectionError("Elasticsearch is not available.")
+        time.sleep(delay)
 
     if not sync_client.indices.exists(index="record"):
         sync_client.indices.create(index="record", mappings=generate_elastic_mapping())
