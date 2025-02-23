@@ -35,13 +35,13 @@ spec:
           env:
             - name: RABBITMQ_DEFAULT_USER
               valueFrom:
-                secretKeyRef:
-                  name: mb-secret
+                configMapKeyRef:
+                  name: mb-config
                   key: RABBITMQ_USERNAME
             - name: RABBITMQ_DEFAULT_PASS
               valueFrom:
-                secretKeyRef:
-                  name: mb-secret
+                configMapKeyRef:
+                  name: mb-config
                   key: RABBITMQ_PASSWORD
             - name: RABBITMQ_DEFAULT_VHOST
               value: vhost
