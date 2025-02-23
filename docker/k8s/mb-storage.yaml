@@ -43,6 +43,8 @@ spec:
                 secretKeyRef:
                   name: mb-secret
                   key: RABBITMQ_PASSWORD
+            - name: RABBITMQ_DEFAULT_VHOST
+              value: vhost
             - name: RABBITMQ_NODE_PORT
               value: "5672"
           resources:
