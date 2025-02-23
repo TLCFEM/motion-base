@@ -22,10 +22,6 @@ data:
   MB_SUPERUSER_PASSWORD: password
   # port that the backend will run on
   MB_PORT: "8000"
-  # number of fastapi workers per container
-  # set to 1 if load balancing is done at the cluster level
-  # set to larger number if only one container is running
-  MB_FASTAPI_WORKERS: "2"
   # file system root directory
   # this is used to temporarily store files for exchange among workers
   MB_FS_ROOT: /tmp
@@ -36,9 +32,6 @@ data:
   # if locally running on port 8000 with nginx reverse proxy on port 80, set to http://localhost:80
   # if running on a server on port 8000, set to http://<server-public-ip>:8000
   MB_MAIN_SITE: http://localhost:8000
-  # in case of running multiple backend containers
-  # set to a proper value, for example, 2*$(nproc)+1
-  MB_REPLICA: "2"
   # mongodb related configurations
   # mongodb service host and port
   # if mongodb container is running on the same host and port is exposed, set to localhost
@@ -52,8 +45,6 @@ data:
   MONGO_PASSWORD: password
   # WiredTiger cache size in GB
   MONGO_CACHE_SIZE: "2"
-  # mongodb memory limit
-  MONGO_MEM_LIMIT: 10g
   # rabbitmq related configurations
   # rabbitmq service host and port
   # if rabbitmq container is running on the same host and port 5672 is exposed, set to localhost

@@ -1,0 +1,74 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mb-storage
+  labels:
+    app: mb-storage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: mb-storage
+  template:
+    metadata:
+      name: mb-storage
+      labels:
+        app: mb-storage
+    spec:
+      volumes:
+        - name: motion-rabbitmq
+          emptyDir: {}
+        - name: motion-elasticsearch
+          emptyDir: {}
+      containers:
+        - name: mb-rabbitmq
+          image: rabbitmq
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 5672
+              protocol: TCP
+            - containerPort: 15672
+              protocol: TCP
+          volumeMounts:
+            - name: motion-rabbitmq
+              mountPath: /var/lib/rabbitmq
+          env:
+            - name: RABBITMQ_DEFAULT_USER
+              valueFrom:
+                secretKeyRef:
+                  name: mb-secret
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_DEFAULT_PASS
+              valueFrom:
+                secretKeyRef:
+                  name: mb-secret
+                  key: RABBITMQ_PASSWORD
+            - name: RABBITMQ_NODE_PORT
+              value: "5672"
+          resources:
+            requests:
+              memory: "128Mi"
+            limits:
+              memory: "1Gi"
+              cpu: "1"
+        - name: mb-elasticsearch
+          image: elasticsearch:8.16.4
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9200
+              protocol: TCP
+          volumeMounts:
+            - name: motion-elasticsearch
+              mountPath: /usr/share/elasticsearch/data
+          env:
+            - name: discovery.type
+              value: single-node
+            - name: xpack.security.enabled
+              value: "false"
+          resources:
+            requests:
+              memory: "1Gi"
+            limits:
+              memory: "4Gi"
+              cpu: "1"
+      restartPolicy: Always
