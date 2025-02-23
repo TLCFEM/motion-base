@@ -1,0 +1,11 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: mb-front-service
+spec:
+  selector:
+    app: mb-front
+  ports:
+    - protocol: TCP
+      port: 3000
+      targetPort: 3000
