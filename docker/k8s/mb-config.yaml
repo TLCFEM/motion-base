@@ -5,44 +5,44 @@ metadata:
 data:
   # secret key used for hashing password
   # see: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
-  MB_SECRET_KEY: 09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7
+  MB_SECRET_KEY: "09d25e094faa6ca2556c818166b7a9563b93f7099f6f0f4caa6cf63b88e8d3e7"
   # algorithm used for hashing password
   # see: https://fastapi.tiangolo.com/tutorial/security/oauth2-jwt/#handle-jwt-tokens
-  MB_ALGORITHM: HS256
+  MB_ALGORITHM: "HS256"
   # access token expire time in minutes.
   MB_ACCESS_TOKEN_EXPIRE_MINUTES: "120"
   # default superuser email
-  MB_SUPERUSER_EMAIL: admin@admin.admin
+  MB_SUPERUSER_EMAIL: "admin@admin.admin"
   # default superuser first name
-  MB_SUPERUSER_FIRST_NAME: admin
+  MB_SUPERUSER_FIRST_NAME: "admin"
   # default superuser last name
-  MB_SUPERUSER_LAST_NAME: admin
+  MB_SUPERUSER_LAST_NAME: "admin"
   # default superuser username and password
-  MB_SUPERUSER_USERNAME: test
-  MB_SUPERUSER_PASSWORD: password
+  MB_SUPERUSER_USERNAME: "test"
+  MB_SUPERUSER_PASSWORD: "password"
   # port that the backend will run on
   MB_PORT: "8000"
   # file system root directory
   # this is used to temporarily store files for exchange among workers
-  MB_FS_ROOT: /tmp
+  MB_FS_ROOT: "/tmp"
   # backend url that can be accessed from public internet
   # this will be used by workers to access the files
   # for example
   # if locally running on port 8000, set to http://localhost:8000
   # if locally running on port 8000 with nginx reverse proxy on port 80, set to http://localhost:80
   # if running on a server on port 8000, set to http://<server-public-ip>:8000
-  MB_MAIN_SITE: http://localhost:8000
+  MB_MAIN_SITE: "http://localhost:8000"
   # mongodb related configurations
   # mongodb service host and port
   # if mongodb container is running on the same host and port is exposed, set to localhost
   # if mongodb container is running on the same host and port is not exposed, set to the service name
   # if mongodb container is running on a different host, set to the host ip that is accessible from the backend container
-  MONGO_DB_NAME: StrongMotion
-  MONGO_HOST: localhost
+  MONGO_DB_NAME: "StrongMotion"
+  MONGO_HOST: "localhost"
   MONGO_PORT: "27017"
   # mongodb username and password
-  MONGO_USERNAME: test
-  MONGO_PASSWORD: password
+  MONGO_USERNAME: "test"
+  MONGO_PASSWORD: "password"
   # WiredTiger cache size in GB
   MONGO_CACHE_SIZE: "2"
   # rabbitmq related configurations
@@ -50,10 +50,10 @@ data:
   # if rabbitmq container is running on the same host and port 5672 is exposed, set to localhost
   # if rabbitmq container is running on the same host and port 5672 is not exposed, set to the service name
   # if rabbitmq container is running on a different host, set to the host ip that is accessible from the backend container
-  RABBITMQ_HOST: localhost
+  RABBITMQ_HOST: "localhost"
   RABBITMQ_PORT: "5672"
   # rabbitmq username and password
-  RABBITMQ_USERNAME: test
-  RABBITMQ_PASSWORD: password
+  RABBITMQ_USERNAME: "test"
+  RABBITMQ_PASSWORD: "password"
   # elastic search related configurations
-  ELASTIC_HOST: localhost
+  ELASTIC_HOST: "localhost"
