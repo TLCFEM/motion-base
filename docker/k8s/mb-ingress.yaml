@@ -11,6 +11,6 @@ spec:
             pathType: Prefix
             backend:
               service:
-                name: mb-front-service
+                name: mb-back-service
                 port:
-                  number: 3000
+                  number: 8000

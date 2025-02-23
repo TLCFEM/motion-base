@@ -1,0 +1,120 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: mb-back
+  labels:
+    app: mb-back
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: mb-back
+  template:
+    metadata:
+      name: mb-back
+      labels:
+        app: mb-back
+    spec:
+      volumes:
+        - name: motion-cache
+          emptyDir: {}
+      containers:
+        - name: mb-back
+          image: tlcfem/motion-base-back
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8000
+              protocol: TCP
+          volumeMounts:
+            - name: motion-cache
+              mountPath: /tmp
+          env:
+            - name: MB_SECRET_KEY
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SECRET_KEY
+            - name: MB_ALGORITHM
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_ALGORITHM
+            - name: MB_ACCESS_TOKEN_EXPIRE_MINUTES
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_ACCESS_TOKEN_EXPIRE_MINUTES
+            - name: MB_SUPERUSER_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SUPERUSER_EMAIL
+            - name: MB_SUPERUSER_FIRST_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SUPERUSER_FIRST_NAME
+            - name: MB_SUPERUSER_LAST_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SUPERUSER_LAST_NAME
+            - name: MB_SUPERUSER_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SUPERUSER_USERNAME
+            - name: MB_SUPERUSER_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_SUPERUSER_PASSWORD
+            - name: MB_FASTAPI_WORKERS
+              value: "1"
+            - name: MB_FS_ROOT
+              value: "/tmp"
+            - name: MB_MAIN_SITE
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_MAIN_SITE
+            - name: MONGO_DB_NAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_DB_NAME
+            - name: MONGO_HOST
+              value: "mb-storage-service"
+            - name: MONGO_PORT
+              value: "27017"
+            - name: MONGO_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_USERNAME
+            - name: MONGO_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_PASSWORD
+            - name: RABBITMQ_HOST
+              value: "mb-storage-service"
+            - name: RABBITMQ_PORT
+              value: "5672"
+            - name: RABBITMQ_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: RABBITMQ_USERNAME
+            - name: RABBITMQ_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: RABBITMQ_PASSWORD
+            - name: ELASTIC_HOST
+              value: "mb-storage-service"
+          resources:
+            limits:
+              memory: "512Mi"
+              cpu: "2"
+      restartPolicy: Always

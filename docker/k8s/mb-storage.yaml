@@ -20,6 +20,10 @@ spec:
           emptyDir: {}
         - name: motion-elasticsearch
           emptyDir: {}
+        - name: motion-mongo
+          emptyDir: {}
+        - name: motion-mongoconfig
+          emptyDir: {}
       containers:
         - name: mb-rabbitmq
           image: rabbitmq
@@ -49,7 +53,7 @@ spec:
               value: "5672"
           resources:
             requests:
-              memory: "128Mi"
+              memory: "512Mi"
             limits:
               memory: "1Gi"
               cpu: "1"
@@ -70,6 +74,41 @@ spec:
           resources:
             requests:
               memory: "1Gi"
+            limits:
+              memory: "4Gi"
+              cpu: "1"
+        - name: mb-mongo
+          image: mongo
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 27017
+              protocol: TCP
+          volumeMounts:
+            - name: motion-mongo
+              mountPath: /data/db
+            - name: motion-mongoconfig
+              mountPath: /data/configdb
+          env:
+            - name: MONGO_INITDB_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_DB_NAME
+            - name: MONGO_INITDB_ROOT_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_USERNAME
+            - name: MONGO_INITDB_ROOT_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MONGO_PASSWORD
+            - name: MONGO_DATA_DIR
+              value: /data/db
+          resources:
+            requests:
+              memory: "512Mi"
             limits:
               memory: "4Gi"
               cpu: "1"
