@@ -17,7 +17,9 @@ spec:
     spec:
       volumes:
         - name: motion-cache
-          emptyDir: {}
+          hostPath:
+            path: /tmp
+            type: Directory
       containers:
         - name: mb-worker
           image: tlcfem/motion-base-back
