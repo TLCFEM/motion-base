@@ -23,7 +23,9 @@ _logger = structlog.get_logger(__name__)
 LOADED: bool = False
 
 if not LOADED:
-    if load_dotenv(os.path.join(os.path.dirname(__file__), "../../../docker/.env")):
+    if load_dotenv(".env"):
+        _logger.info("Using .env file in CWD.")
+    elif load_dotenv(os.path.join(os.path.dirname(__file__), "../../../docker/.env")):
         _logger.info("Using .env file.")
     else:
         _logger.info("No .env file found.")
