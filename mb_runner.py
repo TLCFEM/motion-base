@@ -16,7 +16,7 @@
 import sys
 from multiprocessing import freeze_support
 
-from mb import run_app, Config
+from mb import Config, run_app
 
 
 def config_and_run():
