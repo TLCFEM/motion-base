@@ -1,30 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: mb-back
+  name: mb-worker
   labels:
-    app: mb-back
+    app: mb-worker
 spec:
   replicas: 2
   selector:
     matchLabels:
-      app: mb-back
+      app: mb-worker
   template:
     metadata:
-      name: mb-back
+      name: mb-worker
       labels:
-        app: mb-back
+        app: mb-worker
     spec:
       volumes:
         - name: motion-cache
           emptyDir: {}
       containers:
-        - name: mb-back
+        - name: mb-worker
           image: tlcfem/motion-base-back
           imagePullPolicy: Always
-          ports:
-            - containerPort: 8000
-              protocol: TCP
+          args:
+            - celery
           volumeMounts:
             - name: motion-cache
               mountPath: /tmp
@@ -115,6 +114,6 @@ spec:
               value: "mb-storage-service"
           resources:
             limits:
-              memory: "512Mi"
+              memory: "1Gi"
               cpu: "1"
       restartPolicy: Always
