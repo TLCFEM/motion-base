@@ -317,7 +317,6 @@ async def search_records(query: QueryConfig = QueryConfig()):
             search_after=search_after,
             size=page_size,
         )
-        search_after = results["hits"]["hits"][-1]["sort"]
 
     return ListMetadataResponse(
         records=[
@@ -329,7 +328,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
             sort_by=pagination.sort_by,
             page_size=page_size,
             page_number=page_number,
-            search_after=search_after,
+            search_after=results["hits"]["hits"][-1]["sort"],
         ),
     )
 
