@@ -294,7 +294,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
     pagination = query.pagination
 
     page_size: int = pagination.page_size
-    page_number: int = min(pagination.page_number, 10000 // page_size - 1)
+    page_number: int = pagination.page_number
 
     client = await async_elastic()
     results = await client.search(
