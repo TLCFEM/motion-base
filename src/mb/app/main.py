@@ -295,15 +295,29 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
     page_size: int = pagination.page_size
     page_number: int = pagination.page_number
+    search_after: list | None = pagination.search_after
 
     client = await async_elastic()
-    results = await client.search(
-        track_total_hits=True,
-        index="record",
-        query=query.generate_elastic_query(),
-        from_=page_number * page_size,
-        size=page_size,
-    )
+
+    if search_after is None:
+        page_number = min(page_number, 10000 // page_size - 1)
+
+        results = await client.search(
+            track_total_hits=True,
+            index="record",
+            query=query.generate_elastic_query(),
+            from_=page_number * page_size,
+            size=page_size,
+        )
+    else:
+        results = await client.search(
+            track_total_hits=True,
+            index="record",
+            query=query.generate_elastic_query(),
+            search_after=search_after,
+            size=page_size,
+        )
+        search_after = results["hits"]["hits"][-1]["sort"]
 
     return ListMetadataResponse(
         records=[
@@ -315,6 +329,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
             sort_by=pagination.sort_by,
             page_size=page_size,
             page_number=page_number,
+            search_after=search_after,
         ),
     )
 

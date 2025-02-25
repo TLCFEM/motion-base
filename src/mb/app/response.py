@@ -169,6 +169,7 @@ class PaginationConfig(BaseModel):
     page_size: int = Field(10, ge=1, le=1000)
     page_number: int = Field(0, ge=0)
     sort_by: str = Field("-maximum_acceleration")
+    search_after: list | None = Field(None)
 
     @field_validator("sort_by")
     @classmethod
@@ -248,33 +249,33 @@ class UploadResponse(BaseModel):
 
 
 class QueryConfig(BaseModel):
-    region: str = Field(None, pattern="^(jp|nz)$")
-    min_magnitude: float = Field(None, ge=0, le=10)
-    max_magnitude: float = Field(None, ge=0, le=10)
-    category: str = Field(None)
-    event_location: list[float] = Field(
+    region: str | None = Field(None, pattern="^(jp|nz)$")
+    min_magnitude: float | None = Field(None, ge=0, le=10)
+    max_magnitude: float | None = Field(None, ge=0, le=10)
+    category: str | None = Field(None)
+    event_location: list[float] | None = Field(
         None, min_length=2, max_length=2, description="[longitude, latitude]"
     )
-    station_location: list[float] = Field(
+    station_location: list[float] | None = Field(
         None, min_length=2, max_length=2, description="[longitude, latitude]"
     )
-    max_event_distance: float = Field(
+    max_event_distance: float | None = Field(
         None,
         ge=0,
         description="Maximum distance in meters from the event location to the desired location.",
     )
-    max_station_distance: float = Field(
+    max_station_distance: float | None = Field(
         None,
         ge=0,
         description="Maximum distance in meters from the station location to the desired location.",
     )
-    from_date: datetime = Field(None)
-    to_date: datetime = Field(None)
-    min_pga: float = Field(None, ge=0)
-    max_pga: float = Field(None, ge=0)
-    file_name: str = Field(None)
-    station_code: str = Field(None)
-    direction: str = Field(None)
+    from_date: datetime | None = Field(None)
+    to_date: datetime | None = Field(None)
+    min_pga: float | None = Field(None, ge=0)
+    max_pga: float | None = Field(None, ge=0)
+    file_name: str | None = Field(None)
+    station_code: str | None = Field(None)
+    direction: str | None = Field(None)
     pagination: PaginationConfig = Field(PaginationConfig())
 
     def generate_query_string(self) -> dict:
