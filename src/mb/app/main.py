@@ -297,6 +297,11 @@ async def search_records(query: QueryConfig = QueryConfig()):
     page_number: int = pagination.page_number
     search_after: list | None = pagination.search_after
 
+    if (sort_by := pagination.sort_by).startswith(("+", "-")):
+        sort = [{sort_by[1:]: "asc" if sort_by[0] == "+" else "desc"}]
+    else:
+        sort = [{sort_by: "asc"}]
+
     client = await async_elastic()
 
     if search_after is None:
@@ -305,7 +310,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
         results = await client.search(
             track_total_hits=True,
             index="record",
-            sort=pagination.sort_by,
+            sort=sort,
             query=query.generate_elastic_query(),
             from_=page_number * page_size,
             size=page_size,
@@ -314,7 +319,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
         results = await client.search(
             track_total_hits=True,
             index="record",
-            sort=pagination.sort_by,
+            sort=sort,
             query=query.generate_elastic_query(),
             search_after=search_after,
             size=page_size,
