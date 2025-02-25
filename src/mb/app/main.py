@@ -298,6 +298,7 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
     client = await async_elastic()
     results = await client.search(
+        track_total_hits=True,
         index="record",
         query=query.generate_elastic_query(),
         from_=page_number * page_size,
