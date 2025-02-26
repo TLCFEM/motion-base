@@ -218,6 +218,10 @@ class MBClient:
         wait_for_result: bool = False,
         overwrite_existing: bool = True,
     ):
+        if self.auth is None:
+            self.print("Upload requires authentication.")
+            return
+
         if isinstance(path, Generator):
             async with anyio.create_task_group() as tg:
                 for file in path:
@@ -267,7 +271,7 @@ class MBClient:
                     f"[[red]{self.current_upload_size}/{self.upload_size}[/]]."
                 )
             else:
-                self.print(f"Successfully uploaded file [green]{base_name}[/]. ")
+                self.print(f"Successfully uploaded file [green]{base_name}[/].")
             for task_id in result.json()["task_ids"]:
                 self.tasks[task_id] = 0
 
@@ -292,6 +296,30 @@ class MBClient:
 
         return [MBRecord.new_record(r) for r in result.json()["records"]]
 
+    async def retrieve_all(self, query: QueryConfig | dict):
+        search_after = None
+        json_query = (
+            query.model_dump(exclude_none=True)
+            if isinstance(query, QueryConfig)
+            else query
+        )
+        while True:
+            if search_after is not None:
+                json_query["pagination"]["search_after"] = search_after
+            result = await self.client.post("/search", json=json_query)
+            if result.status_code != HTTPStatus.OK:
+                self.print("[red]Failed to perform query.[/]")
+                return
+
+            result_json = result.json()
+            search_after = result_json["pagination"]["search_after"]
+
+            if not result_json["records"]:
+                return
+
+            for r in result_json["records"]:
+                yield MBRecord.new_record(r)
+
     async def task_status(self, task_id: str):
         result = await self.client.get(f"/task/status/{task_id}")
         if result.status_code != HTTPStatus.OK:
@@ -315,15 +343,17 @@ class MBClient:
 
 async def main():
     async with MBClient("http://170.64.176.26:8000", timeout=100) as client:
-        results = await client.search(
-            QueryConfig(pagination=PaginationConfig(page_size=100))
-        )
-        fig: Figure = None  # type: ignore
-        for result in await client.download(results):
-            fig = result.normalise().plot_waveform(fig)
-        # fig.legend()
-        fig.tight_layout()
-        fig.savefig("waveform.png")
+        counter = 0
+        async for x in client.retrieve_all(
+            QueryConfig(
+                min_magnitude=6,
+                min_pga=300,
+                pagination=PaginationConfig(page_size=100),
+            )
+        ):
+            counter += 1
+
+        print(counter)
 
 
 if __name__ == "__main__":
