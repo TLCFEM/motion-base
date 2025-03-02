@@ -344,7 +344,7 @@ class MBClient:
 async def main():
     async with MBClient("http://170.64.176.26:8000", timeout=100) as client:
         counter = 0
-        async for x in client.retrieve_all(
+        async for _ in client.retrieve_all(
             QueryConfig(
                 min_magnitude=6,
                 min_pga=300,

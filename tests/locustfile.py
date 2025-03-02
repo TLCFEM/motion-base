@@ -15,8 +15,16 @@
 
 from locust import FastHttpUser, task
 
+from mb.app.response import PaginationConfig, QueryConfig
+
 
 class HelloWorldUser(FastHttpUser):
+    json_query = QueryConfig(
+        min_magnitude=6,
+        min_pga=300,
+        pagination=PaginationConfig(page_size=100),
+    ).model_dump(exclude_none=True)
+
     @task
     def raw(self):
         self.client.get("/raw/jackpot")
@@ -24,3 +32,7 @@ class HelloWorldUser(FastHttpUser):
     @task
     def waveform(self):
         self.client.get("/waveform/jackpot")
+
+    @task
+    def search(self):
+        self.client.post("/search", json=self.json_query)
