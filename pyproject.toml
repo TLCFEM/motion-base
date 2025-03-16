@@ -34,6 +34,8 @@ dependencies = [
     "mongoengine",
     "numba",
     "Pint",
+    "py-spy",
+    "pycparser==2.14", # https://github.com/eliben/pycparser/issues/291
     "pyinstrument",
     "python-dotenv",
     "python-multipart",
@@ -41,7 +43,6 @@ dependencies = [
     "scipy",
     "structlog",
     "uvicorn",
-    "pycparser==2.14", # https://github.com/eliben/pycparser/issues/291
 ]
 
 [project.optional-dependencies]
