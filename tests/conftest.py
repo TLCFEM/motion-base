@@ -72,7 +72,7 @@ async def mock_client_superuser(mongo_connection):
     user = await always_active()
     await user.save()
     app.dependency_overrides[is_active] = always_active
-    while not User.find_one(User.username == "test"):
+    while not await User.find_one(User.username == "test"):
         await asyncio.sleep(0.5)
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
