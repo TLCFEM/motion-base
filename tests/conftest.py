@@ -13,6 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
 import os.path
 from uuid import uuid4
 
@@ -71,6 +72,8 @@ async def mock_client_superuser(mongo_connection):
     user = await always_active()
     await user.save()
     app.dependency_overrides[is_active] = always_active
+    while not User.find_one(User.username == "test"):
+        await asyncio.sleep(0.5)
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
