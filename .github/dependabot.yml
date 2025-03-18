@@ -3,12 +3,12 @@ updates:
   - package-ecosystem: github-actions
     directory: /
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: npm
     directory: gui
     schedule:
-      interval: weekly
+      interval: monthly
   - package-ecosystem: npm
     directory: electron
     schedule:
-      interval: weekly
+      interval: monthly
