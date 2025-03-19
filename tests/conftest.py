@@ -15,6 +15,7 @@
 
 import asyncio
 import os.path
+from time import sleep
 from uuid import uuid4
 
 import pytest
@@ -32,7 +33,11 @@ def celery_config():
 
 
 @pytest.fixture(scope="function", autouse=True)
-def mock_celery(celery_session_worker):
+def mock_celery(celery_session_app, celery_session_worker):
+    while True:
+        if celery_session_app.control.inspect().stats():
+            break
+        sleep(1)
     yield celery_session_worker
 
 
