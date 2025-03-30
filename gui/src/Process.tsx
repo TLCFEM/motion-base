@@ -501,14 +501,14 @@ const Waveform: Component<sxProps> = (props) => {
             "time",
             records,
             {
-                title: processed().file_name,
+                title: { text: processed().file_name },
                 xaxis: {
-                    title: "Time (s)",
+                    title: { text: "Time (s)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Acceleration (cm/s^2)",
+                    title: { text: "Acceleration (cm/s^2)" },
                     autorange: true,
                     automargin: true
                 },
@@ -556,14 +556,14 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
             "spectrum",
             records,
             {
-                title: processed().file_name,
+                title: { text: processed().file_name },
                 xaxis: {
-                    title: "Frequency (Hz)",
+                    title: { text: "Frequency (Hz)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Acceleration (cm/s^2)",
+                    title: { text: "Acceleration (cm/s^2)" },
                     type: withLogScale() ? "log" : "linear",
                     autorange: true,
                     automargin: true
@@ -639,14 +639,14 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
             "a_spectrum",
             acceleration_records,
             {
-                title: processed().file_name,
+                title: { text: processed().file_name },
                 xaxis: {
-                    title: "Period (s)",
+                    title: { text: "Period (s)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Acceleration (cm/s^2)",
+                    title: { text: "Acceleration (cm/s^2)" },
                     autorange: true,
                     automargin: true
                 },
@@ -660,14 +660,14 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
             "v_spectrum",
             velocity_records,
             {
-                title: processed().file_name,
+                title: { text: processed().file_name },
                 xaxis: {
-                    title: "Period (s)",
+                    title: { text: "Period (s)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Velocity (cm/s)",
+                    title: { text: "Velocity (cm/s)" },
                     autorange: true,
                     automargin: true
                 },
@@ -681,14 +681,14 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
             "u_spectrum",
             displacement_records,
             {
-                title: processed().file_name,
+                title: { text: processed().file_name },
                 xaxis: {
-                    title: "Period (s)",
+                    title: { text: "Period (s)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Displacement (cm)",
+                    title: { text: "Displacement (cm)" },
                     autorange: true,
                     automargin: true
                 },

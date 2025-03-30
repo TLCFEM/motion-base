@@ -228,14 +228,14 @@ const Waveform: Component<sxProps> = (props) => {
                 }
             ],
             {
-                title: data().file_name,
+                title: { text: data().file_name },
                 xaxis: {
-                    title: "Time (s)",
+                    title: { text: "Time (s)" },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Acceleration (cm/s^2)",
+                    title: { text: "Acceleration (cm/s^2)" },
                     autorange: true,
                     automargin: true
                 },

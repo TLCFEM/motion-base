@@ -38,14 +38,14 @@ const Histogram: Component<HistogramProps> = (props) => {
                 }
             ],
             {
-                title: props.item + " Histogram",
+                title: { text: props.item + " Histogram" },
                 xaxis: {
-                    title: props.item,
+                    title: { text: props.item },
                     autorange: true,
                     automargin: true
                 },
                 yaxis: {
-                    title: "Counts",
+                    title: { text: "Counts" },
                     autorange: true,
                     automargin: true
                 },
