@@ -342,6 +342,34 @@ async def search_records(query: QueryConfig = QueryConfig()):
     )
 
 
+@app.delete("/purge")
+async def purge_records(query: QueryConfig = QueryConfig()):
+    """
+    Purge records from the database using elastic search.
+    """
+    elastic_query = query.generate_elastic_query()
+
+    client = await async_elastic()
+
+    all_records = []
+
+    while True:
+        results = await client.search(index="record", query=elastic_query)
+        record_ids = [x["_id"] for x in results["hits"]["hits"]]
+        if not record_ids:
+            break
+        all_records.extend(record_ids)
+        await client.bulk(
+            index="record",
+            body=[{"delete": {"_id": x}} for x in record_ids],
+            refresh=True,
+        )
+
+    await Record.find(In(Record.id, all_records)).delete()
+
+    return {"deleted": all_records}
+
+
 @app.get("/stats")
 async def aggregation_stats():
     client = await async_elastic()

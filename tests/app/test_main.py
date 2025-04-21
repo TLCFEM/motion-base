@@ -129,3 +129,11 @@ async def test_process(sample_data, mock_celery, mock_client):
 async def test_search(sample_data, mock_client):
     response = await mock_client.post("/search")
     assert response.status_code == HTTPStatus.OK
+
+
+async def test_purge(sample_data, mock_client):
+    response = await mock_client.delete("/purge")
+    assert response.status_code == HTTPStatus.OK
+    response = await mock_client.get("/total")
+    assert response.status_code == HTTPStatus.OK
+    assert response.json()["total"][0] == 0
