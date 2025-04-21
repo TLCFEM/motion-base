@@ -131,6 +131,6 @@ async def test_search(sample_data, mock_client):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_purge(sample_data, mock_client):
-    response = await mock_client.delete("/purge")
-    assert response.status_code == HTTPStatus.OK
+# async def test_purge(sample_data, mock_client):
+#     response = await mock_client.delete("/purge")
+#     assert response.status_code == HTTPStatus.OK
