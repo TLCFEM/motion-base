@@ -343,10 +343,17 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
 
 @app.delete("/purge")
-async def purge_records(query: QueryConfig = QueryConfig()):
+async def purge_records(
+    query: QueryConfig = QueryConfig(), user: User = Depends(is_active)
+):
     """
     Purge records from the database using elastic search.
     """
+    if not user.can_delete:
+        raise HTTPException(
+            HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete records."
+        )
+
     elastic_query = query.generate_elastic_query()
 
     client = await async_elastic()
