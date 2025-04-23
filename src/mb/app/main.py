@@ -344,7 +344,9 @@ async def search_records(query: QueryConfig = QueryConfig()):
 
 @app.delete("/purge")
 async def purge_records(
-    query: QueryConfig = QueryConfig(), user: User = Depends(is_active)
+    query: QueryConfig = QueryConfig(),
+    user: User = Depends(is_active),
+    confirm: bool = False,
 ):
     """
     Purge records from the database using elastic search.
@@ -357,6 +359,9 @@ async def purge_records(
     elastic_query = query.generate_elastic_query()
 
     client = await async_elastic()
+
+    if not confirm:
+        return await client.search(index="record", query=elastic_query)
 
     all_records = []
 
