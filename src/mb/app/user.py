@@ -15,7 +15,10 @@
 
 from http import HTTPStatus
 
+# noinspection PyPackageRequirements
 from fastapi import APIRouter, Depends, HTTPException
+
+# noinspection PyPackageRequirements
 from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.response import Token, UserResponse

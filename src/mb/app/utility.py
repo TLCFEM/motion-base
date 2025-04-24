@@ -21,7 +21,11 @@ from http import HTTPStatus
 
 import bcrypt
 from beanie import Document
+
+# noinspection PyPackageRequirements
 from fastapi import Depends, HTTPException
+
+# noinspection PyPackageRequirements
 from fastapi.security import OAuth2PasswordBearer
 from joserfc import jwt
 from joserfc.jwk import OctKey

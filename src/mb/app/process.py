@@ -17,6 +17,8 @@ from __future__ import annotations
 from http import HTTPStatus
 
 import numpy as np
+
+# noinspection PyPackageRequirements
 from fastapi import HTTPException
 
 from ..record.async_record import Record

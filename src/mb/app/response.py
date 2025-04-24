@@ -244,8 +244,8 @@ class ProcessedResponse(RecordResponse):
 
 class UploadResponse(BaseModel):
     message: str
-    task_ids: list = Field(None)
-    records: list = Field(None)
+    task_ids: list | None = Field(None)
+    records: list | None = Field(None)
 
 
 class QueryConfig(BaseModel):
@@ -276,7 +276,7 @@ class QueryConfig(BaseModel):
     file_name: str | None = Field(None)
     station_code: str | None = Field(None)
     direction: str | None = Field(None)
-    pagination: PaginationConfig = Field(PaginationConfig())
+    pagination: PaginationConfig = Field(default_factory=PaginationConfig)
 
     def generate_query_string(self) -> dict:
         query_dict: dict = {}

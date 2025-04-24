@@ -21,7 +21,11 @@ from http import HTTPStatus
 from uuid import UUID
 
 from beanie.operators import In
+
+# noinspection PyPackageRequirements
 from fastapi import Body, Depends, FastAPI, HTTPException
+
+# noinspection PyPackageRequirements
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pyinstrument import Profiler
 from starlette.middleware import Middleware
@@ -79,6 +83,7 @@ async def profile_request(request, call_next):
     return HTMLResponse(profiler.output_html())
 
 
+# noinspection PyTypeChecker
 app = FastAPI(
     docs_url="/docs",
     title="Strong Motion Database",

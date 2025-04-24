@@ -24,6 +24,8 @@ from pathlib import Path
 from typing import BinaryIO
 
 import structlog
+
+# noinspection PyPackageRequirements
 from fastapi import UploadFile
 from requests import delete, get, post
 
