@@ -79,3 +79,8 @@ venv = ".venv"
 [tool.ruff.lint]
 select = ["E", "F", "UP", "B", "SIM", "I"]
 ignore = ["B008","E501"]
+
+[tool.uv]
+override-dependencies = [
+    'h11>=0.16.0',
+]
