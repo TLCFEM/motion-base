@@ -21,7 +21,7 @@ click-repl==0.3.0         # via celery
 cryptography==45.0.2      # via joserfc
 dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==8.17.1  # via elasticsearch
-elasticsearch==8.18.1     # via motion-base (pyproject.toml)
+elasticsearch==9.0.1      # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
 fastapi-slim==0.115.12    # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
@@ -37,7 +37,7 @@ lazy-model==0.2.0         # via beanie
 llvmlite==0.44.0          # via numba
 mongoengine==0.29.1       # via motion-base (pyproject.toml)
 motor==3.7.1              # via beanie
-multidict==6.4.3          # via aiohttp, yarl
+multidict==6.4.4          # via aiohttp, yarl
 numba==0.61.2             # via motion-base (pyproject.toml)
 numpy==2.2.6              # via numba, scipy
 pint==0.24.4              # via motion-base (pyproject.toml)
