@@ -21,7 +21,7 @@ click-repl==0.3.0         # via celery
 cryptography==45.0.2      # via joserfc
 dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==8.17.1  # via elasticsearch
-elasticsearch==9.0.1      # via motion-base (pyproject.toml)
+elasticsearch==8.18.1     # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
 fastapi-slim==0.115.12    # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
