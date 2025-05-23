@@ -14,7 +14,7 @@ celery==5.5.2             # via motion-base (pyproject.toml)
 certifi==2025.4.26        # via elastic-transport, httpcore, httpx, requests
 cffi==1.17.1              # via cryptography
 charset-normalizer==3.4.2  # via requests
-click==8.2.0              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
+click==8.2.1              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1      # via celery
 click-repl==0.3.0         # via celery
@@ -46,7 +46,7 @@ prompt-toolkit==3.0.51    # via click-repl
 propcache==0.3.1          # via aiohttp, yarl
 py-spy==0.4.0             # via motion-base (pyproject.toml)
 pycparser==2.14           # via cffi, motion-base (pyproject.toml)
-pydantic==2.11.4          # via beanie, fastapi-slim, lazy-model
+pydantic==2.11.5          # via beanie, fastapi-slim, lazy-model
 pydantic-core==2.33.2     # via pydantic
 pyinstrument==5.0.1       # via motion-base (pyproject.toml)
 pymongo==4.13.0           # via mongoengine, motor
@@ -61,7 +61,7 @@ starlette==0.46.2         # via fastapi-slim
 structlog==25.3.0         # via motion-base (pyproject.toml)
 toml==0.10.2              # via beanie
 typing-extensions==4.13.2  # via anyio, beanie, elasticsearch, fastapi-slim, flexcache, flexparser, pint, pydantic, pydantic-core, typing-inspection
-typing-inspection==0.4.0  # via pydantic
+typing-inspection==0.4.1  # via pydantic
 tzdata==2025.2            # via kombu
 urllib3==2.4.0            # via elastic-transport, requests
 uvicorn==0.34.2           # via motion-base (pyproject.toml)
