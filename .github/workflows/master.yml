@@ -27,7 +27,7 @@ jobs:
         ports:
           - '5672:5672'
       elasticsearch:
-        image: elasticsearch:8.18.1
+        image: elasticsearch:9.0.1
         ports:
           - '9200:9200'
         env:
