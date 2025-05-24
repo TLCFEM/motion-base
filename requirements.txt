@@ -31,7 +31,7 @@ h11==0.16.0               # via httpcore, uvicorn
 httpcore==1.0.9           # via httpx
 httpx==0.28.1             # via motion-base (pyproject.toml)
 idna==3.10                # via anyio, email-validator, httpx, requests, yarl
-joserfc==1.0.4            # via motion-base (pyproject.toml)
+joserfc==1.1.0            # via motion-base (pyproject.toml)
 kombu==5.5.3              # via celery
 lazy-model==0.2.0         # via beanie
 llvmlite==0.44.0          # via numba
