@@ -27,7 +27,7 @@ import ServerModal from "./Server";
 import { marked } from "marked";
 import hljs from "highlight.js";
 
-const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting">("jackpot");
+const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting" | "brief">("brief");
 const [total] = createResource<number>(get_total_api);
 
 const App: Component = () => {
@@ -35,22 +35,22 @@ const App: Component = () => {
         tippy(`#btn-jackpot`, {
             content: "Get a random record from the database.",
             animation: "scale",
-            theme: "translucent"
+            theme: "translucent",
         });
         tippy(`#btn-query`, {
             content: "Query the database according to certain criteria.",
             animation: "scale",
-            theme: "translucent"
+            theme: "translucent",
         });
         tippy(`#btn-process`, {
             content: "Apply further processing to records.",
             animation: "scale",
-            theme: "translucent"
+            theme: "translucent",
         });
         tippy(`#btn-scripting`, {
             content: "Guides to programmatic usage.",
             animation: "scale",
-            theme: "translucent"
+            theme: "translucent",
         });
     });
 
@@ -66,7 +66,7 @@ const App: Component = () => {
                         alignItems: "center",
                         alignContent: "center",
                         gap: "1rem",
-                        height: "4rem"
+                        height: "4rem",
                     }}
                 >
                     <Typography sx={{ flexGrow: 1 }} variant="h5">
@@ -102,6 +102,9 @@ const App: Component = () => {
                     <Match when={mode() === "scripting"}>
                         <Guide />
                     </Match>
+                    <Match when={mode() === "brief"}>
+                        <Brief />
+                    </Match>
                 </Switch>
             </Box>
         </Stack>
@@ -114,12 +117,30 @@ const Guide = () => {
     onMount(async () => {
         const response = await fetch("/src/assets/client.md");
 
-        setHtml(await marked.use({ async: true }).parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")));
+        setHtml(
+            await marked
+                .use({ async: true })
+                .parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")),
+        );
 
         hljs.highlightAll();
     });
 
     return <div id="md-content" style={{ width: "100%" }} innerHTML={html()} />;
-}
+};
+
+const Brief = () => {
+    const [html, setHtml] = createSignal<string>("");
+
+    onMount(async () => {
+        const response = await fetch("/src/assets/brief.md");
+
+        setHtml(await marked.use({ async: true }).parse(await response.text()));
+
+        hljs.highlightAll();
+    });
+
+    return <div id="md-content" style={{ width: "100%" }} innerHTML={html()} />;
+};
 
 export default App;
