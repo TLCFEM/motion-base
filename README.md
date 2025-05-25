@@ -11,7 +11,6 @@ It comes with a web interface and a Python client that can be used to access the
 
 > [!IMPORTANT]
 > **Check out the [demo](http://170.64.176.26/) site.**
-> ![screenshot](docs/screenshot.png)
 
 ## Main Functionalities
 
@@ -23,6 +22,8 @@ It comes with a web interface and a Python client that can be used to access the
 
 Potential use cases include: 1) seismology statistical analysis, 2) structural dynamics analysis, 3) uncertainty
 quantification, and 4) many others.
+
+![screenshot](docs/screenshot.png)
 
 > [!IMPORTANT]
 > **Collaboration in any form at various levels is welcome.**
