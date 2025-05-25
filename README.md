@@ -9,7 +9,8 @@ records from different national databases.
 
 It comes with a web interface and a Python client that can be used to access the data programmatically.
 
-**Check out the [demo](http://170.64.176.26/) site.**
+> [!IMPORTANT]
+> **Check out the [demo](http://170.64.176.26/) site.**
 
 ![screenshot](docs/screenshot.png)
 
@@ -20,6 +21,12 @@ It comes with a web interface and a Python client that can be used to access the
 - [x] Provide ad hoc processing, including up-/down-sampling, normalization, filtering and computation of response spectra.
 - [x] Provide standard machine-readable format for the processed data and a programmatic interface to allow further processing in large scale.
 - [x] Convert acceleration record to velocity/displacement record that is consistent with specific time integration methods.
+
+Potential use cases include: 1) seismology statistical analysis, 2) structural dynamics analysis, 3) uncertainty
+quantification, and 4) many others.
+
+> [!IMPORTANT]
+> **Collaboration in any form at various levels is welcome.**
 
 ## Quick Start
 
