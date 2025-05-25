@@ -126,7 +126,7 @@ const Guide = () => {
         hljs.highlightAll();
     });
 
-    return <div id="md-content" style={{ width: "100%" }} innerHTML={html()} />;
+    return <div id="md-content" style={{ margin: "auto", "max-width": "800pt" }} innerHTML={html()} />;
 };
 
 const Brief = () => {
@@ -140,7 +140,7 @@ const Brief = () => {
         hljs.highlightAll();
     });
 
-    return <div id="md-content" style={{ width: "100%" }} innerHTML={html()} />;
+    return <div id="md-content" style={{ margin: "auto", "max-width": "800pt" }} innerHTML={html()} />;
 };
 
 export default App;

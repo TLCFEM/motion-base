@@ -273,7 +273,7 @@ const Settings: Component<sxProps> = (props) => {
                 <Stack sx={stackProps}>
                     <TextField
                         size="small"
-                        sx={{ minWidth: "17ch" }}
+                        sx={{ minWidth: "18ch" }}
                         id="from-date"
                         label="From"
                         type="date"
@@ -284,7 +284,7 @@ const Settings: Component<sxProps> = (props) => {
                     />
                     <TextField
                         size="small"
-                        sx={{ minWidth: "17ch" }}
+                        sx={{ minWidth: "18ch" }}
                         id="to-date"
                         label="To"
                         type="date"

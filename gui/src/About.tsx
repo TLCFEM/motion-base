@@ -76,13 +76,13 @@ export default function AboutModal() {
                         border: "1px solid lightgrey",
                         borderRadius: "4px",
                         boxShadow: "24px",
-                        p: 4
+                        p: 4,
                     }}
                 >
                     <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
                         <img src={mb_logo} alt="logo" height="50px" />
                         <Typography variant="h4" sx={{ p: 1 }}>
-                            Motion Base
+                            motion-base
                         </Typography>
                     </Stack>
                     <Typography variant="body1" sx={{ p: 1 }}>

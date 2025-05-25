@@ -18,8 +18,8 @@ It utilizes modern database tools such as [`Elasticsearch`](https://www.elastic.
 
 ## Why
 
-A recent [paper](https://doi.org/10.1080/13632469.2024.2372814) discusses the need of filtering the target ground
-motion records before using them in dynamic analyses.
+A recent paper [10.1080/13632469.2024.2372814](https://doi.org/10.1080/13632469.2024.2372814) discusses the need of
+filtering the target ground motion records before using them in dynamic analyses.
 The main conclusion is that, as a safety measure and general rule of thumb, any ground motion records need to be filtered
 based on the properties of the system being analyzed and the time integration method used.
 
