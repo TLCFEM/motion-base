@@ -11,8 +11,7 @@ It comes with a web interface and a Python client that can be used to access the
 
 > [!IMPORTANT]
 > **Check out the [demo](http://170.64.176.26/) site.**
-
-![screenshot](docs/screenshot.png)
+> ![screenshot](docs/screenshot.png)
 
 ## Main Functionalities
 
