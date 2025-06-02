@@ -20,8 +20,14 @@ It comes with a web interface and a Python client that can be used to access the
 - [x] Provide standard machine-readable format for the processed data and a programmatic interface to allow further processing in large scale.
 - [x] Convert acceleration record to velocity/displacement record that is consistent with specific time integration methods.
 
-Potential use cases include: 1) seismology statistical analysis, 2) structural dynamics analysis, 3) uncertainty
-quantification, and 4) many others.
+Potential use cases include:
+
+1. seismology statistical analysis,
+2. structural dynamics analysis,
+3. uncertainty quantification,
+4. artificial ground motion generation,
+5. machine learning applications,
+6. many others.
 
 ![screenshot](docs/screenshot.png)
 
