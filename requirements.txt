@@ -23,7 +23,7 @@ dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==8.17.1  # via elasticsearch
 elasticsearch==9.0.2      # via motion-base (pyproject.toml)
 email-validator==2.2.0    # via motion-base (pyproject.toml)
-fastapi-slim==0.115.12    # via motion-base (pyproject.toml)
+fastapi-slim==0.115.13    # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
 frozenlist==1.7.0         # via aiohttp, aiosignal
@@ -37,7 +37,7 @@ lazy-model==0.2.0         # via beanie
 llvmlite==0.44.0          # via numba
 mongoengine==0.29.1       # via motion-base (pyproject.toml)
 motor==3.7.1              # via beanie
-multidict==6.4.4          # via aiohttp, yarl
+multidict==6.5.0          # via aiohttp, yarl
 numba==0.61.2             # via motion-base (pyproject.toml)
 numpy==2.2.6              # via numba, scipy
 packaging==25.0           # via kombu
@@ -50,7 +50,7 @@ pycparser==2.14           # via cffi, motion-base (pyproject.toml)
 pydantic==2.11.7          # via beanie, fastapi-slim, lazy-model
 pydantic-core==2.33.2     # via pydantic
 pyinstrument==5.0.2       # via motion-base (pyproject.toml)
-pymongo==4.13.1           # via mongoengine, motor
+pymongo==4.13.2           # via mongoengine, motor
 python-dateutil==2.9.0.post0  # via celery, elasticsearch
 python-dotenv==1.1.0      # via motion-base (pyproject.toml)
 python-multipart==0.0.20  # via motion-base (pyproject.toml)
@@ -63,7 +63,7 @@ structlog==25.4.0         # via motion-base (pyproject.toml)
 typing-extensions==4.14.0  # via anyio, beanie, elasticsearch, fastapi-slim, flexcache, flexparser, pint, pydantic, pydantic-core, typing-inspection
 typing-inspection==0.4.1  # via pydantic
 tzdata==2025.2            # via kombu
-urllib3==2.4.0            # via elastic-transport, requests
+urllib3==2.5.0            # via elastic-transport, requests
 uvicorn==0.34.3           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
 wcwidth==0.2.13           # via prompt-toolkit
