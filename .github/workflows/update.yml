@@ -31,3 +31,4 @@ jobs:
       with:
         delete-branch: true
         title: Update Python and Node dependencies
+        commit-message: '[chore] Update Python and Node dependencies'
