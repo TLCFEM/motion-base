@@ -9,8 +9,8 @@
     "serve": "vite preview"
   },
   "devDependencies": {
-    "@types/leaflet": "^1.9.19",
-    "@types/node": "^24.0.10",
+    "@types/leaflet": "^1.9.20",
+    "@types/node": "^24.0.13",
     "@types/plotly.js-basic-dist-min": "^2.12.4",
     "prettier": "^3.6.2",
     "solid-devtools": "^0.34.3",
