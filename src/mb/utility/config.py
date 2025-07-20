@@ -15,7 +15,7 @@
 
 from beanie import init_beanie
 from mongoengine import connect, disconnect
-from motor.motor_asyncio import AsyncIOMotorClient
+from pymongo import AsyncMongoClient
 
 from ..app.utility import User
 from ..record.async_record import Record, UploadTask
@@ -46,7 +46,7 @@ async def init_mongo():
         host=f"{uri}{MONGO_DB_NAME}?authSource=admin", uuidrepresentation="standard"
     )
     await init_beanie(
-        database=AsyncIOMotorClient(uri, uuidRepresentation="standard")[MONGO_DB_NAME],
+        database=AsyncMongoClient(uri, uuidRepresentation="standard").get_database(MONGO_DB_NAME),
         document_models=[Record, User, UploadTask],
     )
     return mongo_client
