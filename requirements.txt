@@ -11,7 +11,7 @@ bcrypt==4.3.0             # via motion-base (pyproject.toml)
 beanie==1.30.0            # via motion-base (pyproject.toml)
 billiard==4.2.1           # via celery
 celery==5.5.3             # via motion-base (pyproject.toml)
-certifi==2025.7.9         # via elastic-transport, httpcore, httpx, requests
+certifi==2025.7.14        # via elastic-transport, httpcore, httpx, requests
 cffi==1.17.1              # via cryptography
 charset-normalizer==3.4.2  # via requests
 click==8.2.1              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
@@ -31,7 +31,7 @@ h11==0.16.0               # via httpcore, uvicorn
 httpcore==1.0.9           # via httpx
 httpx==0.28.1             # via motion-base (pyproject.toml)
 idna==3.10                # via anyio, email-validator, httpx, requests, yarl
-joserfc==1.2.1            # via motion-base (pyproject.toml)
+joserfc==1.2.2            # via motion-base (pyproject.toml)
 kombu==5.5.4              # via celery
 lazy-model==0.2.0         # via beanie
 llvmlite==0.44.0          # via numba
