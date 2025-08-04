@@ -22,7 +22,7 @@ spec:
             type: Directory
       containers:
         - name: mb-worker
-          image: tlcfem/motion-base-back
+          image: tlcfem/motion-base:back
           imagePullPolicy: Always
           args:
             - celery

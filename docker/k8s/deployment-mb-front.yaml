@@ -17,7 +17,7 @@ spec:
     spec:
       containers:
         - name: mb-front
-          image: tlcfem/motion-base-front
+          image: tlcfem/motion-base:front
           imagePullPolicy: Always
           ports:
             - containerPort: 3000

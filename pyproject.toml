@@ -9,7 +9,7 @@ description = "a strong motion database"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
-keywords = ["earthquake"]
+keywords = ["earthquake", "ground motion", "response history analysis", "strong motion", "seismology"]
 authors = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
 maintainers = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
 classifiers = [
@@ -78,4 +78,4 @@ venv = ".venv"
 
 [tool.ruff.lint]
 select = ["E", "F", "UP", "B", "SIM", "I"]
-ignore = ["B008","E501"]
+ignore = ["B008", "E501"]

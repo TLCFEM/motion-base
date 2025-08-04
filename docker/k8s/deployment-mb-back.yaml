@@ -22,7 +22,7 @@ spec:
             type: Directory
       containers:
         - name: mb-back
-          image: tlcfem/motion-base-back
+          image: tlcfem/motion-base:back
           imagePullPolicy: Always
           ports:
             - containerPort: 8000

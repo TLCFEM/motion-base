@@ -93,7 +93,7 @@ services:
     volumes:
       - motion_elasticsearch:/usr/share/elasticsearch/data
   mb-back:
-    image: tlcfem/motion-base-back
+    image: tlcfem/motion-base:back
     container_name: mb-back
     restart: 'always'
     depends_on:
@@ -128,7 +128,7 @@ services:
       RABBITMQ_PASSWORD: \${RABBITMQ_PASSWORD}
       ELASTIC_HOST: mb-elasticsearch
   mb-front:
-    image: tlcfem/motion-base-front
+    image: tlcfem/motion-base:front
     container_name: mb-front
     restart: 'always'
     command: ['127.0.0.1']

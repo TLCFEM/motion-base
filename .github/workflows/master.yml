@@ -27,7 +27,7 @@ jobs:
         ports:
           - '5672:5672'
       elasticsearch:
-        image: elasticsearch:9.0.1
+        image: elasticsearch:9.1.0
         ports:
           - '9200:9200'
         env:
@@ -97,7 +97,7 @@ jobs:
           file: back.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: tlcfem/motion-base-back:latest
+          tags: tlcfem/motion-base:back
       - name: Build Frontend
         uses: docker/build-push-action@v6
         with:
@@ -105,4 +105,4 @@ jobs:
           file: front.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
-          tags: tlcfem/motion-base-front:latest
+          tags: tlcfem/motion-base:front
