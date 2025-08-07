@@ -20,4 +20,4 @@ WORKDIR /mb/gui
 
 ENTRYPOINT ["/bin/sh", "gui.sh"]
 
-CMD ["170.64.176.26"]
+CMD ["mb.tlcfem.top"]
