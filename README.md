@@ -48,4 +48,4 @@ curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/s
 Please always check the content of the script (especially from the Internet) before executing it.
 The following is a walkthrough of the script.
 
-[![walkthrough](docs/demo.gif)](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)
+[<p align="center"><img src="docs/demo.gif"></p>](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)

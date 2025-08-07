@@ -51,7 +51,7 @@ Please ensure `docker`, `curl`, and `jq` are installed on the system.
 Please always check the content of the script (especially from the Internet) before executing it.
 The following is a walkthrough of the script.
 
-[![walkthrough](https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/docs/demo.gif)](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)
+[<p align="center"><img src="[docs/demo.gif](https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/docs/demo.gif)"></p>](https://asciinema.org/a/FYpQv4PFufAEArqzWBOyodzeQ)
 
 ### To develop the application locally
 
