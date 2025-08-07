@@ -6,7 +6,7 @@ if [ $# -lt 1 ]; then
 fi
 
 for file in dist/assets/*.js; do
-    sed -i "s/127.0.0.1/$1/g" "$file"
+    sed -i "s|http://127.0.0.1|https://$1|g" "$file"
 done
 
 shift
