@@ -31,7 +31,7 @@ data:
   # if locally running on port 8000, set to http://localhost:8000
   # if locally running on port 8000 with nginx reverse proxy on port 80, set to http://localhost:80
   # if running on a server on port 8000, set to http://<server-public-ip>:8000
-  MB_MAIN_SITE: "http://mb.tlcfem.top:8000"
+  MB_MAIN_SITE: "https://mb.tlcfem.top:8000"
   # mongodb related configurations
   # mongodb service host and port
   # if mongodb container is running on the same host and port is exposed, set to localhost

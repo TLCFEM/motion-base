@@ -5,7 +5,7 @@ aiohttp==3.12.15          # via elasticsearch
 aiosignal==1.4.0          # via aiohttp
 amqp==5.3.1               # via kombu
 annotated-types==0.7.0    # via pydantic
-anyio==4.9.0              # via httpx, starlette
+anyio==4.10.0             # via httpx, starlette
 attrs==25.3.0             # via aiohttp
 bcrypt==4.3.0             # via motion-base (pyproject.toml)
 beanie==2.0.0             # via motion-base (pyproject.toml)
@@ -18,7 +18,7 @@ click==8.2.1              # via beanie, celery, click-didyoumean, click-plugins,
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1.2    # via celery
 click-repl==0.3.0         # via celery
-cryptography==45.0.5      # via joserfc
+cryptography==45.0.6      # via joserfc
 dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==9.1.0  # via elasticsearch
 elasticsearch==9.1.0      # via motion-base (pyproject.toml)
@@ -49,7 +49,7 @@ pycparser==2.14           # via cffi, motion-base (pyproject.toml)
 pydantic==2.11.7          # via beanie, fastapi-slim, lazy-model
 pydantic-core==2.33.2     # via pydantic
 pyinstrument==5.0.3       # via motion-base (pyproject.toml)
-pymongo==4.13.2           # via beanie, mongoengine
+pymongo==4.14.0           # via beanie, mongoengine
 python-dateutil==2.9.0.post0  # via celery, elasticsearch
 python-dotenv==1.1.1      # via motion-base (pyproject.toml)
 python-multipart==0.0.20  # via motion-base (pyproject.toml)
