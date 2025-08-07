@@ -42,7 +42,7 @@ from rich.pretty import pprint
 
 from mb.client import MBClient
 
-server_url = "https://mb.tlcfem.top:8000"
+server_url = "https://mb.tlcfem.top:8443"
 ```
 
 
