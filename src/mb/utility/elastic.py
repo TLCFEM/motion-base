@@ -18,7 +18,7 @@ from __future__ import annotations
 import asyncio
 import time
 
-from elasticsearch import AsyncElasticsearch, Elasticsearch
+from elasticsearch import AsyncElasticsearch, BadRequestError, Elasticsearch
 
 from mb.utility.env import ELASTIC_HOST
 
@@ -70,9 +70,13 @@ async def async_elastic():
         await asyncio.sleep(delay)
 
     if not await async_client.indices.exists(index="record"):
-        await async_client.indices.create(
-            index="record", mappings=generate_elastic_mapping()
-        )
+        try:
+            await async_client.indices.create(
+                index="record", mappings=generate_elastic_mapping()
+            )
+        except BadRequestError as e:
+            if not await async_client.indices.exists(index="record"):
+                raise e
 
     return async_client
 
