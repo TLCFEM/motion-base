@@ -147,7 +147,15 @@ volumes:
 
 docker compose -f docker-compose.yml up -d || exit 0
 
-curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/tests/data/jp_test.knt.tar.gz -o jp_test.knt.tar.gz
+cleanup() {
+    echo "
+>>> Shutdown docker..."
+    docker compose -f docker-compose.yml down
+    echo ">>> To clean up, please remove the 'mb-example' directory and docker volumes."
+}
+
+trap 'cleanup; exit 130' INT
+trap 'cleanup; exit 143' TERM
 
 echo ">>> Waiting for the application to start..."
 response=""
@@ -161,6 +169,8 @@ token="$(curl -s -X 'POST' 'http://localhost:8000/user/token' \
   -H 'Content-Type: application/x-www-form-urlencoded' \
   -d 'grant_type=password&username=test&password=password' | jq -r '.access_token')"
 
+curl -s https://raw.githubusercontent.com/TLCFEM/motion-base/refs/heads/master/tests/data/jp_test.knt.tar.gz -o jp_test.knt.tar.gz
+
 curl -s -X 'POST' 'http://localhost:8000/jp/upload' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
@@ -172,16 +182,6 @@ while [ "$total" -lt 1 ]; do
     sleep 2
     total="$(curl -s -X 'GET' 'http://localhost:8000/total' -H 'accept: application/json' | jq -r '.total | .[0]')"
 done
-
-cleanup() {
-    echo "
->>> Shutdown docker..."
-    docker compose -f docker-compose.yml down
-    echo ">>> To clean up, please remove the 'mb-example' directory and docker volumes."
-}
-
-trap 'cleanup; exit 130' INT
-trap 'cleanup; exit 143' TERM
 
 echo "The application is now running at http://localhost:3000
 You can open the url in your browser to access the application.
