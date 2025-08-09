@@ -55,7 +55,7 @@ services:
   mb-mongo:
     image: mongo
     container_name: mb-mongo
-    restart: 'always'
+    restart: always
     command: --wiredTigerCacheSizeGB \${MONGO_CACHE_SIZE} --port \${MONGO_PORT}
     mem_limit: \${MONGO_MEM_LIMIT}
     ports:
@@ -71,7 +71,7 @@ services:
   mb-rabbitmq:
     image: rabbitmq:management
     container_name: mb-rabbitmq
-    restart: 'always'
+    restart: always
     ports:
       - '\${RABBITMQ_PORT}:\${RABBITMQ_PORT}'
       - '15672:15672'
@@ -85,7 +85,7 @@ services:
   mb-elasticsearch:
     image: elasticsearch:\${ELASTIC_VERSION}
     container_name: mb-elasticsearch
-    restart: 'always'
+    restart: always
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx4g"
       discovery.type: single-node
@@ -95,7 +95,7 @@ services:
   mb-back:
     image: tlcfem/motion-base:back
     container_name: mb-back
-    restart: 'always'
+    restart: always
     depends_on:
       - mb-mongo
       - mb-rabbitmq
@@ -130,8 +130,8 @@ services:
   mb-front:
     image: tlcfem/motion-base:front
     container_name: mb-front
-    restart: 'always'
-    command: ['127.0.0.1']
+    restart: always
+    command: ['http://127.0.0.1:8000']
     depends_on:
       - mb-back
     ports:
