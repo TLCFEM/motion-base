@@ -13,7 +13,7 @@ billiard==4.2.1           # via celery
 celery==5.5.3             # via motion-base (pyproject.toml)
 certifi==2025.8.3         # via elastic-transport, httpcore, httpx, requests
 cffi==1.17.1              # via cryptography
-charset-normalizer==3.4.2  # via requests
+charset-normalizer==3.4.3  # via requests
 click==8.2.1              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1.2    # via celery
