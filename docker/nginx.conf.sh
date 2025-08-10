@@ -1,5 +1,10 @@
 #!/bin/bash
 
+if [ $# -lt 1 ]; then
+  echo "Usage: $0 <backend_prefix>"
+  echo "Example: $0 docker-mb-back"
+  exit 1
+fi
 
 if [ -z "${MB_REPLICA}" ]; then
   echo "MB_REPLICA is not set, using nproc."
@@ -19,7 +24,7 @@ echo "upstream backends {" > "${CONF_PATH}"
 echo "  least_conn;" >> "${CONF_PATH}"
 for i in $(seq 1 "${MB_REPLICA}")
 do
-  echo "  server docker-mb-back-${i}:${MB_PORT};" >> "${CONF_PATH}"
+  echo "  server $1-${i}:${MB_PORT};" >> "${CONF_PATH}"
 done
 
 cat <<EOF >> "${CONF_PATH}"
