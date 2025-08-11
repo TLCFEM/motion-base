@@ -36,7 +36,7 @@ kombu==5.5.4              # via celery
 lazy-model==0.3.0         # via beanie
 llvmlite==0.44.0          # via numba
 mongoengine==0.29.1       # via motion-base (pyproject.toml)
-multidict==6.6.3          # via aiohttp, yarl
+multidict==6.6.4          # via aiohttp, yarl
 numba==0.61.2             # via motion-base (pyproject.toml)
 numpy==2.2.6              # via numba, scipy
 packaging==25.0           # via kombu
