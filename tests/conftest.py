@@ -51,7 +51,7 @@ async def mongo_connection(monkeypatch):
         mongo_client.drop_database(random_db)
 
 
-@pytest.fixture(scope="session", autouse=True)
+@pytest.fixture(scope="function", autouse=True)
 async def mock_client():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
