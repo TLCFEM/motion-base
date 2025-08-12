@@ -48,6 +48,11 @@ jobs:
           pip install uv
           uv pip install --system -e .[dev] pyinstaller
           export NUMBA_DISABLE_JIT=1
+          wget https://raw.githubusercontent.com/vishnubob/wait-for-it/refs/heads/master/wait-for-it.sh
+          chmod +x wait-for-it.sh
+          ./wait-for-it.sh localhost:27017 -s -t 60
+          ./wait-for-it.sh localhost:5672 -s -t 60
+          ./wait-for-it.sh localhost:9200 -s -t 60
           pytest -n auto --cov --junitxml=junit.xml .
       - name: Codecov
         if: matrix.python-version == '3.10'
