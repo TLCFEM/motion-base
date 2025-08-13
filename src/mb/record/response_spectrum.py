@@ -100,7 +100,7 @@ class Oscillator:
         )
 
 
-@njit(parallel=True)
+@njit(signature=(float64, float64, float64[:], float64[:]), parallel=True)
 def response_spectrum(
     damping_ratio: float, interval: float, motion: np.ndarray, period: np.ndarray
 ) -> np.ndarray:
@@ -126,7 +126,7 @@ def response_spectrum(
     return results
 
 
-@njit
+@njit(signature=(float64, float64, float64, float64[:]))
 def sdof_response(
     damping_ratio: float, interval: float, freq: float, motion: np.ndarray
 ) -> np.ndarray:
