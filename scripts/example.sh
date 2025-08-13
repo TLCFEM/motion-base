@@ -1,26 +1,28 @@
 #!/bin/bash
 
-echo "This is an example script that sets up a working application for demonstration.
+echo -e "\
+\033[1;33mThis is an example script that sets up a working application for demonstration.\033[0m
 
-This script requires Internet access and 'curl' and 'jq' to download files and images.
-This script also requires 'docker' and 'docker-compose' to be installed on your system.
-It is assumed that the current user has permission to run docker commands without sudo.
+This script requires \033[1;36mInternet access\033[0m and '\033[1;36mcurl\033[0m' and '\033[1;36mjq\033[0m' to download files and images.
+This script also requires '\033[1;36mdocker\033[0m' to be installed on your system.
+It is assumed that the current user has permission to run docker commands \033[1;35mwithout sudo\033[0m.
+If not, please check this page: https://docs.docker.com/engine/install/linux-postinstall/#manage-docker-as-a-non-root-user
 
-Please be informed that this script is for demonstration purposes only.
-It means the setup only includes the minimum simplest configuration required to run the application.
-Typically, most docker services shall be run behind a reverse proxy.
-Only the necessary ports and services shall be exposed to the public.
-Also, a production setup shall deploy celery workers to handle processing tasks in the background.
-These are not included in this script.
+\033[1;33mPlease be informed that this script is for demonstration purposes only.\033[0m
+It means the setup only includes the \033[1;36mminimum simplest configuration\033[0m required to run the application.
+Typically, most docker services shall be run \033[1;31mbehind a reverse proxy\033[0m.
+Only the necessary ports and services shall be \033[1;31mexposed to the public\033[0m.
+Also, a production setup shall deploy \033[1;36mcelery workers\033[0m to handle processing tasks in the background.
+\033[1;31mThese are not included in this script.\033[0m
 
-This script will create a new directory called 'mb-example' in the current directory.
+This script will create a \033[1;36mnew directory\033[0m called '\033[1;36mmb-example\033[0m' in the current directory.
 All files will be downloaded to this directory.
 
 The following files will be downloaded:
-1. A .env file that defines environment variables for the application.
-2. An example data file 'jp_test.knt.tar.gz' that will be uploaded to the application.
+1. A \033[1;36m.env\033[0m file that defines environment variables for the application.
+2. An \033[1;36mexample data file\033[0m '\033[1;36mjp_test.knt.tar.gz\033[0m' that will be uploaded to the application.
 
-Do you want to continue? (y/n)"
+\033[1;33mDo you want to continue? (y/n)\033[0m"
 
 read -r response
 if [ "$response" != "y" ]; then
@@ -151,7 +153,7 @@ cleanup() {
     echo "
 >>> Shutdown docker..."
     docker compose -f docker-compose.yml down
-    echo ">>> To clean up, please remove the 'mb-example' directory and docker volumes."
+    echo -e "\033[1;33m>>>\033[0m To clean up, please remove the \033[1;36m'mb-example'\033[0m directory and \033[1;36mdocker volumes\033[0m."
 }
 
 trap 'cleanup; exit 130' INT
@@ -183,11 +185,12 @@ while [ "$total" -lt 1 ]; do
     total="$(curl -s -X 'GET' 'http://localhost:8000/total' -H 'accept: application/json' | jq -r '.total | .[0]')"
 done
 
-echo "The application is now running at http://localhost:3000
-You can open the url in your browser to access the application.
-There shall be six records in the database.
+echo -e "\
+The application is now running at \033[1;36mhttp://localhost:3000\033[0m
+You can open the URL in your browser to access the application.
+There shall be \033[1;33msix records\033[0m in the database.
 
-To stop the application, please press 'Ctrl + C'."
+To stop the application, please press \033[1;31m'Ctrl + C'\033[0m."
 
 while true; do
     sleep 10
