@@ -126,7 +126,9 @@ class RecordResponse(RawRecordResponse):
             raise RuntimeError("Cannot convert to spectrum.")
 
         self.frequency_interval = 1 / (self.time_interval * len(self.waveform))
-        self.spectrum = 2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
+        self.spectrum = (
+            2 * np.abs(np.fft.rfft(self.waveform)) / len(self.waveform)
+        ).tolist()
 
     def to_response_spectrum(
         self, damping_ratio: float, period: list[float] | np.ndarray

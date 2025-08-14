@@ -1,7 +1,8 @@
-.venv
-.idea
-*.egg-info
 __pycache__
+.dirty
+.idea
+.venv
+*.egg-info
 build
 dist
 mb_runner.spec
