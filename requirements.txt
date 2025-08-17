@@ -40,7 +40,7 @@ multidict==6.6.4          # via aiohttp, yarl
 numba==0.61.2             # via motion-base (pyproject.toml)
 numpy==2.2.6              # via numba, scipy
 packaging==25.0           # via kombu
-pint==0.24.4              # via motion-base (pyproject.toml)
+pint==0.25                # via motion-base (pyproject.toml)
 platformdirs==4.3.8       # via pint
 prompt-toolkit==3.0.51    # via click-repl
 propcache==0.3.2          # via aiohttp, yarl
