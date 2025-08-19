@@ -12,6 +12,8 @@ It comes with a web interface and a Python client that can be used to access the
 > [!IMPORTANT]
 > **Check out the [demo](https://mb.tlcfem.top/) site.**
 
+![screenshot](docs/screenshot.png)
+
 ## Main Functionalities
 
 - [x] Parse and index ground motion records from different databases in a uniform format.
@@ -28,8 +30,6 @@ Potential use cases include:
 4. artificial ground motion generation,
 5. machine learning applications,
 6. many others.
-
-![screenshot](docs/screenshot.png)
 
 > [!IMPORTANT]
 > **Collaboration in any form at various levels is welcome.**
