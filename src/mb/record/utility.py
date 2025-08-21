@@ -20,7 +20,7 @@ from uuid import NAMESPACE_OID, uuid4, uuid5
 
 import numpy as np
 import pint
-from numba import njit
+from numba import float64, int32, njit
 from scipy import signal
 
 
@@ -31,7 +31,7 @@ def perform_fft(
     return sampling_frequency / magnitude.size, fft_magnitude
 
 
-@njit(parallel=True)
+@njit((float64[:],), parallel=True)
 def normalise(magnitude: np.ndarray) -> np.ndarray:
     max_value: float = abs(np.max(magnitude))
     min_value: float = abs(np.min(magnitude))
@@ -43,12 +43,12 @@ def convert_to(quantity: pint.Quantity, unit: pint.Unit | None):
     return quantity.to(unit).magnitude if unit else quantity.magnitude
 
 
-@njit
+@njit((float64[:], float64[:]))
 def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
     return np.convolve(waveform, window, mode="same")
 
 
-@njit
+@njit((int32, float64[:]))
 def zero_stuff(ratio: int, waveform: np.ndarray | list[float]) -> np.ndarray:
     if ratio == 1:
         return np.array(waveform) if isinstance(waveform, list) else waveform
