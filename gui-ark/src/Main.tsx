@@ -19,14 +19,14 @@ const Brief = () => {
 };
 
 const Main = () => (
-    <Tabs.Root lazyMount defaultValue="main">
-        <Tabs.List>
-            <Tabs.Trigger value="main">Main</Tabs.Trigger>
-            <Tabs.Trigger value="jackpot">Jackpot</Tabs.Trigger>
-            <Tabs.Trigger value="query">Query</Tabs.Trigger>
-            <Tabs.Trigger value="process">Process</Tabs.Trigger>
-            <Tabs.Trigger value="scripting">Scripting</Tabs.Trigger>
-            <Tabs.Trigger value="server">Server</Tabs.Trigger>
+    <Tabs.Root lazyMount defaultValue="main" class="tabs-root">
+        <Tabs.List class="tabs-list">
+            <Tabs.Trigger class="tabs-trigger" value="main">Main</Tabs.Trigger>
+            <Tabs.Trigger class="tabs-trigger" value="jackpot">Jackpot</Tabs.Trigger>
+            <Tabs.Trigger class="tabs-trigger" value="query">Query</Tabs.Trigger>
+            <Tabs.Trigger class="tabs-trigger" value="process">Process</Tabs.Trigger>
+            <Tabs.Trigger class="tabs-trigger" value="scripting">Scripting</Tabs.Trigger>
+            <Tabs.Trigger class="tabs-trigger" value="server">Server</Tabs.Trigger>
             <Tabs.Indicator/>
         </Tabs.List>
         <Tabs.Content value="main"><Brief/></Tabs.Content>
