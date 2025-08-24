@@ -22,3 +22,26 @@ pre {
     padding: 2px;
     border-radius: 2px;
 }
+
+[data-scope='tabs'][data-part='root'] {
+    max-width: 1200pt;
+    margin: 0 auto 0 auto;
+}
+
+[data-scope='tabs'][data-part='list'] {
+    display: flex;
+    justify-content: flex-end;
+    gap: 40px;
+    margin-top: 20px;
+    margin-bottom: 20px;
+}
+
+[data-scope='tabs'][data-part='trigger'] {
+    all: unset;
+    cursor: pointer;
+    margin: 0 8px 0 8px;
+    font-size: larger;
+}
+
+[data-scope='tabs'][data-part='content'] {
+}
