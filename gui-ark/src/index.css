@@ -23,33 +23,25 @@ pre {
     border-radius: 2px;
 }
 
-.tabs-root {
-    max-width: 1200px;
-    margin: 20px auto;
-    background: #fff;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
-    padding: 24px;
+[data-scope='tabs'][data-part='root'] {
+    max-width: 1200pt;
+    margin: 0 auto 0 auto;
 }
 
-.tabs-list {
+[data-scope='tabs'][data-part='list'] {
     display: flex;
-    gap: 12px;
-    border-bottom: 2px solid #eee;
+    justify-content: flex-end;
+    gap: 40px;
+    margin-top: 20px;
     margin-bottom: 20px;
 }
 
-.tabs-trigger {
-    padding: 8px 20px;
-    background: none;
-    border: none;
+[data-scope='tabs'][data-part='trigger'] {
+    all: unset;
     cursor: pointer;
-    font-weight: 500;
-    color: #333;
-    transition: color 0.2s, border-bottom 0.2s;
+    margin: 0 8px 0 8px;
+    font-size: larger;
 }
 
-.tabs-trigger[data-active="true"] {
-    border-bottom: 2px solid #0078d4;
-    color: #0078d4;
+[data-scope='tabs'][data-part='content'] {
 }
