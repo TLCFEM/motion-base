@@ -13,22 +13,40 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
-import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@suid/material";
+import {Component, createResource, createSignal, Match, onMount, Switch} from "solid-js";
+import {AppBar, Box, Button, Stack, Toolbar, Typography} from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
 import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
-import { get_total_api } from "./API";
+import {get_total_api} from "./API";
 import Process from "./Process";
 import ServerModal from "./Server";
-import { marked } from "marked";
+import {marked} from "marked";
 import hljs from "highlight.js";
 
 const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting" | "brief">("brief");
 const [total] = createResource<number>(get_total_api);
+
+const MarkdownContent = (props: { src: string }) => {
+    const [content, setContent] = createSignal<string>("");
+
+    onMount(async () => {
+        const response = await fetch(`/src/assets/${props.src}`);
+
+        setContent(
+            await marked
+                .use({async: true})
+                .parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")),
+        );
+
+        hljs.highlightAll();
+    });
+
+    return <div style={{margin: "auto", "max-width": "800pt"}} innerHTML={content()}/>;
+};
 
 const App: Component = () => {
     onMount(() => {
@@ -69,7 +87,7 @@ const App: Component = () => {
                         height: "4rem",
                     }}
                 >
-                    <Typography sx={{ flexGrow: 1 }} variant="h5">
+                    <Typography sx={{flexGrow: 1}} variant="h5">
                         {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
                     </Typography>
                     <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
@@ -84,63 +102,31 @@ const App: Component = () => {
                     <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
                         Scripting
                     </Button>
-                    <AboutModal />
-                    <ServerModal />
+                    <AboutModal/>
+                    <ServerModal/>
                 </Toolbar>
             </AppBar>
-            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
+            <Box sx={{display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem"}}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot sx={{ border: "1px solid darkgrey", height: "calc(100vh - 7rem)" }} />
+                        <Jackpot sx={{border: "1px solid darkgrey", height: "calc(100vh - 7rem)"}}/>
                     </Match>
                     <Match when={mode() === "query"}>
-                        <QueryDatabase />
+                        <QueryDatabase/>
                     </Match>
                     <Match when={mode() === "process"}>
-                        <Process sx={{ border: "1px solid darkgrey" }} />
+                        <Process sx={{border: "1px solid darkgrey"}}/>
                     </Match>
                     <Match when={mode() === "scripting"}>
-                        <Guide />
+                        <MarkdownContent src="client.md"/>
                     </Match>
                     <Match when={mode() === "brief"}>
-                        <Brief />
+                        <MarkdownContent src="brief.md"/>
                     </Match>
                 </Switch>
             </Box>
         </Stack>
     );
-};
-
-const Guide = () => {
-    const [html, setHtml] = createSignal<string>("");
-
-    onMount(async () => {
-        const response = await fetch("/src/assets/client.md");
-
-        setHtml(
-            await marked
-                .use({ async: true })
-                .parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")),
-        );
-
-        hljs.highlightAll();
-    });
-
-    return <div id="md-content" style={{ margin: "auto", "max-width": "800pt" }} innerHTML={html()} />;
-};
-
-const Brief = () => {
-    const [html, setHtml] = createSignal<string>("");
-
-    onMount(async () => {
-        const response = await fetch("/src/assets/brief.md");
-
-        setHtml(await marked.use({ async: true }).parse(await response.text()));
-
-        hljs.highlightAll();
-    });
-
-    return <div id="md-content" style={{ margin: "auto", "max-width": "800pt" }} innerHTML={html()} />;
 };
 
 export default App;
