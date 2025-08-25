@@ -34,5 +34,5 @@ def get_stats():
 
 
 @worker_process_init.connect
-def init_mongo_in_celery_worker():
+def init_mongo_in_celery_worker(**_):
     asyncio.run(init_mongo())
