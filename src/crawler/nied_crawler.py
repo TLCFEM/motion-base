@@ -56,7 +56,15 @@ async def _crawl_once():
 
 async def crawl(root_path: Path):
     root_list = root_path / "items.txt"
-    if not root_list.exists():
+
+    start_new: bool = True
+    if root_list.exists():
+        print(
+            "The previous list of files is detected, do you want to download from scratch? (y/N)"
+        )
+        start_new = input().strip().lower() == "y"
+
+    if start_new:
         with open(root_list, "w") as file:
             for index in root_path.rglob("index.htm"):
                 with open(index) as f:
@@ -116,8 +124,8 @@ async def _parse_next(
 
 async def parse(local: Path):
     failed_file = local / "failed.txt"
-    start_new: bool = True
 
+    start_new: bool = True
     if failed_file.exists():
         print(
             "The previous failed links are detected, do you want to create server structure from scratch? (y/N)"
