@@ -3,6 +3,7 @@ __pycache__
 .idea
 .venv
 *.egg-info
+*.spec
 build
 dist
 mb_runner.spec
