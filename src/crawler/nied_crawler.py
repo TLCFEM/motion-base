@@ -9,7 +9,7 @@ from bs4 import BeautifulSoup
 BASE = "https://www.kyoshin.bosai.go.jp"
 USER = ""
 PASS = ""
-SEM_LIMIT = 10
+SEM_LIMIT = 50
 RETRY = 3
 
 
@@ -104,13 +104,11 @@ async def _parse_next(
         for link in contents.find_all("a"):
             href = link.get("href")  # type: ignore
             if not href.startswith(("?", "/")) and "." not in href:  # type: ignore
-                children.append(href)
+                children.append(href.rstrip("/"))
 
     await gather(
         *[
-            _parse_next(
-                local / child, f"{remote}{child.rstrip('/')}/", client, semaphore
-            )
+            _parse_next(local / child, f"{remote}{child}/", client, semaphore)
             for child in children
         ]
     )
@@ -132,7 +130,7 @@ async def parse(local: Path):
                 local_path, remote_url = line.strip().split(",")
                 pending_pool.add((Path(local_path), remote_url))
     else:
-        for x in ("kik/alldata/2009/", "knet/alldata/2009/"):
+        for x in ("kik/alldata/", "knet/alldata/"):
             pending_pool.add((local / x, f"{BASE}/kyoshin/download/{x}"))
 
     semaphore = Semaphore(SEM_LIMIT)
