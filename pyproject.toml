@@ -55,6 +55,9 @@ dev = [
     "ruff",
 ]
 client = [
+    "aiohttp[speedups]",
+    "beautifulsoup4",
+    "click",
     "httpx-auth",
     "matplotlib",
     "rich",
