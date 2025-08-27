@@ -16,7 +16,8 @@
 import asyncio
 
 from celery import Celery
-from celery.signals import worker_process_init
+from celery.signals import worker_process_init, worker_process_shutdown
+from mongoengine import disconnect
 
 from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
@@ -36,3 +37,8 @@ def get_stats():
 @worker_process_init.connect
 def init_mongo_in_celery_worker(**_):
     asyncio.run(init_mongo())
+
+
+@worker_process_shutdown.connect
+def shutdown_mongo_in_celery_worker(*args, **kwargs):
+    disconnect()
