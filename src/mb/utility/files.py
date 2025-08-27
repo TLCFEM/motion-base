@@ -38,12 +38,9 @@ _logger = structlog.get_logger(__name__)
 
 def _local_path(file_name: str):
     fs_root: Path = Path(MB_FS_ROOT)
-    if not fs_root.exists():
-        os.makedirs(fs_root)
 
     folder: Path = fs_root / str_factory()
-    if not folder.exists():
-        os.makedirs(folder)
+    folder.mkdir(parents=True, exist_ok=True)
 
     path: Path = folder / file_name
     if not path.exists():
