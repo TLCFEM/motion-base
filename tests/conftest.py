@@ -24,7 +24,7 @@ from httpx import ASGITransport, AsyncClient
 from mb.app.main import app
 from mb.app.utility import User, bcrypt_hash, is_active
 from mb.utility import env
-from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri, shutdown_mongo
+from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
 
 @pytest.fixture(scope="session", autouse=True)
@@ -49,7 +49,6 @@ async def mongo_connection(monkeypatch):
         mongo_client = await init_mongo()
         yield
         mongo_client.drop_database(random_db)
-        await shutdown_mongo()
 
 
 @pytest.fixture(scope="function", autouse=True)
