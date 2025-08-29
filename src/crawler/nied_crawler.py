@@ -1,3 +1,19 @@
+#  Copyright (C) 2022-2025 Theodore Chang
+#
+#  This program is free software: you can redistribute it and/or modify
+#  it under the terms of the GNU General Public License as published by
+#  the Free Software Foundation, either version 3 of the License, or
+#  (at your option) any later version.
+#
+#  This program is distributed in the hope that it will be useful,
+#  but WITHOUT ANY WARRANTY; without even the implied warranty of
+#  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#  GNU General Public License for more details.
+#
+#  You should have received a copy of the GNU General Public License
+#  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+
 from asyncio import Semaphore, gather, run
 from datetime import datetime
 from pathlib import Path
@@ -37,6 +53,8 @@ async def _fetch_file(
         print(f"{datetime.now()} {counter}/{total} Downloading {full_url}")
         try:
             async with client.get(full_url, auth=BasicAuth(USER, PASS)) as response:
+                if not response.ok:
+                    return
                 content = await response.read()
             with open(file_path, "wb") as file:
                 file.write(content)
@@ -71,8 +89,8 @@ async def crawl(root_path: Path):
                     contents = BeautifulSoup(f, "html.parser")
                     url_path = contents.find("title").text.split(" ")[-1]  # type: ignore
                     for link in contents.find_all("a"):
-                        file_name = link.get("href")  # type: ignore
-                        if file_name.endswith(".tar.gz"):  # type: ignore
+                        file_name: str = link.get("href")  # type: ignore
+                        if file_name.endswith(".tar.gz"):
                             file.write(f"{index.parent},{url_path},{file_name}\n")
 
     with open(root_list) as file:
@@ -98,20 +116,19 @@ async def _parse_next(
     async with semaphore:
         print(f"Creating directory: {local} from {remote}")
         async with client.get(remote, auth=BasicAuth(USER, PASS)) as response:
+            if not response.ok:
+                print(f">>> Error: {remote}")
+                pending_pool.add((local, remote))
+                return
             response_content = await response.read()
-        contents = BeautifulSoup(response_content, "html.parser")
-        if contents.find("title").text == "500 Internal Server Error":  # type: ignore
-            print(f">>> 500 Error: {remote}")
-            pending_pool.add((local, remote))
-            return
 
         pending_pool.discard((local, remote))
         local.mkdir(parents=True, exist_ok=True)
         with open(local / "index.htm", "wb") as file:
             file.write(response_content)
-        for link in contents.find_all("a"):
-            href = link.get("href")  # type: ignore
-            if not href.startswith(("?", "/")) and "." not in href:  # type: ignore
+        for link in BeautifulSoup(response_content, "html.parser").find_all("a"):
+            href: str = link.get("href")  # type: ignore
+            if not href.startswith(("?", "/")) and "." not in href:
                 children.append(href.rstrip("/"))
 
     await gather(
@@ -122,7 +139,13 @@ async def _parse_next(
     )
 
 
-async def parse(local: Path):
+async def _parse_once():
+    semaphore = Semaphore(SEM_LIMIT)
+    async with ClientSession() as client:
+        await gather(*[_parse_next(x, y, client, semaphore) for x, y in pending_pool])
+
+
+async def parse(local: Path, targets: list[str]):
     failed_file = local / "failed.txt"
 
     start_new: bool = True
@@ -138,12 +161,16 @@ async def parse(local: Path):
                 local_path, remote_url = line.strip().split(",")
                 pending_pool.add((Path(local_path), remote_url))
     else:
-        for x in ("kik/alldata/", "knet/alldata/"):
-            pending_pool.add((local / x, f"{BASE}/kyoshin/download/{x}"))
+        for x in targets:
+            x_stripped = "/".join(v for v in x.split("/") if v)
+            pending_pool.add(
+                (local / x_stripped, f"{BASE}/kyoshin/download/{x_stripped}/")
+            )
 
-    semaphore = Semaphore(SEM_LIMIT)
-    async with ClientSession() as client:
-        await gather(*[_parse_next(x, y, client, semaphore) for x, y in pending_pool])
+    local_retry = RETRY
+    while pending_pool and local_retry > 0:
+        local_retry -= 1
+        await _parse_once()
 
     with open(failed_file, "w") as file:
         for local_path, remote_url in pending_pool:
@@ -151,14 +178,96 @@ async def parse(local: Path):
 
 
 @click.command()
-@click.argument("mode", type=str)
 @click.argument("username", type=str)
 @click.argument("password", type=str)
-@click.option("--root", default=Path.cwd() / "NIED", type=Path, help="Root folder.")
-@click.option("--parallel", default=10, type=int, help="Number of concurrent requests.")
-@click.option("--retry", default=3, type=int, help="Number of retry attempts.")
+@click.option(
+    "--mode",
+    "-m",
+    default="all",
+    type=str,
+    help="Mode of operation: parse, crawl, or all. Default is all.",
+)
+@click.option(
+    "--root",
+    "-r",
+    default=Path.cwd() / "NIED",
+    type=Path,
+    help="Local root folder: where do you want to put the downloaded data? Default is ./NIED",
+)
+@click.option(
+    "--parallel",
+    "-p",
+    default=10,
+    type=int,
+    help="Number of concurrent requests. Default is 10.",
+)
+@click.option(
+    "--retry", default=3, type=int, help="Number of retry attempts. Default is 3."
+)
 @click.option("--dry-run", default=False, is_flag=True, help="Dry run.")
-def main(mode, username, password, root, parallel, retry, dry_run):
+@click.option(
+    "--targets",
+    "-t",
+    default=["kik/alldata/", "knet/alldata/"],
+    multiple=True,
+    help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets kik/alldata/ --targets knet/alldata/",
+)
+def main(mode, username, password, root, parallel, retry, dry_run, targets):
+    """
+    \b
+    NIED Seismic Data Crawling Utility
+    ==================================
+
+    This script provides an asynchronous command-line utility for downloading and
+    mirroring strong-motion seismograph data from the NIED (https://www.kyoshin.bosai.go.jp)
+    service.
+
+    \b
+    Overview
+    --------
+    The tool works in two main phases:
+
+    \b
+    1. **Parse Mode (`parse`)**
+    - Recursively traverses the remote server directory structure.
+    - Creates a mirrored local folder tree.
+    - Saves `index.htm` files representing remote directory listings.
+    - Tracks failed directories in `failed.txt`, allowing resumption or retry.
+
+    \b
+    2. **Crawl Mode (`crawl`)**
+    - Reads previously saved `index.htm` files.
+    - Extracts `.tar.gz` file links and downloads them concurrently.
+    - Maintains `items.txt` with a list of download targets.
+    - Retries failed downloads up to a configurable number of attempts.
+
+    \b
+    3. **All Mode (`all`)**
+    - Executes both `parse` and `crawl` phases in sequence.
+
+    \b
+    Features
+    --------
+    - Concurrent requests with configurable limits.
+    - Automatic retry of failed downloads/directories.
+    - Resumable: failed files/directories are logged and retried on subsequent runs.
+    - Interactive prompts to choose between fresh starts or resuming from saved state.
+
+    \b
+    Additional Notes
+    ----------------
+
+    - **Disclaimer**: The data fetched by this script **may be subject to copyright**.
+    This crawler is provided “as-is,” and **no responsibility is accepted** for any
+    copyright or usage issues arising from downloading or using these data.
+
+    - **Account Required**: A valid user account is needed to download waveform data
+    (registration can be done via the official NIED registration page: https://hinetwww11.bosai.go.jp/nied/registration/).
+
+    - **Rate Limit Considerations**: There may be server-imposed limitations. As of the
+    time of writing, using up to 50 concurrent connections appears to be acceptable.
+    """
+
     global USER, PASS, SEM_LIMIT, RETRY
     USER = username
     PASS = password
@@ -176,13 +285,14 @@ def main(mode, username, password, root, parallel, retry, dry_run):
         print(f"Root path: {root}")
         print(f"Parallel limit: {SEM_LIMIT}")
         print(f"Retry attempts: {RETRY}")
+        print(f"Targets: {targets}")
     else:
         if mode == "parse":
-            run(parse(root))
+            run(parse(root, targets))
         elif mode == "crawl":
             run(crawl(root))
         else:
-            run(parse(root))
+            run(parse(root, targets))
             run(crawl(root))
 
 

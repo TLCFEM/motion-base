@@ -77,6 +77,12 @@ jobs:
         with:
           name: mb_runner
           path: dist/mb_runner
+      - name: Artifact Crawler
+        if: matrix.python-version == '3.11'
+        uses: actions/upload-artifact@v4
+        with:
+          name: nied_crawler
+          path: dist/nied_crawler
   docker:
     needs: build
     runs-on: ubuntu-latest

@@ -17,3 +17,4 @@ then
 fi
 
 pyinstaller --onefile --additional-hooks-dir extra-hooks --hidden-import mb.app.main ./mb_runner.py
+pyinstaller --onefile src/crawler/nied_crawler.py
