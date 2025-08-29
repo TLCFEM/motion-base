@@ -15,6 +15,8 @@
 
 from http import HTTPStatus
 
+from mb.record.utility import uuid5_str
+
 
 async def test_acquire_token(mock_client_superuser):
     response = await mock_client_superuser.post(
@@ -40,5 +42,5 @@ async def test_user_new(mock_client):
     response = await mock_client.post("/user/new", json=new_user)
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client.delete("/user/delete", json=new_user)
+    response = await mock_client.delete(f"/user/{uuid5_str(new_user['username'])}")
     assert response.status_code == HTTPStatus.OK

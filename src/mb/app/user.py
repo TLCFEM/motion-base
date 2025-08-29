@@ -62,9 +62,9 @@ async def create_new_user(form_data: UserForm):
     return {"message": "User created."}
 
 
-@router.delete("/delete", status_code=HTTPStatus.OK)
-async def delete_user(form_data: UserForm):
-    if target_user := await User.find_one(User.username == form_data.username):
+@router.delete("/{user_id}", status_code=HTTPStatus.OK)
+async def delete_user(user_id: str):
+    if target_user := await User.find_one(User.id == user_id):
         await target_user.delete()
 
     return {"message": "User deleted."}
