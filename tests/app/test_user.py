@@ -29,26 +29,16 @@ async def test_whoami(mock_client_superuser):
 
 
 async def test_user_new(mock_client):
-    response = await mock_client.post(
-        "/user/new",
-        json={
-            "username": "tester1",
-            "password": "test!e2zAr",
-            "email": "a@b.c",
-            "last_name": "a",
-            "first_name": "a",
-        },
-    )
+    new_user = {
+        "username": "tester1",
+        "password": "test!e2zAr",
+        "email": "a@b.c",
+        "last_name": "a",
+        "first_name": "a",
+    }
+
+    response = await mock_client.post("/user/new", json=new_user)
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client.post(
-        "/user/delete",
-        json={
-            "username": "tester1",
-            "password": "test!e2zAr",
-            "email": "a@b.c",
-            "last_name": "a",
-            "first_name": "a",
-        },
-    )
+    response = await mock_client.delete("/user/delete", json=new_user)
     assert response.status_code == HTTPStatus.OK
