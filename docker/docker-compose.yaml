@@ -2,10 +2,8 @@ services:
   dev-mongo:
     image: mongo
     container_name: dev-mongo
-    restart: 'no'
+    restart: no
     command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
-    ports:
-      - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
@@ -17,7 +15,7 @@ services:
   dev-mongo-express:
     image: mongo-express
     container_name: dev-mongo-express
-    restart: 'no'
+    restart: no
     depends_on:
       - dev-mongo
     ports:
@@ -31,10 +29,7 @@ services:
   dev-rabbitmq:
     image: rabbitmq:management
     container_name: dev-rabbitmq
-    restart: 'no'
-    ports:
-      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
-      - '15672:15672'
+    restart: no
     environment:
       RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
@@ -45,7 +40,7 @@ services:
   def-flower:
     image: mher/flower
     container_name: dev-flower
-    restart: 'no'
+    restart: no
     depends_on:
       - dev-rabbitmq
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
@@ -56,9 +51,7 @@ services:
   dev-elasticsearch:
     image: elasticsearch:${ELASTIC_VERSION}
     container_name: dev-elasticsearch
-    restart: 'no'
-    ports:
-      - '9200:9200'
+    restart: no
     environment:
       ES_JAVA_OPTS: "-Xms512m -Xmx1g"
       discovery.type: single-node

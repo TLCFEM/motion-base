@@ -2,11 +2,9 @@ services:
   mongo:
     image: mongo
     container_name: mongo
-    restart: 'always'
+    restart: always
     command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
     mem_limit: ${MONGO_MEM_LIMIT}
-    ports:
-      - '${MONGO_PORT}:${MONGO_PORT}'
     environment:
       MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
@@ -18,7 +16,7 @@ services:
   mongo-express:
     image: mongo-express
     container_name: mongo-express
-    restart: 'always'
+    restart: always
     depends_on:
       - mongo
     ports:
@@ -32,10 +30,7 @@ services:
   rabbitmq:
     image: rabbitmq:management
     container_name: rabbitmq
-    restart: 'always'
-    ports:
-      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
-      - '15672:15672'
+    restart: always
     environment:
       RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
       RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
@@ -46,7 +41,7 @@ services:
   flower:
     image: mher/flower
     container_name: flower
-    restart: 'always'
+    restart: always
     depends_on:
       - rabbitmq
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
@@ -57,7 +52,7 @@ services:
   elasticsearch:
     image: elasticsearch:${ELASTIC_VERSION}
     container_name: elasticsearch
-    restart: 'always'
+    restart: always
     environment:
       ES_JAVA_OPTS: "-Xms1g -Xmx4g"
       discovery.type: single-node
@@ -68,7 +63,7 @@ services:
     image: tlcfem/motion-base:back
     #    container_name: mb-back
     scale: ${MB_REPLICA}
-    restart: 'always'
+    restart: always
     depends_on:
       - mongo
       - rabbitmq
@@ -103,7 +98,7 @@ services:
   mb-worker:
     image: tlcfem/motion-base:back
     container_name: mb-worker
-    restart: 'always'
+    restart: always
     depends_on:
       - mongo
       - rabbitmq
@@ -137,7 +132,7 @@ services:
   mb-front:
     image: tlcfem/motion-base:front
     container_name: mb-front
-    restart: 'always'
+    restart: always
     depends_on:
       - mb-back
     ports:
@@ -145,7 +140,7 @@ services:
   nginx:
     image: nginx
     container_name: nginx
-    restart: 'always'
+    restart: always
     ports:
       - '80:80'
     volumes:
