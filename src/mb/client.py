@@ -211,6 +211,25 @@ class MBClient:
 
         return self
 
+    @staticmethod
+    async def _retry(
+        fn,
+        retries: int = 3,
+        delay: float = 1,
+        backoff: float = 2,
+        exceptions=(Exception,),
+    ):
+        attempt: int = 0
+        while True:
+            try:
+                return await fn()
+            except exceptions:
+                attempt += 1
+                if attempt > retries:
+                    raise
+                await anyio.sleep(delay)
+                delay *= backoff
+
     async def upload(
         self,
         region: str,
@@ -253,17 +272,23 @@ class MBClient:
             return
 
         base_name = os.path.basename(path)
+
         async with self.semaphore:
             with open(path, "rb") as file:
-                result = await self.client.post(
-                    f"/{region}/upload"
-                    f"?wait_for_result={'true' if wait_for_result else 'false'}"
-                    f"&overwrite_existing={'true' if overwrite_existing else 'false'}",
-                    files={"archives": (base_name, file, "multipart/form-data")},
-                    auth=self.auth,
-                )
+
+                async def _post():
+                    return await self.client.post(
+                        f"/{region}/upload"
+                        f"?wait_for_result={'true' if wait_for_result else 'false'}"
+                        f"&overwrite_existing={'true' if overwrite_existing else 'false'}",
+                        files={"archives": (base_name, file, "multipart/form-data")},
+                        auth=self.auth,
+                    )
+
+                result = await self._retry(_post)
                 if result.status_code != HTTPStatus.ACCEPTED:
                     raise RuntimeError("Failed to upload.")
+
             if self.upload_size > 0:
                 self.current_upload_size += 1
                 self.print(
@@ -272,6 +297,7 @@ class MBClient:
                 )
             else:
                 self.print(f"Successfully uploaded file [green]{base_name}[/].")
+
             for task_id in result.json()["task_ids"]:
                 self.tasks[task_id] = 0
 
