@@ -27,6 +27,7 @@ USER = ""
 PASS = ""
 SEM_LIMIT = 50
 RETRY = 3
+FILE_LIST = (".tar.gz",)
 
 
 task_pool = set()
@@ -90,7 +91,7 @@ async def crawl(root_path: Path):
                     url_path = contents.find("title").text.split(" ")[-1]  # type: ignore
                     for link in contents.find_all("a"):
                         file_name: str = link.get("href")  # type: ignore
-                        if file_name.endswith(".tar.gz"):
+                        if file_name.endswith(FILE_LIST):
                             file.write(f"{index.parent},{url_path},{file_name}\n")
 
     with open(root_list) as file:
@@ -221,6 +222,11 @@ def main(mode, username, password, root, parallel, retry, dry_run, targets):
     This script provides an asynchronous command-line utility for downloading and
     mirroring strong-motion seismograph data from the NIED (https://www.kyoshin.bosai.go.jp)
     service.
+
+    Only *.tar.gz files will be fetched.
+    Those files contain waveform data in plain text.
+    Binary files cannot be processed thus are not downloaded.
+    Modify the FILE_LIST variable in the script to if you want to download other file types.
 
     \b
     Overview
