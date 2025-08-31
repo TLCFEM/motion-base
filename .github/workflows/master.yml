@@ -71,7 +71,7 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:./src
           /bin/bash ./scripts/pyinstaller.sh
-      - name: Artifact
+      - name: Artifact Runner
         if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
@@ -83,6 +83,20 @@ jobs:
         with:
           name: nied_crawler
           path: dist/nied_crawler
+      - name: Release
+        if: github.event_name == 'push' && matrix.python-version == '3.11'
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/*
+          file_glob: true
+          tag: latest
+          overwrite: true
+          body: |
+            The binaries are standalone executables that can be run on Linux.
+
+            1. `mb_runner`: The main application that can run the server, or the celery worker.
+            2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
   docker:
     needs: build
     runs-on: ubuntu-latest
