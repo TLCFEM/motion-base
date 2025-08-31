@@ -20,8 +20,10 @@ import tarfile
 import time
 from datetime import datetime
 from io import BytesIO
+from os.path import basename
 from pathlib import Path
-from typing import BinaryIO
+from shutil import copyfileobj
+from urllib.parse import quote
 
 import structlog
 
@@ -42,23 +44,17 @@ def _local_path(file_name: str):
     folder: Path = fs_root / str_factory()
     folder.mkdir(parents=True, exist_ok=True)
 
-    path: Path = folder / file_name
+    path: Path = folder / quote(basename(file_name))
     if not path.exists():
         return path, path.relative_to(fs_root)
 
     raise FileExistsError(f"File {path} already exists.")
 
 
-def _iter(file: BinaryIO):
-    while chunk := file.read(16 * 2**20):
-        yield chunk
-
-
 def store(upload: UploadFile) -> str:
     local_path, fs_path = _local_path(upload.filename)
     with open(local_path, "wb") as file:
-        for chunk in _iter(upload.file):
-            file.write(chunk)
+        copyfileobj(upload.file, file, 16 * 2**20)
 
     return f"{MB_MAIN_SITE}/access/{fs_path}"
 
