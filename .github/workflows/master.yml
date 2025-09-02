@@ -36,7 +36,7 @@ jobs:
           xpack.security.enabled: false
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Python
         uses: actions/setup-python@v5
         with:
@@ -103,7 +103,7 @@ jobs:
     timeout-minutes: 100
     steps:
       - name: Clone
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Update
         run: /bin/bash ./scripts/git-commit.sh
       - name: Login
