@@ -272,7 +272,7 @@ def main(mode, root, parallel, retry, dry_run, targets):
     SEM_LIMIT = parallel
     RETRY = retry
 
-    if mode not in ("parse", "crawl", "all"):
+    if mode not in ("parse", "crawl", "all", "pack"):
         print("Invalid mode, choose from parse, crawl or all.")
         return
 
