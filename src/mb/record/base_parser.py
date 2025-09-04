@@ -74,6 +74,8 @@ class BaseParserNIED:
 
 
 class BaseParserNZSM:
+    pattern = re.compile(r"\s(\d+\.\d+)\s")
+
     @staticmethod
     def validate_file(file_path: str):
         if file_path.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
@@ -83,8 +85,7 @@ class BaseParserNZSM:
 
     @staticmethod
     def _parse_interval(line: str):
-        pattern = re.compile(r"\s(\d+\.\d+)\s")
-        if matches := pattern.search(line):
+        if matches := BaseParserNZSM.pattern.findall(line):
             return float(matches[-1])
 
         raise ValueError("Sampling frequency/interval not found.")
