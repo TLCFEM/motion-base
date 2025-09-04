@@ -40,10 +40,10 @@ counter = 0
 
 async def _execute_retry(fn, pool):
     global counter
-    counter = 0
 
     local_retry = RETRY
     while pool and local_retry > 0:
+        counter = 0
         local_retry -= 1
         await fn()
 
@@ -58,6 +58,7 @@ async def _fetch_file(
     file_path = file_folder / file_name
     if file_path.exists() and file_path.stat().st_size > 0:
         counter += 1
+        task_pool.remove(pack)
         return
 
     async with semaphore:
@@ -71,8 +72,9 @@ async def _fetch_file(
                 if not response.ok:
                     return
                 content = await response.read()
-            with open(file_path, "wb") as file:
-                file.write(content)
+            if content:
+                with open(file_path, "wb") as file:
+                    file.write(content)
             task_pool.remove(pack)
         except Exception:  # noqa
             print(f">>> Fail to download {full_url}")
@@ -186,7 +188,7 @@ async def parse(local: Path, targets: list[str]):
             file.write(f"{local_path},{remote_url}\n")
 
 
-def pack(root: Path):
+def compress(root: Path):
     root.mkdir(parents=True, exist_ok=True)
 
     file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
@@ -281,7 +283,7 @@ def main(mode, root, parallel, retry, dry_run, targets):
         print(f"Targets: {targets}")
     else:
         if mode == "pack":
-            pack(root)
+            compress(root)
         elif mode == "parse":
             run(parse(root, targets))
         elif mode == "crawl":

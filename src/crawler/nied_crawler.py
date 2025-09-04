@@ -38,10 +38,10 @@ counter = 0
 
 async def _execute_retry(fn, pool):
     global counter
-    counter = 0
 
     local_retry = RETRY
     while pool and local_retry > 0:
+        counter = 0
         local_retry -= 1
         await fn()
 
@@ -56,6 +56,7 @@ async def _fetch_file(
     file_path = file_folder / file_name
     if file_path.exists() and file_path.stat().st_size > 0:
         counter += 1
+        task_pool.remove(pack)
         return
 
     async with semaphore:
