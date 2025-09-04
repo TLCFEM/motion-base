@@ -200,6 +200,7 @@ def compress(root: Path):
 
     def __compress(_fl):
         zip_file_name = f"{uuid.uuid4().hex}.zip"
+        print(f"Creating {zip_file_name} with {len(_fl)} files...")
         with zipfile.ZipFile(
             root / zip_file_name, "w", zipfile.ZIP_DEFLATED
         ) as archive:
@@ -208,13 +209,10 @@ def compress(root: Path):
                     archive.write(f, f.relative_to(root))
         return zip_file_name
 
-    created = []
     with ProcessPoolExecutor() as executor:
-        futures = {executor.submit(__compress, batch): len(batch) for batch in batches}
+        futures = [executor.submit(__compress, batch) for batch in batches]
         for future in as_completed(futures):
-            zip_path = future.result()
-            created.append(zip_path)
-            print(f"Created {zip_path} with {futures[future]} files.")
+            print(f"Created {future.result()}.")
 
 
 @click.command()
