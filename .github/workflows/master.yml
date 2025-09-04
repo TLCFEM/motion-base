@@ -97,6 +97,7 @@ jobs:
 
             1. `mb_runner`: The main application that can run the server, or the celery worker.
             2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
+            3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
   docker:
     needs: build
     runs-on: ubuntu-latest

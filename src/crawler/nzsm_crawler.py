@@ -17,17 +17,16 @@
 from asyncio import Semaphore, gather, run
 from datetime import datetime
 from pathlib import Path
+from urllib.parse import quote
 
 import click
-from aiohttp import BasicAuth, ClientSession
+from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-BASE = "https://www.kyoshin.bosai.go.jp"
-USER = ""
-PASS = ""
-SEM_LIMIT = 50
+BASE = "https://data.geonet.org.nz/seismic-products/strong-motion/volume-products"
+SEM_LIMIT = 10
 RETRY = 3
-FILE_LIST = (".tar.gz",)
+FILE_LIST = (".v1a", ".v2a")
 
 
 task_pool = set()
@@ -57,10 +56,12 @@ async def _fetch_file(
 
     async with semaphore:
         counter += 1
-        full_url = f"{BASE}{url_path}/{file_name}"
+        full_url = "/".join(
+            [BASE] + list(x for x in url_path.split("/") if x) + [file_name]
+        )
         print(f"{datetime.now()} {counter}/{total} Downloading {full_url}")
         try:
-            async with client.get(full_url, auth=BasicAuth(USER, PASS)) as response:
+            async with client.get(full_url) as response:
                 if not response.ok:
                     return
                 content = await response.read()
@@ -95,7 +96,9 @@ async def crawl(root_path: Path):
             for index in root_path.rglob("index.htm"):
                 with open(index) as f:
                     contents = BeautifulSoup(f, "html.parser")
-                    url_path = contents.find("title").text.split(" ")[-1]  # type: ignore
+                    url_path = quote(
+                        contents.find("title").text.removeprefix("Index of ")
+                    )
                     for link in contents.find_all("a"):
                         file_name: str = link.get("href")  # type: ignore
                         if file_name.lower().endswith(FILE_LIST):
@@ -120,7 +123,7 @@ async def _parse_next(
 
     async with semaphore:
         print(f"Creating directory: {local} from {remote}")
-        async with client.get(remote, auth=BasicAuth(USER, PASS)) as response:
+        async with client.get(remote) as response:
             if not response.ok:
                 print(f">>> Error: {remote}")
                 pending_pool.add((local, remote))
@@ -133,8 +136,8 @@ async def _parse_next(
             file.write(response_content)
         for link in BeautifulSoup(response_content, "html.parser").find_all("a"):
             href: str = link.get("href")  # type: ignore
-            if not href.startswith(("?", "/")) and "." not in href:
-                children.append(href.rstrip("/"))
+            if not href.startswith(("/", "Vol3", "Vol4", "plots")) and "." not in href:
+                children.append(href.strip("/"))
 
     await gather(
         *[
@@ -168,9 +171,7 @@ async def parse(local: Path, targets: list[str]):
     else:
         for x in targets:
             if x_stripped := "/".join(v for v in x.split("/") if v):
-                pending_pool.add(
-                    (local / x_stripped, f"{BASE}/kyoshin/download/{x_stripped}/")
-                )
+                pending_pool.add((local / x_stripped, f"{BASE}/{x_stripped}/"))
 
     await _execute_retry(_parse_once, pending_pool)
 
@@ -180,8 +181,6 @@ async def parse(local: Path, targets: list[str]):
 
 
 @click.command()
-@click.argument("username", type=str)
-@click.argument("password", type=str)
 @click.option(
     "--mode",
     "-m",
@@ -192,9 +191,9 @@ async def parse(local: Path, targets: list[str]):
 @click.option(
     "--root",
     "-r",
-    default=Path.cwd() / "NIED",
+    default=Path.cwd() / "NZSM",
     type=Path,
-    help="Local root folder: where do you want to put the downloaded data? Default is ./NIED",
+    help="Local root folder: where do you want to put the downloaded data? Default is ./NZSM",
 )
 @click.option(
     "--parallel",
@@ -210,74 +209,43 @@ async def parse(local: Path, targets: list[str]):
 @click.option(
     "--targets",
     "-t",
-    default=["kik/alldata/", "knet/alldata/"],
+    default=["/"],
     multiple=True,
-    help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets kik/alldata/ --targets knet/alldata/",
+    help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets 2016 --targets 2007/09_Sep",
 )
-def main(mode, username, password, root, parallel, retry, dry_run, targets):
+def main(mode, root, parallel, retry, dry_run, targets):
     """
     \b
-    NIED Seismic Data Crawling Utility
-    ==================================
+    GeoNet Strong-Motion Data Downloader
+    ====================================
 
-    This script provides an asynchronous command-line utility for downloading and
-    mirroring strong-motion seismograph data from the NIED (https://www.kyoshin.bosai.go.jp)
-    service.
+    This script provides an asynchronous command-line tool to mirror and download
+    seismic strong-motion "volume-products" from GeoNet
+    (https://data.geonet.org.nz/seismic-products/strong-motion/volume-products).
 
-    Only *.tar.gz files will be fetched.
-    Those files contain waveform data in plain text.
-    Binary files cannot be processed thus are not downloaded.
-    Modify the FILE_LIST variable in the script to if you want to download other file types.
+    It supports two primary operations:
 
     \b
-    Overview
-    --------
-    The tool works in two main phases:
+    1. **Parse mode (`parse`)**
+        - Recursively crawls the remote directory structure.
+        - Recreates the folder hierarchy locally.
+        - Saves each directory listing as an ``index.htm`` file.
+        - Skips unwanted entries (``/Vol3``, ``/Vol4``, ``/plots``, and file links).
+        - Tracks failed requests in ``failed.txt`` for resuming later.
 
     \b
-    1. **Parse Mode (`parse`)**
-    - Recursively traverses the remote server directory structure.
-    - Creates a mirrored local folder tree.
-    - Saves `index.htm` files representing remote directory listings.
-    - Tracks failed directories in `failed.txt`, allowing resumption or retry.
+    2. **Crawl mode (`crawl`)**
+        - Reads all locally saved ``index.htm`` files.
+        - Extracts strong-motion data files (``.v1a`` and ``.v2a``).
+        - Downloads missing files into the mirrored folder structure.
+        - Tracks unfinished downloads in ``items.txt`` for resuming later.
 
     \b
-    2. **Crawl Mode (`crawl`)**
-    - Reads previously saved `index.htm` files.
-    - Extracts `.tar.gz` file links and downloads them concurrently.
-    - Maintains `items.txt` with a list of download targets.
-    - Retries failed downloads up to a configurable number of attempts.
-
-    \b
-    3. **All Mode (`all`)**
-    - Executes both `parse` and `crawl` phases in sequence.
-
-    \b
-    Features
-    --------
-    - Concurrent requests with configurable limits.
-    - Automatic retry of failed downloads/directories.
-    - Resumable: failed files/directories are logged and retried on subsequent runs.
-    - Interactive prompts to choose between fresh starts or resuming from saved state.
-
-    \b
-    Additional Notes
-    ----------------
-
-    - **Disclaimer**: The data fetched by this script **may be subject to copyright**.
-    This crawler is provided “as-is,” and **no responsibility is accepted** for any
-    copyright or usage issues arising from downloading or using these data.
-
-    - **Account Required**: A valid user account is needed to download waveform data
-    (registration can be done via the official NIED registration page: https://hinetwww11.bosai.go.jp/nied/registration/).
-
-    - **Rate Limit Considerations**: There may be server-imposed limitations. As of the
-    time of writing, using up to 50 concurrent connections appears to be acceptable.
+    3. **All mode (`all`, default)**
+        - Executes ``parse`` followed by ``crawl``.
     """
 
-    global USER, PASS, SEM_LIMIT, RETRY
-    USER = username
-    PASS = password
+    global SEM_LIMIT, RETRY
     SEM_LIMIT = parallel
     RETRY = retry
 
@@ -287,8 +255,6 @@ def main(mode, username, password, root, parallel, retry, dry_run, targets):
 
     if dry_run:
         print(f"Mode: {mode}")
-        print(f"Username: {USER}")
-        print(f"Password: {'*' * len(PASS)}")
         print(f"Root path: {root}")
         print(f"Parallel limit: {SEM_LIMIT}")
         print(f"Retry attempts: {RETRY}")
