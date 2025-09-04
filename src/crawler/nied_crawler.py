@@ -37,6 +37,9 @@ counter = 0
 
 
 async def _execute_retry(fn, pool):
+    global counter
+    counter = 0
+
     local_retry = RETRY
     while pool and local_retry > 0:
         local_retry -= 1

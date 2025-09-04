@@ -14,6 +14,8 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 
+import uuid
+import zipfile
 from asyncio import Semaphore, gather, run
 from datetime import datetime
 from pathlib import Path
@@ -37,6 +39,9 @@ counter = 0
 
 
 async def _execute_retry(fn, pool):
+    global counter
+    counter = 0
+
     local_retry = RETRY
     while pool and local_retry > 0:
         local_retry -= 1
@@ -181,6 +186,20 @@ async def parse(local: Path, targets: list[str]):
             file.write(f"{local_path},{remote_url}\n")
 
 
+def pack(root: Path):
+    root.mkdir(parents=True, exist_ok=True)
+
+    file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
+
+    batch_size = 1000
+    for i in range(0, len(file_list), batch_size):
+        with zipfile.ZipFile(
+            root / f"{uuid.uuid4().hex}.zip", "w", zipfile.ZIP_DEFLATED
+        ) as archive:
+            for f in file_list[i : i + batch_size]:
+                archive.write(f, f.relative_to(root))
+
+
 @click.command()
 @click.option(
     "--mode",
@@ -261,7 +280,9 @@ def main(mode, root, parallel, retry, dry_run, targets):
         print(f"Retry attempts: {RETRY}")
         print(f"Targets: {targets}")
     else:
-        if mode == "parse":
+        if mode == "pack":
+            pack(root)
+        elif mode == "parse":
             run(parse(root, targets))
         elif mode == "crawl":
             run(crawl(root))
