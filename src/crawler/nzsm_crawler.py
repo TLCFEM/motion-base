@@ -189,28 +189,27 @@ async def parse(local: Path, targets: list[str]):
             file.write(f"{local_path},{remote_url}\n")
 
 
+def _compress_impl(file_list, root):
+    zip_file_name = f"{uuid.uuid4().hex}.zip"
+    print(f"Creating {zip_file_name} with {len(file_list)} files...")
+    with zipfile.ZipFile(root / zip_file_name, "w", zipfile.ZIP_DEFLATED) as archive:
+        for f in file_list:
+            if f.stat().st_size > 0:
+                archive.write(f, f.relative_to(root))
+    return zip_file_name
+
+
 def compress(root: Path):
     root.mkdir(parents=True, exist_ok=True)
 
     batch_size = 4000
     file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
-    batches = [
-        file_list[i : i + batch_size] for i in range(0, len(file_list), batch_size)
-    ]
-
-    def __compress(_fl):
-        zip_file_name = f"{uuid.uuid4().hex}.zip"
-        print(f"Creating {zip_file_name} with {len(_fl)} files...")
-        with zipfile.ZipFile(
-            root / zip_file_name, "w", zipfile.ZIP_DEFLATED
-        ) as archive:
-            for f in _fl:
-                if f.stat().st_size > 0:
-                    archive.write(f, f.relative_to(root))
-        return zip_file_name
 
     with ProcessPoolExecutor() as executor:
-        futures = [executor.submit(__compress, batch) for batch in batches]
+        futures = [
+            executor.submit(_compress_impl, file_list[i : i + batch_size], root)
+            for i in range(0, len(file_list), batch_size)
+        ]
         for future in as_completed(futures):
             print(f"Created {future.result()}.")
 
