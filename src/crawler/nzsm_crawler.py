@@ -17,6 +17,7 @@
 import uuid
 import zipfile
 from asyncio import Semaphore, gather, run
+from concurrent.futures import ProcessPoolExecutor, as_completed
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import quote
@@ -191,16 +192,29 @@ async def parse(local: Path, targets: list[str]):
 def compress(root: Path):
     root.mkdir(parents=True, exist_ok=True)
 
-    file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
-
     batch_size = 4000
-    for i in range(0, len(file_list), batch_size):
+    file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
+    batches = [
+        file_list[i : i + batch_size] for i in range(0, len(file_list), batch_size)
+    ]
+
+    def __compress(_fl):
+        zip_file_name = f"{uuid.uuid4().hex}.zip"
         with zipfile.ZipFile(
-            root / f"{uuid.uuid4().hex}.zip", "w", zipfile.ZIP_DEFLATED
+            root / zip_file_name, "w", zipfile.ZIP_DEFLATED
         ) as archive:
-            for f in file_list[i : i + batch_size]:
+            for f in _fl:
                 if f.stat().st_size > 0:
                     archive.write(f, f.relative_to(root))
+        return zip_file_name
+
+    created = []
+    with ProcessPoolExecutor() as executor:
+        futures = {executor.submit(__compress, batch): len(batch) for batch in batches}
+        for future in as_completed(futures):
+            zip_path = future.result()
+            created.append(zip_path)
+            print(f"Created {zip_path} with {futures[future]} files.")
 
 
 @click.command()
