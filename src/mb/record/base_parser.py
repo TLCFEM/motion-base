@@ -15,6 +15,7 @@
 from __future__ import annotations
 
 import re
+from collections.abc import Generator
 
 import pint
 import structlog
@@ -84,12 +85,12 @@ class BaseParserNZSM:
     def _parse_interval(line: str):
         pattern = re.compile(r"\s(\d+\.\d+)\s")
         if matches := pattern.search(line):
-            return float(matches[1])
+            return float(matches[-1])
 
         raise ValueError("Sampling frequency/interval not found.")
 
     @staticmethod
-    def _split(line: str, size: int = 8) -> list[str]:
+    def _split(line: str, size: int = 8) -> Generator:
         line = line.replace("\n", "")
         for i in range(0, len(line), size):
             yield line[i : i + size]

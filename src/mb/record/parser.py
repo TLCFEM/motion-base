@@ -195,9 +195,7 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             task.save()
-                        if not f.name.upper().endswith(
-                            (".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")
-                        ):
+                        if not f.name.upper().endswith((".V2A", ".V1A")):
                             continue
                         if target := archive.extractfile(f):
                             try:
@@ -224,9 +222,7 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             task.save()
-                        if not f.upper().endswith(
-                            (".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")
-                        ):
+                        if not f.upper().endswith((".V2A", ".V1A")):
                             continue
                         with archive.open(f) as target:
                             try:
