@@ -23,7 +23,8 @@ import click
 from aiohttp import ClientSession
 from bs4 import BeautifulSoup
 
-BASE = "https://data.geonet.org.nz/seismic-products/strong-motion/volume-products"
+DOMAIN = "https://data.geonet.org.nz"
+BASE = f"{DOMAIN}/seismic-products/strong-motion/volume-products"
 SEM_LIMIT = 10
 RETRY = 3
 FILE_LIST = (".v1a", ".v2a")
@@ -57,7 +58,7 @@ async def _fetch_file(
     async with semaphore:
         counter += 1
         full_url = "/".join(
-            [BASE] + list(x for x in url_path.split("/") if x) + [file_name]
+            [DOMAIN] + list(x for x in url_path.split("/") if x) + [file_name]
         )
         print(f"{datetime.now()} {counter}/{total} Downloading {full_url}")
         try:
