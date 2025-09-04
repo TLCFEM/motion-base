@@ -193,13 +193,14 @@ def compress(root: Path):
 
     file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
 
-    batch_size = 1000
+    batch_size = 4000
     for i in range(0, len(file_list), batch_size):
         with zipfile.ZipFile(
             root / f"{uuid.uuid4().hex}.zip", "w", zipfile.ZIP_DEFLATED
         ) as archive:
             for f in file_list[i : i + batch_size]:
-                archive.write(f, f.relative_to(root))
+                if f.stat().st_size > 0:
+                    archive.write(f, f.relative_to(root))
 
 
 @click.command()
