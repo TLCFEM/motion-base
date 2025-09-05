@@ -191,23 +191,25 @@ async def parse(local: Path, targets: list[str]):
             file.write(f"{local_path},{remote_url}\n")
 
 
-def _compress_impl(file_list, root):
+def _compress_impl(file_list, root, output):
     zip_file_name = f"{uuid.uuid4().hex}.zip"
     print(f"Creating {zip_file_name} with {len(file_list)} files...")
-    with zipfile.ZipFile(root / zip_file_name, "w", zipfile.ZIP_DEFLATED) as archive:
+    with zipfile.ZipFile(output / zip_file_name, "w", zipfile.ZIP_DEFLATED) as archive:
         for f in file_list:
             if f.stat().st_size > 0:
                 archive.write(f, f.relative_to(root))
     return zip_file_name
 
 
-def compress(root: Path):
+def compress(root: Path, output: Path):
     file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
 
-    batch_size = 4000
+    output.mkdir(parents=True, exist_ok=True)
+
+    batch_size = 500
     with ProcessPoolExecutor() as executor:
         futures = [
-            executor.submit(_compress_impl, file_list[i : i + batch_size], root)
+            executor.submit(_compress_impl, file_list[i : i + batch_size], root, output)
             for i in range(0, len(file_list), batch_size)
         ]
         for future in as_completed(futures):
@@ -230,6 +232,13 @@ def compress(root: Path):
     help="Local root folder: where do you want to put the downloaded data? Default is ./NZSM",
 )
 @click.option(
+    "--output",
+    "-o",
+    default=Path.cwd() / "OUTPUT",
+    type=Path,
+    help="Local output folder, only used in packing. Default is ./OUTPUT",
+)
+@click.option(
     "--parallel",
     "-p",
     default=10,
@@ -247,7 +256,7 @@ def compress(root: Path):
     multiple=True,
     help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets 2016 --targets 2007/09_Sep",
 )
-def main(mode, root, parallel, retry, dry_run, targets):
+def main(mode, root, output, parallel, retry, dry_run, targets):
     """
     \b
     GeoNet Strong-Motion Data Downloader
@@ -297,7 +306,7 @@ def main(mode, root, parallel, retry, dry_run, targets):
         root.mkdir(parents=True, exist_ok=True)
 
         if mode == "pack":
-            compress(root)
+            compress(root, output)
         elif mode == "parse":
             run(parse(root, targets))
         elif mode == "crawl":
