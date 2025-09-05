@@ -179,7 +179,9 @@ async def parse(local: Path, targets: list[str]):
                 pending_pool.add((Path(local_path), remote_url))
     else:
         for x in targets:
-            if x_stripped := "/".join(v for v in x.split("/") if v):
+            if x == "/":
+                pending_pool.add((local, f"{BASE}/"))
+            elif x_stripped := "/".join(v for v in x.split("/") if v):
                 pending_pool.add((local / x_stripped, f"{BASE}/{x_stripped}/"))
 
     await _execute_retry(_parse_once, pending_pool)
