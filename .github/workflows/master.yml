@@ -66,18 +66,11 @@ jobs:
         run: |
           export PYTHONPATH=$PYTHONPATH:./src
           /bin/bash ./scripts/pyinstaller.sh
-      - name: Artifact Runner
+      - name: Artifact
         if: matrix.python-version == '3.11'
         uses: actions/upload-artifact@v4
         with:
-          name: mb_runner
-          path: dist/mb_runner
-      - name: Artifact Crawler
-        if: matrix.python-version == '3.11'
-        uses: actions/upload-artifact@v4
-        with:
-          name: nied_crawler
-          path: dist/nied_crawler
+          path: dist/*
       - name: Release
         if: github.event_name == 'push' && matrix.python-version == '3.11'
         uses: svenstaro/upload-release-action@v2
