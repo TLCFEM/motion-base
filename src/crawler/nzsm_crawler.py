@@ -200,11 +200,9 @@ def _compress_impl(file_list, root):
 
 
 def compress(root: Path):
-    root.mkdir(parents=True, exist_ok=True)
-
-    batch_size = 4000
     file_list = [p for p in root.rglob("*") if p.suffix.lower() in FILE_LIST]
 
+    batch_size = 4000
     with ProcessPoolExecutor() as executor:
         futures = [
             executor.submit(_compress_impl, file_list[i : i + batch_size], root)
@@ -294,6 +292,8 @@ def main(mode, root, parallel, retry, dry_run, targets):
         print(f"Retry attempts: {RETRY}")
         print(f"Targets: {targets}")
     else:
+        root.mkdir(parents=True, exist_ok=True)
+
         if mode == "pack":
             compress(root)
         elif mode == "parse":

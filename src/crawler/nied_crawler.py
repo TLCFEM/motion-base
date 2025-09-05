@@ -298,6 +298,8 @@ def main(mode, username, password, root, parallel, retry, dry_run, targets):
         print(f"Retry attempts: {RETRY}")
         print(f"Targets: {targets}")
     else:
+        root.mkdir(parents=True, exist_ok=True)
+
         if mode == "parse":
             run(parse(root, targets))
         elif mode == "crawl":
