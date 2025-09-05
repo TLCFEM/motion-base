@@ -51,7 +51,7 @@ dev = [
     "pytest-asyncio",
     "pytest-celery",
     "pytest-cov",
-    "pytest-xdist",
+    # "pytest-xdist",
     "ruff",
 ]
 client = [
