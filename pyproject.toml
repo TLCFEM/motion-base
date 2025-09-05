@@ -62,7 +62,7 @@ client = [
     "rich",
 ]
 benchmark = [
-    "locust<2.40.0"
+    "locust"
 ]
 
 [project.urls]
