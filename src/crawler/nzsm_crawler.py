@@ -145,7 +145,7 @@ async def _parse_next(
             file.write(response_content)
         for link in BeautifulSoup(response_content, "html.parser").find_all("a"):
             href: str = link.get("href")  # type: ignore
-            if not href.startswith(("/", "Vol3", "Vol4", "plots")) and "." not in href:
+            if not href.startswith(("/", "Vol3", "Vol4", "plot")) and "." not in href:
                 children.append(href.strip("/"))
 
     await gather(
