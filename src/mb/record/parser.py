@@ -34,6 +34,14 @@ from .sync_record import NIED, NZSM, UploadTask
 _logger = structlog.get_logger(__name__)
 
 
+def _wrap_longitude(_longitude: float) -> float:
+    while _longitude > 180.0:
+        _longitude -= 360.0
+    while _longitude < -180.0:
+        _longitude += 360.0
+    return _longitude
+
+
 class ParserNIED(BaseParserNIED):
     @staticmethod
     def parse_archive(
@@ -121,7 +129,10 @@ class ParserNIED(BaseParserNIED):
         record = NIED()
         record.file_hash = file_hash
         record.event_time = _parse_date(lines[0][18:])
-        record.event_location = [float(lines[2][18:]), float(lines[1][18:])]
+        record.event_location = [
+            _wrap_longitude(float(lines[2][18:])),
+            float(lines[1][18:]),
+        ]
         record.depth = (
             pint.Quantity(float(lines[3][18:]), ParserNIED._normalise_unit(lines[3]))
             .to("km")
@@ -129,7 +140,10 @@ class ParserNIED(BaseParserNIED):
         )
         record.magnitude = float(lines[4][18:])
         record.station_code = lines[5][18:]
-        record.station_location = [float(lines[7][18:]), float(lines[6][18:])]
+        record.station_location = [
+            _wrap_longitude(float(lines[7][18:])),
+            float(lines[6][18:]),
+        ]
         record.station_elevation = float(lines[8][18:])
         record.station_elevation_unit = ParserNIED._normalise_unit(lines[8])
         record.record_time = _parse_date(lines[9][18:])
@@ -330,7 +344,7 @@ class ParserNZSM(BaseParserNZSM):
             int_header[4],
             int(int_header[5] / 10),
         )
-        record.event_location = [float_header[13], -float_header[12]]
+        record.event_location = [_wrap_longitude(float_header[13]), -float_header[12]]
         record.depth = int_header[16]
         record.magnitude = (
             float_header[14] if float_header[14] > 0 else float_header[16]
@@ -346,7 +360,7 @@ class ParserNZSM(BaseParserNZSM):
         )
         if date_tuple != (1970, 1, 1, 0, 0, -1):
             record.record_time = datetime(*date_tuple)
-        record.station_location = [float_header[11], -float_header[10]]
+        record.station_location = [_wrap_longitude(float_header[11]), -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
