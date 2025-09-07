@@ -52,7 +52,7 @@ async def mongo_connection(monkeypatch):
 
 
 @pytest.fixture(scope="function")
-async def mock_client():
+async def mock_client(mongo_connection):
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
