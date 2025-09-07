@@ -77,7 +77,7 @@ class UserForm(BaseModel):
     def create_user(self):
         return User(
             username=self.username,
-            email=self.email,
+            email=self.email,  # type: ignore
             first_name=self.first_name,
             last_name=self.last_name,
             hashed_password=bcrypt_hash(self.password),

@@ -156,6 +156,7 @@ async def upload_archive(
         return UploadResponse(
             message="Successfully uploaded and will be processed in the background.",
             task_ids=task_id_pool,
+            records=None,
         )
 
     if has_worker:
@@ -174,4 +175,5 @@ async def upload_archive(
     return UploadResponse(
         message="Successfully uploaded and processed.",
         records=list(itertools.chain.from_iterable(records)),
+        task_ids=None,
     )
