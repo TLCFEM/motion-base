@@ -22,7 +22,7 @@ import pytest
 from httpx import ASGITransport, AsyncClient
 
 from mb.app.main import app
-from mb.app.utility import User, bcrypt_hash, is_active
+from mb.app.utility import User, bcrypt_hash, is_active, is_admin
 from mb.utility import env
 from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
 
@@ -77,6 +77,7 @@ async def mock_client_superuser(mongo_connection):
     user = await always_active()
     await user.save()
     app.dependency_overrides[is_active] = always_active
+    app.dependency_overrides[is_admin] = always_active
     while True:
         saved_user = await User.find_one(User.username == "test")
         if saved_user is not None:

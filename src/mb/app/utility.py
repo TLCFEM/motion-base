@@ -62,15 +62,18 @@ class CredentialException(HTTPException):
         )
 
 
-class UserForm(BaseModel):
+class BriefUser(BaseModel):
     username: str
+    email: EmailStr
+
+
+class UserForm(BriefUser):
     password: str = Field(
         pattern=re.compile(
             r"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$"
         ),
         description="At least 8 characters, with at least one uppercase letter, one lowercase letter, and one number.",
     )
-    email: EmailStr
     last_name: str
     first_name: str
 
@@ -157,4 +160,10 @@ async def current_user(token: str = Depends(OAUTH2)):
 async def is_active(user: User = Depends(current_user)):
     if user.disabled:
         raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Inactive user.")
+    return user
+
+
+async def is_admin(user: User = Depends(current_user)):
+    if not user.can_upload or not user.can_delete:
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Not admin user.")
     return user

@@ -30,7 +30,7 @@ async def test_whoami(mock_client_superuser):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_user_new(mock_client):
+async def test_user_new(mock_client_superuser):
     new_user = {
         "username": "tester1",
         "password": "test!e2zAr",
@@ -39,8 +39,10 @@ async def test_user_new(mock_client):
         "first_name": "a",
     }
 
-    response = await mock_client.post("/user/new", json=new_user)
+    response = await mock_client_superuser.post("/user/new", json=new_user)
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client.delete(f"/user/{uuid5_str(new_user['username'])}")
+    response = await mock_client_superuser.delete(
+        f"/user/{uuid5_str(new_user['username'])}"
+    )
     assert response.status_code == HTTPStatus.OK

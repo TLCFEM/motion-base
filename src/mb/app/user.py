@@ -22,7 +22,15 @@ from fastapi import APIRouter, Depends, HTTPException
 from fastapi.security import OAuth2PasswordRequestForm
 
 from mb.app.response import Token, UserResponse
-from mb.app.utility import User, UserForm, authenticate_user, create_token, is_active
+from mb.app.utility import (
+    BriefUser,
+    User,
+    UserForm,
+    authenticate_user,
+    create_token,
+    is_active,
+    is_admin,
+)
 
 router = APIRouter(tags=["account"])
 
@@ -38,7 +46,7 @@ async def acquire_token(form_data: OAuth2PasswordRequestForm = Depends()):
     return create_token(user.username)
 
 
-async def ensure_user_available(form_data: UserForm):
+async def ensure_user_available(form_data: BriefUser):
     if await User.find_one(User.username == form_data.username):
         raise HTTPException(HTTPStatus.CONFLICT, detail="Username already exists.")
 
@@ -47,14 +55,14 @@ async def ensure_user_available(form_data: UserForm):
 
 
 @router.post("/check", status_code=HTTPStatus.OK)
-async def check_new_user(form_data: UserForm):
+async def check_new_user(form_data: BriefUser):
     await ensure_user_available(form_data)
 
     return {"message": "User does not exist."}
 
 
 @router.post("/new", status_code=HTTPStatus.OK)
-async def create_new_user(form_data: UserForm):
+async def create_new_user(form_data: UserForm, _: User = Depends(is_admin)):
     await ensure_user_available(form_data)
 
     await form_data.create_user().save()
@@ -63,7 +71,7 @@ async def create_new_user(form_data: UserForm):
 
 
 @router.delete("/{user_id}", status_code=HTTPStatus.OK)
-async def delete_user(user_id: str):
+async def delete_user(user_id: str, _: User = Depends(is_admin)):
     if target_user := await User.find_one(User.id == user_id):
         await target_user.delete()
 
