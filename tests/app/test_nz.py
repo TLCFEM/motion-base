@@ -35,7 +35,6 @@ import pytest
     [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")],
 )
 async def test_upload_nz(
-    mock_celery,
     mock_client_superuser,
     pwd,
     monkeypatch,

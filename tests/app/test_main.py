@@ -114,7 +114,7 @@ async def test_query(mock_client, count_total):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_simple(sample_data, mock_celery, mock_client):
+async def test_simple(sample_data, mock_client):
     response = await mock_client.post(
         f"/process?record_id={sample_data[0].id}",
         json={

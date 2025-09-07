@@ -41,7 +41,7 @@ def mock_celery(celery_session_app, celery_session_worker):
     yield celery_session_worker
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function")
 async def mongo_connection(monkeypatch):
     with monkeypatch.context() as m:
         random_db: str = uuid4().hex
@@ -51,7 +51,7 @@ async def mongo_connection(monkeypatch):
         mongo_client.drop_database(random_db)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function")
 async def mock_client():
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
@@ -72,8 +72,8 @@ async def always_active():
     )
 
 
-@pytest.fixture(scope="function", autouse=True)
-async def mock_client_superuser():
+@pytest.fixture(scope="function")
+async def mock_client_superuser(mongo_connection):
     user = await always_active()
     await user.save()
     app.dependency_overrides[is_active] = always_active

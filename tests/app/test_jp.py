@@ -38,7 +38,6 @@ from mb import celery
 )
 async def test_upload_jp(
     monkeypatch,
-    mock_celery,
     mock_client_superuser,
     pwd,
     file_name,
