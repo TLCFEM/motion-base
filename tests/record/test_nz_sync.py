@@ -45,7 +45,7 @@ def test_nz_parse_archive(pwd, file_path):
 
 
 def test_nz_response_spectrum():
-    motion = np.array([0, 1, 1, 0, 2, 0, 0])
+    motion = np.array([0, 1, 1, 0, 2, 0, 0], dtype=float)
     interval = 0.01
     period = np.arange(0.1, 0.2, interval)
     response_spectrum(0.05, interval, motion, period)
