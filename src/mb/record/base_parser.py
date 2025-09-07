@@ -92,7 +92,7 @@ class BaseParserNZSM:
 
     @staticmethod
     def _split(line: str, size: int = 8) -> Generator:
-        line = line.replace("\n", "")
+        line = line.strip("\n\r")
         for i in range(0, len(line), size):
             yield line[i : i + size]
 

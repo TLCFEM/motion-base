@@ -358,7 +358,7 @@ class ParserNZSM(BaseParserNZSM):
             int_header[38],
             int(int_header[39] / 1000),
         )
-        if date_tuple != (1970, 1, 1, 0, 0, -1):
+        if date_tuple not in ((1970, 1, 1, 0, 0, -1), (0, 0, 0, 0, 0, 0)):
             record.record_time = datetime(*date_tuple)
         record.station_location = [_wrap_longitude(float_header[11]), -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
