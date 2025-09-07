@@ -33,7 +33,7 @@ import {
     Paper,
     Select,
     Stack,
-    TextField
+    TextField,
 } from "@suid/material";
 import { createDownloadLink, ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
 import Plotly from "plotly.js-basic-dist-min";
@@ -49,6 +49,7 @@ const [normalised, setNormalised] = createSignal(false);
 const [withWaveform, setWithWaveform] = createSignal(true);
 const [withFilter, setWithFilter] = createSignal(false);
 const [withSpectrum, setWithSpectrum] = createSignal(false);
+const [withEnergy, setWithEnergy] = createSignal(false);
 const [withLogScale, setWithLogScale] = createSignal(false);
 const [withResponseSpectrum, setWithResponseSpectrum] = createSignal(false);
 
@@ -72,6 +73,8 @@ const Settings: Component<sxProps> = (props) => {
 
         setWithFilter(false);
         setWithSpectrum(false);
+        setWithLogScale(false);
+        setWithEnergy(false);
         setWithResponseSpectrum(false);
 
         setLowCut("");
@@ -129,71 +132,75 @@ const Settings: Component<sxProps> = (props) => {
     onMount(() => {
         tippy(`#btn-process`, {
             content: "Process the record with the current settings.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#btn-reset`, {
             content: "Clear the current settings.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#btn-download`, {
             content: "Download the processed record in json.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#remove-head`, {
             content: "Remove the first a few seconds, default is zero.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#upsampling-ratio`, {
             content: "Assign a positive integer to upsample the record, default is one (no upsampling).",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#downsampling-ratio`, {
             content: "Assign a positive integer to downsample the record, default is one (no downsampling).",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#filter-length`, {
             content: "Assign a positive integer (at least eight) to set the filter window length, default is 32.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#low-cut`, {
             content: "The low-cut frequency for the highpass and bandpass filters, default is 0.01.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#high-cut`, {
             content: "The high-cut frequency for the lowpass and bandpass filters, default is 50.0.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#damping-ratio`, {
             content: "Assign a positive floating point number representing the damping ratio, default is 0.05.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#period-step`, {
             content: "The period interval for the response spectrum computation, default is 0.01.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#period-end`, {
             content: "The termination period (right bound) for the response spectrum computation, default is 10.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#chk-waveform`, {
             content: "Display the original waveform.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#chk-normalised`, {
             content: "Normalise the PGA to unity.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#chk-frequency-spectrum`, {
             content: "Compute the frequency spectrum of the original waveform.",
-            animation: "scale"
+            animation: "scale",
+        });
+        tippy(`#chk-energy`, {
+            content: "Compute the energy accumulation based on the frequency spectrum.",
+            animation: "scale",
         });
         tippy(`#chk-filter`, {
             content: "Further process the record by applying a filter.",
-            animation: "scale"
+            animation: "scale",
         });
         tippy(`#chk-response-spectrum`, {
             content: "Compute response spectra of the original waveform.",
-            animation: "scale"
+            animation: "scale",
         });
     });
 
@@ -206,7 +213,7 @@ const Settings: Component<sxProps> = (props) => {
                     justifyContent: "center",
                     alignContent: "center",
                     alignItems: "flex-start",
-                    gap: "1rem"
+                    gap: "1rem",
                 }}
             >
                 <Box
@@ -215,7 +222,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem"
+                        gap: "1rem",
                     }}
                 >
                     <FormControlLabel
@@ -248,6 +255,12 @@ const Settings: Component<sxProps> = (props) => {
                             <Checkbox checked={withLogScale()} onChange={(_, checked) => setWithLogScale(checked)} />
                         }
                     />
+                    <FormControlLabel
+                        id="chk-energy"
+                        name="chk-energy"
+                        label="Energy Accumulation"
+                        control={<Checkbox checked={withEnergy()} onChange={(_, checked) => setWithEnergy(checked)} />}
+                    />
                     <TextField
                         size="small"
                         id="record-id"
@@ -272,7 +285,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem"
+                        gap: "1rem",
                     }}
                 >
                     <FormControlLabel
@@ -375,7 +388,7 @@ const Settings: Component<sxProps> = (props) => {
                         justifyContent: "center",
                         alignContent: "center",
                         alignItems: "center",
-                        gap: "1rem"
+                        gap: "1rem",
                     }}
                 >
                     <FormControlLabel
@@ -425,7 +438,12 @@ const Settings: Component<sxProps> = (props) => {
                         sx={{ maxWidth: "10rem" }}
                     />
                     <ButtonGroup variant="contained" orientation="horizontal">
-                        <Button size="small" onClick={process} id="btn-process" disabled={loading() || !currentRecord()}>
+                        <Button
+                            size="small"
+                            onClick={process}
+                            id="btn-process"
+                            disabled={loading() || !currentRecord()}
+                        >
                             Process
                         </Button>
                         <Button size="small" onClick={clear} id="btn-reset" disabled={loading()}>
@@ -453,7 +471,7 @@ const Settings: Component<sxProps> = (props) => {
                                 top: "50%",
                                 left: "50%",
                                 transform: "translate(-50%, -50%)",
-                                width: "40%"
+                                width: "40%",
                             }}
                         >
                             <AlertTitle>Error</AlertTitle>
@@ -483,7 +501,7 @@ const Waveform: Component<sxProps> = (props) => {
                 type: "scatter",
                 mode: "lines",
                 name: record.id,
-                line: { color: "rgb(220, 220, 220)" }
+                line: { color: "rgb(220, 220, 220)" },
             });
         }
 
@@ -494,7 +512,7 @@ const Waveform: Component<sxProps> = (props) => {
             y: processed().waveform,
             type: "scatter",
             mode: "lines",
-            name: processed().id
+            name: processed().id,
         });
 
         await Plotly.newPlot(
@@ -505,17 +523,17 @@ const Waveform: Component<sxProps> = (props) => {
                 xaxis: {
                     title: { text: "Time (s)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Acceleration (cm/s^2)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 autosize: true,
-                showlegend: false
+                showlegend: false,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
     });
 
@@ -526,11 +544,11 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
     createEffect(async () => {
         if (loading() || !withSpectrum()) return;
 
-        let records: Plotly.Data[] = [];
+        let frequencies: Plotly.Data[] = [];
 
         for (const record of history()) {
             if (!record.spectrum) continue;
-            records.push({
+            frequencies.push({
                 x: Array<number>(record.spectrum.length)
                     .fill(0)
                     .map((_, i) => i * record.frequency_interval),
@@ -538,44 +556,106 @@ const FrequencySpectrum: Component<sxProps> = (props) => {
                 type: "scatter",
                 mode: "lines",
                 name: record.id,
-                line: { color: "rgb(220, 220, 220)" }
+                line: { color: "rgb(220, 220, 220)" },
             });
         }
 
-        records.push({
+        frequencies.push({
             x: Array<number>(processed().spectrum.length)
                 .fill(0)
                 .map((_, i) => i * processed().frequency_interval),
             y: processed().spectrum,
             type: "scatter",
             mode: "lines",
-            name: processed().id
+            name: processed().id,
         });
 
         await Plotly.newPlot(
             "spectrum",
-            records,
+            frequencies,
             {
                 title: { text: processed().file_name },
                 xaxis: {
                     title: { text: "Frequency (Hz)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Acceleration (cm/s^2)" },
                     type: withLogScale() ? "log" : "linear",
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 autosize: true,
-                showlegend: false
+                showlegend: false,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
     });
 
     return <Paper id="spectrum" sx={props.sx} />;
+};
+
+const EnergyAccumulation: Component<sxProps> = (props) => {
+    createEffect(async () => {
+        if (loading() || !withSpectrum() || !withEnergy()) return;
+
+        let energies: Plotly.Data[] = [];
+
+        const accu = (input: number[]): number[] => {
+            const accumulated: number[] = [];
+            for (const n of input) accumulated.push((accumulated.at(-1) ?? 0) + n * n);
+            return accumulated.map((v) => (v / (accumulated.at(-1) ?? 1)) * 100);
+        };
+
+        for (const record of history()) {
+            if (!record.spectrum) continue;
+            energies.push({
+                x: Array<number>(record.spectrum.length)
+                    .fill(0)
+                    .map((_, i) => i * record.frequency_interval),
+                y: accu(record.spectrum),
+                type: "scatter",
+                mode: "lines",
+                name: record.id,
+                line: { color: "rgb(220, 220, 220)" },
+            });
+        }
+
+        energies.push({
+            x: Array<number>(processed().spectrum.length)
+                .fill(0)
+                .map((_, i) => i * processed().frequency_interval),
+            y: accu(processed().spectrum),
+            type: "scatter",
+            mode: "lines",
+            name: processed().id,
+        });
+
+        await Plotly.newPlot(
+            "energy",
+            energies,
+            {
+                title: { text: processed().file_name },
+                xaxis: {
+                    title: { text: "Frequency (Hz)" },
+                    autorange: true,
+                    automargin: true,
+                },
+                yaxis: {
+                    title: { text: "Accumulated Energy (%)" },
+                    type: "linear",
+                    autorange: true,
+                    automargin: true,
+                },
+                autosize: true,
+                showlegend: false,
+            },
+            { autosizable: true, responsive: true },
+        );
+    });
+
+    return <Paper id="energy" sx={props.sx} />;
 };
 
 const ResponseSpectrum: Component<sxProps> = (props) => {
@@ -587,30 +667,33 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
         let displacement_records: Plotly.Data[] = [];
 
         for (const record of history()) {
-            if (record.acceleration_spectrum) acceleration_records.push({
-                x: record.period,
-                y: record.acceleration_spectrum,
-                type: "scatter",
-                mode: "lines",
-                name: record.id,
-                line: { color: "rgb(220, 220, 220)" }
-            });
-            if (record.velocity_spectrum) velocity_records.push({
-                x: record.period,
-                y: record.velocity_spectrum,
-                type: "scatter",
-                mode: "lines",
-                name: record.id,
-                line: { color: "rgb(220, 220, 220)" }
-            });
-            if (record.displacement_spectrum) displacement_records.push({
-                x: record.period,
-                y: record.displacement_spectrum,
-                type: "scatter",
-                mode: "lines",
-                name: record.id,
-                line: { color: "rgb(220, 220, 220)" }
-            });
+            if (record.acceleration_spectrum)
+                acceleration_records.push({
+                    x: record.period,
+                    y: record.acceleration_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: record.id,
+                    line: { color: "rgb(220, 220, 220)" },
+                });
+            if (record.velocity_spectrum)
+                velocity_records.push({
+                    x: record.period,
+                    y: record.velocity_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: record.id,
+                    line: { color: "rgb(220, 220, 220)" },
+                });
+            if (record.displacement_spectrum)
+                displacement_records.push({
+                    x: record.period,
+                    y: record.displacement_spectrum,
+                    type: "scatter",
+                    mode: "lines",
+                    name: record.id,
+                    line: { color: "rgb(220, 220, 220)" },
+                });
         }
 
         acceleration_records.push({
@@ -618,21 +701,21 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
             y: processed().acceleration_spectrum,
             type: "scatter",
             mode: "lines",
-            name: processed().id
+            name: processed().id,
         });
         velocity_records.push({
             x: processed().period,
             y: processed().velocity_spectrum,
             type: "scatter",
             mode: "lines",
-            name: processed().id
+            name: processed().id,
         });
         displacement_records.push({
             x: processed().period,
             y: processed().displacement_spectrum,
             type: "scatter",
             mode: "lines",
-            name: processed().id
+            name: processed().id,
         });
 
         await Plotly.newPlot(
@@ -643,17 +726,17 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
                 xaxis: {
                     title: { text: "Period (s)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Acceleration (cm/s^2)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 autosize: true,
-                showlegend: false
+                showlegend: false,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
 
         await Plotly.newPlot(
@@ -664,17 +747,17 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
                 xaxis: {
                     title: { text: "Period (s)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Velocity (cm/s)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 autosize: true,
-                showlegend: false
+                showlegend: false,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
 
         await Plotly.newPlot(
@@ -685,17 +768,17 @@ const ResponseSpectrum: Component<sxProps> = (props) => {
                 xaxis: {
                     title: { text: "Period (s)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Displacement (cm)" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 autosize: true,
-                showlegend: false
+                showlegend: false,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
     });
 
@@ -708,6 +791,9 @@ const Process: Component<sxProps> = (props) => {
             <Settings sx={props.sx} />
             {withWaveform() && processed().waveform && <Waveform sx={{ ...props.sx, height: "70vh" }} />}
             {withSpectrum() && processed().spectrum && <FrequencySpectrum sx={{ ...props.sx, height: "70vh" }} />}
+            {withSpectrum() && withEnergy() && processed().spectrum && (
+                <EnergyAccumulation sx={{ ...props.sx, height: "70vh" }} />
+            )}
             {withResponseSpectrum() && processed().period && <ResponseSpectrum sx={{ ...props.sx, height: "70vh" }} />}
         </Stack>
     );
