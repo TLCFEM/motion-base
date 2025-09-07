@@ -86,6 +86,8 @@ async def mock_client_superuser(mongo_connection):
         yield ac
     app.dependency_overrides = {}
     await user.delete()
+    while (await User.find_one(User.username == "test")) is not None:
+        await asyncio.sleep(1)
 
 
 @pytest.fixture(scope="function", autouse=True)
