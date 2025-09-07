@@ -18,7 +18,7 @@ click==8.2.1              # via beanie, celery, click-didyoumean, click-plugins,
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1.2    # via celery
 click-repl==0.3.0         # via celery
-cryptography==45.0.6      # via joserfc
+cryptography==45.0.7      # via joserfc
 dnspython==2.7.0          # via email-validator, pymongo
 elastic-transport==9.1.0  # via elasticsearch
 elasticsearch==9.1.0      # via motion-base (pyproject.toml)
@@ -31,7 +31,7 @@ h11==0.16.0               # via httpcore, uvicorn
 httpcore==1.0.9           # via httpx
 httpx==0.28.1             # via motion-base (pyproject.toml)
 idna==3.10                # via anyio, email-validator, httpx, requests, yarl
-joserfc==1.3.1            # via motion-base (pyproject.toml)
+joserfc==1.3.2            # via motion-base (pyproject.toml)
 kombu==5.5.4              # via celery
 lazy-model==0.3.0         # via beanie
 llvmlite==0.44.0          # via numba
