@@ -280,10 +280,6 @@ class ParserNZSM(BaseParserNZSM):
                 break
             lines.pop()
 
-        num_lines = len(lines) // 3
-
-        assert 3 * num_lines == len(lines), "Number of lines should be a multiple of 3."
-
         records: list[NZSM] = []
         station_code = [x for x in lines[1].split(" ") if x][1]
 
@@ -307,15 +303,29 @@ class ParserNZSM(BaseParserNZSM):
             record.save()
             records.append(record)
 
-        _populate_common_fields(
-            ParserNZSM.parse_lines(lines[:num_lines], overwrite_existing)
-        )
-        _populate_common_fields(
-            ParserNZSM.parse_lines(lines[num_lines : 2 * num_lines], overwrite_existing)
-        )
-        _populate_common_fields(
-            ParserNZSM.parse_lines(lines[2 * num_lines :], overwrite_existing)
-        )
+        int_header = ParserNZSM._parse_header(lines)[0]
+        a_lines = (int_header[33] + 9) // 10
+        v_lines = (int_header[34] + 9) // 10
+        d_lines = (int_header[35] + 9) // 10
+
+        if (target_lines := a_lines + v_lines + d_lines + 26) == len(lines):
+            _populate_common_fields(ParserNZSM.parse_lines(lines, overwrite_existing))
+        else:
+            assert 3 * target_lines == len(lines), (
+                "Number of lines should be a multiple of 3."
+            )
+
+            _populate_common_fields(
+                ParserNZSM.parse_lines(lines[:target_lines], overwrite_existing)
+            )
+            _populate_common_fields(
+                ParserNZSM.parse_lines(
+                    lines[target_lines : 2 * target_lines], overwrite_existing
+                )
+            )
+            _populate_common_fields(
+                ParserNZSM.parse_lines(lines[2 * target_lines :], overwrite_existing)
+            )
 
         return records
 

@@ -27,6 +27,7 @@ from mb.record.utility import str_factory
     "file_path",
     [
         "data/20110222_015029_MQZ.V2A",
+        "data/20190904_070311_WAKS_20.V1A",
         "data/I06465B10.V2A",
         "data/D9644D08.V2A",
         "data/D5054A01.V2A",
