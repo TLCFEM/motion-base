@@ -114,8 +114,8 @@ async def test_query(mock_client, count_total):
     assert response.status_code == HTTPStatus.OK
 
 
-async def test_simple(sample_data, mock_client):
-    response = await mock_client.post(
+async def test_simple(sample_data, mock_client_superuser):
+    response = await mock_client_superuser.post(
         f"/process?record_id={sample_data[0].id}",
         json={
             "with_filter": True,
@@ -125,8 +125,8 @@ async def test_simple(sample_data, mock_client):
     )
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client.post("/search")
+    response = await mock_client_superuser.post("/search")
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client.delete("/purge")
+    response = await mock_client_superuser.delete("/purge")
     assert response.status_code == HTTPStatus.OK
