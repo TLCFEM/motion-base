@@ -64,7 +64,9 @@ async def _fetch_file(
         full_url = f"{BASE}{url_path}/{file_name}"
         print(f"{datetime.now()} {counter}/{total} Downloading {full_url}")
         try:
-            async with client.get(full_url, auth=BasicAuth(USER, PASS)) as response:
+            async with client.get(
+                full_url, auth=BasicAuth(USER, PASS), timeout=None
+            ) as response:
                 if not response.ok:
                     return
                 content = await response.read()
