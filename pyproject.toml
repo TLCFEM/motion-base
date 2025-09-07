@@ -47,6 +47,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "locust",
     "pytest-asyncio",
     "pytest-celery",
     "pytest-cov",
@@ -60,9 +61,6 @@ client = [
     "httpx-auth",
     "matplotlib",
     "rich",
-]
-benchmark = [
-    "locust"
 ]
 
 [project.urls]
