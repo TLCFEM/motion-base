@@ -15,7 +15,6 @@
 
 import asyncio
 import os.path
-from time import sleep
 from uuid import uuid4
 
 import pytest
@@ -24,29 +23,13 @@ from httpx import ASGITransport, AsyncClient
 from mb.app.main import app
 from mb.app.utility import User, bcrypt_hash, is_active, is_admin
 from mb.utility import env
-from mb.utility.config import init_mongo, mongo_uri, rabbitmq_uri
-
-
-@pytest.fixture(scope="session", autouse=True)
-def celery_config():
-    return {"broker_url": rabbitmq_uri(), "result_backend": mongo_uri()}
-
-
-@pytest.fixture(scope="function", autouse=True)
-def mock_celery(celery_session_app, celery_session_worker):
-    while True:
-        if celery_session_app.control.inspect().stats():
-            break
-        sleep(1)
-    yield celery_session_worker
+from mb.utility.config import init_mongo
 
 
 @pytest.fixture(scope="function")
 async def mongo_connection(monkeypatch):
-    with monkeypatch.context() as m:
-        random_db: str = uuid4().hex
-        m.setattr(env, "MONGO_DB_NAME", random_db)
-        mongo_client = await init_mongo()
+    monkeypatch.setattr(env, "MONGO_DB_NAME", random_db := uuid4().hex)
+    async with init_mongo(random_db) as mongo_client:
         yield
         mongo_client.drop_database(random_db)
 
@@ -73,23 +56,22 @@ async def always_active():
 
 
 @pytest.fixture(scope="function")
-async def mock_client_superuser(mongo_connection):
+async def mock_client_superuser(monkeypatch, mongo_connection):
+    monkeypatch.setitem(app.dependency_overrides, is_active, always_active)
+    monkeypatch.setitem(app.dependency_overrides, is_admin, always_active)
     user = await always_active()
     await user.save()
-    app.dependency_overrides[is_active] = always_active
-    app.dependency_overrides[is_admin] = always_active
     while (await User.find_one(User.username == "test")) is None:
         await asyncio.sleep(1)
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
-    app.dependency_overrides = {}
     await user.delete()
     while (await User.find_one(User.username == "test")) is not None:
         await asyncio.sleep(1)
 
 
-@pytest.fixture(scope="function", autouse=True)
+@pytest.fixture(scope="function")
 def pwd():
     return os.path.dirname(os.path.abspath(__file__))

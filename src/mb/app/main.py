@@ -34,8 +34,8 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
 from ..record.async_record import MetadataRecord, Record, UploadTask
-from ..utility.config import init_mongo, shutdown_mongo
-from ..utility.elastic import async_elastic
+from ..utility.config import init_mongo
+from ..utility.elastic import async_elastic, close_all
 from ..utility.env import MB_FS_ROOT
 from .jp import router as jp_router
 from .nz import router as nz_router
@@ -64,13 +64,12 @@ from .utility import (
 
 
 @asynccontextmanager
-async def lifespan(fastapi_app: FastAPI):  # noqa # pylint: disable=unused-argument
-    client = await async_elastic()
-    await init_mongo()
-    await create_superuser()
-    yield
-    await shutdown_mongo()
-    await client.close()
+async def lifespan(_: FastAPI):
+    async with init_mongo():
+        await create_superuser()
+        await async_elastic()
+        yield
+        await close_all()
 
 
 async def profile_request(request, call_next):

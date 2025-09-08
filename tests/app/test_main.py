@@ -57,7 +57,7 @@ async def test_for_test_only(mock_client):
 
 
 @pytest.fixture(scope="function")
-def sample_data(pwd):
+def sample_data(pwd, mongo_connection):
     results = ParserNZSM.parse_archive(
         archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
     )

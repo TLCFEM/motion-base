@@ -98,3 +98,13 @@ def sync_elastic():
         sync_client.indices.create(index="record", mappings=generate_elastic_mapping())
 
     return sync_client
+
+
+async def close_all():
+    global async_client, sync_client
+    if async_client is not None:
+        await async_client.close()
+        async_client = None
+    if sync_client is not None:
+        sync_client.close()
+        sync_client = None

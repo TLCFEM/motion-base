@@ -18,19 +18,15 @@ from http import HTTPStatus
 from mb.record.utility import uuid5_str
 
 
-async def test_acquire_token(mock_client_superuser):
+async def test_user(mock_client_superuser):
     response = await mock_client_superuser.post(
         "/user/token", data={"username": "test", "password": "test"}
     )
     assert response.status_code == HTTPStatus.OK
 
-
-async def test_whoami(mock_client_superuser):
     response = await mock_client_superuser.get("/user/whoami")
     assert response.status_code == HTTPStatus.OK
 
-
-async def test_user_new(mock_client_superuser):
     new_user = {
         "username": "tester1",
         "password": "test!e2zAr",

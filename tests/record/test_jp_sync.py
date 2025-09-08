@@ -22,12 +22,12 @@ from mb.record.utility import str_factory
 
 
 @pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])
-def test_jp_parse_file(pwd, file_path):
+def test_jp_parse_file(pwd, file_path, mongo_connection):
     ParserNIED.parse_file(os.path.join(pwd, file_path))
 
 
 @pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
-def test_jp_parse_archive(pwd, file_path):
+def test_jp_parse_archive(pwd, file_path, mongo_connection):
     ParserNIED.parse_archive(
         archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
     )
