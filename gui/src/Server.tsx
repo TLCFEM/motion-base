@@ -24,6 +24,7 @@ interface HistogramProps {
     id: string;
     item: string;
     data: AggregationItem[];
+    scale: Plotly.AxisType;
 }
 
 const Histogram: Component<HistogramProps> = (props) => {
@@ -32,27 +33,28 @@ const Histogram: Component<HistogramProps> = (props) => {
             props.id,
             [
                 {
-                    x: props.data.map(item => item.key),
-                    y: props.data.map(item => item.doc_count),
-                    type: "bar"
-                }
+                    x: props.data.map((item) => item.key),
+                    y: props.data.map((item) => item.doc_count),
+                    type: "bar",
+                },
             ],
             {
                 title: { text: props.item + " Histogram" },
                 xaxis: {
                     title: { text: props.item },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
                 },
                 yaxis: {
                     title: { text: "Counts" },
                     autorange: true,
-                    automargin: true
+                    automargin: true,
+                    type: props.scale,
                 },
                 width: 450,
-                height: 400
+                height: 400,
             },
-            { autosizable: true, responsive: true }
+            { autosizable: true, responsive: true },
         );
     });
 
@@ -94,7 +96,7 @@ export default function ServerModal() {
                         bgcolor: theme.palette.background.paper,
                         border: "1px solid lightgrey",
                         borderRadius: "4px",
-                        boxShadow: "24px"
+                        boxShadow: "24px",
                     }}
                 >
                     <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center" justifyContent="center">
@@ -106,26 +108,39 @@ export default function ServerModal() {
                             value={newServer()}
                             onChange={(_, value) => setNewServer(value)}
                         />
-                        <Button variant="contained" size="small" onClick={async () => {
-                            setLoading(true);
-                            try {
-                                await axios.get(`${newServer()}/alive`);
-                                axios.defaults.baseURL = newServer();
-                                setOpen(false);
-                            } catch {
-                                alert("Target server is not reachable.");
-                            }
-                            setLoading(false);
-                        }} disabled={loading()} id="btn-change">Change</Button>
-                        <Button variant="contained" size="small" onClick={() => setOpen(false)} disabled={loading()}
-                            id="btn-cancel">
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={async () => {
+                                setLoading(true);
+                                try {
+                                    await axios.get(`${newServer()}/alive`);
+                                    axios.defaults.baseURL = newServer();
+                                    setOpen(false);
+                                } catch {
+                                    alert("Target server is not reachable.");
+                                }
+                                setLoading(false);
+                            }}
+                            disabled={loading()}
+                            id="btn-change"
+                        >
+                            Change
+                        </Button>
+                        <Button
+                            variant="contained"
+                            size="small"
+                            onClick={() => setOpen(false)}
+                            disabled={loading()}
+                            id="btn-cancel"
+                        >
                             Cancel
                         </Button>
                     </Stack>
                     {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
                     <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} />
-                        <Histogram id="pga-hist" item="PGA" data={pgaHist()} />
+                        <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
+                        <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
                     </Stack>
                 </Box>
             </Modal>
