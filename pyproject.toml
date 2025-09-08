@@ -49,7 +49,6 @@ dependencies = [
 dev = [
     "locust",
     "pytest-asyncio",
-    "pytest-celery",
     "pytest-cov",
     "pytest-xdist",
     "ruff",
