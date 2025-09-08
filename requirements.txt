@@ -19,7 +19,7 @@ click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1.2    # via celery
 click-repl==0.3.0         # via celery
 cryptography==45.0.7      # via joserfc
-dnspython==2.7.0          # via email-validator, pymongo
+dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.1.0  # via elasticsearch
 elasticsearch==9.1.0      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
