@@ -69,9 +69,7 @@ async def _fetch_file(
             ) as response:
                 if not response.ok:
                     return
-                content = await response.read()
-            with open(file_path, "wb") as file:
-                file.write(content)
+                file_path.write_bytes(await response.read())
             task_pool.remove(pack)
         except Exception:  # noqa
             print(f">>> Fail to download {full_url}")
@@ -135,8 +133,7 @@ async def _parse_next(
 
         pending_pool.discard((local, remote))
         local.mkdir(parents=True, exist_ok=True)
-        with open(local / "index.htm", "wb") as file:
-            file.write(response_content)
+        (local / "index.htm").write_bytes(response_content)
         for link in BeautifulSoup(response_content, "html.parser").find_all("a"):
             href: str = link.get("href")  # type: ignore
             if not href.startswith(("?", "/")) and "." not in href:
