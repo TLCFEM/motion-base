@@ -94,6 +94,12 @@ services:
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       ELASTIC_HOST: elasticsearch
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:${MB_PORT}" ]
+      interval: 300s
+      timeout: 5s
+      start_period: 60s
+      retries: 10
   mb-worker:
     image: tlcfem/motion-base:back
     container_name: mb-worker

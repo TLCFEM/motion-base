@@ -19,10 +19,7 @@ RUN useradd -m runner
 USER runner
 
 ENV PYTHONOPTIMIZE=2
-ENV MB_PORT=8000
 
 ENTRYPOINT ["python3", "mb_runner.py"]
 
 CMD ["host", "0.0.0.0"]
-
-HEALTHCHECK --interval=300s --timeout=5s --start-period=60s --retries=10 CMD curl -fsS http://localhost:${MB_PORT} || exit 1
