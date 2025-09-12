@@ -14,12 +14,19 @@ services:
     volumes:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
+    healthcheck:
+      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet" ]
+      interval: 300s
+      timeout: 10s
+      start_period: 10s
+      retries: 5
   dev-mongo-express:
     image: mongo-express
     container_name: dev-mongo-express
     restart: no
     depends_on:
-      - dev-mongo
+      dev-mongo:
+        condition: service_healthy
     ports:
       - '8081:8081'
     environment:
@@ -41,12 +48,19 @@ services:
       RABBITMQ_DEFAULT_VHOST: vhost
     volumes:
       - motion_rabbitmq:/var/lib/rabbitmq
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
+      interval: 300s
+      timeout: 10s
+      start_period: 10s
+      retries: 5
   def-flower:
     image: mher/flower
     container_name: dev-flower
     restart: no
     depends_on:
-      - dev-rabbitmq
+      rabbitmq:
+        condition: service_healthy
     command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
     ports:
       - '5555:5555'
@@ -64,6 +78,12 @@ services:
       xpack.security.enabled: false
     volumes:
       - motion_elasticsearch:/usr/share/elasticsearch/data
+    healthcheck:
+      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
+      interval: 300s
+      timeout: 10s
+      start_period: 10s
+      retries: 5
 
 volumes:
   motion_mongo:
