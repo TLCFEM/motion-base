@@ -29,7 +29,6 @@ dependencies = [
     "elasticsearch[async]",
     "email-validator",
     "fastapi-slim",
-    "httpx",
     "joserfc",
     "mongoengine",
     "numba",
@@ -46,6 +45,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
+    "httpx",
     "locust",
     "pytest-asyncio",
     "pytest-cov",
