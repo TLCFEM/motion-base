@@ -56,6 +56,7 @@ client = [
     "aiohttp[speedups]",
     "beautifulsoup4",
     "click",
+    "httpx",
     "httpx-auth",
     "matplotlib",
     "rich",
