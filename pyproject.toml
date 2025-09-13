@@ -35,7 +35,7 @@ dependencies = [
     "numba",
     "Pint",
     "py-spy",
-    "pycparser==2.14", # https://github.com/eliben/pycparser/issues/291
+    "pycparser",
     "pyinstrument",
     "python-dotenv",
     "python-multipart",
