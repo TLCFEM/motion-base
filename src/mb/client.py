@@ -24,7 +24,7 @@ import anyio
 import httpx
 import matplotlib.pyplot as plt
 import numpy as np
-from httpx_auth import OAuth2ResourceOwnerPasswordCredentials
+from httpx_auth import OAuth2ResourceOwnerPasswordCredentials as OAuth2
 from matplotlib.figure import Figure
 from rich.console import Console
 from rich.progress import track
@@ -127,8 +127,8 @@ class MBClient:
             self.host_url = self.host_url[:-1]
         self.username: str | None = username
         self.password: str | None = password
-        self.auth: OAuth2ResourceOwnerPasswordCredentials | None = (
-            OAuth2ResourceOwnerPasswordCredentials(
+        self.auth: OAuth2 | None = (
+            OAuth2(
                 f"{self.host_url}/user/token",
                 username=self.username,
                 password=self.password,
