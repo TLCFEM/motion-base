@@ -1,5 +1,6 @@
 # motion-base
 
+[![Release](https://github.com/TLCFEM/motion-base/actions/workflows/master.yml/badge.svg)](https://github.com/TLCFEM/motion-base/actions/workflows/master.yml)
 [![codecov](https://codecov.io/gh/TLCFEM/motion-base/branch/master/graph/badge.svg?token=E6TCZUQ6AX)](https://codecov.io/gh/TLCFEM/motion-base)
 ![front-size](https://img.shields.io/docker/image-size/tlcfem/motion-base/front?label=front%20end)
 ![back-size](https://img.shields.io/docker/image-size/tlcfem/motion-base/back?label=back%20end)
