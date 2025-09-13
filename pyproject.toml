@@ -35,7 +35,6 @@ dependencies = [
     "numba",
     "Pint",
     "py-spy",
-    "pycparser",
     "pyinstrument",
     "python-dotenv",
     "python-multipart",

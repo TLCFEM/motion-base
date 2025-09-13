@@ -45,7 +45,7 @@ platformdirs==4.4.0       # via pint
 prompt-toolkit==3.0.52    # via click-repl
 propcache==0.3.2          # via aiohttp, yarl
 py-spy==0.4.1             # via motion-base (pyproject.toml)
-pycparser==2.23           # via cffi, motion-base (pyproject.toml)
+pycparser==2.23           # via cffi
 pydantic==2.11.9          # via beanie, fastapi-slim, lazy-model
 pydantic-core==2.33.2     # via pydantic
 pyinstrument==5.1.1       # via motion-base (pyproject.toml)
