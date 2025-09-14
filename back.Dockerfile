@@ -3,7 +3,7 @@ FROM python:3.12-slim AS dependency
 COPY requirements.txt /mb/requirements.txt
 WORKDIR /mb
 
-RUN pip install --no-cache-dir --no-compile  --upgrade -r requirements.txt
+RUN pip install --no-cache-dir --no-compile --upgrade -r requirements.txt
 
 FROM python:3.12-slim
 
