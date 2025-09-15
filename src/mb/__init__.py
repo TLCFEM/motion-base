@@ -22,12 +22,12 @@ from pydantic import BaseModel, Field
 
 
 class Config(BaseModel):
-    workers: int = Field(2, ge=1)
-    host: str | None = Field(None)
-    port: int = Field(8000, ge=1)
-    overwrite_env: bool = Field(False)
-    celery: bool = Field(False)
-    debug: bool = Field(False)
+    workers: int = Field(default=2, ge=1)
+    host: str | None = Field(default=None)
+    port: int = Field(default=8000, ge=1)
+    overwrite_env: bool = Field(default=False)
+    celery: bool = Field(default=False)
+    debug: bool = Field(default=False)
     celery_config: list = Field(default_factory=list)
 
 
