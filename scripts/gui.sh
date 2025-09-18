@@ -12,7 +12,7 @@ done
 shift
 
 if command -v npx &> /dev/null; then
-    npx serve -n -s dist "$@"
+    npx serve -n -l 0.0.0.0 -s dist "$@"
 elif command -v bunx &> /dev/null; then
-    bunx serve -n -s dist "$@"
+    bunx serve -n -l 0.0.0.0 -s dist "$@"
 fi
