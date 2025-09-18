@@ -3,7 +3,7 @@ FROM oven/bun:alpine AS build
 COPY gui /mb/gui
 WORKDIR /mb/gui
 
-RUN bun install --production && bun run build
+RUN bun install && bun run build
 
 FROM oven/bun:alpine
 
