@@ -11,8 +11,8 @@ done
 
 shift
 
-if command -v npx &> /dev/null; then
+if command -v npx > /dev/null 2>&1; then
     npx serve -n -l tcp://0.0.0.0:3000 -s dist "$@"
-elif command -v bunx &> /dev/null; then
+elif command -v bunx > /dev/null 2>&1; then
     bunx serve -n -l tcp://0.0.0.0:3000 -s dist "$@"
 fi
