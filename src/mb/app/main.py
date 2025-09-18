@@ -15,9 +15,9 @@
 
 from __future__ import annotations
 
-import os.path
 from contextlib import asynccontextmanager
 from http import HTTPStatus
+from pathlib import Path
 from uuid import UUID
 
 from beanie.operators import In
@@ -425,18 +425,27 @@ async def process_record(record_id: UUID, process_config: ProcessConfig = Body(.
     raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")
 
 
-@app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
-async def download_file(file_path: str):
+def validate_path(file_path: str):
     if not MB_FS_ROOT:
         raise HTTPException(
             HTTPStatus.NOT_FOUND, detail="File system is not available."
         )
 
-    local_path = os.path.join(MB_FS_ROOT, file_path)
-    if not os.path.exists(local_path):
+    root_path = Path(MB_FS_ROOT)
+    target_path = root_path / file_path
+
+    if not target_path.is_relative_to(root_path):
+        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Invalid file path.")
+
+    if not target_path.exists():
         raise HTTPException(HTTPStatus.NOT_FOUND, detail="File not found.")
 
-    return FileResponse(local_path)
+    return target_path
+
+
+@app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
+async def download_file(file_path: str):
+    return FileResponse(validate_path(file_path))
 
 
 @app.delete("/access/{file_path:path}", tags=["misc"])
@@ -446,20 +455,13 @@ async def delete_file(file_path: str, user: User = Depends(is_active)):
             HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files."
         )
 
-    if not MB_FS_ROOT:
-        raise HTTPException(
-            HTTPStatus.NOT_FOUND, detail="File system is not available."
-        )
-
-    local_path = os.path.join(MB_FS_ROOT, file_path)
-    if not os.path.exists(local_path):
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File not found.")
+    local_path: Path = validate_path(file_path)
 
     try:
-        os.remove(local_path)
-        if not os.listdir(parent := os.path.dirname(local_path)):
-            os.rmdir(parent)
-    except OSError as error:
+        local_path.unlink()
+        if not any((parent := local_path.parent).iterdir()):
+            parent.rmdir()
+    except Exception as error:
         raise HTTPException(
             HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file."
         ) from error
