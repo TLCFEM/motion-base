@@ -375,7 +375,9 @@ class ParserNZSM(BaseParserNZSM):
         record.duration = float_header[23]
         record.direction = lines[12].split()[1].upper()
         record.maximum_acceleration = abs(
-            pint.Quantity(float_header[35], "mm/s/s").to("Gal").magnitude
+            pint.Quantity(float_header[35] or float_header[30], "mm/s/s")
+            .to("Gal")
+            .magnitude
         )
 
         offset: int = 26
