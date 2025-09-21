@@ -76,7 +76,7 @@ const App: Component = () => {
 
     return (
         <Stack>
-            <AppBar position="static" enableColorOnDark>
+            <AppBar position="sticky" enableColorOnDark>
                 <Toolbar
                     variant={variant}
                     sx={{
@@ -87,7 +87,7 @@ const App: Component = () => {
                         height: "4rem",
                     }}
                 >
-                    <Typography sx={{flexGrow: 1}} variant="h5">
+                    <Typography sx={{ flexGrow: 1 }} variant="h5">
                         {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
                     </Typography>
                     <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
@@ -102,26 +102,26 @@ const App: Component = () => {
                     <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
                         Scripting
                     </Button>
-                    <AboutModal/>
-                    <ServerModal/>
+                    <AboutModal />
+                    <ServerModal />
                 </Toolbar>
             </AppBar>
-            <Box sx={{display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem"}}>
+            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot sx={{border: "1px solid darkgrey", height: "calc(100vh - 7rem)"}}/>
+                        <Jackpot sx={{ border: "1px solid darkgrey", height: "calc(100vh - 7rem)" }} />
                     </Match>
                     <Match when={mode() === "query"}>
-                        <QueryDatabase/>
+                        <QueryDatabase />
                     </Match>
                     <Match when={mode() === "process"}>
-                        <Process sx={{border: "1px solid darkgrey"}}/>
+                        <Process sx={{ border: "1px solid darkgrey" }} />
                     </Match>
                     <Match when={mode() === "scripting"}>
-                        <MarkdownContent src="client.md"/>
+                        <MarkdownContent src="client.md" />
                     </Match>
                     <Match when={mode() === "brief"}>
-                        <MarkdownContent src="brief.md"/>
+                        <MarkdownContent src="brief.md" />
                     </Match>
                 </Switch>
             </Box>
