@@ -13,18 +13,18 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import {Component, createResource, createSignal, Match, onMount, Switch} from "solid-js";
-import {AppBar, Box, Button, Stack, Toolbar, Typography} from "@suid/material";
+import { Component, createResource, createSignal, Match, onMount, Show, Switch } from "solid-js";
+import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
 import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
-import {get_total_api} from "./API";
+import { check_backend, get_total_api } from "./API";
 import Process from "./Process";
 import ServerModal from "./Server";
-import {marked} from "marked";
+import { marked } from "marked";
 import hljs from "highlight.js";
 
 const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting" | "brief">("brief");
@@ -38,18 +38,20 @@ const MarkdownContent = (props: { src: string }) => {
 
         setContent(
             await marked
-                .use({async: true})
+                .use({ async: true })
                 .parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")),
         );
 
         hljs.highlightAll();
     });
 
-    return <div style={{margin: "auto", "max-width": "800pt"}} innerHTML={content()}/>;
+    return <div style={{ margin: "auto", "max-width": "800pt" }} innerHTML={content()} />;
 };
 
 const App: Component = () => {
-    onMount(() => {
+    const [backend, setBackend] = createSignal<boolean>(false);
+
+    onMount(async () => {
         tippy(`#btn-jackpot`, {
             content: "Get a random record from the database.",
             animation: "scale",
@@ -70,6 +72,8 @@ const App: Component = () => {
             animation: "scale",
             theme: "translucent",
         });
+
+        setBackend(await check_backend());
     });
 
     const variant = screen.height <= 1080 ? "dense" : "regular";
@@ -88,22 +92,28 @@ const App: Component = () => {
                     }}
                 >
                     <Typography sx={{ flexGrow: 1 }} variant="h5">
-                        {total.loading ? "..." : `Record Count: ${total().toLocaleString()}.`}
+                        {backend()
+                            ? total.loading
+                                ? "..."
+                                : `Record Count: ${total().toLocaleString()}.`
+                            : "Motion Base"}
                     </Typography>
-                    <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
-                        Jackpot
-                    </Button>
-                    <Button size="small" id="btn-query" onClick={() => setMode("query")} variant="contained">
-                        Query
-                    </Button>
-                    <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
-                        Process
-                    </Button>
                     <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
                         Scripting
                     </Button>
-                    <AboutModal />
-                    <ServerModal />
+                    <Show when={backend()}>
+                        <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
+                            Jackpot
+                        </Button>
+                        <Button size="small" id="btn-query" onClick={() => setMode("query")} variant="contained">
+                            Query
+                        </Button>
+                        <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
+                            Process
+                        </Button>
+                        <AboutModal />
+                        <ServerModal />
+                    </Show>
                 </Toolbar>
             </AppBar>
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>

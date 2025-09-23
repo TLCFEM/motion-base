@@ -124,7 +124,7 @@ function stringify(obj: any) {
 export async function query_api(config: QueryConfig) {
     const response = (
         await axios.post<QueryResponse>("/search", stringify(config), {
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
         })
     ).data;
 
@@ -160,7 +160,7 @@ export async function get_stats() {
 export async function post_total_api(configs: QueryConfig[]) {
     return (
         await axios.post<TotalResponse>("/total", stringify(configs), {
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
         })
     ).data.total;
 }
@@ -190,7 +190,7 @@ export class ProcessResponse extends SeismicRecord {
 export async function process_api(record_id: string, config: ProcessConfig) {
     return (
         await axios.post<ProcessResponse>(`/process?record_id=${record_id}`, stringify(config), {
-            headers: { "Content-Type": "application/json" }
+            headers: { "Content-Type": "application/json" },
         })
     ).data;
 }
@@ -210,11 +210,20 @@ export function createDownloadLink(obj: any) {
     const file = new Blob(
         [
             JSON.stringify(obj, (_, value) =>
-                value === null || value === undefined || value?.length === 0 ? undefined : value
-            )
+                value === null || value === undefined || value?.length === 0 ? undefined : value,
+            ),
         ],
-        { type: "application/json" }
+        { type: "application/json" },
     );
     element.href = URL.createObjectURL(file);
     return element;
+}
+
+export async function check_backend() {
+    try {
+        await axios.get("/alive", { timeout: 2000 });
+        return true;
+    } catch {
+        return false;
+    }
 }
