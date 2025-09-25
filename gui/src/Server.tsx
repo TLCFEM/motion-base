@@ -15,7 +15,7 @@
 
 import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField } from "@suid/material";
 import useTheme from "@suid/material/styles/useTheme";
-import { Component, createEffect, createSignal, onMount } from "solid-js";
+import { Component, createEffect, createSignal, onMount, Show } from "solid-js";
 import axios from "axios";
 import { AggregationItem, get_stats } from "./API";
 import Plotly from "plotly.js-basic-dist-min";
@@ -61,7 +61,11 @@ const Histogram: Component<HistogramProps> = (props) => {
     return <Paper id={props.id} sx={{ width: 450, height: 400 }} />;
 };
 
-export default function ServerModal() {
+type ServerModalProps = {
+    backend: boolean;
+};
+
+export default function ServerModal(props: ServerModalProps) {
     const [open, setOpen] = createSignal(false);
     const [newServer, setNewServer] = createSignal(axios.defaults.baseURL);
     const [loading, setLoading] = createSignal(false);
@@ -70,6 +74,7 @@ export default function ServerModal() {
     const [pgaHist, setPgaHist] = createSignal([] as AggregationItem[]);
 
     onMount(async () => {
+        if (!props.backend) return;
         const allStats = await get_stats();
         setMagnitudeHist(allStats.magnitude.buckets);
         setPgaHist(allStats.pga.buckets);
@@ -137,11 +142,13 @@ export default function ServerModal() {
                             Cancel
                         </Button>
                     </Stack>
-                    {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
-                    <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
-                        <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
-                    </Stack>
+                    <Show when={props.backend}>
+                        {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
+                        <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
+                            <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
+                            <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
+                        </Stack>
+                    </Show>
                 </Box>
             </Modal>
         </>

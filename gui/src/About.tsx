@@ -29,12 +29,18 @@ import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
 import { post_total_api, QueryConfig } from "./API";
 
-export default function AboutModal() {
+type AboutModalProps = {
+    backend: boolean;
+};
+
+export default function AboutModal(props: AboutModalProps) {
     const [open, setOpen] = createSignal(false);
-    const [stats, setStats] = createSignal([] as number[]);
+    const [stats, setStats] = createSignal([0, 0, 0]);
     const theme = useTheme();
 
     onMount(async () => {
+        if (!props.backend) return;
+
         let configs = [] as QueryConfig[];
         let config = new QueryConfig();
         config.min_magnitude = 0;
