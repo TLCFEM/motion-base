@@ -1,5 +1,7 @@
 #!/bin/bash
 
+set -e
+
 echo -e "\
 \033[1;33mThis is an example script that sets up a working application for demonstration.\033[0m
 
@@ -26,27 +28,27 @@ The following files will be downloaded:
 
 read -r response
 if [ "$response" != "y" ]; then
-    echo "Exiting..."
-    exit 0
+  echo "Exiting..."
+  exit 0
 fi
 
-if ! command -v docker &> /dev/null; then
-    echo "'docker' is not installed."
-    exit 0
+if ! command -v docker &>/dev/null; then
+  echo "'docker' is not installed."
+  exit 0
 fi
 
-if ! command -v curl &> /dev/null; then
-    echo "'curl' is not installed."
-    exit 0
+if ! command -v curl &>/dev/null; then
+  echo "'curl' is not installed."
+  exit 0
 fi
 
-if ! command -v jq &> /dev/null; then
-    echo "'jq' is not installed."
-    exit 0
+if ! command -v jq &>/dev/null; then
+  echo "'jq' is not installed."
+  exit 0
 fi
 
 if [ ! -d "mb-example" ]; then
-    mkdir mb-example
+  mkdir mb-example
 fi
 cd mb-example || exit 0
 
@@ -145,15 +147,15 @@ volumes:
   motion_rabbitmq:
   motion_cache:
   motion_elasticsearch:
-" > docker-compose.yml
+" >docker-compose.yml
 
 docker compose -f docker-compose.yml up -d || exit 0
 
 cleanup() {
-    echo "
+  echo "
 >>> Shutdown docker..."
-    docker compose -f docker-compose.yml down
-    echo -e "\033[1;33m>>>\033[0m To clean up, please remove the \033[1;36m'mb-example'\033[0m directory and \033[1;36mdocker volumes\033[0m."
+  docker compose -f docker-compose.yml down
+  echo -e "\033[1;33m>>>\033[0m To clean up, please remove the \033[1;36m'mb-example'\033[0m directory and \033[1;36mdocker volumes\033[0m."
 }
 
 trap 'cleanup; exit 130' INT
@@ -162,8 +164,8 @@ trap 'cleanup; exit 143' TERM
 echo ">>> Waiting for the application to start..."
 response=""
 while [ "$response" != "200" ]; do
-    sleep 4
-    response="$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/alive)"
+  sleep 4
+  response="$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/alive)"
 done
 
 token="$(curl -s -X 'POST' 'http://localhost:8000/user/token' \
@@ -177,12 +179,12 @@ curl -s -X 'POST' 'http://localhost:8000/jp/upload' \
   -H 'accept: application/json' \
   -H "Authorization: Bearer $token" \
   -H 'Content-Type: multipart/form-data' \
-  -F 'archives=@jp_test.knt.tar.gz;type=application/gzip' > /dev/null
+  -F 'archives=@jp_test.knt.tar.gz;type=application/gzip' >/dev/null
 
 total=0
 while [ "$total" -lt 1 ]; do
-    sleep 2
-    total="$(curl -s -X 'GET' 'http://localhost:8000/total' -H 'accept: application/json' | jq -r '.total | .[0]')"
+  sleep 2
+  total="$(curl -s -X 'GET' 'http://localhost:8000/total' -H 'accept: application/json' | jq -r '.total | .[0]')"
 done
 
 echo -e "\
@@ -193,5 +195,5 @@ There shall be \033[1;33msix records\033[0m in the database.
 To stop the application, please press \033[1;31m'Ctrl + C'\033[0m."
 
 while true; do
-    sleep 10
+  sleep 10
 done
