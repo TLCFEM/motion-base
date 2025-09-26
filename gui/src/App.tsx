@@ -111,9 +111,9 @@ const App: Component = () => {
                         <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
                             Process
                         </Button>
+                        <AboutModal />
+                        <ServerModal />
                     </Show>
-                    <AboutModal backend={backend()} />
-                    <ServerModal backend={backend()} />
                 </Toolbar>
             </AppBar>
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
