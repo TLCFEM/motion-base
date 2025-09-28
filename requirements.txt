@@ -7,7 +7,7 @@ amqp==5.3.1               # via kombu
 annotated-types==0.7.0    # via pydantic
 anyio==4.11.0             # via starlette
 attrs==25.3.0             # via aiohttp
-bcrypt==4.3.0             # via motion-base (pyproject.toml)
+bcrypt==5.0.0             # via motion-base (pyproject.toml)
 beanie==2.0.0             # via motion-base (pyproject.toml)
 billiard==4.2.2           # via celery
 celery==5.5.3             # via motion-base (pyproject.toml)
