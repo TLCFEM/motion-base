@@ -18,7 +18,7 @@
     "@electron-forge/plugin-auto-unpack-natives": "^7.9.0",
     "@electron-forge/plugin-fuses": "^7.9.0",
     "@electron/fuses": "^2.0.0",
-    "electron": "37.4.0"
+    "electron": "38.2.0"
   },
   "author": {
     "name": "Theodore Chang",
