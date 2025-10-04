@@ -34,12 +34,12 @@ const MarkdownContent = (props: { src: string }) => {
     const [content, setContent] = createSignal<string>("");
 
     onMount(async () => {
-        const response = await fetch(`/src/assets/${props.src}`);
+        const response = await fetch(`./${props.src}`);
 
         setContent(
             await marked
                 .use({ async: true })
-                .parse((await response.text()).replace(/\(client_files\//g, "(/src/assets/client_files/")),
+                .parse((await response.text()).replace(/\(client_files\//g, "(./client_files/")),
         );
 
         hljs.highlightAll();
