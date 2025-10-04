@@ -11,7 +11,7 @@ records from different national databases.
 It comes with a web interface and a Python client that can be used to access the data programmatically.
 
 > [!IMPORTANT]
-> **Check out the [demo](https://mb.tlcfem.top/) site.**
+> **Check out the [demo](https://tlcfem.top/mb/) site.**
 
 ![screenshot](docs/screenshot.png)
 

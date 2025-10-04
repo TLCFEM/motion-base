@@ -32,7 +32,7 @@ async with MBClient('http://localhost:8000', timeout=20, semaphore=10) as client
     ...
 ```
 
-Here we use the [demo](https://mb.tlcfem.top) server for demonstration.
+Here we use the [demo](https://tlcfem.top/mb/) server for demonstration.
 Please note that this server is only for demonstration purposes and the performance is expected to be poor.
 Thus, it is not recommended to use it for massive data processing.
 
@@ -42,7 +42,7 @@ from rich.pretty import pprint
 
 from mb.client import MBClient
 
-server_url = "https://mb.tlcfem.top:8443"
+server_url = "https://tlcfem.top:8443"
 ```
 
 

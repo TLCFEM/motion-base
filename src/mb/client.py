@@ -368,7 +368,7 @@ class MBClient:
 
 
 async def main():
-    async with MBClient("https://mb.tlcfem.top:8443", timeout=100) as client:
+    async with MBClient("https://tlcfem.top:8443", timeout=100) as client:
         counter = 0
         async for _ in client.retrieve_all(
             QueryConfig(
