@@ -5,6 +5,8 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
     timeout-minutes: 30
     strategy:
       matrix:
@@ -91,7 +93,7 @@ jobs:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           update_release_body: true
-          files: '*'
+          files: dist/*
   docker:
     needs: build
     runs-on: ubuntu-latest
