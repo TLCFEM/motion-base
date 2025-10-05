@@ -86,11 +86,12 @@ jobs:
             3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
       - name: VirusTotal
         if: github.event_name == 'push' && matrix.python-version == '3.11'
-        uses: cssnr/virustotal-action@v1
+        uses: crazy-max/ghaction-virustotal@v4
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
-          update_release: true
+          update_release_body: true
+          files: '*'
   docker:
     needs: build
     runs-on: ubuntu-latest
