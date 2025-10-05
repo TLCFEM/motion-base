@@ -91,7 +91,6 @@ jobs:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           update_release: true
-          file_globs: dist/*
   docker:
     needs: build
     runs-on: ubuntu-latest
