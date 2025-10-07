@@ -88,7 +88,7 @@ jobs:
             2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
             3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
       - name: VirusTotal
-        if: github.event_name == 'push' && matrix.python-version == '3.11'
+        if: steps.release.outputs.release_id
         uses: TLCFEM/virustotal-action@feature-explicit-release-id
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
