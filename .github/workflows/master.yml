@@ -92,8 +92,7 @@ jobs:
         uses: TLCFEM/virustotal-action@feature-explicit-release-id
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          release_id: ${{ steps.release.outputs.release_id }}
+          release_id: latest
           release_heading: "### 🛡️ VirusTotal Results"
   docker:
     needs: build
