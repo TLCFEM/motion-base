@@ -86,14 +86,6 @@ jobs:
             1. `mb_runner`: The main application that can run the server, or the celery worker.
             2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
             3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
-      - name: VirusTotal
-        if: github.event_name == 'push' && matrix.python-version == '3.11'
-        uses: crazy-max/ghaction-virustotal@v4
-        with:
-          vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          update_release_body: true
-          files: dist/*
   docker:
     needs: build
     runs-on: ubuntu-latest

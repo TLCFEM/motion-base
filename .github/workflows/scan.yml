@@ -5,6 +5,7 @@ on:
   release:
     types:
       - edited
+      - published
 jobs:
   virustotal:
     runs-on: ubuntu-latest
