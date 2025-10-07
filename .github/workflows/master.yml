@@ -89,7 +89,7 @@ jobs:
             3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
       - name: VirusTotal
         if: steps.release.outputs.release_id
-        uses: cssnr/virustotal-action@v1
+        uses: TLCFEM/virustotal-action@bug-wrong-variable-name
         with:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
           release_id: latest
