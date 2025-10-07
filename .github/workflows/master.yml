@@ -94,6 +94,7 @@ jobs:
           vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           release_id: ${{ steps.release.outputs.release_id }}
+          release_heading: "### 🛡️ VirusTotal Results"
   docker:
     needs: build
     runs-on: ubuntu-latest
