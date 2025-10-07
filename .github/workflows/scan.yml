@@ -1,0 +1,21 @@
+name: Scan
+permissions:
+  contents: read
+on:
+  release:
+    types:
+      - edited
+jobs:
+  virustotal:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: VirusTotal
+        uses: crazy-max/ghaction-virustotal@v4
+        with:
+          vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          update_release_body: true
+          files: |
+            *
