@@ -57,6 +57,6 @@ class HelloWorldUser(FastHttpUser):
     @task
     def process(self):
         self.client.post(
-            "/process?record_id=09c43563-bf42-50ac-ba1e-56d46d1ab702",
+            "/process?record_id=a4590f38-5063-5625-bad4-90e3103dcffc",
             json=self.process_query,
         )
