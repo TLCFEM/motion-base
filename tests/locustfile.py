@@ -38,6 +38,11 @@ class HelloWorldUser(FastHttpUser):
         "with_response_spectrum": True,
     }
 
+    @tag("alive")
+    @task
+    def alive(self):
+        self.client.get("/alive")
+
     @tag("raw")
     @task
     def raw(self):
