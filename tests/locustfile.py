@@ -38,6 +38,8 @@ class HelloWorldUser(FastHttpUser):
         "with_response_spectrum": True,
     }
 
+    host = "https://tlcfem.top:8443"
+
     @tag("alive")
     @task
     def alive(self):
