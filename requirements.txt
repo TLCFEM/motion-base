@@ -23,13 +23,13 @@ dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.1.0  # via elasticsearch
 elasticsearch==9.1.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
-fastapi-slim==0.118.2     # via motion-base (pyproject.toml)
+fastapi-slim==0.119.0     # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
 h11==0.16.0               # via uvicorn
 idna==3.10                # via anyio, email-validator, requests, yarl
-joserfc==1.3.4            # via motion-base (pyproject.toml)
+joserfc==1.4.0            # via motion-base (pyproject.toml)
 kombu==5.5.4              # via celery
 lazy-model==0.3.0         # via beanie
 llvmlite==0.45.1          # via numba
