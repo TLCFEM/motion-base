@@ -101,19 +101,35 @@ const App: Component = () => {
                     <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
                         Scripting
                     </Button>
-                    <Show when={backend()}>
-                        <Button size="small" id="btn-jackpot" onClick={() => setMode("jackpot")} variant="contained">
-                            Jackpot
-                        </Button>
-                        <Button size="small" id="btn-query" onClick={() => setMode("query")} variant="contained">
-                            Query
-                        </Button>
-                        <Button size="small" id="btn-process" onClick={() => setMode("process")} variant="contained">
-                            Process
-                        </Button>
-                        <AboutModal />
-                        <ServerModal />
-                    </Show>
+                    <Button
+                        size="small"
+                        id="btn-jackpot"
+                        onClick={() => setMode("jackpot")}
+                        variant="contained"
+                        disabled={!backend()}
+                    >
+                        Jackpot
+                    </Button>
+                    <Button
+                        size="small"
+                        id="btn-query"
+                        onClick={() => setMode("query")}
+                        variant="contained"
+                        disabled={!backend()}
+                    >
+                        Query
+                    </Button>
+                    <Button
+                        size="small"
+                        id="btn-process"
+                        onClick={() => setMode("process")}
+                        variant="contained"
+                        disabled={!backend()}
+                    >
+                        Process
+                    </Button>
+                    <AboutModal />
+                    <ServerModal />
                 </Toolbar>
             </AppBar>
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
