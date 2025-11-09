@@ -24,13 +24,13 @@ dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.2.0  # via elasticsearch
 elasticsearch==9.2.0      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
-fastapi-slim==0.120.4     # via motion-base (pyproject.toml)
+fastapi-slim==0.121.1     # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
 h11==0.16.0               # via uvicorn
 idna==3.11                # via anyio, email-validator, requests, yarl
-joserfc==1.4.0            # via motion-base (pyproject.toml)
+joserfc==1.4.1            # via motion-base (pyproject.toml)
 kombu==5.5.4              # via celery
 lazy-model==0.3.0         # via beanie
 llvmlite==0.45.1          # via numba
@@ -39,14 +39,14 @@ multidict==6.7.0          # via aiohttp, yarl
 numba==0.62.1             # via motion-base (pyproject.toml)
 numpy==2.3.4              # via numba, scipy
 packaging==25.0           # via kombu
-pint==0.25.1              # via motion-base (pyproject.toml)
+pint==0.25.2              # via motion-base (pyproject.toml)
 platformdirs==4.5.0       # via pint
 prompt-toolkit==3.0.52    # via click-repl
 propcache==0.4.1          # via aiohttp, yarl
 py-spy==0.4.1             # via motion-base (pyproject.toml)
 pycparser==2.23           # via cffi
-pydantic==2.12.3          # via beanie, fastapi-slim, lazy-model
-pydantic-core==2.41.4     # via pydantic
+pydantic==2.12.4          # via beanie, fastapi-slim, lazy-model
+pydantic-core==2.41.5     # via pydantic
 pyinstrument==5.1.1       # via motion-base (pyproject.toml)
 pymongo==4.15.3           # via beanie, mongoengine
 python-dateutil==2.9.0.post0  # via celery, elasticsearch
