@@ -429,14 +429,17 @@ class QueryConfig(BaseModel):
                 }
             )
 
+        def _regex(value):
+            return {"regexp": {"direction": {"value": value, "case_insensitive": True}}}
+
         if self.direction is not None:
-            query_must.append({"regexp": {"direction": self.direction}})
+            query_must.append(_regex(self.direction))
 
         if self.file_name is not None:
-            query_must.append({"regexp": {"file_name": self.file_name}})
+            query_must.append(_regex(self.file_name))
 
         if self.station_code is not None:
-            query_must.append({"regexp": {"station_code": self.station_code}})
+            query_must.append(_regex(self.station_code))
 
         return query_dict
 
