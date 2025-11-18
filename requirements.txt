@@ -10,7 +10,7 @@ anyio==4.11.0             # via elasticsearch, starlette
 attrs==25.4.0             # via aiohttp
 bcrypt==5.0.0             # via motion-base (pyproject.toml)
 beanie==2.0.0             # via motion-base (pyproject.toml)
-billiard==4.2.2           # via celery
+billiard==4.2.3           # via celery
 celery==5.5.3             # via motion-base (pyproject.toml)
 certifi==2025.11.12       # via elastic-transport, requests
 cffi==2.0.0               # via cryptography
@@ -30,14 +30,14 @@ flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
 h11==0.16.0               # via uvicorn
 idna==3.11                # via anyio, email-validator, requests, yarl
-joserfc==1.4.1            # via motion-base (pyproject.toml)
+joserfc==1.4.2            # via motion-base (pyproject.toml)
 kombu==5.5.4              # via celery
 lazy-model==0.3.0         # via beanie
 llvmlite==0.45.1          # via numba
 mongoengine==0.29.1       # via motion-base (pyproject.toml)
 multidict==6.7.0          # via aiohttp, yarl
 numba==0.62.1             # via motion-base (pyproject.toml)
-numpy==2.3.4              # via numba, scipy
+numpy==2.3.5              # via numba, scipy
 packaging==25.0           # via kombu
 pint==0.25.2              # via motion-base (pyproject.toml)
 platformdirs==4.5.0       # via pint
