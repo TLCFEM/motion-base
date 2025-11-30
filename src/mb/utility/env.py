@@ -63,6 +63,8 @@ MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "/tmp")
 MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000")
 MB_MAIN_SITE = MB_MAIN_SITE.rstrip("/")
 
+TURNSTILE_SECRET: str = os.getenv("TURNSTILE_SECRET", "")
+
 if not LOADED:
     _logger.info(f"Hosting on {MB_MAIN_SITE}.")
 

@@ -20,10 +20,11 @@ from http import HTTPStatus
 from pathlib import Path
 from uuid import UUID
 
+import aiohttp
 from beanie.operators import In
 
 # noinspection PyPackageRequirements
-from fastapi import Body, Depends, FastAPI, HTTPException
+from fastapi import Body, Depends, FastAPI, Form, HTTPException
 
 # noinspection PyPackageRequirements
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
@@ -36,7 +37,7 @@ from starlette.middleware.gzip import GZipMiddleware
 from ..record.async_record import MetadataRecord, Record, UploadTask
 from ..utility.config import init_mongo
 from ..utility.elastic import async_elastic, close_all
-from ..utility.env import MB_FS_ROOT
+from ..utility.env import MB_FS_ROOT, TURNSTILE_SECRET
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import process_record_local
@@ -467,3 +468,33 @@ async def delete_file(file_path: str, user: User = Depends(is_active)):
         ) from error
 
     return {"message": "File deleted."}
+
+
+@app.post("/turnstile", tags=["misc"])
+async def validate_turnstile(turnstile_token: str = Form(...)):
+    """
+    Validate Cloudflare Turnstile tokens.
+    """
+    if not TURNSTILE_SECRET:
+        raise HTTPException(status_code=500, detail="Turnstile secret not configured.")
+
+    async with (
+        aiohttp.ClientSession() as session,
+        session.post(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data={
+                "secret": TURNSTILE_SECRET,
+                "response": turnstile_token,
+            },
+        ) as response,
+    ):
+        data = await response.json()
+
+    return (
+        {"success": True}
+        if data.get("success")
+        else {
+            "success": False,
+            "errors": data.get("error-codes", []),
+        }
+    )
