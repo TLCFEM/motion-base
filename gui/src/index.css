@@ -22,3 +22,16 @@ pre {
     padding: 2px;
     border-radius: 2px;
 }
+
+.cf-turnstile {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: #f0f3f2;
+    z-index: 9999;
+}
