@@ -9,7 +9,7 @@ annotated-doc==0.0.4      # via fastapi-slim
 annotated-types==0.7.0    # via pydantic
 anyio==4.12.0             # via elasticsearch, starlette
 attrs==25.4.0             # via aiohttp
-backports-zstd==1.1.0     # via aiohttp
+backports-zstd==1.2.0     # via aiohttp
 bcrypt==5.0.0             # via motion-base (pyproject.toml)
 beanie==2.0.1             # via motion-base (pyproject.toml)
 billiard==4.2.4           # via celery
