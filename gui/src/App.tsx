@@ -13,7 +13,7 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createResource, createSignal, Match, onMount, Show, Switch } from "solid-js";
+import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
 import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
