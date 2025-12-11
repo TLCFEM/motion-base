@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "aiohttp[speedups]",
+    "pycares<5", # due to aiodns
     "bcrypt",
     "beanie",
     "celery",
