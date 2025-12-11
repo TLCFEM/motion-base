@@ -16,12 +16,13 @@ from __future__ import annotations
 
 from datetime import datetime
 from enum import Enum
+from typing import Literal
 
 import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
 
 from ..record.response_spectrum import response_spectrum
-from ..record.utility import apply_filter, filter_regex, window_regex, zero_stuff
+from ..record.utility import apply_filter, zero_stuff
 
 
 class MetadataResponse(BaseModel):
@@ -218,14 +219,14 @@ class ProcessConfig(BaseModel):
     filter_length: int = Field(
         32, ge=8, description="Filter window length, at least eight, default is 32."
     )
-    filter_type: str = Field(
+    filter_type: Literal["lowpass", "highpass", "bandpass", "bandstop"] = Field(
         "bandpass",
-        pattern=filter_regex,
         description="filter type, any of `lowpass`, `highpass`, `bandpass`, `bandstop`",
     )
-    window_type: str = Field(
+    window_type: Literal[
+        "flattop", "blackmanharris", "nuttall", "hann", "hamming", "kaiser", "chebwin"
+    ] = Field(
         "nuttall",
-        pattern=window_regex,
         description="any window type of `flattop`, `blackmanharris`, `nuttall`, `hann`, `hamming`, `kaiser`, `chebwin`",
     )
     low_cut: float = Field(0.01, gt=0)
@@ -251,7 +252,7 @@ class UploadResponse(BaseModel):
 
 
 class QueryConfig(BaseModel):
-    region: str | None = Field(None, pattern="^(jp|nz)$")
+    region: Literal["jp", "nz"] | None = Field(None)
     min_magnitude: float | None = Field(None, ge=0, le=10)
     max_magnitude: float | None = Field(None, ge=0, le=10)
     category: str | None = Field(None)

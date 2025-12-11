@@ -57,10 +57,6 @@ def zero_stuff(ratio: int, waveform: np.ndarray | list[float]) -> np.ndarray:
     return output
 
 
-filter_regex = "^(lowpass|highpass|bandpass|bandstop)$"
-window_regex = "^(flattop|blackmanharris|nuttall|hann|hamming|kaiser|chebwin)$"
-
-
 def get_window(
     filter_type: str,
     window_type: str,
