@@ -34,7 +34,7 @@ flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
 h11==0.16.0               # via uvicorn
 idna==3.11                # via anyio, email-validator, requests, yarl
-joserfc==1.5.0            # via motion-base (pyproject.toml)
+joserfc==1.6.0            # via motion-base (pyproject.toml)
 kombu==5.6.1              # via celery
 lazy-model==0.4.0         # via beanie
 llvmlite==0.46.0          # via numba
@@ -65,7 +65,7 @@ starlette==0.50.0         # via fastapi-slim
 structlog==25.5.0         # via motion-base (pyproject.toml)
 typing-extensions==4.15.0  # via aiosignal, anyio, beanie, elasticsearch, exceptiongroup, fastapi-slim, flexcache, flexparser, pint, pydantic, pydantic-core, starlette, typing-inspection
 typing-inspection==0.4.2  # via pydantic
-tzdata==2025.2            # via kombu
+tzdata==2025.3            # via kombu
 tzlocal==5.3.1            # via celery
 urllib3==2.6.2            # via elastic-transport, requests
 uvicorn==0.38.0           # via motion-base (pyproject.toml)
