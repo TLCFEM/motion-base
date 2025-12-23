@@ -10,16 +10,16 @@
   </head>
   <body>
     <noscript>You need to enable JavaScript to run this app.</noscript>
-    <div
-      class="cf-turnstile"
-      data-sitekey="0x4AAAAAACDz9riiGytnlsJR"
-      data-theme="light"
-      data-size="normal"
-      data-callback="validateToken"
-    ></div>
+<!--    <div-->
+<!--      class="cf-turnstile"-->
+<!--      data-sitekey="0x4AAAAAACDz9riiGytnlsJR"-->
+<!--      data-theme="light"-->
+<!--      data-size="normal"-->
+<!--      data-callback="validateToken"-->
+<!--    ></div>-->
     <div id="root"></div>
     <script src="./src/index.tsx" type="module"></script>
-    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>
+<!--    <script src="https://challenges.cloudflare.com/turnstile/v0/api.js" async defer></script>-->
     <script>
       function validateToken(token) {
         document.getElementsByClassName("cf-turnstile").item(0).style.display = "none";

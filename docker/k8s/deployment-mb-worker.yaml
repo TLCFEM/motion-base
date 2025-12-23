@@ -5,7 +5,7 @@ metadata:
   labels:
     app: mb-worker
 spec:
-  replicas: 2
+  replicas: 1
   selector:
     matchLabels:
       app: mb-worker
@@ -116,6 +116,6 @@ spec:
               value: "mb-storage-service"
           resources:
             limits:
-              memory: "1Gi"
-              cpu: "1"
+              memory: "2Gi"
+              cpu: ".5"
       restartPolicy: Always
