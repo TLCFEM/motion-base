@@ -36,7 +36,7 @@ elasticsearch==9.2.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
 exceptiongroup==1.3.1     # via celery
 execnet==2.1.2            # via pytest-xdist
-fastapi-slim==0.127.0     # via motion-base (pyproject.toml)
+fastapi-slim==0.128.0     # via motion-base (pyproject.toml)
 flask==3.1.2              # via flask-cors, flask-login, locust
 flask-cors==6.0.2         # via locust
 flask-login==0.6.3        # via locust

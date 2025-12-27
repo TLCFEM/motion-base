@@ -39,7 +39,7 @@ def run_app(setting: Config):
         args.extend(setting.celery_config)
         if sys.platform == "win32":
             args.extend(
-                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "info"]
+                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
             )
 
         celery.start(args)
