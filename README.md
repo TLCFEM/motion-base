@@ -4,6 +4,7 @@
 [![codecov](https://codecov.io/gh/TLCFEM/motion-base/branch/master/graph/badge.svg?token=E6TCZUQ6AX)](https://codecov.io/gh/TLCFEM/motion-base)
 [![front-size](https://img.shields.io/docker/image-size/tlcfem/motion-base/front?label=front%20end)](https://hub.docker.com/r/tlcfem/motion-base)
 [![back-size](https://img.shields.io/docker/image-size/tlcfem/motion-base/back?label=back%20end)](https://hub.docker.com/r/tlcfem/motion-base)
+[![DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/TLCFEM/motion-base)
 
 `motion-base` aims to provide a unified entry point for accessing and processing ground motion
 records from different national databases.
