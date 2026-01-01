@@ -27,7 +27,7 @@ jobs:
           cd gui && pnpm up && cd ..
           cd electron && pnpm up && cd ..
       - name: PR
-        uses: peter-evans/create-pull-request@v7
+        uses: peter-evans/create-pull-request@v8
         with:
           delete-branch: true
           title: Update Python and Node dependencies
