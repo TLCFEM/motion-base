@@ -151,7 +151,7 @@ async def get_task_status(task_id: UUID) -> UploadTaskResponse:
 
 
 @app.post(
-    "/task/status/",
+    "/task/status",
     tags=["status"],
     status_code=HTTPStatus.OK,
     response_model=UploadTasksResponse,
