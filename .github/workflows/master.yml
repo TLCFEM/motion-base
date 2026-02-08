@@ -57,10 +57,7 @@ jobs:
           token: ${{ secrets.CODECOV_TOKEN }}
           slug: TLCFEM/motion-base
           plugins: pycoverage
-      - name: Result
-        uses: codecov/test-results-action@v1
-        with:
-          token: ${{ secrets.CODECOV_TOKEN }}
+          report_type: test_results
       - name: Binary
         if: matrix.python-version == '3.11'
         run: |
