@@ -105,12 +105,12 @@ app.include_router(user_router, prefix="/user")
 
 
 @app.get("/", response_class=RedirectResponse)
-async def redirect_to_docs():
+def redirect_to_docs():
     return "/docs"
 
 
 @app.get("/alive", tags=["status"])
-async def alive():
+def alive():
     return {"message": "I'm alive!"}
 
 
@@ -445,12 +445,12 @@ def validate_path(file_path: str):
 
 
 @app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
-async def download_file(file_path: str):
+def download_file(file_path: str):
     return FileResponse(validate_path(file_path))
 
 
 @app.delete("/access/{file_path:path}", tags=["misc"])
-async def delete_file(file_path: str, user: User = Depends(is_active)):
+def delete_file(file_path: str, user: User = Depends(is_active)):
     if not user.can_delete:
         raise HTTPException(
             HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files."

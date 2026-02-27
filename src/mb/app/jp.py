@@ -98,7 +98,7 @@ def _parse_archive(
 
 # noinspection DuplicatedCode
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
-async def upload_archive(
+def upload_archive(
     archives: list[UploadFile],
     tasks: BackgroundTasks,
     user: User = Depends(is_active),
