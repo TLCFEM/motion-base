@@ -48,7 +48,6 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
     "httpx",
-    "locust",
     "pytest-asyncio",
     "pytest-cov",
     "pytest-xdist",
