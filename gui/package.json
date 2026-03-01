@@ -10,7 +10,7 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.21",
-    "@types/node": "^25.3.0",
+    "@types/node": "^25.3.3",
     "@types/plotly.js-basic-dist-min": "^2.12.4",
     "prettier": "^3.8.1",
     "solid-devtools": "^0.34.5",
@@ -23,7 +23,7 @@
     "@suid/material": "^0.19.0",
     "@suid/vite-plugin": "^0.4.1",
     "@tanstack/solid-table": "^8.21.3",
-    "axios": "^1.13.5",
+    "axios": "^1.13.6",
     "highlight.js": "^11.11.1",
     "leaflet": "^1.9.4",
     "marked": "^17.0.3",
