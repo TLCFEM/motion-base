@@ -27,14 +27,19 @@ import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
-import { post_total_api, QueryConfig } from "./API";
+import { check_backend, post_total_api, QueryConfig } from "./API";
 
 export default function AboutModal() {
+    const [backend, setBackend] = createSignal<boolean>(false);
     const [open, setOpen] = createSignal(false);
     const [stats, setStats] = createSignal([] as number[]);
     const theme = useTheme();
 
     onMount(async () => {
+        setBackend(await check_backend());
+
+        if (!backend()) return;
+
         let configs = [] as QueryConfig[];
         let config = new QueryConfig();
         config.min_magnitude = 0;
@@ -88,11 +93,13 @@ export default function AboutModal() {
                     <Typography variant="body1" sx={{ p: 1 }}>
                         This is a demo of the ground motion database ({commit_link}).
                     </Typography>
-                    <Typography variant="body1" sx={{ p: 1 }}>
-                        Currently this server contains in total {stats()[0].toLocaleString()} records from various
-                        national database. Among them, {stats()[1].toLocaleString()} records have a magnitude greater
-                        than six, {stats()[2].toLocaleString()} records has a PGA greater than 100 Gal.
-                    </Typography>
+                    {backend() && (
+                        <Typography variant="body1" sx={{ p: 1 }}>
+                            Currently this server contains in total {stats()[0].toLocaleString()} records from various
+                            national database. Among them, {stats()[1].toLocaleString()} records have a magnitude
+                            greater than six, {stats()[2].toLocaleString()} records has a PGA greater than 100 Gal.
+                        </Typography>
+                    )}
                     <Typography variant="body1" sx={{ p: 1 }}>
                         The source code is available in this repository {repo_link}.
                     </Typography>
@@ -118,7 +125,7 @@ export default function AboutModal() {
                         <Link href="https://www.mongodb.com/">
                             <img src={mongodb_logo} alt="mongodb" height="40px" />
                         </Link>
-                        <Link href="http://mongoengine.org/">
+                        <Link href="https://github.com/MongoEngine/mongoengine">
                             <img src={mongoengine_logo} alt="mongoengine" height="40px" />
                         </Link>
                         <Link href="https://beanie-odm.dev/">
