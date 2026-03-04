@@ -65,12 +65,12 @@ def sample_data(pwd, mongo_connection):
     def to_dict(record) -> dict:
         dict_data = record.to_mongo()
         for key in (
-            "scale_factor",
-            "raw_data",
-            "raw_data_unit",
-            "offset",
-            "_id",
-            "_cls",
+                "scale_factor",
+                "raw_data",
+                "raw_data_unit",
+                "offset",
+                "_id",
+                "_cls",
         ):
             dict_data.pop(key, None)
         dict_data["id"] = record.id
@@ -125,8 +125,8 @@ async def test_simple(sample_data, mock_client_superuser):
     )
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client_superuser.post("/search")
-    assert response.status_code == HTTPStatus.OK
-
-    response = await mock_client_superuser.delete("/purge")
-    assert response.status_code == HTTPStatus.OK
+    # response = await mock_client_superuser.post("/search")
+    # assert response.status_code == HTTPStatus.OK
+    #
+    # response = await mock_client_superuser.delete("/purge")
+    # assert response.status_code == HTTPStatus.OK

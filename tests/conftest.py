@@ -26,8 +26,13 @@ from mb.utility import env
 from mb.utility.config import init_mongo
 
 
+@pytest.fixture
+def anyio_backend():
+    return 'asyncio'
+
+
 @pytest.fixture(scope="function")
-async def mongo_connection(monkeypatch):
+async def mongo_connection(monkeypatch, anyio_backend):
     monkeypatch.setattr(env, "MONGO_DB_NAME", random_db := uuid4().hex)
     async with init_mongo(random_db) as mongo_client:
         yield
@@ -37,7 +42,7 @@ async def mongo_connection(monkeypatch):
 @pytest.fixture(scope="function")
 async def mock_client(mongo_connection):
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
 
@@ -64,7 +69,7 @@ async def mock_client_superuser(monkeypatch, mongo_connection):
     while (await User.find_one(User.username == "test")) is None:
         await asyncio.sleep(1)
     async with AsyncClient(
-        transport=ASGITransport(app=app), base_url="http://test"
+            transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
     await user.delete()
