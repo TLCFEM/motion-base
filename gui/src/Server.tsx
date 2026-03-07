@@ -141,7 +141,7 @@ export default function ServerModal() {
                     </Stack>
                     {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
                     <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Histogram id="year-hist" item="Magnitude" data={yearHist()} scale="linear" />
+                        <Histogram id="year-hist" item="Year" data={yearHist()} scale="log" />
                         <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
                         <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
                     </Stack>
