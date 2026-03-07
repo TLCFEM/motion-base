@@ -396,6 +396,9 @@ async def aggregation_stats():
         aggs={
             "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
             "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
+            "year": {
+                "date_histogram": {"field": "event_time", "calendar_interval": "year"}
+            },
         },
         size=0,
     )

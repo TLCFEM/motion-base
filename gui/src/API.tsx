@@ -140,6 +140,7 @@ export async function get_total_api() {
 }
 
 interface StatsResponse {
+    year: AggregationBucket;
     magnitude: AggregationBucket;
     pga: AggregationBucket;
 }
@@ -151,6 +152,7 @@ class AggregationBucket {
 export class AggregationItem {
     public key: number;
     public doc_count: number;
+    public key_as_string?: string;
 }
 
 export async function get_stats() {

@@ -33,7 +33,7 @@ const Histogram: Component<HistogramProps> = (props) => {
             props.id,
             [
                 {
-                    x: props.data.map((item) => item.key),
+                    x: props.data.map((item) => (item.key_as_string ? item.key_as_string.slice(0, 4) : item.key)),
                     y: props.data.map((item) => item.doc_count),
                     type: "bar",
                 },
@@ -66,11 +66,13 @@ export default function ServerModal() {
     const [newServer, setNewServer] = createSignal(axios.defaults.baseURL);
     const [loading, setLoading] = createSignal(false);
     const theme = useTheme();
+    const [yearHist, setYearHist] = createSignal([] as AggregationItem[]);
     const [magnitudeHist, setMagnitudeHist] = createSignal([] as AggregationItem[]);
     const [pgaHist, setPgaHist] = createSignal([] as AggregationItem[]);
 
     onMount(async () => {
         const allStats = await get_stats();
+        setYearHist(allStats.year.buckets);
         setMagnitudeHist(allStats.magnitude.buckets);
         setPgaHist(allStats.pga.buckets);
     });
@@ -139,6 +141,7 @@ export default function ServerModal() {
                     </Stack>
                     {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
                     <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
+                        <Histogram id="year-hist" item="Magnitude" data={yearHist()} scale="linear" />
                         <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
                         <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
                     </Stack>
