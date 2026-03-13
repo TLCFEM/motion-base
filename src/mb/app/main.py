@@ -83,9 +83,14 @@ async def profile_request(request, call_next):
     return HTMLResponse(profiler.output_html())
 
 
+_ROOT_PATH_ = "/mb/api"
+_DOC_URL_ = "/docs"
+
+
 # noinspection PyTypeChecker
 app = FastAPI(
-    docs_url="/docs",
+    root_path=_ROOT_PATH_,
+    docs_url=_DOC_URL_,
     title="Strong Motion Database",
     contact={"name": "Theodore Chang", "email": "tlcfem@gmail.com"},
     description="A database for strong motion records.",
@@ -106,7 +111,7 @@ app.include_router(user_router, prefix="/user")
 
 @app.get("/", response_class=RedirectResponse)
 def redirect_to_docs():
-    return "/docs"
+    return _ROOT_PATH_ + _DOC_URL_
 
 
 @app.get("/alive", tags=["status"])
