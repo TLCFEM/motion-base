@@ -38,7 +38,7 @@ class HelloWorldUser(FastHttpUser):
         "with_response_spectrum": True,
     }
 
-    host = "https://tlcfem.top:8443"
+    host = "https://tlcfem.top/mb/api"
 
     @tag("alive")
     @task
