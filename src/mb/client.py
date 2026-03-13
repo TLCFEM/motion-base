@@ -107,6 +107,8 @@ class MBClient:
         host_url: str | None = None,
         username: str | None = None,
         password: str | None = None,
+        *,
+        max_file_size: int = 0,
         **kwargs,
     ):
         """
@@ -117,16 +119,23 @@ class MBClient:
         All other keyword arguments are passed to `httpx.AsyncClient`.
         For example, to set a timeout of 10 seconds, use `timeout=10`.
 
-        :param host_url: The URL of the server.
+        :param host_url: The URL of the server, should not contain trailing slash.
         :param username: The username for authentication.
         :param password: The password for authentication.
+        :param max_file_size: The maximum file size (in MB) to be uploaded.
+            Some configurations may have size limit, for example, cloudflare (free tier) has a limit of 100MB for request body.
+            Files larger than this size will be skipped.
+            Set to 0 to disable this check.
         :param kwargs: Additional arguments for `httpx.AsyncClient`.
         """
-        self.host_url: str = host_url if host_url else "http://localhost:8000"
+        self.host_url: str = (
+            host_url.rstrip("/") if host_url else "http://localhost:8000"
+        )
         while self.host_url.endswith("/"):
             self.host_url = self.host_url[:-1]
         self.username: str | None = username
         self.password: str | None = password
+        self.max_file_size: int = max_file_size * 2**20
         self.auth: OAuth2 | None = (
             OAuth2(
                 f"{self.host_url}/user/token",
@@ -247,7 +256,13 @@ class MBClient:
                     tg.start_soon(self.upload, region, file, wait_for_result)
             return
 
-        def _include(file_name: str) -> bool:
+        def _include(parent: str, file_name: str) -> bool:
+            if (
+                0
+                < self.max_file_size
+                < os.path.getsize(os.path.join(parent, file_name))
+            ):
+                return False
             file_name = file_name.lower()
             if file_name.endswith((".tar.gz", ".zip")):
                 return True
@@ -257,7 +272,9 @@ class MBClient:
         if os.path.isdir(path):
             file_list: list[str] = []
             for root, _, files in os.walk(path):
-                file_list.extend(os.path.join(root, f) for f in files if _include(f))
+                file_list.extend(
+                    os.path.join(root, f) for f in files if _include(root, f)
+                )
             self.upload_size = len(file_list)
             self.current_upload_size = 0
             async with anyio.create_task_group() as tg:
