@@ -108,7 +108,7 @@ export default function ServerModal() {
                             sx={{ minWidth: "36ch" }}
                             label="Server"
                             value={newServer()}
-                            onChange={(_, value) => setNewServer(value)}
+                            onChange={(_, value) => setNewServer(value.replace(/\/+$/, ""))}
                         />
                         <Button
                             variant="contained"
