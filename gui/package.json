@@ -10,13 +10,13 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.21",
-    "@types/node": "^25.3.5",
+    "@types/node": "^25.5.0",
     "@types/plotly.js-basic-dist-min": "^2.12.4",
     "prettier": "^3.8.1",
     "solid-devtools": "^0.34.5",
     "typescript": "^5.9.3",
     "vite": "^6.4.1",
-    "vite-plugin-solid": "^2.11.10"
+    "vite-plugin-solid": "^2.11.11"
   },
   "dependencies": {
     "@suid/icons-material": "^0.9.0",
