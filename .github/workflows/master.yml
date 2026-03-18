@@ -93,6 +93,9 @@ jobs:
     needs: build
     runs-on: ubuntu-latest
     timeout-minutes: 100
+    strategy:
+      matrix:
+        image: [ "front", "back" ]
     steps:
       - name: Clone
         uses: actions/checkout@v6
@@ -113,23 +116,13 @@ jobs:
         uses: docker/setup-qemu-action@v3
       - name: Buildx
         uses: docker/setup-buildx-action@v3
-      - name: Build Backend
+      - name: Build
         uses: docker/build-push-action@v6
         with:
           context: .
-          file: back.Dockerfile
+          file: ${{ matrix.image }}.Dockerfile
           platforms: linux/amd64,linux/arm64
           push: true
           tags: |
-            tlcfem/motion-base:back
-            ghcr.io/tlcfem/motion-base:back
-      - name: Build Frontend
-        uses: docker/build-push-action@v6
-        with:
-          context: .
-          file: front.Dockerfile
-          platforms: linux/amd64,linux/arm64
-          push: true
-          tags: |
-            tlcfem/motion-base:front
-            ghcr.io/tlcfem/motion-base:front
+            tlcfem/motion-base:${{ matrix.image }}
+            ghcr.io/tlcfem/motion-base:${{ matrix.image }}
