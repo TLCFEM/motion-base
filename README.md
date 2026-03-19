@@ -14,6 +14,8 @@ It comes with a web interface and a Python client that can be used to access the
 > [!IMPORTANT]
 > **Check out the [demo](https://tlcfem.top/mb/) site.**
 
+[![uptime](https://cdn.uptimeradar.com/23ybbH.svg)](https://uptimeradar.com/#23ybbH)
+
 ![screenshot](docs/screenshot.png)
 
 ## Main Functionalities
