@@ -24,6 +24,8 @@ The following files will be downloaded:
 1. A \033[1;36m.env\033[0m file that defines environment variables for the application.
 2. An \033[1;36mexample data file\033[0m '\033[1;36mjp_test.knt.tar.gz\033[0m' that will be uploaded to the application.
 
+A few docker images will be pulled, the total size is around \033[1;36m1.5GB\033[0m.
+
 \033[1;33mDo you want to continue? (y/n)\033[0m"
 
 read -r response
