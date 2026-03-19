@@ -154,8 +154,8 @@ docker compose -f docker-compose.yml up -d || exit 0
 cleanup() {
   echo "
 >>> Shutdown docker..."
-  docker compose -f docker-compose.yml down
-  echo -e "\033[1;33m>>>\033[0m To clean up, please remove the \033[1;36m'mb-example'\033[0m directory and \033[1;36mdocker volumes\033[0m."
+  docker compose -f docker-compose.yml down -v
+  echo -e "\033[1;33m>>>\033[0m To clean up, please remove the \033[1;36m'mb-example'\033[0m directory manually."
 }
 
 trap 'cleanup; exit 130' INT
