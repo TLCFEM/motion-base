@@ -165,7 +165,7 @@ echo ">>> Waiting for the application to start..."
 response=""
 while [ "$response" != "200" ]; do
   sleep 4
-  response="$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/alive)"
+  response="$(curl -s -o /dev/null -w "%{http_code}" http://localhost:8000/alive || true)"
 done
 
 token="$(curl -s -X 'POST' 'http://localhost:8000/user/token' \
