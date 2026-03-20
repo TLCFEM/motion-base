@@ -329,7 +329,7 @@ const Settings: Component<sxProps> = (props) => {
                         size="small"
                         id="low-cut"
                         error={ifError(lowCut())}
-                        label="Low Cut"
+                        label="Low Cut (Hz)"
                         type="number"
                         value={lowCut()}
                         onChange={(_, value) => setLowCut(value)}
@@ -340,7 +340,7 @@ const Settings: Component<sxProps> = (props) => {
                         size="small"
                         id="high-cut"
                         error={ifError(highCut())}
-                        label="High Cut"
+                        label="High Cut (Hz)"
                         type="number"
                         value={highCut()}
                         onChange={(_, value) => setHighCut(value)}
@@ -419,7 +419,7 @@ const Settings: Component<sxProps> = (props) => {
                         size="small"
                         id="period-step"
                         error={ifError(periodStep())}
-                        label="Period Step"
+                        label="Period Step (s)"
                         type="number"
                         value={periodStep()}
                         onChange={(_, value) => setPeriodStep(value)}
@@ -430,7 +430,7 @@ const Settings: Component<sxProps> = (props) => {
                         size="small"
                         id="period-end"
                         error={ifError(periodEnd())}
-                        label="Period End"
+                        label="Period End (s)"
                         type="number"
                         value={periodEnd()}
                         onChange={(_, value) => setPeriodEnd(value)}
