@@ -26,7 +26,7 @@
     "axios": "^1.13.6",
     "highlight.js": "^11.11.1",
     "leaflet": "^1.9.4",
-    "marked": "^17.0.4",
+    "marked": "^17.0.5",
     "marked-highlight": "^2.2.3",
     "plotly.js-basic-dist-min": "^3.4.0",
     "solid-js": "^1.9.11",
