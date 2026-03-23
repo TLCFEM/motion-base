@@ -26,11 +26,6 @@ from mb.utility import env
 from mb.utility.config import init_mongo
 
 
-@pytest.fixture
-def anyio_backend():
-    return 'asyncio'
-
-
 @pytest.fixture(scope="function")
 async def mongo_connection(monkeypatch, anyio_backend):
     monkeypatch.setattr(env, "MONGO_DB_NAME", random_db := uuid4().hex)

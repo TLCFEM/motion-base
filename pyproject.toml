@@ -35,7 +35,6 @@ dependencies = [
     "mongoengine",
     "numba",
     "Pint",
-    "py-spy",
     "pyinstrument",
     "python-dotenv",
     "python-multipart",
@@ -66,9 +65,6 @@ client = [
 "Homepage" = "https://github.com/TLCFEM/motion-base"
 "Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
 "Source" = "https://github.com/TLCFEM/motion-base"
-
-[tool.pytest.ini_options]
-anyio_mode = "auto"
 
 [tool.pyright]
 venvPath = "."
