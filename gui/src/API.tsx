@@ -14,6 +14,7 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import axios from "axios";
+import { createSignal } from "solid-js";
 
 axios.defaults.baseURL = "http://127.0.0.1:8000";
 axios.defaults.timeout = 10000;
@@ -220,6 +221,8 @@ export function createDownloadLink(obj: any) {
     element.href = URL.createObjectURL(file);
     return element;
 }
+
+export const [backend, setBackend] = createSignal<boolean>(false);
 
 export async function check_backend() {
     try {

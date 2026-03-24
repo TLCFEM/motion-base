@@ -17,7 +17,7 @@ import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField } from "@su
 import useTheme from "@suid/material/styles/useTheme";
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import axios from "axios";
-import { AggregationItem, get_stats } from "./API";
+import { AggregationItem, get_stats, setBackend } from "./API";
 import Plotly from "plotly.js-basic-dist-min";
 
 interface HistogramProps {
@@ -108,7 +108,7 @@ export default function ServerModal() {
                             sx={{ minWidth: "36ch" }}
                             label="Server"
                             value={newServer()}
-                            onChange={(_, value) => setNewServer(value.replace(/\/+$/, ""))}
+                            onChange={(_, value) => setNewServer(value)}
                         />
                         <Button
                             variant="contained"
@@ -116,8 +116,9 @@ export default function ServerModal() {
                             onClick={async () => {
                                 setLoading(true);
                                 try {
-                                    await axios.get(`${newServer()}/alive`);
+                                    await axios.get(`${newServer().replace(/\/+$/, "")}/alive`);
                                     axios.defaults.baseURL = newServer();
+                                    setBackend(true);
                                     setOpen(false);
                                 } catch {
                                     alert("Target server is not reachable.");

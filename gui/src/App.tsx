@@ -21,7 +21,7 @@ import QueryDatabase from "./Query";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";
 import "tippy.js/animations/scale.css";
-import { check_backend, get_total_api } from "./API";
+import { backend, check_backend, get_total_api, setBackend } from "./API";
 import Process from "./Process";
 import ServerModal from "./Server";
 import { marked } from "marked";
@@ -49,8 +49,6 @@ const MarkdownContent = (props: { src: string }) => {
 };
 
 const App: Component = () => {
-    const [backend, setBackend] = createSignal<boolean>(false);
-
     onMount(async () => {
         tippy(`#btn-jackpot`, {
             content: "Get a random record from the database.",

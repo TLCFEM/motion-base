@@ -27,10 +27,9 @@ import mb_logo from "./assets/logo.svg";
 import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
-import { check_backend, post_total_api, QueryConfig } from "./API";
+import { backend, check_backend, post_total_api, QueryConfig, setBackend } from "./API";
 
 export default function AboutModal() {
-    const [backend, setBackend] = createSignal<boolean>(false);
     const [open, setOpen] = createSignal(false);
     const [stats, setStats] = createSignal([] as number[]);
     const theme = useTheme();
