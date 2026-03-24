@@ -133,7 +133,9 @@ const App: Component = () => {
             <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot sx={{ border: "1px solid darkgrey", height: "calc(100vh - 7rem)" }} />
+                        <Jackpot
+                            sx={{ border: "1px solid darkgrey", height: "calc(100vh - 7rem)", minHeight: "700px" }}
+                        />
                     </Match>
                     <Match when={mode() === "query"}>
                         <QueryDatabase />
