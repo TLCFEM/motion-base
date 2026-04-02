@@ -52,7 +52,7 @@ jobs:
           export NUMBA_DISABLE_JIT=1
           pytest -n auto --cov --junitxml=junit.xml .
       - name: Codecov
-        uses: codecov/codecov-action@v5
+        uses: codecov/codecov-action@v6
         with:
           token: ${{ secrets.CODECOV_TOKEN }}
           plugins: pycoverage
