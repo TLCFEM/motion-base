@@ -10,24 +10,24 @@
   },
   "devDependencies": {
     "@types/leaflet": "^1.9.21",
-    "@types/node": "^25.5.2",
+    "@types/node": "^25.6.0",
     "@types/plotly.js-basic-dist-min": "^2.12.4",
-    "prettier": "^3.8.1",
+    "prettier": "^3.8.2",
     "solid-devtools": "^0.34.5",
     "typescript": "^6.0.2",
-    "vite": "^6.4.1",
-    "vite-plugin-solid": "^2.11.11"
+    "vite": "^6.4.2",
+    "vite-plugin-solid": "^2.11.12"
   },
   "dependencies": {
     "@suid/icons-material": "^0.9.0",
     "@suid/material": "^0.19.0",
     "@suid/vite-plugin": "^0.4.1",
     "@tanstack/solid-table": "^8.21.3",
-    "axios": "^1.14.0",
+    "axios": "^1.15.0",
     "highlight.js": "^11.11.1",
     "leaflet": "^1.9.4",
     "marked": "^17.0.6",
-    "marked-highlight": "^2.2.3",
+    "marked-highlight": "^2.2.4",
     "plotly.js-basic-dist-min": "^3.5.0",
     "solid-js": "^1.9.12",
     "tippy.js": "^6.3.7"
