@@ -95,7 +95,7 @@ jobs:
     timeout-minutes: 100
     strategy:
       matrix:
-        image: [ "front", "back" ]
+        image: [ "front", "back", "crawler" ]
     steps:
       - name: Clone
         uses: actions/checkout@v6
