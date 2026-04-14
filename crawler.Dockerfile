@@ -9,4 +9,4 @@ dest="/usr/local/bin/$(basename "${f%.py}")"; \
 cp "$f" "$dest" && chmod +x "$dest"; \
 done
 
-RUN ls -halt /usr/local/bin
+RUN rm -rf /crawler
