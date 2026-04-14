@@ -95,7 +95,7 @@ jobs:
   docker:
     needs: build
     runs-on: ubuntu-latest
-    timeout-minutes: 100
+    timeout-minutes: 20
     strategy:
       matrix:
         image: [ "front", "back", "crawler" ]
