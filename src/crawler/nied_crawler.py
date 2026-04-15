@@ -29,7 +29,7 @@ USER = ""
 PASS = ""
 SEM_LIMIT = 100
 RETRY = 3
-FILE_LIST = (".ew1", ".ew2", ".ns1", ".ns2", ".ud1", ".ud2")
+FILE_LIST = (".ew", ".ew1", ".ew2", "ns", ".ns1", ".ns2", "ud", ".ud1", ".ud2")
 SILENT = False
 
 
