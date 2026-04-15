@@ -30,9 +30,10 @@ from bs4 import BeautifulSoup
 
 DOMAIN = "https://data.geonet.org.nz"
 BASE = f"{DOMAIN}/seismic-products/strong-motion/volume-products"
-SEM_LIMIT = 10
+SEM_LIMIT = 100
 RETRY = 3
 FILE_LIST = (".v1a", ".v2a")
+SILENT = False
 
 
 task_pool = set()
@@ -96,6 +97,8 @@ async def crawl(root_path: Path):
 
     start_new: bool = True
     if root_list.exists():
+        if SILENT:
+            return
         print(
             "The previous list of files is detected, do you want to download from scratch? (y/N)"
         )
@@ -167,6 +170,8 @@ async def parse(local: Path, targets: list[str]):
 
     start_new: bool = True
     if failed_file.exists():
+        if SILENT:
+            return
         print(
             "The previous failed links are detected, do you want to create server structure from scratch? (y/N)"
         )
@@ -249,6 +254,7 @@ def compress(root: Path, output: Path):
     "--retry", default=3, type=int, help="Number of retry attempts. Default is 3."
 )
 @click.option("--dry-run", default=False, is_flag=True, help="Dry run.")
+@click.option("--silent", "-s", default=False, is_flag=True, help="Silent mode.")
 @click.option(
     "--targets",
     "-t",
@@ -256,7 +262,7 @@ def compress(root: Path, output: Path):
     multiple=True,
     help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets 2016 --targets 2007/09_Sep",
 )
-def main(mode, root, output, parallel, retry, dry_run, targets):
+def main(mode, root, output, parallel, retry, dry_run, silent, targets):
     """
     \b
     GeoNet Strong-Motion Data Downloader
@@ -288,9 +294,10 @@ def main(mode, root, output, parallel, retry, dry_run, targets):
         - Executes ``parse`` followed by ``crawl``.
     """
 
-    global SEM_LIMIT, RETRY
+    global SEM_LIMIT, RETRY, SILENT
     SEM_LIMIT = parallel
     RETRY = retry
+    SILENT = silent
 
     if mode not in ("parse", "crawl", "all", "pack"):
         print("Invalid mode, choose from parse, crawl or all.")

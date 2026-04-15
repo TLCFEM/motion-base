@@ -27,9 +27,10 @@ from bs4 import BeautifulSoup
 BASE = "https://www.kyoshin.bosai.go.jp"
 USER = ""
 PASS = ""
-SEM_LIMIT = 50
+SEM_LIMIT = 100
 RETRY = 3
-FILE_LIST = (".tar.gz",)
+FILE_LIST = (".EW1", ".EW2", ".NS1", ".NS2", ".UD1", ".UD2")
+SILENT = False
 
 
 task_pool = set()
@@ -91,6 +92,8 @@ async def crawl(root_path: Path):
 
     start_new: bool = True
     if root_list.exists():
+        if SILENT:
+            return
         print(
             "The previous list of files is detected, do you want to download from scratch? (y/N)"
         )
@@ -160,6 +163,8 @@ async def parse(local: Path, targets: list[str]):
 
     start_new: bool = True
     if failed_file.exists():
+        if SILENT:
+            return
         print(
             "The previous failed links are detected, do you want to create server structure from scratch? (y/N)"
         )
@@ -212,14 +217,15 @@ async def parse(local: Path, targets: list[str]):
     "--retry", default=3, type=int, help="Number of retry attempts. Default is 3."
 )
 @click.option("--dry-run", default=False, is_flag=True, help="Dry run.")
+@click.option("--silent", "-s", default=False, is_flag=True, help="Silent mode.")
 @click.option(
     "--targets",
     "-t",
-    default=["kik/alldata/", "knet/alldata/"],
+    default=["kik/data/", "knet/data/"],
     multiple=True,
-    help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets kik/alldata/ --targets knet/alldata/",
+    help="Specific remote target paths to parse, only used in parse mode, e.g. (also defaults), --targets kik/data/ --targets knet/data/",
 )
-def main(mode, username, password, root, parallel, retry, dry_run, targets):
+def main(mode, username, password, root, parallel, retry, dry_run, silent, targets):
     """
     \b
     NIED Seismic Data Crawling Utility
@@ -280,11 +286,12 @@ def main(mode, username, password, root, parallel, retry, dry_run, targets):
     time of writing, using up to 50 concurrent connections appears to be acceptable.
     """
 
-    global USER, PASS, SEM_LIMIT, RETRY
+    global USER, PASS, SEM_LIMIT, RETRY, SILENT
     USER = username
     PASS = password
     SEM_LIMIT = parallel
     RETRY = retry
+    SILENT = silent
 
     if mode not in ("parse", "crawl", "all"):
         print("Invalid mode, choose from parse, crawl or all.")
