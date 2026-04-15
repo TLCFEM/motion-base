@@ -93,11 +93,12 @@ async def crawl(root_path: Path):
     start_new: bool = True
     if root_list.exists():
         if SILENT:
-            return
-        print(
-            "The previous list of files is detected, do you want to download from scratch? (y/N)"
-        )
-        start_new = input().strip().lower() == "y"
+            start_new = False
+        else:
+            print(
+                "The previous list of files is detected, do you want to download from scratch? (y/N)"
+            )
+            start_new = input().strip().lower() == "y"
 
     if start_new:
         with open(root_list, "w") as file:
@@ -164,11 +165,12 @@ async def parse(local: Path, targets: list[str]):
     start_new: bool = True
     if failed_file.exists():
         if SILENT:
-            return
-        print(
-            "The previous failed links are detected, do you want to create server structure from scratch? (y/N)"
-        )
-        start_new = input().strip().lower() == "y"
+            start_new = False
+        else:
+            print(
+                "The previous failed links are detected, do you want to create server structure from scratch? (y/N)"
+            )
+            start_new = input().strip().lower() == "y"
 
     if not start_new:
         with open(failed_file) as file:
