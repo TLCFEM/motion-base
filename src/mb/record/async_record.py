@@ -22,7 +22,7 @@ import pint
 from beanie import Document, Indexed
 from pydantic import Field
 
-from .utility import convert_to, normalise, perform_fft, str_factory
+from .utility import convert_to, normalise, perform_fft, str_factory, uuid5_str
 
 ASCENDING = 1
 DESCENDING = -1
@@ -96,6 +96,20 @@ class MetadataRecord(Document):
             ],
         ]
 
+    async def save(self, *args, **kwargs):
+        token: str = self.file_name
+        if self.region is not None:
+            token += self.region
+        if self.category is not None:
+            token += self.category
+        if self.last_update_time is not None:
+            token += self.last_update_time.isoformat()
+        if self.direction is not None:
+            token += self.direction
+        self.id = uuid5_str(token)
+
+        return await super().save(*args, **kwargs)
+
 
 class Record(MetadataRecord):
     raw_data: list[int] = Field(
@@ -163,7 +177,12 @@ class UploadTask(Document):
         return self.current_size / max(1, self.total_size)
 
 
-async def create_task():
-    task = UploadTask()
+async def create_task(task_id: str | None = None):
+    task = UploadTask() if task_id is None else UploadTask(id=task_id)
     await task.save()
     return task.id
+
+
+async def delete_task(task_id: str):
+    if (task := await UploadTask.get(task_id)) is not None:
+        await task.delete()
