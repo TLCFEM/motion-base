@@ -24,7 +24,7 @@ jobs:
         ports:
           - "27017:27017"
       rabbitmq:
-        image: rabbitmq:latest
+        image: rabbitmq:4.2
         env:
           RABBITMQ_DEFAULT_USER: test
           RABBITMQ_DEFAULT_PASS: password
