@@ -75,7 +75,7 @@ services:
       - motion_mongo:/data/db
       - motion_mongoconfig:/data/configdb
   mb-rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:4.2-management
     container_name: mb-rabbitmq
     restart: always
     ports:

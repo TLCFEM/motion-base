@@ -35,7 +35,7 @@ services:
       ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
       ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
   rabbitmq:
-    image: rabbitmq:management
+    image: rabbitmq:4.2-management
     container_name: rabbitmq
     restart: always
     environment:
