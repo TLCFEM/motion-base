@@ -65,12 +65,12 @@ async def sample_data(pwd, mongo_connection):
     def to_dict(record) -> dict:
         dict_data = record.to_mongo()
         for key in (
-                "scale_factor",
-                "raw_data",
-                "raw_data_unit",
-                "offset",
-                "_id",
-                "_cls",
+            "scale_factor",
+            "raw_data",
+            "raw_data_unit",
+            "offset",
+            "_id",
+            "_cls",
         ):
             dict_data.pop(key, None)
         dict_data["id"] = record.id
