@@ -12,10 +12,10 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from datetime import datetime
 
 import pint
-import structlog
 from mongoengine import (
     DateTimeField,
     Document,
@@ -26,8 +26,6 @@ from mongoengine import (
 )
 
 from .utility import str_factory, uuid5_str
-
-_logger = structlog.get_logger(__name__)
 
 
 class Record(Document):

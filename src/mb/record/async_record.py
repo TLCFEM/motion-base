@@ -29,6 +29,7 @@ DESCENDING = -1
 GEOSPHERE = "2dsphere"
 
 
+# noinspection PyTypeHints
 class MetadataRecord(Document):
     id: str = Field(default_factory=str_factory)
 
