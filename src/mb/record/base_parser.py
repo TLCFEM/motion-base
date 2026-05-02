@@ -12,15 +12,13 @@
 #
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
 from __future__ import annotations
 
 import re
 from collections.abc import Generator
 
 import pint
-import structlog
-
-_logger = structlog.get_logger(__name__)
 
 
 class BaseParserNIED:

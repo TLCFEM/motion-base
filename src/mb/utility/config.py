@@ -44,11 +44,12 @@ def mongo_uri():
 
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
-    database = AsyncMongoClient(
-        mongo_uri(), uuidRepresentation="standard"
-    ).get_database(db or MONGO_DB_NAME)
     await init_beanie(
-        database=database,
+        database=(
+            database := AsyncMongoClient(
+                mongo_uri(), uuidRepresentation="standard"
+            ).get_database(db or MONGO_DB_NAME)
+        ),
         document_models=[Record, User, UploadTask],
     )
     yield database
