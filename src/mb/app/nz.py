@@ -36,14 +36,18 @@ router = APIRouter(tags=["New Zealand"])
 
 
 # noinspection DuplicatedCode
-def _parse_archive_local(
+def _parse_archive_impl(
     archive_uri: str,
+    access_token: str | None,
     user_id: str,
-    task_id: str | None = None,
-    overwrite_existing: bool = True,
+    task_id: str | None,
+    overwrite_existing: bool,
+    is_local: bool,
 ) -> list[str]:
     try:
-        with FileProxy(archive_uri, None, always_delete_on_exit=True) as archive_file:
+        with FileProxy(
+            archive_uri, access_token, always_delete_on_exit=is_local
+        ) as archive_file:
             results = ParserNZSM.parse_archive(
                 archive_obj=archive_file.file,
                 user_id=user_id,
@@ -53,14 +57,31 @@ def _parse_archive_local(
             )
             return archive_file.bulk(results)
     except Exception as exc:
-        # we need to handle the exception here
-        # throwing exception in background task queue will terminate all tasks
-        structlog.get_logger(__name__).error(
-            f"Failed to parse archive {archive_uri}.", exc_info=exc
-        )
+        if is_local:
+            # we need to handle the exception here
+            # throwing exception in background task queue will terminate all tasks
+            structlog.get_logger(__name__).error(
+                f"Failed to parse archive {archive_uri}.", exc_info=exc
+            )
+            if task_id is not None:
+                delete_task(task_id)
+            return []
+
         if task_id is not None:
-            delete_task(task_id)
-        return []
+            create_task(task_id)
+
+        raise exc
+
+
+def _parse_archive_local(
+    archive_uri: str,
+    user_id: str,
+    task_id: str | None = None,
+    overwrite_existing: bool = True,
+) -> list[str]:
+    return _parse_archive_impl(
+        archive_uri, None, user_id, task_id, overwrite_existing, True
+    )
 
 
 @celery.task(
@@ -80,20 +101,9 @@ def _parse_archive(
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    try:
-        with FileProxy(archive_uri, access_token) as archive_file:
-            results = ParserNZSM.parse_archive(
-                archive_obj=archive_file.file,
-                user_id=user_id,
-                archive_name=archive_file.file_name,
-                task_id=task_id,
-                overwrite_existing=overwrite_existing,
-            )
-            return archive_file.bulk(results)
-    except Exception as exc:
-        if task_id is not None:
-            create_task(task_id)
-        raise exc
+    return _parse_archive_impl(
+        archive_uri, access_token, user_id, task_id, overwrite_existing, False
+    )
 
 
 # noinspection DuplicatedCode
