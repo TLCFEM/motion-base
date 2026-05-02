@@ -24,7 +24,6 @@ import tippy_logo from "./assets/tippy.svg";
 import plotly_logo from "./assets/plotly.svg";
 import leaflet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
-import mongoengine_logo from "./assets/mongoengine.png";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
 import { backend, check_backend, post_total_api, QueryConfig, setBackend } from "./API";
@@ -123,9 +122,6 @@ export default function AboutModal() {
                     <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
                         <Link href="https://www.mongodb.com/">
                             <img src={mongodb_logo} alt="mongodb" height="40px" />
-                        </Link>
-                        <Link href="https://github.com/MongoEngine/mongoengine">
-                            <img src={mongoengine_logo} alt="mongoengine" height="40px" />
                         </Link>
                         <Link href="https://beanie-odm.dev/">
                             <img src={beanie_logo} alt="beanie" height="40px" />
