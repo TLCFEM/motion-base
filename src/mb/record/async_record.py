@@ -20,7 +20,7 @@ from datetime import datetime
 import numpy as np
 import pint
 from beanie import Document, Indexed
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .utility import convert_to, normalise, perform_fft, str_factory, uuid5_str
 
@@ -120,6 +120,14 @@ class Record(MetadataRecord):
         None, description="The unit of the raw acceleration data of the record."
     )
     offset: float = Field(0, description="The offset of the record.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def allow_default_none(cls, data):
+        if not isinstance(data, dict):
+            return data
+
+        return {k: v for k, v in data.items() if v is not None}
 
     def to_raw_waveform(self) -> tuple[float, list]:
         return 1 / self.sampling_frequency, self.raw_data
