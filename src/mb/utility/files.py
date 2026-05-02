@@ -100,6 +100,7 @@ def serialize_records(records: list, is_remote: bool):
 
     return bulk_body
 
+
 def _retry(func, delay: int = 10, max_retries: int = 3):
     for _ in range(max_retries):
         try:
