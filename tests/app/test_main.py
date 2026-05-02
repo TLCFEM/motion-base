@@ -23,6 +23,7 @@ from mb.record.parser import ParserNZSM
 from mb.record.sync_record import Record
 from mb.record.utility import str_factory
 from mb.utility.elastic import sync_elastic
+from mb.utility.files import serialize_records
 
 
 async def test_redirect_to_docs(mock_client):
@@ -62,30 +63,7 @@ def sample_data(pwd, mongo_connection):
         archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
     )
 
-    def to_dict(record) -> dict:
-        dict_data = record.to_mongo()
-        for key in (
-                "scale_factor",
-                "raw_data",
-                "raw_data_unit",
-                "offset",
-                "_id",
-                "_cls",
-        ):
-            dict_data.pop(key, None)
-        dict_data["id"] = record.id
-        for k, v in dict_data.items():
-            if isinstance(v, datetime):
-                dict_data[k] = v.isoformat()
-
-        return dict_data
-
-    bulk_body: list = []
-    for r in results:
-        bulk_body.append({"index": {"_id": r.id}})
-        bulk_body.append(to_dict(r))
-
-    sync_elastic().bulk(index="record", body=bulk_body)
+    sync_elastic().bulk(index="record", body=serialize_records(results, True))
 
     yield Record.objects()
 
