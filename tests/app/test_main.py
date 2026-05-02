@@ -103,8 +103,8 @@ async def test_simple(sample_data, mock_client_superuser):
     )
     assert response.status_code == HTTPStatus.OK
 
-    # response = await mock_client_superuser.post("/search")
-    # assert response.status_code == HTTPStatus.OK
-    #
-    # response = await mock_client_superuser.delete("/purge")
-    # assert response.status_code == HTTPStatus.OK
+    response = await mock_client_superuser.post("/search")
+    assert response.status_code == HTTPStatus.OK
+
+    response = await mock_client_superuser.delete("/purge")
+    assert response.status_code == HTTPStatus.OK
