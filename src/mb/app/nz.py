@@ -20,8 +20,6 @@ from http import HTTPStatus
 
 import structlog
 from elastic_transport import ConnectionTimeout
-
-# noinspection PyPackageRequirements
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pymongo.errors import ServerSelectionTimeoutError
 

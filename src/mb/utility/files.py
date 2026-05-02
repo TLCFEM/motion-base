@@ -26,8 +26,6 @@ from shutil import copyfileobj
 from urllib.parse import quote
 
 import structlog
-
-# noinspection PyPackageRequirements
 from fastapi import UploadFile
 from requests import delete, get, post
 

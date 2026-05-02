@@ -22,11 +22,7 @@ from uuid import UUID
 
 import aiohttp
 from beanie.operators import In
-
-# noinspection PyPackageRequirements
 from fastapi import Body, Depends, FastAPI, Form, HTTPException
-
-# noinspection PyPackageRequirements
 from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
 from pyinstrument import Profiler
 from starlette.middleware import Middleware
