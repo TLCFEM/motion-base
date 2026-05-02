@@ -62,7 +62,8 @@ def sample_data(pwd, mongo_connection):
         archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
     )
 
-    sync_elastic().bulk(index="record", body=serialize_records(results, True))
+    with sync_elastic() as client:
+        client.bulk(index="record", body=serialize_records(results, True))
 
     yield Record.objects()
 

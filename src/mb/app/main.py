@@ -36,7 +36,7 @@ from starlette.middleware.gzip import GZipMiddleware
 
 from ..record.async_record import MetadataRecord, Record, UploadTask
 from ..utility.config import init_mongo
-from ..utility.elastic import async_elastic, close_all
+from ..utility.elastic import async_elastic
 from ..utility.env import MB_FS_ROOT, TURNSTILE_SECRET
 from .jp import router as jp_router
 from .nz import router as nz_router
@@ -68,9 +68,7 @@ from .utility import (
 async def lifespan(_: FastAPI):
     async with init_mongo():
         await create_superuser()
-        await async_elastic()
         yield
-        await close_all()
 
 
 async def profile_request(request, call_next):
@@ -312,28 +310,27 @@ async def search_records(query: QueryConfig = QueryConfig()):
     else:
         sort = [{sort_by: "asc"}]
 
-    client = await async_elastic()
+    async with async_elastic() as client:
+        if search_after is None:
+            page_number = min(page_number, 10000 // page_size - 1)
 
-    if search_after is None:
-        page_number = min(page_number, 10000 // page_size - 1)
-
-        results = await client.search(
-            track_total_hits=True,
-            index="record",
-            sort=sort,
-            query=query.generate_elastic_query(),
-            from_=page_number * page_size,
-            size=page_size,
-        )
-    else:
-        results = await client.search(
-            track_total_hits=True,
-            index="record",
-            sort=sort,
-            query=query.generate_elastic_query(),
-            search_after=search_after,
-            size=page_size,
-        )
+            results = await client.search(
+                track_total_hits=True,
+                index="record",
+                sort=sort,
+                query=query.generate_elastic_query(),
+                from_=page_number * page_size,
+                size=page_size,
+            )
+        else:
+            results = await client.search(
+                track_total_hits=True,
+                index="record",
+                sort=sort,
+                query=query.generate_elastic_query(),
+                search_after=search_after,
+                size=page_size,
+            )
 
     return ListMetadataResponse(
         records=[
@@ -368,47 +365,49 @@ async def purge_records(
 
     elastic_query = query.generate_elastic_query()
 
-    client = await async_elastic()
+    async with async_elastic() as client:
+        if not confirm:
+            return await client.search(index="record", query=elastic_query)
 
-    if not confirm:
-        return await client.search(index="record", query=elastic_query)
+        all_records = []
 
-    all_records = []
+        while True:
+            results = await client.search(index="record", query=elastic_query)
+            record_ids = [x["_id"] for x in results["hits"]["hits"]]
+            if not record_ids:
+                break
+            all_records.extend(record_ids)
+            await client.bulk(
+                index="record",
+                body=[{"delete": {"_id": x}} for x in record_ids],
+                refresh=True,
+            )
 
-    while True:
-        results = await client.search(index="record", query=elastic_query)
-        record_ids = [x["_id"] for x in results["hits"]["hits"]]
-        if not record_ids:
-            break
-        all_records.extend(record_ids)
-        await client.bulk(
-            index="record",
-            body=[{"delete": {"_id": x}} for x in record_ids],
-            refresh=True,
-        )
+        await Record.find(In(Record.id, all_records)).delete()
 
-    await Record.find(In(Record.id, all_records)).delete()
-
-    return {"deleted": all_records}
+        return {"deleted": all_records}
 
 
 @app.get("/stats")
 async def aggregation_stats():
-    client = await async_elastic()
-    results = await client.search(
-        index="record",
-        query={"range": {"magnitude": {"gte": 1, "lte": 10}}},
-        aggs={
-            "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
-            "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
-            "year": {
-                "date_histogram": {"field": "event_time", "calendar_interval": "year"}
+    async with async_elastic() as client:
+        results = await client.search(
+            index="record",
+            query={"range": {"magnitude": {"gte": 1, "lte": 10}}},
+            aggs={
+                "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
+                "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
+                "year": {
+                    "date_histogram": {
+                        "field": "event_time",
+                        "calendar_interval": "year",
+                    }
+                },
             },
-        },
-        size=0,
-    )
+            size=0,
+        )
 
-    return results["aggregations"]
+        return results["aggregations"]
 
 
 @app.post("/index")
@@ -421,9 +420,8 @@ async def index_records(body: BulkRequest = Body(...), user: User = Depends(is_a
             HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload files."
         )
 
-    client = await async_elastic()
-
-    return await client.bulk(index="record", body=body.records)
+    async with async_elastic() as client:
+        return await client.bulk(index="record", body=body.records)
 
 
 @app.post("/process", response_model=ProcessedResponse)

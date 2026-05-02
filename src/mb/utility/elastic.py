@@ -17,13 +17,11 @@ from __future__ import annotations
 
 import asyncio
 import time
+from contextlib import asynccontextmanager, contextmanager
 
 from elasticsearch import AsyncElasticsearch, BadRequestError, Elasticsearch
 
 from mb.utility.env import ELASTIC_HOST
-
-async_client: AsyncElasticsearch | None = None
-sync_client: Elasticsearch | None = None
 
 delay: int = 5
 
@@ -56,59 +54,41 @@ def generate_elastic_mapping() -> dict:
     }
 
 
+@asynccontextmanager
 async def async_elastic():
-    global async_client
-    if async_client is None:
-        # noinspection HttpUrlsUsage
-        async_client = AsyncElasticsearch(f"http://{ELASTIC_HOST}:9200")
+    # noinspection HttpUrlsUsage
+    async with AsyncElasticsearch(f"http://{ELASTIC_HOST}:9200") as client:
+        counter: int = 0
+        while not await client.ping():
+            counter += delay
+            if counter > 600:
+                raise ConnectionError("Elasticsearch is not available.")
+            await asyncio.sleep(delay)
 
-    assert isinstance(async_client, AsyncElasticsearch)
+        if not await client.indices.exists(index="record"):
+            try:
+                await client.indices.create(
+                    index="record", mappings=generate_elastic_mapping()
+                )
+            except BadRequestError as e:
+                if not await client.indices.exists(index="record"):
+                    raise e
 
-    counter: int = 0
-    while not await async_client.ping():
-        counter += delay
-        if counter > 600:
-            raise ConnectionError("Elasticsearch is not available.")
-        await asyncio.sleep(delay)
-
-    if not await async_client.indices.exists(index="record"):
-        try:
-            await async_client.indices.create(
-                index="record", mappings=generate_elastic_mapping()
-            )
-        except BadRequestError as e:
-            if not await async_client.indices.exists(index="record"):
-                raise e
-
-    return async_client
+        yield client
 
 
+@contextmanager
 def sync_elastic():
-    global sync_client
-    if sync_client is None:
-        # noinspection HttpUrlsUsage
-        sync_client = Elasticsearch(f"http://{ELASTIC_HOST}:9200")
+    # noinspection HttpUrlsUsage
+    with Elasticsearch(f"http://{ELASTIC_HOST}:9200") as client:
+        counter: int = 0
+        while not client.ping():
+            counter += delay
+            if counter > 600:
+                raise ConnectionError("Elasticsearch is not available.")
+            time.sleep(delay)
 
-    assert isinstance(sync_client, Elasticsearch)
+        if not client.indices.exists(index="record"):
+            client.indices.create(index="record", mappings=generate_elastic_mapping())
 
-    counter: int = 0
-    while not sync_client.ping():
-        counter += delay
-        if counter > 600:
-            raise ConnectionError("Elasticsearch is not available.")
-        time.sleep(delay)
-
-    if not sync_client.indices.exists(index="record"):
-        sync_client.indices.create(index="record", mappings=generate_elastic_mapping())
-
-    return sync_client
-
-
-async def close_all():
-    global async_client, sync_client
-    if async_client is not None:
-        await async_client.close()
-        async_client = None
-    if sync_client is not None:
-        sync_client.close()
-        sync_client = None
+        yield client

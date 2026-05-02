@@ -143,7 +143,8 @@ class FileProxy:
     def bulk(self, records: list):
         if bulk_body := serialize_records(records, self.is_remote):
             if not self.is_remote:
-                response = sync_elastic().bulk(index="record", body=bulk_body)
+                with sync_elastic() as client:
+                    response = client.bulk(index="record", body=bulk_body)
                 if response["errors"]:
                     _logger.error(f"Failed to index file: {self._file_uri}")
             else:
