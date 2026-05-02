@@ -14,15 +14,15 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os
-from datetime import datetime
 from http import HTTPStatus
 
 import pytest
 
+from mb.record.async_record import Record
 from mb.record.parser import ParserNZSM
-from mb.record.sync_record import Record
 from mb.record.utility import str_factory
-from mb.utility.elastic import sync_elastic
+from mb.utility.elastic import async_elastic, sync_elastic
+from mb.utility.files import serialize_records
 
 
 async def test_redirect_to_docs(mock_client):
@@ -62,32 +62,9 @@ async def sample_data(pwd, mongo_connection):
         archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
     )
 
-    def to_dict(record) -> dict:
-        dict_data = record.model_dump()
-        for key in (
-            "scale_factor",
-            "raw_data",
-            "raw_data_unit",
-            "offset",
-            "_id",
-            "_cls",
-        ):
-            dict_data.pop(key, None)
-        dict_data["id"] = record.id
-        for k, v in dict_data.items():
-            if isinstance(v, datetime):
-                dict_data[k] = v.isoformat()
+    sync_elastic().bulk(index="record", body=serialize_records(results, True))
 
-        return dict_data
-
-    bulk_body: list = []
-    for r in results:
-        bulk_body.append({"index": {"_id": r.id}})
-        bulk_body.append(to_dict(r))
-
-    sync_elastic().bulk(index="record", body=bulk_body)
-
-    yield Record.objects()
+    return await Record.find_all().to_list()
 
 
 @pytest.mark.parametrize(

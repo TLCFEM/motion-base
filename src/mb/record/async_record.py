@@ -179,7 +179,7 @@ class UploadTask(Document):
     pid: int = Field(default=0)
     total_size: int = Field(default=0)
     current_size: int = Field(default=0)
-    archive_path: str = Field(default=None)
+    archive_path: str | None = Field(default=None)
 
     @property
     def progress(self) -> float:

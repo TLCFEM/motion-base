@@ -73,6 +73,32 @@ def pack(uploads: list[UploadFile]):
     return f"{MB_MAIN_SITE}/access/{fs_path}"
 
 
+def serialize_records(records: list, is_remote: bool):
+    def to_dict(record) -> dict:
+        dict_data = record.model_dump()
+        for key in (
+            "scale_factor",
+            "raw_data",
+            "raw_data_unit",
+            "offset",
+            "id",
+        ):
+            dict_data.pop(key, None)
+        dict_data["id"] = record.id
+        if is_remote:
+            for k, v in dict_data.items():
+                if isinstance(v, datetime):
+                    dict_data[k] = v.isoformat()
+
+        return dict_data
+
+    bulk_body: list = []
+    for r in records:
+        bulk_body.append({"index": {"_id": r.id}})
+        bulk_body.append(to_dict(r))
+
+    return bulk_body
+
 def _retry(func, delay: int = 10, max_retries: int = 3):
     for _ in range(max_retries):
         try:
@@ -113,31 +139,7 @@ class FileProxy:
         return os.path.basename(self.fs_path)
 
     def bulk(self, records: list):
-        def to_dict(record) -> dict:
-            dict_data = record.model_dump()
-            for key in (
-                "scale_factor",
-                "raw_data",
-                "raw_data_unit",
-                "offset",
-                "_id",
-                "_cls",
-            ):
-                dict_data.pop(key, None)
-            dict_data["id"] = record.id
-            if self.is_remote:
-                for k, v in dict_data.items():
-                    if isinstance(v, datetime):
-                        dict_data[k] = v.isoformat()
-
-            return dict_data
-
-        bulk_body: list = []
-        for r in records:
-            bulk_body.append({"index": {"_id": r.id}})
-            bulk_body.append(to_dict(r))
-
-        if bulk_body:
+        if bulk_body := serialize_records(records, self.is_remote):
             if not self.is_remote:
                 response = sync_elastic().bulk(index="record", body=bulk_body)
                 if response["errors"]:
