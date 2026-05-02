@@ -55,13 +55,14 @@ def init_mongo_sync(db: str | None = None):
 
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
-    await init_beanie(
-        database=AsyncMongoClient(
-            uri := mongo_uri(), uuidRepresentation="standard"
-        ).get_database(db or MONGO_DB_NAME),
-        document_models=[Record, User, UploadTask],
-    )
+    async with AsyncMongoClient(
+        uri := mongo_uri(), uuidRepresentation="standard"
+    ) as client:
+        await init_beanie(
+            database=client.get_database(db or MONGO_DB_NAME),
+            document_models=[Record, User, UploadTask],
+        )
 
-    yield _init_mongo_impl(uri, db)
+        yield _init_mongo_impl(uri, db)
 
-    disconnect()
+        disconnect()
