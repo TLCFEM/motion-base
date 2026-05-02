@@ -106,5 +106,8 @@ async def test_simple(sample_data, mock_client_superuser):
     response = await mock_client_superuser.post("/search")
     assert response.status_code == HTTPStatus.OK
 
-    response = await mock_client_superuser.delete("/purge")
+
+@pytest.mark.parametrize("confirm", [True, False])
+async def test_purge(sample_data, mock_client_superuser, confirm):
+    response = await mock_client_superuser.delete(f"/purge?confirm={confirm}")
     assert response.status_code == HTTPStatus.OK
