@@ -114,7 +114,7 @@ class FileProxy:
 
     def bulk(self, records: list):
         def to_dict(record) -> dict:
-            dict_data = record.to_mongo()
+            dict_data = record.model_dump()
             for key in (
                 "scale_factor",
                 "raw_data",
