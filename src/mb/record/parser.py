@@ -28,8 +28,8 @@ import pint
 import structlog
 import tzdata  # noqa # pylint: disable=unused-import
 
+from .async_record import NIED, NZSM, UploadTask
 from .base_parser import BaseParserNIED, BaseParserNZSM
-from .sync_record import NIED, NZSM, UploadTask
 
 _logger = structlog.get_logger(__name__)
 
@@ -44,7 +44,7 @@ def _wrap_longitude(_longitude: float) -> float:
 
 class ParserNIED(BaseParserNIED):
     @staticmethod
-    def parse_archive(
+    async def parse_archive(
         *,
         archive_obj: str | BinaryIO,
         user_id: str,
@@ -66,7 +66,7 @@ class ParserNIED(BaseParserNIED):
 
         task: UploadTask | None = None
         if task_id is not None:
-            task = UploadTask.objects(id=task_id).first()
+            task = await UploadTask.get(task_id)
             task.pid = os.getpid()
             if isinstance(archive_obj, str):
                 task.archive_path = archive_obj
@@ -79,7 +79,7 @@ class ParserNIED(BaseParserNIED):
                 for f in archive:
                     if task:
                         task.current_size += 1
-                        task.save()
+                        await task.save()
                     if (
                         not f.isfile()
                         or not f.name.endswith(
@@ -89,11 +89,11 @@ class ParserNIED(BaseParserNIED):
                     ):
                         continue
                     try:
-                        record = ParserNIED.parse_file(target, overwrite_existing)
+                        record = await ParserNIED.parse_file(target, overwrite_existing)
                         record.uploaded_by = user_id
                         record.file_name = os.path.basename(f.name)
                         record.category = category
-                        record.save()
+                        await record.save()
                         records.append(record)
                     except Exception as e:
                         _logger.critical(
@@ -103,12 +103,14 @@ class ParserNIED(BaseParserNIED):
             _logger.critical("Failed to open the archive.", exc_info=e)
 
         if task:
-            task.delete()
+            await task.delete()
 
         return records
 
     @staticmethod
-    def parse_file(file_path: str | IO[bytes], overwrite_existing: bool = True) -> NIED:
+    async def parse_file(
+        file_path: str | IO[bytes], overwrite_existing: bool = True
+    ) -> NIED:
         if isinstance(file_path, str):
             with open(file_path, encoding="utf-8") as f:
                 lines = f.readlines()
@@ -118,8 +120,10 @@ class ParserNIED(BaseParserNIED):
             lines = [line.decode("utf-8").strip() for line in file_path.readlines()]
 
         file_hash = hashlib.sha256("".join(lines).encode("utf-8")).hexdigest()
-        if overwrite_existing and (record := NIED.objects(file_hash=file_hash).first()):
-            record.delete()
+        if overwrite_existing and (
+            record := await NIED.find_one(NIED.file_hash == file_hash)
+        ):
+            await record.delete()
 
         def _parse_date(string: str) -> datetime:
             return datetime.strptime(string, "%Y/%m/%d %H:%M:%S").replace(
@@ -167,7 +171,7 @@ class ParserNIED(BaseParserNIED):
 
 class ParserNZSM(BaseParserNZSM):
     @staticmethod
-    def parse_archive(
+    async def parse_archive(
         *,
         archive_obj: str | BinaryIO,
         user_id: str,
@@ -193,7 +197,7 @@ class ParserNZSM(BaseParserNZSM):
 
         task: UploadTask | None = None
         if task_id is not None:
-            task = UploadTask.objects(id=task_id).first()
+            task = await UploadTask.get(task_id)
             if isinstance(archive_obj, str):
                 task.archive_path = archive_obj
             task.pid = os.getpid()
@@ -208,13 +212,13 @@ class ParserNZSM(BaseParserNZSM):
                     for f in archive:
                         if task:
                             task.current_size += 1
-                            task.save()
+                            await task.save()
                         if not f.name.upper().endswith((".V2A", ".V1A")):
                             continue
                         if target := archive.extractfile(f):
                             try:
                                 records.extend(
-                                    ParserNZSM.parse_file(
+                                    await ParserNZSM.parse_file(
                                         target,
                                         user_id,
                                         os.path.basename(f.name),
@@ -235,13 +239,13 @@ class ParserNZSM(BaseParserNZSM):
                     for f in archive.namelist():
                         if task:
                             task.current_size += 1
-                            task.save()
+                            await task.save()
                         if not f.upper().endswith((".V2A", ".V1A")):
                             continue
                         with archive.open(f) as target:
                             try:
                                 records.extend(
-                                    ParserNZSM.parse_file(
+                                    await ParserNZSM.parse_file(
                                         target,
                                         user_id,
                                         os.path.basename(f),
@@ -256,12 +260,12 @@ class ParserNZSM(BaseParserNZSM):
                 _logger.critical("Failed to open the archive.", exc_info=e)
 
         if task:
-            task.delete()
+            await task.delete()
 
         return records
 
     @staticmethod
-    def parse_file(
+    async def parse_file(
         file_path: str | IO[bytes],
         user_id: str,
         file_name: str | None = None,
@@ -289,7 +293,7 @@ class ParserNZSM(BaseParserNZSM):
                 last_processed[1].strip(), "%Y %B %d"
             ).replace(tzinfo=ZoneInfo("Pacific/Auckland"))
 
-        def _populate_common_fields(record: NZSM):
+        async def _populate_common_fields(record: NZSM):
             record.station_code = station_code
             record.uploaded_by = user_id
             record.file_name = os.path.basename(
@@ -300,7 +304,7 @@ class ParserNZSM(BaseParserNZSM):
             )
             if last_update_time is not None:
                 record.last_update_time = last_update_time
-            record.save()
+            await record.save()
             records.append(record)
 
         int_header = ParserNZSM._parse_header(lines)[0]
@@ -309,36 +313,42 @@ class ParserNZSM(BaseParserNZSM):
         d_lines = (int_header[35] + 9) // 10
 
         if (target_lines := a_lines + v_lines + d_lines + 26) == len(lines):
-            _populate_common_fields(ParserNZSM.parse_lines(lines, overwrite_existing))
+            await _populate_common_fields(
+                await ParserNZSM.parse_lines(lines, overwrite_existing)
+            )
         else:
             assert 3 * target_lines == len(lines), (
                 "Number of lines should be a multiple of 3."
             )
 
-            _populate_common_fields(
-                ParserNZSM.parse_lines(lines[:target_lines], overwrite_existing)
+            await _populate_common_fields(
+                await ParserNZSM.parse_lines(lines[:target_lines], overwrite_existing)
             )
-            _populate_common_fields(
-                ParserNZSM.parse_lines(
+            await _populate_common_fields(
+                await ParserNZSM.parse_lines(
                     lines[target_lines : 2 * target_lines], overwrite_existing
                 )
             )
-            _populate_common_fields(
-                ParserNZSM.parse_lines(lines[2 * target_lines :], overwrite_existing)
+            await _populate_common_fields(
+                await ParserNZSM.parse_lines(
+                    lines[2 * target_lines :], overwrite_existing
+                )
             )
 
         return records
 
     @staticmethod
-    def parse_lines(lines: list[str], overwrite_existing: bool = True) -> NZSM:
+    async def parse_lines(lines: list[str], overwrite_existing: bool = True) -> NZSM:
         """
         Parse file according to the format shown in the following link.
 
         https://www.geonet.org.nz/data/supplementary/strong_motion_file_formats
         """
         file_hash = hashlib.sha256("".join(lines).encode("utf-8")).hexdigest()
-        if overwrite_existing and (record := NZSM.objects(file_hash=file_hash).first()):
-            record.delete()
+        if overwrite_existing and (
+            record := await NZSM.find_one(NZSM.file_hash == file_hash)
+        ):
+            await record.delete()
 
         record = NZSM()
 
