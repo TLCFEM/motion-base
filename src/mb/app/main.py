@@ -383,9 +383,9 @@ async def purge_records(
                 refresh=True,
             )
 
-        await Record.find(In(Record.id, all_records)).delete()
+    await Record.find(In(Record.id, all_records)).delete()
 
-        return {"deleted": all_records}
+    return {"deleted": all_records}
 
 
 @app.get("/stats")
