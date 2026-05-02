@@ -62,6 +62,8 @@ async def async_elastic():
         # noinspection HttpUrlsUsage
         async_client = AsyncElasticsearch(f"http://{ELASTIC_HOST}:9200")
 
+    assert isinstance(async_client, AsyncElasticsearch)
+
     counter: int = 0
     while not await async_client.ping():
         counter += delay
@@ -86,6 +88,8 @@ def sync_elastic():
     if sync_client is None:
         # noinspection HttpUrlsUsage
         sync_client = Elasticsearch(f"http://{ELASTIC_HOST}:9200")
+
+    assert isinstance(sync_client, Elasticsearch)
 
     counter: int = 0
     while not sync_client.ping():
