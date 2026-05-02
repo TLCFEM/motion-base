@@ -46,7 +46,7 @@ class Oscillator:
         return self.gamma * self.a
 
     @staticmethod
-    def amplitude(data: np.ndarray):
+    def amplitude(data: np.ndarray) -> float:
         return np.max(np.abs(data))
 
     def compute_parameter(self, interval: float):

@@ -292,9 +292,7 @@ class ParserNZSM(BaseParserNZSM):
         def _populate_common_fields(record: NZSM):
             record.station_code = station_code
             record.uploaded_by = user_id
-            record.file_name = os.path.basename(
-                file_name if file_name else file_path
-            ).upper()
+            record.file_name = os.path.basename(file_name or file_path).upper()
             record.category = (
                 "processed" if ".V2A" in record.file_name else "unprocessed"
             )

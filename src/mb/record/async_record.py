@@ -29,6 +29,7 @@ DESCENDING = -1
 GEOSPHERE = "2dsphere"
 
 
+# noinspection PyTypeHints
 class MetadataRecord(Document):
     id: str = Field(default_factory=str_factory)
 
@@ -170,7 +171,7 @@ class UploadTask(Document):
     pid: int = Field(default=0)
     total_size: int = Field(default=0)
     current_size: int = Field(default=0)
-    archive_path: str = Field(default=None)
+    archive_path: str | None = Field(default=None)
 
     @property
     def progress(self) -> float:
