@@ -19,6 +19,7 @@ import hashlib
 import os
 import tarfile
 import zipfile
+from asyncio import gather
 from datetime import datetime
 from math import ceil
 from typing import IO, BinaryIO
@@ -303,7 +304,7 @@ class ParserNZSM(BaseParserNZSM):
             if last_update_time is not None:
                 record.last_update_time = last_update_time
             await record.save()
-            records.append(record)
+            return record
 
         int_header = ParserNZSM._parse_header(lines)[0]
         a_lines = (int_header[33] + 9) // 10
@@ -311,27 +312,23 @@ class ParserNZSM(BaseParserNZSM):
         d_lines = (int_header[35] + 9) // 10
 
         if (target_lines := a_lines + v_lines + d_lines + 26) == len(lines):
-            await _populate_common_fields(
-                await ParserNZSM.parse_lines(lines, overwrite_existing)
-            )
+            tasks = [ParserNZSM.parse_lines(lines, overwrite_existing)]
         else:
             assert 3 * target_lines == len(lines), (
                 "Number of lines should be a multiple of 3."
             )
 
-            await _populate_common_fields(
-                await ParserNZSM.parse_lines(lines[:target_lines], overwrite_existing)
-            )
-            await _populate_common_fields(
-                await ParserNZSM.parse_lines(
+            tasks = [
+                ParserNZSM.parse_lines(lines[:target_lines], overwrite_existing),
+                ParserNZSM.parse_lines(
                     lines[target_lines : 2 * target_lines], overwrite_existing
-                )
-            )
-            await _populate_common_fields(
-                await ParserNZSM.parse_lines(
-                    lines[2 * target_lines :], overwrite_existing
-                )
-            )
+                ),
+                ParserNZSM.parse_lines(lines[2 * target_lines :], overwrite_existing),
+            ]
+
+        tasks = await gather(*tasks)
+        tasks = [_populate_common_fields(x) for x in tasks]
+        records.extend(await gather(*tasks))
 
         return records
 
