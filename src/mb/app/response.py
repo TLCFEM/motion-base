@@ -66,6 +66,13 @@ class MetadataResponse(BaseModel):
     direction: str = Field(None)
     scale_factor: float = Field(None)
 
+    @model_validator(mode="before")
+    @classmethod
+    def allow_default_none(cls, data):
+        if not isinstance(data, dict):
+            return data
+        return {k: v for k, v in data.items() if v is not None}
+
 
 class RawRecordResponse(MetadataResponse):
     """
