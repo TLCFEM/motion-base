@@ -23,15 +23,20 @@ from io import BytesIO
 from os.path import basename
 from pathlib import Path
 from shutil import copyfileobj
+from typing import TYPE_CHECKING
 from urllib.parse import quote
 
 import structlog
-from fastapi import UploadFile
 from requests import delete, get, post
 
 from mb.record.utility import str_factory, uuid5_str
 from mb.utility.elastic import sync_elastic
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
+
+if TYPE_CHECKING:
+    from beanie import Document
+    from fastapi import UploadFile
+
 
 _logger = structlog.get_logger(__name__)
 
@@ -72,16 +77,9 @@ def pack(uploads: list[UploadFile]):
 
 
 def serialize_records(records: list, is_remote: bool):
-    def to_dict(record) -> dict:
-        dict_data = record.to_mongo()
-        for key in (
-            "scale_factor",
-            "raw_data",
-            "raw_data_unit",
-            "offset",
-            "_id",
-            "_cls",
-        ):
+    def to_dict(record: Document) -> dict:
+        dict_data = record.model_dump(exclude_unset=True, exclude_none=True)
+        for key in ("scale_factor", "raw_data", "raw_data_unit", "offset", "id"):
             dict_data.pop(key, None)
         dict_data["id"] = record.id
         if is_remote:
