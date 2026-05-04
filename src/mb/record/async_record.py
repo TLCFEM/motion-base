@@ -20,7 +20,7 @@ from datetime import datetime
 import numpy as np
 import pint
 from beanie import Document, Indexed
-from pydantic import Field
+from pydantic import Field, model_validator
 
 from .utility import convert_to, normalise, perform_fft, str_factory, uuid5_str
 
@@ -96,6 +96,13 @@ class MetadataRecord(Document):
                 ("event_location", DESCENDING),
             ],
         ]
+
+    @model_validator(mode="before")
+    @classmethod
+    def allow_default_none(cls, data):
+        if not isinstance(data, dict):
+            return data
+        return {k: v for k, v in data.items() if v is not None}
 
     async def save(self, *args, **kwargs):
         token: str = self.file_name
