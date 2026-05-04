@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import itertools
-from asyncio import gather, run
+from asyncio import gather, get_event_loop
 from http import HTTPStatus
 
 import structlog
@@ -54,7 +54,7 @@ async def _parse_archive_impl(
                 task_id=task_id,
                 overwrite_existing=overwrite_existing,
             )
-            return archive_file.bulk(results)
+            return await archive_file.bulk(results)
     except Exception as exc:
         if is_local:
             # we need to handle the exception here
@@ -100,7 +100,7 @@ def _parse_archive(
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return run(
+    return get_event_loop().run_until_complete(
         _parse_archive_impl(
             archive_uri, access_token, user_id, task_id, overwrite_existing, False
         )
