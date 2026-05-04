@@ -32,7 +32,6 @@ dependencies = [
     "email-validator",
     "fastapi",
     "joserfc",
-    "mongoengine",
     "numba",
     "Pint",
     "pyinstrument",

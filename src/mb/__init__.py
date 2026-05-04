@@ -16,6 +16,7 @@
 from __future__ import annotations
 
 import sys
+from asyncio import run
 from uuid import uuid4
 
 from pydantic import BaseModel, Field
@@ -31,10 +32,16 @@ class Config(BaseModel):
     celery_config: list = Field(default_factory=list)
 
 
+async def run_celery(args: list):
+    from mb.celery import celery
+    from mb.utility.config import init_mongo
+
+    async with init_mongo():
+        celery.start(args)
+
+
 def run_app(setting: Config):
     if setting.celery:
-        from mb.celery import celery
-
         args: list = ["worker"]
         args.extend(setting.celery_config)
         if sys.platform == "win32":
@@ -42,7 +49,7 @@ def run_app(setting: Config):
                 ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
             )
 
-        celery.start(args)
+        run(run_celery(args))
     else:
         from mb.utility.env import (  # pylint: disable=import-outside-toplevel
             MB_FASTAPI_WORKERS,
