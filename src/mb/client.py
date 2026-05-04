@@ -283,7 +283,7 @@ class MBClient:
 
             return
 
-        if not _include(path) or not os.path.exists(path):
+        if not _include("", path) or not os.path.exists(path):
             if self.upload_size > 0:
                 self.current_upload_size += 1
             return
