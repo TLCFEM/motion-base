@@ -17,6 +17,7 @@ from contextlib import asynccontextmanager
 
 from beanie import init_beanie
 from pymongo import AsyncMongoClient
+from pymongo.asynchronous.database import AsyncDatabase
 
 from ..app.utility import User
 from ..record.async_record import Record, UploadTask
@@ -41,11 +42,21 @@ def mongo_uri():
     return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
+taskiq_result = "taskiq_result"
+
+
+def get_taskiq_collection(db: AsyncDatabase):
+    return db.get_collection(taskiq_result)
+
+
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
     async with AsyncMongoClient(mongo_uri(), uuidRepresentation="standard") as client:
+        target_db = client.get_database(db or MONGO_DB_NAME)
         await init_beanie(
-            database=client.get_database(db or MONGO_DB_NAME),
+            database=target_db,
             document_models=[Record, User, UploadTask],
         )
-        yield client
+        if taskiq_result not in await target_db.list_collection_names():
+            await target_db.create_collection(taskiq_result)
+        yield client, target_db

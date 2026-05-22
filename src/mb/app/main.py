@@ -34,6 +34,7 @@ from ..record.async_record import MetadataRecord, Record, UploadTask
 from ..utility.config import init_mongo
 from ..utility.elastic import async_elastic
 from ..utility.env import MB_FS_ROOT, TURNSTILE_SECRET
+from ..utility.taskiq import set_taskiq_broker
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import process_record_local
@@ -62,9 +63,12 @@ from .utility import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    async with init_mongo():
+    async with init_mongo() as mongo_tuple:
+        broker = set_taskiq_broker(mongo_tuple[1])
+        await broker.startup()
         await create_superuser()
         yield
+        await broker.shutdown()
 
 
 async def profile_request(request, call_next):

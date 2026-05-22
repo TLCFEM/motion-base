@@ -35,9 +35,13 @@ class Config(BaseModel):
 async def run_celery(args: list):
     from mb.celery import celery
     from mb.utility.config import init_mongo
+    from mb.utility.taskiq import set_taskiq_broker
 
-    async with init_mongo():
+    async with init_mongo() as mongo_tuple:
+        broker = set_taskiq_broker(mongo_tuple[1])
+        await broker.startup()
         celery.start(args)
+        await broker.shutdown()
 
 
 def run_app(setting: Config):

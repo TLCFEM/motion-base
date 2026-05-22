@@ -40,6 +40,7 @@ dependencies = [
     "requests",
     "scipy",
     "structlog",
+    "taskiq-aio-pika",
     "uvicorn",
 ]
 
