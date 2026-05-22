@@ -1,0 +1,41 @@
+stages:
+  - test
+
+variables:
+  NUMBA_DISABLE_JIT: "1"
+  MONGO_HOST: "mongodb"
+  RABBITMQ_HOST: "rabbitmq"
+  ELASTIC_HOST: "elasticsearch"
+
+.pytest_template: &pytest_template
+  stage: test
+  image: python:${PYTHON_VERSION}-slim
+  services:
+    - name: mongo:latest
+      alias: mongodb
+      variables:
+        MONGO_INITDB_ROOT_USERNAME: test
+        MONGO_INITDB_ROOT_PASSWORD: password
+        MONGO_INITDB_DATABASE: StrongMotion
+    - name: rabbitmq:4.2
+      alias: rabbitmq
+      variables:
+        RABBITMQ_DEFAULT_USER: test
+        RABBITMQ_DEFAULT_PASS: password
+        RABBITMQ_DEFAULT_VHOST: vhost
+    - name: elasticsearch:9.3.2
+      alias: elasticsearch
+      variables:
+        ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+        discovery.type: single-node
+        xpack.security.enabled: false
+  before_script:
+    - pip install -e ".[dev]"
+  script:
+    - pytest -n auto --cov --junitxml=junit.xml .
+
+test:py314:
+  <<: *pytest_template
+  variables:
+    PYTHON_VERSION: "3.14"
+
