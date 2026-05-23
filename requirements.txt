@@ -105,6 +105,7 @@ taskiq-aio-pika==0.6.0    # via motion-base (pyproject.toml)
 taskiq-dependencies==1.5.7  # via taskiq
 typing-extensions==4.15.0  # via aiosignal, aiostream, anyio, beanie, beautifulsoup4, elasticsearch, fastapi, flexcache, flexparser, pint, pydantic, pydantic-core, starlette, typing-inspection
 typing-inspection==0.4.2  # via fastapi, pydantic
+tzdata==2026.2            # via motion-base (pyproject.toml)
 urllib3==2.7.0            # via elastic-transport, geventhttpclient, requests
 uvicorn==0.47.0           # via motion-base (pyproject.toml)
 websocket-client==1.9.0   # via python-socketio
