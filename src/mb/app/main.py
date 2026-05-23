@@ -62,9 +62,20 @@ from .utility import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
+    import mb.taskiq as _taskiq
+
     async with init_mongo():
+        if not _taskiq.broker.is_worker_process:
+            try:
+                await _taskiq.broker.startup()
+                _taskiq._broker_available = True
+            except Exception:
+                pass
         await create_superuser()
         yield
+        if _taskiq._broker_available and not _taskiq.broker.is_worker_process:
+            await _taskiq.broker.shutdown()
+            _taskiq._broker_available = False
 
 
 async def profile_request(request, call_next):

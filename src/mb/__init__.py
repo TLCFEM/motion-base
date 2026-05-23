@@ -16,7 +16,6 @@
 from __future__ import annotations
 
 import sys
-from uuid import uuid4
 
 from pydantic import BaseModel, Field
 
@@ -26,23 +25,27 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
-    celery: bool = Field(default=False)
+    worker: bool = Field(default=False)
     debug: bool = Field(default=False)
-    celery_config: list = Field(default_factory=list)
+    worker_config: list = Field(default_factory=list)
 
 
 def run_app(setting: Config):
-    if setting.celery:
-        from mb.celery import celery
+    if setting.worker:
+        import subprocess
 
-        args: list = ["worker"]
-        args.extend(setting.celery_config)
-        if sys.platform == "win32":
-            args.extend(
-                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
-            )
-
-        celery.start(args)
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "taskiq",
+                "worker",
+                "mb.taskiq:broker",
+                "mb.app.jp",
+                "mb.app.nz",
+            ]
+            + setting.worker_config
+        )
     else:
         from mb.utility.env import (  # pylint: disable=import-outside-toplevel
             MB_FASTAPI_WORKERS,

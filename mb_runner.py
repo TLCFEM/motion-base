@@ -31,13 +31,12 @@ def config_and_run():
         return sys.argv[index]
 
     while index < len(sys.argv):
-        if sys.argv[index].startswith("c"):
-            config.celery = True
-            config.celery_config = sys.argv[index + 1 :]
-            break
-
-        if sys.argv[index].startswith("w"):
+        if sys.argv[index].startswith("w") and sys.argv[index] != "worker":
             config.workers = int(next_arg())
+        elif sys.argv[index] == "worker":
+            config.worker = True
+            config.worker_config = sys.argv[index + 1 :]
+            break
         elif sys.argv[index].startswith("h"):
             config.host = next_arg()
         elif sys.argv[index].startswith("p"):

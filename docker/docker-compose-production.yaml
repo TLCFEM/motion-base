@@ -58,7 +58,6 @@ services:
     depends_on:
       rabbitmq:
         condition: service_healthy
-    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
     ports:
       - '5555:5555'
     volumes:
@@ -131,7 +130,7 @@ services:
         condition: service_healthy
       elasticsearch:
         condition: service_healthy
-    command: celery
+    command: worker
     volumes:
       - motion_cache:${MB_FS_ROOT}
     environment:
