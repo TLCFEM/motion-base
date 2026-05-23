@@ -31,9 +31,9 @@ def config_and_run():
         return sys.argv[index]
 
     while index < len(sys.argv):
-        if sys.argv[index].startswith("w") and sys.argv[index] != "worker":
+        if sys.argv[index].startswith("w"):
             config.workers = int(next_arg())
-        elif sys.argv[index] == "worker":
+        elif sys.argv[index].startswith("t"):
             config.worker = True
             config.worker_config = sys.argv[index + 1 :]
             break

@@ -120,7 +120,7 @@ services:
       - mongo
       - rabbitmq
       - elasticsearch
-    command: worker
+    command: taskiq
     volumes:
       - motion_cache:${MB_FS_ROOT}
     environment:
