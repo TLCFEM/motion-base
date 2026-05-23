@@ -50,4 +50,4 @@ async def init_worker(state: TaskiqState):
 @broker.on_event(TaskiqEvents.WORKER_SHUTDOWN)
 async def shutdown_worker(state: TaskiqState):
     if hasattr(state, "mongo_client"):
-        state.mongo_client.close()
+        await state.mongo_client.close()

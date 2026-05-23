@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import itertools
 from http import HTTPStatus
 
@@ -156,10 +157,12 @@ async def upload_archive(
             records=None,
         )
 
-    records = [
-        await _parse_archive_local(archive_uri, user.id, None, overwrite_existing)
-        for archive_uri in valid_uris
-    ]
+    records = await asyncio.gather(
+        *[
+            _parse_archive_local(archive_uri, user.id, None, overwrite_existing)
+            for archive_uri in valid_uris
+        ]
+    )
 
     return UploadResponse(
         message="Successfully uploaded and processed.",

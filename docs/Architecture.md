@@ -27,7 +27,6 @@ The provided docker compose file `docker/docker-compose-production.yaml` contain
 4. `mb-front`: the frontend
 5. `mb-worker`: the taskiq worker(s)
 6. `mongo-express`: optional, a web-based MongoDB admin interface
-7. `flower`: optional, monitoring tool for `taskiq` workers
 
 The first four services provide the minimum setup for the application to run.
 The `mb-worker` enhances the performance by offloading heavy tasks to workers.
