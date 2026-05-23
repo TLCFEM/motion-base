@@ -66,7 +66,7 @@ class MongoResultBackend(AsyncResultBackend[Any]):
     ) -> TaskiqResult[Any]:
         doc = await self._collection.find_one({"_id": task_id})
         if doc is None:
-            raise ValueError(f"Result for task {task_id} is not ready.")
+            raise ValueError(f"No result found for task {task_id}.")
         return TaskiqResult.model_validate_json(doc["data"])
 
 
