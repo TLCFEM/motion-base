@@ -57,16 +57,26 @@ async def always_active():
 
 @pytest.fixture(scope="function")
 async def mock_client_superuser(monkeypatch, mongo_connection):
+    import mb.taskiq as _taskiq
+
     monkeypatch.setitem(app.dependency_overrides, is_active, always_active)
     monkeypatch.setitem(app.dependency_overrides, is_admin, always_active)
     user = await always_active()
     await user.save()
     while (await User.find_one(User.username == "test")) is None:
         await asyncio.sleep(1)
+    broker_started = False
+    try:
+        await _taskiq.taskiq_broker.startup()
+        broker_started = True
+    except Exception:
+        pass
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
         yield ac
+    if broker_started:
+        await _taskiq.taskiq_broker.shutdown()
     await user.delete()
     while (await User.find_one(User.username == "test")) is not None:
         await asyncio.sleep(1)
