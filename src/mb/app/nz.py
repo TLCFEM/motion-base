@@ -20,11 +20,11 @@ import itertools
 from http import HTTPStatus
 
 import structlog
-from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
+from fastapi import APIRouter, Depends, HTTPException, UploadFile
 
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
-from ..taskiq import get_stats, taskiq_broker
+from ..taskiq import taskiq_broker
 from ..utility.files import FileProxy, pack, store
 from .response import UploadResponse
 from .utility import User, create_token, is_active
@@ -98,7 +98,6 @@ async def _parse_archive(
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
 async def upload_archive(
     archives: list[UploadFile],
-    tasks: BackgroundTasks,
     user: User = Depends(is_active),
     wait_for_result: bool = False,
     overwrite_existing: bool = True,
@@ -121,7 +120,6 @@ async def upload_archive(
         )
 
     access_token: str = create_token(user.username).access_token
-    has_worker: bool = get_stats() is not None
 
     valid_uris: list[str] = []
     plain_files: list[UploadFile] = []
@@ -136,24 +134,12 @@ async def upload_archive(
 
     if not wait_for_result:
         task_id_pool: list[str] = []
-        if has_worker:
-            for archive_uri in valid_uris:
-                task_id: str = await create_task()
-                await _parse_archive.kiq(
-                    archive_uri, access_token, user.id, task_id, overwrite_existing
-                )
-                task_id_pool.append(task_id)
-        else:
-            for archive_uri in valid_uris:
-                task_id: str = await create_task()
-                tasks.add_task(
-                    _parse_archive_local,
-                    archive_uri,
-                    user.id,
-                    task_id,
-                    overwrite_existing,
-                )
-                task_id_pool.append(task_id)
+        for archive_uri in valid_uris:
+            task_id: str = await create_task()
+            await _parse_archive.kiq(
+                archive_uri, access_token, user.id, task_id, overwrite_existing
+            )
+            task_id_pool.append(task_id)
 
         return UploadResponse(
             message="Successfully uploaded and will be processed in the background.",

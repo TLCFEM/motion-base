@@ -83,12 +83,6 @@ taskiq_broker = AioPikaBroker(rabbitmq_uri()).with_middlewares(
     )
 ).with_result_backend(MongoResultBackend())
 
-_broker_available: bool = False
-
-
-def get_stats():
-    return True if _broker_available else None
-
 
 @taskiq_broker.on_event(TaskiqEvents.WORKER_STARTUP)
 async def init_worker(state: TaskiqState):
