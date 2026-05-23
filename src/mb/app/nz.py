@@ -24,7 +24,7 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
-from ..taskiq import broker, get_stats
+from ..taskiq import get_stats, taskiq_broker
 from ..utility.files import FileProxy, pack, store
 from .response import UploadResponse
 from .utility import User, create_token, is_active
@@ -52,7 +52,7 @@ async def _parse_archive_impl(
                 task_id=task_id,
                 overwrite_existing=overwrite_existing,
             )
-            return archive_file.bulk(results)
+            return await archive_file.bulk(results)
     except Exception as exc:
         if is_local:
             # we need to handle the exception here
@@ -81,7 +81,7 @@ async def _parse_archive_local(
     )
 
 
-@broker.task
+@taskiq_broker.task
 async def _parse_archive(
     archive_uri: str,
     access_token: str,

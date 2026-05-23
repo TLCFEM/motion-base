@@ -54,17 +54,6 @@ services:
       timeout: 10s
       start_period: 10s
       retries: 5
-  def-flower:
-    image: mher/flower
-    container_name: dev-flower
-    restart: no
-#    depends_on:
-#      dev-rabbitmq:
-#        condition: service_healthy
-    ports:
-      - '5555:5555'
-    volumes:
-      - motion_flower:/data
   dev-elasticsearch:
     image: elasticsearch:${ELASTIC_VERSION}
     container_name: dev-elasticsearch
@@ -88,5 +77,4 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_rabbitmq:
-  motion_flower:
   motion_elasticsearch:

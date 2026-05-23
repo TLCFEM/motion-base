@@ -18,10 +18,10 @@ from http import HTTPStatus
 
 import pytest
 
-from mb.record.parser import ParserNZSM
 from mb.record.async_record import Record
+from mb.record.parser import ParserNZSM
 from mb.record.utility import str_factory
-from mb.utility.elastic import sync_elastic
+from mb.utility.elastic import async_elastic
 from mb.utility.files import serialize_records
 
 
@@ -62,8 +62,8 @@ async def sample_data(pwd, mongo_connection):
         archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
     )
 
-    with sync_elastic() as client:
-        client.bulk(index="record", body=serialize_records(results, True))
+    async with async_elastic() as client:
+        await client.bulk(index="record", body=serialize_records(results, True))
 
     yield await Record.find_all().to_list()
 

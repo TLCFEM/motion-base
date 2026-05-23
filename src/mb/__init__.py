@@ -15,8 +15,6 @@
 
 from __future__ import annotations
 
-import sys
-
 from pydantic import BaseModel, Field
 
 
@@ -32,19 +30,18 @@ class Config(BaseModel):
 
 def run_app(setting: Config):
     if setting.worker:
-        import subprocess
+        from taskiq.cli.worker.args import WorkerArgs
+        from taskiq.cli.worker.run import run_worker
 
-        subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "taskiq",
-                "worker",
-                "mb.taskiq:broker",
-                "mb.app.jp",
-                "mb.app.nz",
-            ]
-            + setting.worker_config
+        run_worker(
+            WorkerArgs.from_cli(
+                [
+                    "mb.taskiq:taskiq_broker",
+                    "mb.app.jp",
+                    "mb.app.nz",
+                ]
+                + setting.worker_config
+            )
         )
     else:
         from mb.utility.env import (  # pylint: disable=import-outside-toplevel
