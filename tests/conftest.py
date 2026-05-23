@@ -15,6 +15,7 @@
 
 import asyncio
 import os.path
+import warnings
 from uuid import uuid4
 
 import pytest
@@ -69,8 +70,8 @@ async def mock_client_superuser(monkeypatch, mongo_connection):
     try:
         await _taskiq.taskiq_broker.startup()
         broker_started = True
-    except Exception:
-        pass
+    except Exception as exc:
+        warnings.warn(f"Broker startup failed, no-wait upload tests may fail: {exc}", stacklevel=1)
     async with AsyncClient(
         transport=ASGITransport(app=app), base_url="http://test"
     ) as ac:
