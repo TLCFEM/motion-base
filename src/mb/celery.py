@@ -13,11 +13,17 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from asyncio import new_event_loop
+
 from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
-from mongoengine import disconnect
 
-from mb.utility.config import init_mongo_sync, mongo_uri, rabbitmq_uri
+from mb.utility.config import (
+    mongo_uri,
+    rabbitmq_uri,
+    shutdown,
+    startup,
+)
 
 celery = Celery(
     "mb",
@@ -28,15 +34,18 @@ celery = Celery(
 celery.conf.broker_connection_retry_on_startup = True
 
 
+global_event_loop = new_event_loop()
+
+
 def get_stats():
     return celery.control.inspect().stats()
 
 
 @worker_process_init.connect
 def init_mongo_in_celery_worker(**_):
-    init_mongo_sync()
+    global_event_loop.run_until_complete(startup())
 
 
 @worker_process_shutdown.connect
 def shutdown_mongo_in_celery_worker(*_, **__):
-    disconnect()
+    global_event_loop.run_until_complete(shutdown())
