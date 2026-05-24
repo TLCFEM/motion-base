@@ -30,7 +30,7 @@ from fastapi import UploadFile
 from requests import delete, get, post
 
 from mb.record.utility import str_factory, uuid5_str
-from mb.utility.elastic import sync_elastic
+from mb.utility.elastic import async_elastic
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
 _logger = structlog.get_logger(__name__)
@@ -73,17 +73,11 @@ def pack(uploads: list[UploadFile]):
 
 def serialize_records(records: list, is_remote: bool):
     def to_dict(record) -> dict:
-        dict_data = record.to_mongo()
-        for key in (
-            "scale_factor",
-            "raw_data",
-            "raw_data_unit",
-            "offset",
-            "_id",
-            "_cls",
-        ):
-            dict_data.pop(key, None)
-        dict_data["id"] = record.id
+        dict_data = record.model_dump(
+            exclude={"scale_factor", "raw_data", "raw_data_unit", "offset"},
+            exclude_none=True,
+            exclude_unset=True,
+        )
         if is_remote:
             for k, v in dict_data.items():
                 if isinstance(v, datetime):
@@ -138,11 +132,11 @@ class FileProxy:
     def file_name(self):
         return os.path.basename(self.fs_path)
 
-    def bulk(self, records: list):
+    async def bulk(self, records: list):
         if bulk_body := serialize_records(records, self.is_remote):
             if not self.is_remote:
-                with sync_elastic() as client:
-                    response = client.bulk(index="record", body=bulk_body)
+                async with async_elastic() as client:
+                    response = await client.bulk(index="record", body=bulk_body)
                 if response["errors"]:
                     _logger.error(f"Failed to index file: {self._file_uri}")
             else:

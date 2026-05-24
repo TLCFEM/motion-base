@@ -16,7 +16,6 @@
 from contextlib import asynccontextmanager
 
 from beanie import init_beanie
-from mongoengine import connect, disconnect
 from pymongo import AsyncMongoClient
 
 from ..app.utility import User
@@ -42,27 +41,28 @@ def mongo_uri():
     return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
-def _init_mongo_impl(uri: str, db: str | None):
-    return connect(
-        host=f"{uri}{db or MONGO_DB_NAME}?authSource=admin",
-        uuidrepresentation="standard",
-    )
+mongo_client: AsyncMongoClient = None  # noqa
 
 
-def init_mongo_sync(db: str | None = None):
-    return _init_mongo_impl(mongo_uri(), db)
+async def startup(db: str | None = None):
+    global mongo_client
+    if mongo_client is None:
+        mongo_client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
+        await init_beanie(
+            database=mongo_client.get_database(db or MONGO_DB_NAME),
+            document_models=[Record, User, UploadTask],
+        )
+    return mongo_client
+
+
+async def shutdown():
+    global mongo_client
+    if mongo_client is not None:
+        await mongo_client.close()
+        mongo_client = None  # noqa
 
 
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
-    async with AsyncMongoClient(
-        uri := mongo_uri(), uuidRepresentation="standard"
-    ) as client:
-        await init_beanie(
-            database=client.get_database(db or MONGO_DB_NAME),
-            document_models=[Record, User, UploadTask],
-        )
-
-        yield _init_mongo_impl(uri, db)
-
-        disconnect()
+    yield await startup(db)
+    await shutdown()
