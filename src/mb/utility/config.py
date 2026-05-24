@@ -16,11 +16,10 @@
 from contextlib import asynccontextmanager
 
 from beanie import init_beanie
-from mongoengine import connect, disconnect
 from pymongo import AsyncMongoClient
 
 from ..app.utility import User
-from ..record.async_record import Record, UploadTask
+from ..record.async_record import NIED, NZSM, Record, UploadTask
 from .env import (
     MONGO_DB_NAME,
     MONGO_HOST,
@@ -42,27 +41,14 @@ def mongo_uri():
     return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
-def _init_mongo_impl(uri: str, db: str | None):
-    return connect(
-        host=f"{uri}{db or MONGO_DB_NAME}?authSource=admin",
-        uuidrepresentation="standard",
-    )
-
-
-def init_mongo_sync(db: str | None = None):
-    return _init_mongo_impl(mongo_uri(), db)
-
-
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
     async with AsyncMongoClient(
-        uri := mongo_uri(), uuidRepresentation="standard"
+        mongo_uri(), uuidRepresentation="standard"
     ) as client:
         await init_beanie(
             database=client.get_database(db or MONGO_DB_NAME),
-            document_models=[Record, User, UploadTask],
+            document_models=[Record, NIED, NZSM, User, UploadTask],
         )
 
-        yield _init_mongo_impl(uri, db)
-
-        disconnect()
+        yield client

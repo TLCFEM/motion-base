@@ -15,6 +15,7 @@
 
 from __future__ import annotations
 
+import asyncio
 import itertools
 from http import HTTPStatus
 
@@ -24,8 +25,9 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from pymongo.errors import ServerSelectionTimeoutError
 
 from ..celery import celery, get_stats
+from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
-from ..record.sync_record import create_task, delete_task
+from ..utility.config import init_mongo
 from ..utility.files import FileProxy, pack, store
 from .response import UploadResponse
 from .utility import User, create_token, is_active
@@ -34,7 +36,7 @@ router = APIRouter(tags=["New Zealand"])
 
 
 # noinspection DuplicatedCode
-def _parse_archive_impl(
+async def _parse_archive_impl(
     archive_uri: str,
     access_token: str | None,
     user_id: str,
@@ -46,7 +48,7 @@ def _parse_archive_impl(
         with FileProxy(
             archive_uri, access_token, always_delete_on_exit=is_local
         ) as archive_file:
-            results = ParserNZSM.parse_archive(
+            results = await ParserNZSM.parse_archive(
                 archive_obj=archive_file.file,
                 user_id=user_id,
                 archive_name=archive_file.file_name,
@@ -62,22 +64,22 @@ def _parse_archive_impl(
                 f"Failed to parse archive {archive_uri}.", exc_info=exc
             )
             if task_id is not None:
-                delete_task(task_id)
+                await delete_task(task_id)
             return []
 
         if task_id is not None:
-            create_task(task_id)
+            await create_task(task_id)
 
         raise exc
 
 
-def _parse_archive_local(
+async def _parse_archive_local(
     archive_uri: str,
     user_id: str,
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return _parse_archive_impl(
+    return await _parse_archive_impl(
         archive_uri, None, user_id, task_id, overwrite_existing, True
     )
 
@@ -99,14 +101,18 @@ def _parse_archive(
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return _parse_archive_impl(
-        archive_uri, access_token, user_id, task_id, overwrite_existing, False
-    )
+    async def _run():
+        async with init_mongo():
+            return await _parse_archive_impl(
+                archive_uri, access_token, user_id, task_id, overwrite_existing, False
+            )
+
+    return asyncio.run(_run())
 
 
 # noinspection DuplicatedCode
 @router.post("/upload", status_code=HTTPStatus.ACCEPTED, response_model=UploadResponse)
-def upload_archive(
+async def upload_archive(
     archives: list[UploadFile],
     tasks: BackgroundTasks,
     user: User = Depends(is_active),
@@ -148,14 +154,14 @@ def upload_archive(
         task_id_pool: list[str] = []
         if has_worker:
             for archive_uri in valid_uris:
-                task_id: str = create_task()
+                task_id: str = await create_task()
                 _parse_archive.delay(
                     archive_uri, access_token, user.id, task_id, overwrite_existing
                 )
                 task_id_pool.append(task_id)
         else:
             for archive_uri in valid_uris:
-                task_id: str = create_task()
+                task_id: str = await create_task()
                 tasks.add_task(
                     _parse_archive_local,
                     archive_uri,
@@ -172,15 +178,17 @@ def upload_archive(
         )
 
     if has_worker:
-        records = [
-            _parse_archive.delay(
-                archive_uri, access_token, user.id, None, overwrite_existing
-            ).get()
-            for archive_uri in valid_uris
-        ]
+
+        async def _get_result(uri: str) -> list[str]:
+            result = _parse_archive.delay(
+                uri, access_token, user.id, None, overwrite_existing
+            )
+            return await asyncio.to_thread(result.get)
+
+        records = await asyncio.gather(*[_get_result(uri) for uri in valid_uris])
     else:
         records = [
-            _parse_archive_local(archive_uri, user.id, None, overwrite_existing)
+            await _parse_archive_local(archive_uri, user.id, None, overwrite_existing)
             for archive_uri in valid_uris
         ]
 

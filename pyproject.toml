@@ -25,6 +25,7 @@ classifiers = [
 ]
 dependencies = [
     "aiohttp[speedups]",
+    "anyio",
     "bcrypt",
     "beanie",
     "celery",
@@ -32,7 +33,6 @@ dependencies = [
     "email-validator",
     "fastapi",
     "joserfc",
-    "mongoengine",
     "numba",
     "Pint",
     "pyinstrument",

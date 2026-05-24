@@ -33,13 +33,13 @@ from mb.record.utility import str_factory
         "data/D5054A01.V2A",
     ],
 )
-def test_nz_parse_file(pwd, file_path, mongo_connection):
-    ParserNZSM.parse_file(os.path.join(pwd, file_path), str_factory())
+async def test_nz_parse_file(pwd, file_path, mongo_connection):
+    await ParserNZSM.parse_file(os.path.join(pwd, file_path), str_factory())
 
 
 @pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
-def test_nz_parse_archive(pwd, file_path, mongo_connection):
-    ParserNZSM.parse_archive(
+async def test_nz_parse_archive(pwd, file_path, mongo_connection):
+    await ParserNZSM.parse_archive(
         archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
     )
 
