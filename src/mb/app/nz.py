@@ -24,8 +24,8 @@ from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFi
 from pymongo.errors import ServerSelectionTimeoutError
 
 from ..celery import celery, get_stats
+from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
-from ..record.sync_record import create_task, delete_task
 from ..utility.files import FileProxy, pack, store
 from .response import UploadResponse
 from .utility import User, create_token, is_active

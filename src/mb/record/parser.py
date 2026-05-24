@@ -28,8 +28,8 @@ import pint
 import structlog
 import tzdata  # noqa # pylint: disable=unused-import
 
+from .async_record import NIED, NZSM, UploadTask
 from .base_parser import BaseParserNIED, BaseParserNZSM
-from .sync_record import NIED, NZSM, UploadTask
 
 _logger = structlog.get_logger(__name__)
 
