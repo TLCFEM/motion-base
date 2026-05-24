@@ -108,6 +108,7 @@ async def _parse_archive(
             if attempt >= PARSE_ARCHIVE_MAX_ATTEMPTS - 1:
                 raise
             await sleep(PARSE_ARCHIVE_RETRY_DELAY)
+    raise RuntimeError("Failed to parse archive after all attempts.")
 
 
 # noinspection DuplicatedCode
