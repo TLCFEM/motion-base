@@ -73,17 +73,11 @@ def pack(uploads: list[UploadFile]):
 
 def serialize_records(records: list, is_remote: bool):
     def to_dict(record) -> dict:
-        dict_data = record.to_mongo()
-        for key in (
-            "scale_factor",
-            "raw_data",
-            "raw_data_unit",
-            "offset",
-            "_id",
-            "_cls",
-        ):
-            dict_data.pop(key, None)
-        dict_data["id"] = record.id
+        dict_data = record.model_dump(
+            exclude={"scale_factor", "raw_data", "raw_data_unit", "offset"},
+            exclude_none=True,
+            exclude_unset=True,
+        )
         if is_remote:
             for k, v in dict_data.items():
                 if isinstance(v, datetime):
