@@ -77,7 +77,7 @@ class MongoBackend(AsyncResultBackend):
         return result
 
 
-taskiq_broker = AioPikaBroker(rabbitmq_uri(), MongoBackend())
+taskiq_broker = AioPikaBroker(rabbitmq_uri()).with_result_backend(MongoBackend())
 
 
 def set_taskiq_broker():
