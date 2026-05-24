@@ -32,10 +32,14 @@ variables:
   before_script:
     - pip install -e ".[dev]"
   script:
-    - pytest -n auto --cov --junitxml=junit.xml .
+    - pytest --cov --junitxml=junit.xml .
+
+test:py313:
+  <<: *pytest_template
+  variables:
+    PYTHON_VERSION: "3.13"
 
 test:py314:
   <<: *pytest_template
   variables:
     PYTHON_VERSION: "3.14"
-
