@@ -60,7 +60,7 @@ class MongoBackend(AsyncResultBackend):
         await self.startup()
         header = {"task_id": task_id}
         await self._collection.update_one(
-            header, {"$set": header | {"value": model_dump(result)}}, True
+            header, {"$set": header | {"value": model_dump(result)}}, upsert=True
         )
 
     async def is_result_ready(self, task_id: str):
@@ -70,7 +70,8 @@ class MongoBackend(AsyncResultBackend):
 
     async def get_result(self, task_id: str, with_logs: bool = False):
         await self.startup()
-        target = await self._collection.find_one(header := {"task_id": task_id})
+        header = {"task_id": task_id}
+        target = await self._collection.find_one(header)
         assert target
 
         result = model_validate(
