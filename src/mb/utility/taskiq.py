@@ -13,30 +13,57 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+from aio_pika import connect_robust
+from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 from taskiq.abc.result_backend import AsyncResultBackend
 from taskiq.compat import model_dump, model_validate
 from taskiq.result import TaskiqResult
 from taskiq_aio_pika import AioPikaBroker
+from taskiq_aio_pika.queue import Queue
 
-from mb.utility.config import get_taskiq_collection, rabbitmq_uri
+from mb.utility.config import (
+    get_taskiq_collection,
+    mongo_uri,
+    rabbitmq_uri,
+    taskiq_result,
+)
+from mb.utility.env import MONGO_DB_NAME
 
 
 class MongoBackend(AsyncResultBackend):
-    def __init__(self, db: AsyncDatabase):
+    _client: AsyncMongoClient | None = None
+    _collection = None
+
+    async def startup(self):
+        if self._collection is not None:
+            return
+        self._client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
+        db: AsyncDatabase = self._client.get_database(MONGO_DB_NAME)
+        if taskiq_result not in await db.list_collection_names():
+            await db.create_collection(taskiq_result)
         self._collection = get_taskiq_collection(db)
 
+    async def shutdown(self):
+        if self._client is not None:
+            await self._client.close()
+        self._client = None
+        self._collection = None
+
     async def set_result(self, task_id: str, result: TaskiqResult):
+        await self.startup()
         header = {"task_id": task_id}
         await self._collection.update_one(
             header, {"$set": header | {"value": model_dump(result)}}, True
         )
 
     async def is_result_ready(self, task_id: str):
+        await self.startup()
         target = await self._collection.find_one({"task_id": task_id})
         return target and "value" in target
 
     async def get_result(self, task_id: str, with_logs: bool = False):
+        await self.startup()
         target = await self._collection.find_one(header := {"task_id": task_id})
         assert target
 
@@ -50,11 +77,19 @@ class MongoBackend(AsyncResultBackend):
         return result
 
 
-taskiq_broker = None
+taskiq_broker = AioPikaBroker(rabbitmq_uri(), MongoBackend())
 
 
-def set_taskiq_broker(db: AsyncDatabase):
-    global taskiq_broker
-    if not taskiq_broker:
-        taskiq_broker = AioPikaBroker(rabbitmq_uri(), MongoBackend(db))
+def set_taskiq_broker():
     return taskiq_broker
+
+
+async def has_taskiq_worker() -> bool:
+    try:
+        connection = await connect_robust(rabbitmq_uri(), timeout=1)
+        async with connection:
+            channel = await connection.channel()
+            queue = await channel.declare_queue(Queue().name, passive=True)
+            return bool(queue.declaration_result.consumer_count)
+    except Exception:
+        return False

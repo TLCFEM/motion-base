@@ -63,8 +63,8 @@ from .utility import (
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    async with init_mongo() as mongo_tuple:
-        broker = set_taskiq_broker(mongo_tuple[1])
+    async with init_mongo():
+        broker = set_taskiq_broker()
         await broker.startup()
         await create_superuser()
         yield

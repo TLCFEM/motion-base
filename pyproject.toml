@@ -27,7 +27,6 @@ dependencies = [
     "aiohttp[speedups]",
     "bcrypt",
     "beanie",
-    "celery",
     "elasticsearch[async]",
     "email-validator",
     "fastapi",

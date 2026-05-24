@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import itertools
-from asyncio import gather, get_event_loop
+from asyncio import gather, sleep
 from http import HTTPStatus
 
 import structlog
@@ -24,10 +24,10 @@ from elastic_transport import ConnectionTimeout
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pymongo.errors import ServerSelectionTimeoutError
 
-from ..celery import celery, get_stats
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
 from ..utility.files import FileProxy, pack, store
+from ..utility.taskiq import has_taskiq_worker, taskiq_broker
 from .response import UploadResponse
 from .utility import User, create_token, is_active
 
@@ -83,28 +83,29 @@ async def _parse_archive_local(
     )
 
 
-@celery.task(
-    autoretry_for=(
-        ConnectionError,
-        TimeoutError,
-        ConnectionTimeout,
-        ServerSelectionTimeoutError,
-    ),
-    retry_kwargs={"max_retries": 3},
-    default_retry_delay=10,
-)
-def _parse_archive(
+@taskiq_broker.task
+async def _parse_archive(
     archive_uri: str,
     access_token: str,
     user_id: str,
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return get_event_loop().run_until_complete(
-        _parse_archive_impl(
-            archive_uri, access_token, user_id, task_id, overwrite_existing, False
-        )
-    )
+    retries = 3
+    for attempt in range(retries + 1):
+        try:
+            return await _parse_archive_impl(
+                archive_uri, access_token, user_id, task_id, overwrite_existing, False
+            )
+        except (
+            ConnectionError,
+            TimeoutError,
+            ConnectionTimeout,
+            ServerSelectionTimeoutError,
+        ):
+            if attempt >= retries:
+                raise
+            await sleep(10)
 
 
 # noinspection DuplicatedCode
@@ -134,7 +135,7 @@ async def upload_archive(
         )
 
     access_token: str = create_token(user.username).access_token
-    has_worker: bool = get_stats() is not None
+    has_worker: bool = await has_taskiq_worker()
 
     valid_uris: list[str] = []
     plain_files: list[UploadFile] = []
@@ -152,7 +153,7 @@ async def upload_archive(
         if has_worker:
             for archive_uri in valid_uris:
                 task_id: str = await create_task()
-                _parse_archive.delay(
+                await _parse_archive.kiq(
                     archive_uri, access_token, user.id, task_id, overwrite_existing
                 )
                 task_id_pool.append(task_id)
@@ -175,12 +176,12 @@ async def upload_archive(
         )
 
     if has_worker:
-        records = [
-            _parse_archive.delay(
+        records = []
+        for archive_uri in valid_uris:
+            task = await _parse_archive.kiq(
                 archive_uri, access_token, user.id, None, overwrite_existing
-            ).get()
-            for archive_uri in valid_uris
-        ]
+            )
+            records.append((await task.wait_result()).return_value)
     else:
         record_tasks = [
             _parse_archive_local(archive_uri, user.id, None, overwrite_existing)

@@ -15,10 +15,6 @@
 
 from __future__ import annotations
 
-import sys
-from asyncio import run
-from uuid import uuid4
-
 from pydantic import BaseModel, Field
 
 
@@ -27,33 +23,25 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
-    celery: bool = Field(default=False)
+    worker: bool = Field(default=False)
     debug: bool = Field(default=False)
-    celery_config: list = Field(default_factory=list)
+    worker_config: list = Field(default_factory=list)
 
 
-async def run_celery(args: list):
-    from mb.celery import celery
-    from mb.utility.config import init_mongo
-    from mb.utility.taskiq import set_taskiq_broker
+def run_worker(args: list):
+    from taskiq.cli.worker.args import WorkerArgs
+    from taskiq.cli.worker.run import run_worker
 
-    async with init_mongo() as mongo_tuple:
-        broker = set_taskiq_broker(mongo_tuple[1])
-        await broker.startup()
-        celery.start(args)
-        await broker.shutdown()
+    worker_args = WorkerArgs.from_cli(args)
+    run_worker(worker_args)
 
 
 def run_app(setting: Config):
-    if setting.celery:
-        args: list = ["worker"]
-        args.extend(setting.celery_config)
-        if sys.platform == "win32":
-            args.extend(
-                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
-            )
-
-        run(run_celery(args))
+    if setting.worker:
+        args = setting.worker_config
+        if not args:
+            args = ["mb.utility.taskiq:taskiq_broker", "mb.app.jp", "mb.app.nz"]
+        run_worker(args)
     else:
         from mb.utility.env import (  # pylint: disable=import-outside-toplevel
             MB_FASTAPI_WORKERS,

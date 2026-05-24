@@ -31,9 +31,9 @@ def config_and_run():
         return sys.argv[index]
 
     while index < len(sys.argv):
-        if sys.argv[index].startswith("c"):
-            config.celery = True
-            config.celery_config = sys.argv[index + 1 :]
+        if sys.argv[index].startswith(("c", "t")):
+            config.worker = True
+            config.worker_config = sys.argv[index + 1 :]
             break
 
         if sys.argv[index].startswith("w"):
