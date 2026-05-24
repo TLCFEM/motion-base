@@ -54,7 +54,7 @@ async def _parse_archive_impl(
                 task_id=task_id,
                 overwrite_existing=overwrite_existing,
             )
-            return archive_file.bulk(results)
+            return await archive_file.bulk(results)
     except Exception as exc:
         if is_local:
             # we need to handle the exception here

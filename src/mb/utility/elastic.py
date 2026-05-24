@@ -16,10 +16,9 @@
 from __future__ import annotations
 
 import asyncio
-import time
-from contextlib import asynccontextmanager, contextmanager
+from contextlib import asynccontextmanager
 
-from elasticsearch import AsyncElasticsearch, BadRequestError, Elasticsearch
+from elasticsearch import AsyncElasticsearch, BadRequestError
 
 from mb.utility.env import ELASTIC_HOST
 
@@ -73,22 +72,5 @@ async def async_elastic():
             except BadRequestError as e:
                 if not await client.indices.exists(index="record"):
                     raise e
-
-        yield client
-
-
-@contextmanager
-def sync_elastic():
-    # noinspection HttpUrlsUsage
-    with Elasticsearch(f"http://{ELASTIC_HOST}:9200") as client:
-        counter: int = 0
-        while not client.ping():
-            counter += delay
-            if counter > 600:
-                raise ConnectionError("Elasticsearch is not available.")
-            time.sleep(delay)
-
-        if not client.indices.exists(index="record"):
-            client.indices.create(index="record", mappings=generate_elastic_mapping())
 
         yield client
