@@ -53,7 +53,7 @@ jobs:
         run: |
           pip install -e .[dev] pyinstaller
           export NUMBA_DISABLE_JIT=1
-          pytest -n auto --cov --junitxml=junit.xml .
+          pytest --cov --junitxml=junit.xml .
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:

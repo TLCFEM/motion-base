@@ -48,7 +48,6 @@ dev = [
     "httpx",
     "locust",
     "pytest-cov",
-    "pytest-xdist",
     "ruff",
 ]
 client = [
