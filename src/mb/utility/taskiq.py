@@ -16,6 +16,7 @@
 from aio_pika import connect_robust
 from aio_pika.exceptions import CONNECTION_EXCEPTIONS
 from pymongo import AsyncMongoClient
+from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
 from taskiq.abc.result_backend import AsyncResultBackend
 from taskiq.compat import model_dump, model_validate
@@ -33,7 +34,7 @@ from mb.utility.env import MONGO_DB_NAME
 
 class MongoBackend(AsyncResultBackend):
     _client: AsyncMongoClient | None = None
-    _collection = None
+    _collection: AsyncCollection | None = None
 
     async def startup(self):
         if self._collection is not None:
@@ -77,17 +78,23 @@ class MongoBackend(AsyncResultBackend):
         return result
 
 
-taskiq_broker = AioPikaBroker(rabbitmq_uri()).with_result_backend(MongoBackend())
 TASKIQ_DEFAULT_QUEUE_NAME = "taskiq"
+TASKIQ_WORKER_CHECK_TIMEOUT = 2
+taskiq_broker = None
 
 
 def set_taskiq_broker():
+    global taskiq_broker
+    if taskiq_broker is None:
+        taskiq_broker = AioPikaBroker(rabbitmq_uri()).with_result_backend(MongoBackend())
     return taskiq_broker
 
 
 async def has_taskiq_worker() -> bool:
     try:
-        connection = await connect_robust(rabbitmq_uri(), timeout=1)
+        connection = await connect_robust(
+            rabbitmq_uri(), timeout=TASKIQ_WORKER_CHECK_TIMEOUT
+        )
         async with connection:
             channel = await connection.channel()
             queue = await channel.declare_queue(TASKIQ_DEFAULT_QUEUE_NAME, passive=True)

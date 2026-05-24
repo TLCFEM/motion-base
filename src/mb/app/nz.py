@@ -27,11 +27,12 @@ from pymongo.errors import ServerSelectionTimeoutError
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
 from ..utility.files import FileProxy, pack, store
-from ..utility.taskiq import has_taskiq_worker, taskiq_broker
+from ..utility.taskiq import has_taskiq_worker, set_taskiq_broker
 from .response import UploadResponse
 from .utility import User, create_token, is_active
 
 router = APIRouter(tags=["New Zealand"])
+taskiq_broker = set_taskiq_broker()
 
 
 # noinspection DuplicatedCode
@@ -176,12 +177,14 @@ async def upload_archive(
         )
 
     if has_worker:
-        submitted_tasks = [
-            await _parse_archive.kiq(
-                archive_uri, access_token, user.id, None, overwrite_existing
-            )
-            for archive_uri in valid_uris
-        ]
+        submitted_tasks = await gather(
+            *[
+                _parse_archive.kiq(
+                    archive_uri, access_token, user.id, None, overwrite_existing
+                )
+                for archive_uri in valid_uris
+            ]
+        )
         records = [
             result.return_value
             for result in await gather(*[x.wait_result() for x in submitted_tasks])

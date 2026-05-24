@@ -40,7 +40,7 @@ def run_app(setting: Config):
     if setting.worker:
         args = setting.worker_config
         if not args:
-            args = ["mb.utility.taskiq:taskiq_broker", "mb.app.jp", "mb.app.nz"]
+            args = ["mb.utility.taskiq:set_taskiq_broker", "mb.app.jp", "mb.app.nz"]
         run_worker(args)
     else:
         from mb.utility.env import (  # pylint: disable=import-outside-toplevel
