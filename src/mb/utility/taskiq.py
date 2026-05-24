@@ -14,6 +14,7 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 from aio_pika import connect_robust
+from aio_pika.exceptions import CONNECTION_EXCEPTIONS
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.database import AsyncDatabase
 from taskiq.abc.result_backend import AsyncResultBackend
@@ -91,5 +92,5 @@ async def has_taskiq_worker() -> bool:
             channel = await connection.channel()
             queue = await channel.declare_queue(TASKIQ_DEFAULT_QUEUE_NAME, passive=True)
             return bool(queue.declaration_result.consumer_count)
-    except Exception:
+    except (*CONNECTION_EXCEPTIONS, TimeoutError):
         return False
