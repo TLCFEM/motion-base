@@ -13,8 +13,11 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+import asyncio
+
 from aio_pika import connect_robust
 from aio_pika.exceptions import CONNECTION_EXCEPTIONS
+from aiormq.exceptions import ChannelNotFoundEntity
 from pymongo import AsyncMongoClient
 from pymongo.asynchronous.collection import AsyncCollection
 from pymongo.asynchronous.database import AsyncDatabase
@@ -35,15 +38,19 @@ from mb.utility.env import MONGO_DB_NAME
 class MongoBackend(AsyncResultBackend):
     _client: AsyncMongoClient | None = None
     _collection: AsyncCollection | None = None
+    _startup_lock = asyncio.Lock()
 
     async def startup(self):
         if self._collection is not None:
             return
-        self._client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
-        db: AsyncDatabase = self._client.get_database(MONGO_DB_NAME)
-        if taskiq_result not in await db.list_collection_names():
-            await db.create_collection(taskiq_result)
-        self._collection = get_taskiq_collection(db)
+        async with self._startup_lock:
+            if self._collection is not None:
+                return
+            self._client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
+            db: AsyncDatabase = self._client.get_database(MONGO_DB_NAME)
+            if taskiq_result not in await db.list_collection_names():
+                await db.create_collection(taskiq_result)
+            self._collection = get_taskiq_collection(db)
 
     async def shutdown(self):
         if self._client is not None:
@@ -99,5 +106,5 @@ async def has_taskiq_worker() -> bool:
             channel = await connection.channel()
             queue = await channel.declare_queue(TASKIQ_DEFAULT_QUEUE_NAME, passive=True)
             return bool(queue.declaration_result.consumer_count)
-    except (*CONNECTION_EXCEPTIONS, TimeoutError):
+    except (ChannelNotFoundEntity, *CONNECTION_EXCEPTIONS, TimeoutError):
         return False
