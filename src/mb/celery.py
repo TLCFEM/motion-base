@@ -13,7 +13,7 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-from asyncio import new_event_loop
+from asyncio import new_event_loop, set_event_loop
 
 from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
@@ -35,6 +35,7 @@ celery.conf.broker_connection_retry_on_startup = True
 
 
 global_event_loop = new_event_loop()
+set_event_loop(global_event_loop)
 
 
 def get_stats():
