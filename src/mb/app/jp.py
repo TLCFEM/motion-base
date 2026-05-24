@@ -24,7 +24,7 @@ from elastic_transport import ConnectionTimeout
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pymongo.errors import ServerSelectionTimeoutError
 
-from ..celery import celery, get_stats, global_event_loop
+from ..celery import celery, get_stats, global_loop
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNIED
 from ..utility.files import FileProxy, store
@@ -100,7 +100,7 @@ def _parse_archive(
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return global_event_loop.run_until_complete(
+    return global_loop.run_until_complete(
         _parse_archive_impl(
             archive_uri, access_token, user_id, task_id, overwrite_existing, False
         )
