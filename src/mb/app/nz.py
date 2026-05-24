@@ -33,6 +33,8 @@ from .utility import User, create_token, is_active
 
 router = APIRouter(tags=["New Zealand"])
 taskiq_broker = set_taskiq_broker()
+PARSE_ARCHIVE_MAX_RETRIES = 3
+PARSE_ARCHIVE_RETRY_DELAY = 10
 
 
 # noinspection DuplicatedCode
@@ -92,8 +94,7 @@ async def _parse_archive(
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    retries = 3
-    for attempt in range(retries + 1):
+    for attempt in range(PARSE_ARCHIVE_MAX_RETRIES + 1):
         try:
             return await _parse_archive_impl(
                 archive_uri, access_token, user_id, task_id, overwrite_existing, False
@@ -104,9 +105,9 @@ async def _parse_archive(
             ConnectionTimeout,
             ServerSelectionTimeoutError,
         ):
-            if attempt >= retries:
+            if attempt >= PARSE_ARCHIVE_MAX_RETRIES:
                 raise
-            await sleep(10)
+            await sleep(PARSE_ARCHIVE_RETRY_DELAY)
 
 
 # noinspection DuplicatedCode

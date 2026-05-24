@@ -41,8 +41,6 @@ class MongoBackend(AsyncResultBackend):
     _startup_lock = asyncio.Lock()
 
     async def startup(self):
-        if self._collection is not None:
-            return
         async with self._startup_lock:
             if self._collection is not None:
                 return
