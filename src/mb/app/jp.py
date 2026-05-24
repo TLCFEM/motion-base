@@ -172,12 +172,16 @@ async def upload_archive(
         )
 
     if has_worker:
-        records = []
-        for archive_uri in valid_uris:
-            task = await _parse_archive.kiq(
+        submitted_tasks = [
+            await _parse_archive.kiq(
                 archive_uri, access_token, user.id, None, overwrite_existing
             )
-            records.append((await task.wait_result()).return_value)
+            for archive_uri in valid_uris
+        ]
+        records = [
+            result.return_value
+            for result in await gather(*[x.wait_result() for x in submitted_tasks])
+        ]
     else:
         record_tasks = [
             _parse_archive_local(archive_uri, user.id, None, overwrite_existing)

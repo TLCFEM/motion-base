@@ -20,7 +20,6 @@ from taskiq.abc.result_backend import AsyncResultBackend
 from taskiq.compat import model_dump, model_validate
 from taskiq.result import TaskiqResult
 from taskiq_aio_pika import AioPikaBroker
-from taskiq_aio_pika.queue import Queue
 
 from mb.utility.config import (
     get_taskiq_collection,
@@ -78,6 +77,7 @@ class MongoBackend(AsyncResultBackend):
 
 
 taskiq_broker = AioPikaBroker(rabbitmq_uri()).with_result_backend(MongoBackend())
+TASKIQ_DEFAULT_QUEUE_NAME = "taskiq"
 
 
 def set_taskiq_broker():
@@ -89,7 +89,7 @@ async def has_taskiq_worker() -> bool:
         connection = await connect_robust(rabbitmq_uri(), timeout=1)
         async with connection:
             channel = await connection.channel()
-            queue = await channel.declare_queue(Queue().name, passive=True)
+            queue = await channel.declare_queue(TASKIQ_DEFAULT_QUEUE_NAME, passive=True)
             return bool(queue.declaration_result.consumer_count)
     except Exception:
         return False
