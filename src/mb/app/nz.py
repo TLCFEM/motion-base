@@ -174,22 +174,19 @@ async def upload_archive(
             records=None,
         )
 
-    if has_worker:
-        records = [
-            _parse_archive.delay(
-                archive_uri, access_token, user.id, None, overwrite_existing
-            ).get()
-            for archive_uri in valid_uris
-        ]
-    else:
-        record_tasks = [
-            _parse_archive_local(archive_uri, user.id, None, overwrite_existing)
-            for archive_uri in valid_uris
-        ]
-        records = await gather(*record_tasks)
-
     return UploadResponse(
         message="Successfully uploaded and processed.",
-        records=list(itertools.chain.from_iterable(records)),
+        records=list(
+            itertools.chain.from_iterable(
+                await gather(
+                    *[
+                        _parse_archive_local(
+                            archive_uri, user.id, None, overwrite_existing
+                        )
+                        for archive_uri in valid_uris
+                    ]
+                )
+            )
+        ),
         task_ids=None,
     )
