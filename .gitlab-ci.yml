@@ -41,13 +41,3 @@ test:py311:
   <<: *pytest_template
   variables:
     PYTHON_VERSION: "3.11"
-
-test:py312:
-  <<: *pytest_template
-  variables:
-    PYTHON_VERSION: "3.12"
-
-test:py313:
-  <<: *pytest_template
-  variables:
-    PYTHON_VERSION: "3.13"
