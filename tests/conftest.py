@@ -27,7 +27,7 @@ from mb.utility.config import init_mongo
 
 
 @pytest.fixture(scope="function")
-async def mongo_connection(monkeypatch, anyio_backend):
+async def mongo_connection(monkeypatch):
     monkeypatch.setattr(env, "MONGO_DB_NAME", random_db := uuid4().hex)
     async with init_mongo(random_db) as mongo_client:
         yield

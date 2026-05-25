@@ -43,6 +43,11 @@ dependencies = [
     "uvicorn",
 ]
 
+[project.urls]
+"Homepage" = "https://github.com/TLCFEM/motion-base"
+"Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
+"Source" = "https://github.com/TLCFEM/motion-base"
+
 [project.optional-dependencies]
 dev = [
     "httpx",
@@ -59,10 +64,8 @@ client = [
     "rich",
 ]
 
-[project.urls]
-"Homepage" = "https://github.com/TLCFEM/motion-base"
-"Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
-"Source" = "https://github.com/TLCFEM/motion-base"
+[tool.pytest.ini_options]
+anyio_mode = "auto"
 
 [tool.pyright]
 venvPath = "."
