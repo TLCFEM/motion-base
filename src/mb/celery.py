@@ -17,13 +17,9 @@ from asyncio import AbstractEventLoop, new_event_loop, set_event_loop
 
 from celery import Celery
 from celery.signals import worker_process_init, worker_process_shutdown
+from pymongo import AsyncMongoClient
 
-from mb.utility.config import (
-    mongo_uri,
-    rabbitmq_uri,
-    shutdown,
-    startup,
-)
+from mb.utility.config import mb_init_beanie, mongo_uri, rabbitmq_uri
 
 celery = Celery(
     "mb",
@@ -35,10 +31,23 @@ celery.conf.broker_connection_retry_on_startup = True
 
 
 global_loop: AbstractEventLoop = None  # noqa
+mongo_client: AsyncMongoClient = None  # noqa
 
 
 def get_stats():
     return celery.control.inspect().stats()
+
+
+async def startup(db: str | None = None):
+    global mongo_client
+    if mongo_client is None:
+        mongo_client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
+        await mb_init_beanie(mongo_client, db)
+
+
+async def shutdown():
+    if mongo_client is not None:
+        await mongo_client.close()
 
 
 @worker_process_init.connect

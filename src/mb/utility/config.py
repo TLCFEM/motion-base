@@ -41,28 +41,15 @@ def mongo_uri():
     return f"mongodb://{MONGO_USERNAME}:{MONGO_PASSWORD}@{MONGO_HOST}:{MONGO_PORT}/"
 
 
-mongo_client: AsyncMongoClient = None  # noqa
-
-
-async def startup(db: str | None = None):
-    global mongo_client
-    if mongo_client is None:
-        mongo_client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
-        await init_beanie(
-            database=mongo_client.get_database(db or MONGO_DB_NAME),
-            document_models=[Record, User, UploadTask],
-        )
-    return mongo_client
-
-
-async def shutdown():
-    global mongo_client
-    if mongo_client is not None:
-        await mongo_client.close()
-        mongo_client = None  # noqa
+async def mb_init_beanie(client: AsyncMongoClient, db: str | None):
+    await init_beanie(
+        database=client.get_database(db or MONGO_DB_NAME),
+        document_models=[Record, User, UploadTask],
+    )
 
 
 @asynccontextmanager
 async def init_mongo(db: str | None = None):
-    yield await startup(db)
-    await shutdown()
+    async with AsyncMongoClient(mongo_uri(), uuidRepresentation="standard") as client:
+        await mb_init_beanie(client, db)
+        yield client
