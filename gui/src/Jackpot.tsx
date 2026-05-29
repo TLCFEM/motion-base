@@ -24,8 +24,8 @@ import {
     IconButton,
     LinearProgress,
     Paper,
-    ShuffleOnIcon,
     Typography,
+    ShuffleOnIcon,
 } from "./ui";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
