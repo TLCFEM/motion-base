@@ -13,12 +13,11 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField } from "@suid/material";
-import useTheme from "@suid/material/styles/useTheme";
 import { Component, createEffect, createSignal, onMount } from "solid-js";
 import axios from "axios";
 import { AggregationItem, get_stats, setBackend } from "./API";
 import Plotly from "plotly.js-basic-dist-min";
+import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField, useTheme } from "./ui";
 
 interface HistogramProps {
     id: string;

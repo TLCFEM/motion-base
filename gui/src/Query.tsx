@@ -37,13 +37,13 @@ import {
     TableHead,
     TableRow,
     TextField,
-} from "@suid/material";
-import KeyboardArrowRightIcon from "@suid/icons-material/KeyboardArrowRight";
-import KeyboardArrowLeftIcon from "@suid/icons-material/KeyboardArrowLeft";
-import KeyboardDoubleArrowRightIcon from "@suid/icons-material/KeyboardDoubleArrowRight";
-import KeyboardDoubleArrowLeftIcon from "@suid/icons-material/KeyboardDoubleArrowLeft";
-import AddIcon from "@suid/icons-material/Add";
-import RemoveIcon from "@suid/icons-material/Remove";
+    AddIcon,
+    KeyboardArrowLeftIcon,
+    KeyboardArrowRightIcon,
+    KeyboardDoubleArrowLeftIcon,
+    KeyboardDoubleArrowRightIcon,
+    RemoveIcon,
+} from "./ui";
 import { createDownloadLink, ifError, isNumeric, query_api, QueryConfig, SeismicRecord, sxProps, toUTC } from "./API";
 import tippy from "tippy.js";
 import "tippy.js/dist/tippy.css";

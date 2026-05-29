@@ -24,9 +24,9 @@ import {
     IconButton,
     LinearProgress,
     Paper,
-    Typography
-} from "@suid/material";
-import ShuffleOnIcon from "@suid/icons-material/ShuffleOn";
+    ShuffleOnIcon,
+    Typography,
+} from "./ui";
 import L, { LatLng } from "leaflet";
 import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-basic-dist-min";
