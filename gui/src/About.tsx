@@ -13,8 +13,6 @@
 //  You should have received a copy of the GNU General Public License
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Box, Button, Link, Modal, Stack, Typography } from "@suid/material";
-import useTheme from "@suid/material/styles/useTheme";
 import { createSignal, onMount } from "solid-js";
 import mongodb_logo from "./assets/mongodb.svg";
 import fastapi_logo from "./assets/fastapi.svg";
@@ -27,6 +25,7 @@ import mb_logo from "./assets/logo.svg";
 import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
 import { backend, check_backend, post_total_api, QueryConfig, setBackend } from "./API";
+import { Box, Button, Link, Modal, Stack, Typography, useTheme } from "./ui";
 
 export default function AboutModal() {
     const [open, setOpen] = createSignal(false);

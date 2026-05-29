@@ -34,7 +34,7 @@ import {
     Select,
     Stack,
     TextField,
-} from "@suid/material";
+} from "./ui";
 import { createDownloadLink, ifError, isNumeric, process_api, ProcessConfig, ProcessResponse, sxProps } from "./API";
 import Plotly from "plotly.js-basic-dist-min";
 

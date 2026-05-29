@@ -14,7 +14,6 @@
 //  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
-import { AppBar, Box, Button, Stack, Toolbar, Typography } from "@suid/material";
 import AboutModal from "./About";
 import Jackpot from "./Jackpot";
 import QueryDatabase from "./Query";
@@ -26,6 +25,7 @@ import Process from "./Process";
 import ServerModal from "./Server";
 import { marked } from "marked";
 import hljs from "highlight.js";
+import { AppBar, Box, Button, Stack, Toolbar, Typography } from "./ui";
 
 const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting" | "brief">("brief");
 const [total] = createResource<number>(get_total_api);
