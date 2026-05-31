@@ -25,7 +25,7 @@ variables:
         RABBITMQ_DEFAULT_USER: test
         RABBITMQ_DEFAULT_PASS: password
         RABBITMQ_DEFAULT_VHOST: vhost
-    - name: elasticsearch:9.3.2
+    - name: elasticsearch:9.3.4
       pull_policy: if-not-present
       alias: elasticsearch
       variables:
