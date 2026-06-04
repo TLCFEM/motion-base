@@ -35,8 +35,8 @@ When provided, location filtering is combined with maximum distance constraints.
 ### `max_event_distance` and `max_station_distance`
 
 Maximum allowed distance (meters) from `event_location` or `station_location`.
-If omitted while location is provided, each field defaults to `100000` meters (`max_event_distance` for event filtering, `max_station_distance` for station filtering).
-This default is implemented in `QueryConfig.generate_query_string()` and `QueryConfig.generate_elastic_query()`.
+If omitted while location is provided, each field defaults to `100000` meters:
+`max_event_distance` for event filtering and `max_station_distance` for station filtering.
 
 ### `from_date` and `to_date`
 
