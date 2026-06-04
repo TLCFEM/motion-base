@@ -35,7 +35,7 @@ When provided, location filtering is combined with maximum distance constraints.
 ### `max_event_distance` and `max_station_distance`
 
 Maximum allowed distance (meters) from `event_location` or `station_location`.
-If omitted while location is provided, a default of `100000` meters is used.
+If omitted while location is provided, each field defaults to `100000` meters (`max_event_distance` for event filtering, `max_station_distance` for station filtering).
 
 ### `from_date` and `to_date`
 
@@ -47,7 +47,7 @@ Minimum and maximum PGA (`maximum_acceleration`).
 
 ### `file_name`
 
-Case-insensitive pattern match on the source file name.
+Case-insensitive pattern match on the original record file name from the source dataset/provider.
 
 ### `station_code`
 
