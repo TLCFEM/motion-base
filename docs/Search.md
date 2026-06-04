@@ -2,55 +2,92 @@
 
 ## API
 
-The search functionality fully relies on the MongoDB query. An API named as `/query` is provided.
+Two APIs are available for record filtering:
 
-Search criteria can be provided as either query parameters or as a JSON object in the request body. An example will
-be provided in the following section.
+1. `POST /query`: MongoDB-backed query endpoint.
+2. `POST /search`: Elasticsearch-backed query endpoint.
 
-## Query Parameters
+`/query` is suitable for normal filtering and simple pagination.
+`/search` is recommended for large result sets and deep pagination (`search_after`).
+
+Search criteria are provided as a JSON request body (`QueryConfig`).
+
+## Query Fields
 
 ### `region`
 
-Query a specific region, e.g., `region=jp`. If not specified, all regions will be queried, and results will be merged.
+Query a specific region (`jp` or `nz`).
+If not specified, records from all regions are considered.
 
 ### `min_magnitude` and `max_magnitude`
 
-The minimum and maximum magnitude of the records of interest.
+Minimum and maximum event magnitude.
 
 ### `category`
 
-The category of the records of interest. Some databases have categories. The Japanese database NIED, for
-example, has two categories: `knt` and `kik`. In this case, `category=knt` will query the records of the KNT
-network.
+Database/category label (for example, `knt` or `kik` for some JP records).
 
 ### `event_location` and `station_location`
 
-The geographic locations of the event and the station. The location needs to be specified in the form of a list of
-two floats, e.g., `event_location=-122.0&event_location=38.0`. The first float is the longitude, and the second
-float is the latitude.
-
-The records returned will be the ones that are closer to the specified location, ordered by the distance.
+Geographic location expressed as `[longitude, latitude]`.
+When provided, location filtering is combined with maximum distance constraints.
 
 ### `max_event_distance` and `max_station_distance`
 
-If one wants to find all the records that are within a certain distance from the event, this parameter can be used.
+Maximum allowed distance (meters) from `event_location` or `station_location`.
+If omitted while location is provided, each field defaults to `100000` meters:
+`max_event_distance` for event filtering and `max_station_distance` for station filtering.
 
 ### `from_date` and `to_date`
 
-The start and end time of the records of interest. These can be used to find a specific earthquake event.
+Start and end timestamps for event time filtering.
 
 ### `min_pga` and `max_pga`
 
-The minimum and maximum magnitude of the records of interest.
+Minimum and maximum PGA (`maximum_acceleration`).
 
-### `event_name`
+### `file_name`
+
+Case-insensitive pattern match on the original record file name from the source dataset/provider.
+
+### `station_code`
+
+Case-insensitive pattern match on station code.
 
 ### `direction`
 
-### `page_size`
+Case-insensitive pattern match on record direction.
 
-Use for pagination. The default value is 10.
+## Pagination
 
-### `page_number`
+Pagination options are grouped under `pagination` in the request body.
 
-Use for pagination. The default value is 0.
+### `pagination.page_size`
+
+Number of records per page. Default: `10`.
+
+### `pagination.page_number`
+
+Zero-based page index. Default: `0`.
+
+### `pagination.sort_by`
+
+Sort expression with sign prefix (`+` ascending, `-` descending).
+Supported fields:
+
+- `magnitude`
+- `maximum_acceleration`
+- `event_time`
+- `depth`
+
+Default: `-maximum_acceleration`.
+
+### `pagination.search_after`
+
+Cursor-based pagination token used by `/search`.
+When present, `/search` continues from that cursor instead of using `page_number`.
+
+## Notes
+
+- `/query` supports optional `count_total` (query parameter) to return exact total count, which may be expensive for some geo queries.
+- `/search` always returns total hits from Elasticsearch together with `search_after` for the next page.
