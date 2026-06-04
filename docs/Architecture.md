@@ -28,7 +28,7 @@ The provided production compose file `docker/docker-compose-production.yaml` def
 7. `mongo-express`: optional MongoDB admin UI.
 8. `flower`: optional celery monitoring UI.
 
-The minimum practical setup is `mongo`, `rabbitmq`, `elasticsearch`, and `mb-back` (plus `mb-front` for the web UI).
+The minimum practical, full-featured setup is `mongo`, `rabbitmq`, `elasticsearch`, and `mb-back` (plus `mb-front` for the web UI).
 Adding `mb-worker` improves responsiveness by offloading heavy parsing tasks.
 
 For reverse-proxy deployment, see `docker/docker-compose-production-nginx.yaml`.
