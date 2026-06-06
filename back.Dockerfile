@@ -19,9 +19,6 @@ COPY src/mb /mb/mb
 COPY mb_runner.py /mb
 WORKDIR /mb
 
-RUN useradd -m runner
-USER runner
-
 ENV PYTHONOPTIMIZE=1
 
 ENTRYPOINT ["python3", "mb_runner.py"]
