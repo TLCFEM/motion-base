@@ -50,7 +50,7 @@ async def shutdown():
         await mongo_client.close()
 
 
-def get_loop():
+def _ensure_loop():
     global global_loop
     if global_loop is None:
         global_loop = new_event_loop()
@@ -60,11 +60,15 @@ def get_loop():
 
 @worker_process_init.connect
 def init_mongo_in_celery_worker(**_):
-    get_loop().run_until_complete(startup())
+    _ensure_loop().run_until_complete(startup())
 
 
 @worker_process_shutdown.connect
 def shutdown_mongo_in_celery_worker(*_, **__):
-    loop = get_loop()
+    loop = _ensure_loop()
     loop.run_until_complete(shutdown())
     loop.close()
+
+
+def execute_task(task):
+    _ensure_loop().run_until_complete(task)
