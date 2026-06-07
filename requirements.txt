@@ -2,7 +2,7 @@
 #    uv pip compile --refresh --annotation-style=line --all-extras --output-file=requirements.txt pyproject.toml
 aiodns==4.0.4             # via aiohttp
 aiohappyeyeballs==2.6.2   # via aiohttp
-aiohttp==3.13.5           # via elasticsearch, motion-base (pyproject.toml)
+aiohttp==3.14.0           # via elasticsearch, motion-base (pyproject.toml)
 aiosignal==1.4.0          # via aiohttp
 amqp==5.3.1               # via kombu
 annotated-doc==0.0.4      # via fastapi
@@ -36,7 +36,7 @@ elasticsearch==9.4.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
 fastapi==0.136.3          # via motion-base (pyproject.toml)
 flask==3.1.3              # via flask-cors, flask-login, locust
-flask-cors==6.0.2         # via locust
+flask-cors==6.0.3         # via locust
 flask-login==0.6.3        # via locust
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
@@ -49,16 +49,16 @@ h11==0.16.0               # via httpcore, uvicorn, wsproto
 httpcore==1.0.9           # via httpx
 httpx==0.28.1             # via httpx-auth, motion-base (pyproject.toml)
 httpx-auth==0.23.1        # via motion-base (pyproject.toml)
-idna==3.17                # via anyio, email-validator, httpx, requests, yarl
+idna==3.18                # via anyio, email-validator, httpx, requests, yarl
 iniconfig==2.3.0          # via pytest
 itsdangerous==2.2.0       # via flask
 jinja2==3.1.6             # via flask
-joserfc==1.6.8            # via motion-base (pyproject.toml)
+joserfc==1.7.0            # via motion-base (pyproject.toml)
 kiwisolver==1.5.0         # via matplotlib
 kombu==5.6.2              # via celery
 lazy-model==0.4.0         # via beanie
 llvmlite==0.47.0          # via numba
-locust==2.44.0            # via motion-base (pyproject.toml)
+locust==2.44.1            # via motion-base (pyproject.toml)
 markdown-it-py==4.2.0     # via rich
 markupsafe==3.0.3         # via flask, jinja2, werkzeug
 matplotlib==3.10.9        # via motion-base (pyproject.toml)
@@ -88,27 +88,27 @@ pytest-cov==7.1.0         # via motion-base (pyproject.toml)
 python-dateutil==2.9.0.post0  # via celery, elasticsearch, matplotlib
 python-dotenv==1.2.2      # via motion-base (pyproject.toml)
 python-engineio==4.13.2   # via locust, python-socketio
-python-multipart==0.0.29  # via motion-base (pyproject.toml)
+python-multipart==0.0.32  # via motion-base (pyproject.toml)
 python-socketio==5.16.2   # via locust
 pyzmq==27.1.0             # via locust
 requests==2.34.2          # via locust, python-socketio, motion-base (pyproject.toml)
 rich==15.0.0              # via motion-base (pyproject.toml)
-ruff==0.15.15             # via motion-base (pyproject.toml)
+ruff==0.15.16             # via motion-base (pyproject.toml)
 scipy==1.17.1             # via motion-base (pyproject.toml)
 simple-websocket==1.1.0   # via python-engineio
 six==1.17.0               # via python-dateutil
 sniffio==1.3.1            # via elastic-transport, elasticsearch
 soupsieve==2.8.4          # via beautifulsoup4
 starlette==1.2.1          # via fastapi
-structlog==25.5.0         # via motion-base (pyproject.toml)
-typing-extensions==4.15.0  # via aiosignal, anyio, beanie, beautifulsoup4, elasticsearch, fastapi, flexcache, flexparser, locust, pint, pydantic, pydantic-core, starlette, typing-inspection
+structlog==26.1.0         # via motion-base (pyproject.toml)
+typing-extensions==4.15.0  # via aiohttp, aiosignal, anyio, beanie, beautifulsoup4, elasticsearch, fastapi, flexcache, flexparser, locust, pint, pydantic, pydantic-core, starlette, typing-inspection
 typing-inspection==0.4.2  # via fastapi, pydantic
 tzdata==2026.2            # via kombu
 tzlocal==5.3.1            # via celery
 urllib3==2.7.0            # via elastic-transport, geventhttpclient, requests
-uvicorn==0.48.0           # via motion-base (pyproject.toml)
+uvicorn==0.49.0           # via motion-base (pyproject.toml)
 vine==5.1.0               # via amqp, celery, kombu
-wcwidth==0.7.0            # via prompt-toolkit
+wcwidth==0.8.0            # via prompt-toolkit
 websocket-client==1.9.0   # via python-socketio
 werkzeug==3.1.8           # via flask, flask-cors, flask-login, locust
 wsproto==1.3.2            # via simple-websocket
