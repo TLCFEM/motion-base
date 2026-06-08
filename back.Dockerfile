@@ -13,6 +13,8 @@ RUN find /usr/local/lib/python*/site-packages -name "*.so" -exec strip --strip-u
 
 FROM python:3.12-slim
 
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 COPY --from=dependency /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
 
 COPY src/mb /mb/mb
