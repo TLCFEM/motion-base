@@ -65,7 +65,7 @@ MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000").rstrip("/
 
 MB_FS_HOST: str = os.getenv("MB_FS_HOST", "localhost")
 MB_FS_PORT: str = os.getenv("MB_FS_PORT", "8333")
-MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb")
+MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb-cache")
 MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", "test")
 MB_FS_PASSWORD: str = os.getenv("MB_FS_PASSWORD", "password")
 
