@@ -21,6 +21,7 @@ import pytest
 from mb.record.parser import ParserNZSM
 from mb.record.response_spectrum import response_spectrum
 from mb.record.utility import str_factory
+from mb.utility import UPath
 
 
 @pytest.mark.parametrize(
@@ -40,7 +41,7 @@ async def test_nz_parse_file(pwd, file_path, mongo_connection):
 @pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
 async def test_nz_parse_archive(pwd, file_path, mongo_connection):
     await ParserNZSM.parse_archive(
-        archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
+        archive_obj=UPath(pwd) / file_path, user_id=str_factory()
     )
 
 

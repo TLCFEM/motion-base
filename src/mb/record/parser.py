@@ -29,6 +29,7 @@ import pint
 import structlog
 import tzdata  # noqa # pylint: disable=unused-import
 
+from ..utility import UPath
 from .async_record import NIED, NZSM, UploadTask
 from .base_parser import BaseParserNIED, BaseParserNZSM
 
@@ -47,20 +48,22 @@ class ParserNIED(BaseParserNIED):
     @staticmethod
     async def parse_archive(
         *,
-        archive_obj: str | BinaryIO,
+        archive_obj: UPath | BinaryIO,
         user_id: str,
         archive_name: str | None = None,
         task_id: str | None = None,
         overwrite_existing: bool = True,
     ) -> list[NIED]:
-        if not isinstance(archive_obj, str) and archive_name is None:
+        if not isinstance(archive_obj, UPath) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
-        name_string: str = archive_obj if isinstance(archive_obj, str) else archive_name
+        name_string: str = (
+            archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
+        )
         category: str = "knt" if "knt" in name_string else "kik"
 
         kwargs: dict = {"mode": "r:gz"}
-        if isinstance(archive_obj, str):
+        if isinstance(archive_obj, UPath):
             kwargs["name"] = archive_obj
         else:
             kwargs["fileobj"] = archive_obj
@@ -69,8 +72,8 @@ class ParserNIED(BaseParserNIED):
         if task_id is not None:
             task = await UploadTask.get(task_id)
             task.pid = os.getpid()
-            if isinstance(archive_obj, str):
-                task.archive_path = archive_obj
+            if isinstance(archive_obj, UPath):
+                task.archive_path = archive_obj.as_posix()
 
         records = []
         try:
@@ -174,21 +177,23 @@ class ParserNZSM(BaseParserNZSM):
     @staticmethod
     async def parse_archive(
         *,
-        archive_obj: str | BinaryIO,
+        archive_obj: UPath | BinaryIO,
         user_id: str,
         archive_name: str | None = None,
         task_id: str | None = None,
         overwrite_existing: bool = True,
     ) -> list[NZSM]:
-        if not isinstance(archive_obj, str) and archive_name is None:
+        if not isinstance(archive_obj, UPath) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
-        name_string: str = archive_obj if isinstance(archive_obj, str) else archive_name
+        name_string: str = (
+            archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
+        )
 
         kwargs: dict = {}
         if name_string.endswith(".tar.gz"):
             kwargs["mode"] = "r:gz"
-            if isinstance(archive_obj, str):
+            if isinstance(archive_obj, UPath):
                 kwargs["name"] = archive_obj
             else:
                 kwargs["fileobj"] = archive_obj
@@ -199,8 +204,8 @@ class ParserNZSM(BaseParserNZSM):
         task: UploadTask | None = None
         if task_id is not None:
             task = await UploadTask.get(task_id)
-            if isinstance(archive_obj, str):
-                task.archive_path = archive_obj
+            if isinstance(archive_obj, UPath):
+                task.archive_path = archive_obj.as_posix()
             task.pid = os.getpid()
 
         records: list = []

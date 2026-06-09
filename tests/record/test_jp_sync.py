@@ -19,6 +19,7 @@ import pytest
 
 from mb.record.parser import ParserNIED
 from mb.record.utility import str_factory
+from mb.utility import UPath
 
 
 @pytest.mark.parametrize("file_path", ["data/SZO0039901271027.NS"])
@@ -29,5 +30,5 @@ async def test_jp_parse_file(pwd, file_path, mongo_connection):
 @pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
 async def test_jp_parse_archive(pwd, file_path, mongo_connection):
     await ParserNIED.parse_archive(
-        archive_obj=os.path.join(pwd, file_path), user_id=str_factory()
+        archive_obj=UPath(pwd) / file_path, user_id=str_factory()
     )

@@ -13,7 +13,6 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
 from http import HTTPStatus
 
 import pytest
@@ -21,6 +20,7 @@ import pytest
 from mb.record.async_record import Record
 from mb.record.parser import ParserNZSM
 from mb.record.utility import str_factory
+from mb.utility import UPath
 from mb.utility.elastic import async_elastic
 from mb.utility.files import serialize_records
 
@@ -59,7 +59,7 @@ async def test_for_test_only(mock_client):
 @pytest.fixture(scope="function")
 async def sample_data(pwd, mongo_connection):
     results = await ParserNZSM.parse_archive(
-        archive_obj=os.path.join(pwd, "data/nz_test.tar.gz"), user_id=str_factory()
+        archive_obj=UPath(pwd) / "data/nz_test.tar.gz", user_id=str_factory()
     )
 
     async with async_elastic() as client:

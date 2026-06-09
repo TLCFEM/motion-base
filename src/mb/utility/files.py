@@ -21,7 +21,6 @@ import time
 from datetime import datetime
 from io import BytesIO
 from os.path import basename
-from pathlib import Path
 from shutil import copyfileobj
 from urllib.parse import quote
 
@@ -30,6 +29,7 @@ from fastapi import UploadFile
 from requests import delete, get, post
 
 from mb.record.utility import str_factory, uuid5_str
+from mb.utility import UPath
 from mb.utility.elastic import async_elastic
 from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
 
@@ -37,12 +37,12 @@ _logger = structlog.get_logger(__name__)
 
 
 def _local_path(file_name: str):
-    fs_root: Path = Path(MB_FS_ROOT)
+    fs_root: UPath = UPath(MB_FS_ROOT)
 
-    folder: Path = fs_root / str_factory()
+    folder: UPath = fs_root / str_factory()
     folder.mkdir(parents=True, exist_ok=True)
 
-    path: Path = folder / quote(basename(file_name))
+    path: UPath = folder / quote(basename(file_name))
     if not path.exists():
         return path, path.relative_to(fs_root)
 
@@ -164,7 +164,7 @@ class FileProxy:
 
             self.file = BytesIO(response.content)
         else:
-            self.file = os.path.abspath(os.path.join(MB_FS_ROOT, self.fs_path))
+            self.file = (UPath(MB_FS_ROOT) / self.fs_path).absolute()
 
         return self
 
