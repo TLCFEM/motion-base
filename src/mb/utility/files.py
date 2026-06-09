@@ -17,16 +17,13 @@ from __future__ import annotations
 
 import os
 import tarfile
-import time
-from datetime import datetime
-from io import BytesIO
 from os.path import basename
 from shutil import copyfileobj
+from tempfile import TemporaryDirectory
 from urllib.parse import quote
 
 import structlog
 from fastapi import UploadFile
-from requests import delete, get, post
 
 from mb.record.utility import str_factory, uuid5_str
 from mb.utility import UPath
@@ -36,22 +33,25 @@ from mb.utility.env import (
     MB_FS_HOST,
     MB_FS_PASSWORD,
     MB_FS_PORT,
-    MB_FS_ROOT,
     MB_FS_USERNAME,
-    MB_MAIN_SITE,
 )
 
 _logger = structlog.get_logger(__name__)
 
 
-def _remote_bucket():
+def _remote_path(uri: str):
     # noinspection HttpUrlsUsage
-    bucket: UPath = UPath(
-        f"s3://{MB_FS_BUCKET}",
+    return UPath(
+        uri,
         key=MB_FS_USERNAME,
         secret=MB_FS_PASSWORD,
         endpoint_url=f"http://{MB_FS_HOST}:{MB_FS_PORT}",
     )
+
+
+def _remote_bucket():
+    # noinspection HttpUrlsUsage
+    bucket: UPath = _remote_path(f"s3://{MB_FS_BUCKET}")
     bucket.mkdir(0o777, True, True)
 
     return bucket
@@ -65,157 +65,72 @@ def _remote_obj(file_name: str):
     raise FileExistsError(f"File {remote_obj} already exists.")
 
 
-def _local_path(file_name: str):
-    fs_root: UPath = UPath(MB_FS_ROOT)
-
-    folder: UPath = fs_root / str_factory()
-    folder.mkdir(parents=True, exist_ok=True)
-
-    path: UPath = folder / quote(basename(file_name))
-    if not path.exists():
-        return path, path.relative_to(fs_root)
-
-    raise FileExistsError(f"File {path} already exists.")
-
-
 def store(upload: UploadFile) -> str:
-    local_path, fs_path = _local_path(upload.filename)
-    with open(local_path, "wb") as file:
-        copyfileobj(upload.file, file, 16 * 2**20)
+    remote_obj = _remote_obj(upload.filename)
+    with remote_obj.open("wb") as remote_file:
+        copyfileobj(upload.file, remote_file, 16 * 2**20)
 
-    return f"{MB_MAIN_SITE}/access/{fs_path}"
+    return remote_obj.as_uri()
 
 
 def pack(uploads: list[UploadFile]):
-    local_path, fs_path = _local_path(
-        f"{uuid5_str(''.join(upload.filename for upload in uploads))}.tar.gz"
-    )
+    tmp_file: str = f"{uuid5_str(''.join(v.filename for v in uploads))}.tar.gz"
+    remote_obj = _remote_obj(tmp_file)
 
-    with tarfile.open(local_path, "w:gz") as archive:
-        for upload in uploads:
-            tar_info = tarfile.TarInfo(upload.filename.upper().rstrip(".BIN"))
-            tar_info.size = upload.size
-            archive.addfile(tar_info, upload.file)
+    with TemporaryDirectory() as tmp_dir:
+        with tarfile.open(tmp_path := UPath(tmp_dir) / tmp_file, "w:gz") as archive:
+            for upload in uploads:
+                tar_info = tarfile.TarInfo(upload.filename.upper().rstrip(".BIN"))
+                tar_info.size = upload.size
+                archive.addfile(tar_info, upload.file)
 
-    return f"{MB_MAIN_SITE}/access/{fs_path}"
+        remote_obj.fs.put_file(tmp_path, remote_obj.path)
+
+    return remote_obj.as_uri()
 
 
-def serialize_records(records: list, is_remote: bool):
-    def to_dict(record) -> dict:
-        dict_data = record.model_dump(
-            exclude={"scale_factor", "raw_data", "raw_data_unit", "offset"},
-            exclude_none=True,
-            exclude_unset=True,
-        )
-        if is_remote:
-            for k, v in dict_data.items():
-                if isinstance(v, datetime):
-                    dict_data[k] = v.isoformat()
-
-        return dict_data
-
+def serialize_records(records: list):
     bulk_body: list = []
     for r in records:
         bulk_body.append({"index": {"_id": r.id}})
-        bulk_body.append(to_dict(r))
+        bulk_body.append(
+            r.model_dump(
+                # mode="json",
+                exclude={"scale_factor", "raw_data", "raw_data_unit", "offset"},
+                exclude_none=True,
+                exclude_unset=True,
+            )
+        )
 
     return bulk_body
 
 
-def _retry(func, delay: int = 10, max_retries: int = 3):
-    for _ in range(max_retries):
-        try:
-            return func()
-        except Exception:  # noqa
-            time.sleep(delay)
-    raise ConnectionError(f"Failed to execute {func.__name__}.")
-
-
 class FileProxy:
-    def __init__(
-        self,
-        file_uri: str,
-        auth_token: str | None,
-        *,
-        always_delete_on_exit: bool = False,
-    ):
-        self._file_uri = file_uri
-        self._auth_token = auth_token
+    def __init__(self, file_uri: str, *, always_delete_on_exit: bool):
+        self.file = _remote_path(file_uri)
         self._always_delete_on_exit = always_delete_on_exit
-
-        self.file = None
-
-    @property
-    def is_remote(self):
-        return not self._file_uri.startswith(MB_MAIN_SITE)
-
-    @property
-    def host_path(self):
-        return self._file_uri.split("/access/")[0]
-
-    @property
-    def fs_path(self):
-        return self._file_uri.split("/access/")[1]
 
     @property
     def file_name(self):
-        return os.path.basename(self.fs_path)
+        return os.path.basename(self.file.path)
 
     async def bulk(self, records: list):
-        if bulk_body := serialize_records(records, self.is_remote):
-            if not self.is_remote:
-                async with async_elastic() as client:
-                    response = await client.bulk(index="record", body=bulk_body)
-                if response["errors"]:
-                    _logger.error(f"Failed to index file: {self._file_uri}")
-            else:
-
-                def _post():
-                    return post(
-                        f"{self.host_path}/index",
-                        headers={"Authorization": f"Bearer {self._auth_token}"},
-                        json={"records": bulk_body},
-                    )
-
-                if _retry(_post).status_code != 200:
-                    _logger.error(f"Failed to index file: {self._file_uri}")
+        if bulk_body := serialize_records(records):
+            async with async_elastic() as client:
+                response = await client.bulk(index="record", body=bulk_body)
+            if response["errors"]:
+                _logger.error(f"Failed to index file: {self.file}")
 
         return [record.file_name for record in records]
 
     def __enter__(self):
-        if self.is_remote:
-
-            def _get():
-                return get(self._file_uri)
-
-            if (response := _retry(_get)).status_code != 200:
-                raise ConnectionError(f"Failed to download file: {self._file_uri}")
-
-            self.file = BytesIO(response.content)
-        else:
-            self.file = (UPath(MB_FS_ROOT) / self.fs_path).absolute()
-
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         # do not try to delete files if there is an exception
         # the task will be retried
         if not exc_type or self._always_delete_on_exit:
-            if self.is_remote and self._auth_token:
-
-                def _delete():
-                    return delete(
-                        self._file_uri,
-                        headers={"Authorization": f"Bearer {self._auth_token}"},
-                    )
-
-                if _retry(_delete).status_code != 200:
-                    _logger.error(f"Failed to delete file: {self._file_uri}")
-            else:
-                if os.path.exists(self.file):
-                    os.remove(self.file)
-                if not os.listdir(folder := os.path.dirname(self.file)):
-                    os.rmdir(folder)
+            self.file.unlink()
 
 
 if __name__ == "__main__":
