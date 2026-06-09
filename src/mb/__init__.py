@@ -33,7 +33,14 @@ class Config(BaseModel):
 
 def run_app(setting: Config):
     if setting.celery:
+        from warnings import filterwarnings
+
+        from celery.exceptions import SecurityWarning
+
         from mb.celery import celery
+
+        # docker root warning
+        filterwarnings("ignore", category=SecurityWarning)
 
         args: list = ["worker"]
         args.extend(setting.celery_config)
