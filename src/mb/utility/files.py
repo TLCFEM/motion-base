@@ -31,9 +31,38 @@ from requests import delete, get, post
 from mb.record.utility import str_factory, uuid5_str
 from mb.utility import UPath
 from mb.utility.elastic import async_elastic
-from mb.utility.env import MB_FS_ROOT, MB_MAIN_SITE
+from mb.utility.env import (
+    MB_FS_BUCKET,
+    MB_FS_HOST,
+    MB_FS_PASSWORD,
+    MB_FS_PORT,
+    MB_FS_ROOT,
+    MB_FS_USERNAME,
+    MB_MAIN_SITE,
+)
 
 _logger = structlog.get_logger(__name__)
+
+
+def _remote_bucket():
+    # noinspection HttpUrlsUsage
+    bucket: UPath = UPath(
+        f"s3://{MB_FS_BUCKET}",
+        key=MB_FS_USERNAME,
+        secret=MB_FS_PASSWORD,
+        endpoint_url=f"http://{MB_FS_HOST}:{MB_FS_PORT}",
+    )
+    bucket.mkdir(0o777, True, True)
+
+    return bucket
+
+
+def _remote_obj(file_name: str):
+    remote_obj: UPath = _remote_bucket() / str_factory() / quote(basename(file_name))
+    if not remote_obj.exists():
+        return remote_obj.absolute()
+
+    raise FileExistsError(f"File {remote_obj} already exists.")
 
 
 def _local_path(file_name: str):

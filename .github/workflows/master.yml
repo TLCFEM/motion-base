@@ -41,6 +41,13 @@ jobs:
           ES_JAVA_OPTS: "-Xms512m -Xmx512m"
           discovery.type: single-node
           xpack.security.enabled: false
+      seaweedfs:
+        image: chrislusf/seaweedfs
+        env:
+          AWS_ACCESS_KEY_ID: test
+          AWS_SECRET_ACCESS_KEY: password
+        ports:
+          - "8333:8333"
     steps:
       - name: Clone
         uses: actions/checkout@v6

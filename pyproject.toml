@@ -38,8 +38,10 @@ dependencies = [
     "python-dotenv",
     "python-multipart",
     "requests",
+    "s3fs",
     "scipy",
     "structlog",
+    "universal_pathlib",
     "uvicorn",
 ]
 
