@@ -89,8 +89,6 @@ services:
       - elasticsearch
     ports:
       - '${MB_PORT}:${MB_PORT}'
-    volumes:
-      - motion_cache:${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: ${MB_SECRET_KEY}
       MB_ALGORITHM: ${MB_ALGORITHM}
@@ -102,8 +100,6 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
-      MB_FS_ROOT: ${MB_FS_ROOT}
-      MB_MAIN_SITE: ${MB_MAIN_SITE}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
@@ -132,8 +128,6 @@ services:
       elasticsearch:
         condition: service_healthy
     command: celery
-    volumes:
-      - motion_cache:${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: ${MB_SECRET_KEY}
       MB_ALGORITHM: ${MB_ALGORITHM}
@@ -145,8 +139,6 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
-      MB_FS_ROOT: ${MB_FS_ROOT}
-      MB_MAIN_SITE: ${MB_MAIN_SITE}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
@@ -170,6 +162,5 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_rabbitmq:
-  motion_cache:
   motion_flower:
   motion_elasticsearch:

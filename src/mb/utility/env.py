@@ -60,9 +60,6 @@ ELASTIC_HOST: str = os.getenv("ELASTIC_HOST", "localhost")
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 
-MB_FS_ROOT: str = os.getenv("MB_FS_ROOT", "/tmp")
-MB_MAIN_SITE: str = os.getenv("MB_MAIN_SITE", "http://localhost:8000").rstrip("/")
-
 MB_FS_HOST: str = os.getenv("MB_FS_HOST", "localhost")
 MB_FS_PORT: str = os.getenv("MB_FS_PORT", "8333")
 MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb-cache")
@@ -70,8 +67,5 @@ MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", "test")
 MB_FS_PASSWORD: str = os.getenv("MB_FS_PASSWORD", "password")
 
 TURNSTILE_SECRET: str = os.getenv("TURNSTILE_SECRET", "")
-
-if not LOADED:
-    _logger.info(f"Hosting on {MB_MAIN_SITE}.")
 
 LOADED = True

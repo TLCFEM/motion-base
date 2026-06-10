@@ -108,8 +108,6 @@ services:
       - mb-elasticsearch
     ports:
       - '\${MB_PORT}:8000'
-    volumes:
-      - motion_cache:\${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: \${MB_SECRET_KEY}
       MB_ALGORITHM: \${MB_ALGORITHM}
@@ -121,8 +119,6 @@ services:
       MB_SUPERUSER_PASSWORD: \${MB_SUPERUSER_PASSWORD}
       MB_PORT: \${MB_PORT}
       MB_FASTAPI_WORKERS: \${MB_FASTAPI_WORKERS}
-      MB_FS_ROOT: \${MB_FS_ROOT}
-      MB_MAIN_SITE: \${MB_MAIN_SITE}
       MONGO_DB_NAME: \${MONGO_DB_NAME}
       MONGO_HOST: mb-mongo
       MONGO_PORT: \${MONGO_PORT}
@@ -147,7 +143,6 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_rabbitmq:
-  motion_cache:
   motion_elasticsearch:
 " >docker-compose.yml
 

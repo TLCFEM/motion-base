@@ -73,13 +73,6 @@ spec:
                   key: MB_SUPERUSER_PASSWORD
             - name: MB_FASTAPI_WORKERS
               value: "1"
-            - name: MB_FS_ROOT
-              value: "/tmp"
-            - name: MB_MAIN_SITE
-              valueFrom:
-                configMapKeyRef:
-                  name: mb-config
-                  key: MB_MAIN_SITE
             - name: MONGO_DB_NAME
               valueFrom:
                 configMapKeyRef:
