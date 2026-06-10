@@ -32,6 +32,7 @@ from mb.utility.env import (
     MB_FS_BUCKET,
     MB_FS_HOST,
     MB_FS_PASSWORD,
+    MB_FS_PERSISTENT,
     MB_FS_PORT,
     MB_FS_USERNAME,
 )
@@ -129,7 +130,7 @@ class FileProxy:
     def __exit__(self, exc_type, exc_value, traceback):
         # do not try to delete files if there is an exception
         # the task will be retried
-        if not exc_type or self._always_delete_on_exit:
+        if not MB_FS_PERSISTENT and (not exc_type or self._always_delete_on_exit):
             self.file.unlink()
 
 

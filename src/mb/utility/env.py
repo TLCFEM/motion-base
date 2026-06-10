@@ -65,6 +65,7 @@ MB_FS_PORT: str = os.getenv("MB_FS_PORT", "8333")
 MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb-cache")
 MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", "test")
 MB_FS_PASSWORD: str = os.getenv("MB_FS_PASSWORD", "password")
+MB_FS_PERSISTENT: bool = bool(os.getenv("MB_FS_PERSISTENT", ""))
 
 TURNSTILE_SECRET: str = os.getenv("TURNSTILE_SECRET", "")
 
