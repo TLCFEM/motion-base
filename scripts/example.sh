@@ -117,6 +117,7 @@ services:
       - mb-mongo
       - mb-rabbitmq
       - mb-elasticsearch
+      - mb-seaweedfs
     ports:
       - '\${MB_PORT}:8000'
     environment:
