@@ -1,84 +1,193 @@
 services:
-  mongo:
-    image: mongo
-    container_name: mongo
-    restart: always
-    command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
-    mem_limit: ${MONGO_MEM_LIMIT}
+  elasticsearch:
+    container_name: elasticsearch
     environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_DATA_DIR: /data/db
-    volumes:
-      - motion_mongo:/data/db
-      - motion_mongoconfig:/data/configdb
+      ES_JAVA_OPTS: '-Xms1g -Xmx4g'
+      discovery.type: single-node
+      xpack.security.enabled: false
     healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet" ]
       interval: 300s
-      timeout: 10s
-      start_period: 10s
       retries: 5
-  mongo-express:
-    image: mongo-express
-    container_name: mongo-express
+      start_period: 10s
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - http://localhost:9200/_cluster/health
+      timeout: 10s
+    image: elasticsearch:${ELASTIC_VERSION}
     restart: always
-    depends_on:
-      mongo:
-        condition: service_healthy
-    ports:
-      - '8081:8081'
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:${MONGO_PORT}/
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
-  rabbitmq:
-    image: rabbitmq:4.2-management
-    container_name: rabbitmq
-    restart: always
-    environment:
-      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_DEFAULT_VHOST: vhost
     volumes:
-      - motion_rabbitmq:/var/lib/rabbitmq
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 300s
-      timeout: 10s
-      start_period: 10s
-      retries: 5
+      - motion_elasticsearch:/usr/share/elasticsearch/data
   flower:
-    image: mher/flower
+    command: >-
+      celery
+      --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost
+      flower
+      --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
     container_name: flower
-    restart: always
     depends_on:
       rabbitmq:
         condition: service_healthy
-    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
+    image: mher/flower
     ports:
       - '5555:5555'
+    restart: always
     volumes:
       - motion_flower:/data
-  elasticsearch:
-    image: elasticsearch:${ELASTIC_VERSION}
-    container_name: elasticsearch
-    restart: always
+  mb-back:
+    container_name: mb-back
+    depends_on:
+      - mongo
+      - rabbitmq
+      - elasticsearch
     environment:
-      ES_JAVA_OPTS: "-Xms1g -Xmx4g"
-      discovery.type: single-node
-      xpack.security.enabled: false
-    volumes:
-      - motion_elasticsearch:/usr/share/elasticsearch/data
+      ELASTIC_HOST: elasticsearch
+      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
+      MB_ALGORITHM: ${MB_ALGORITHM}
+      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
+      MB_FS_BUCKET: ${MB_FS_BUCKET}
+      MB_FS_HOST: ${MB_FS_HOST}
+      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
+      MB_FS_PORT: ${MB_FS_PORT}
+      MB_FS_USERNAME: ${MB_FS_USERNAME}
+      MB_PORT: ${MB_PORT}
+      MB_SECRET_KEY: ${MB_SECRET_KEY}
+      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
+      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
+      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
+      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
+      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_HOST: mongo
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 300s
-      timeout: 10s
-      start_period: 10s
+      retries: 10
+      start_period: 60s
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - http://localhost:${MB_PORT}
+      timeout: 5s
+    image: tlcfem/motion-base:back
+    ports:
+      - ${MB_PORT}:${MB_PORT}
+    restart: always
+  mb-front:
+    container_name: mb-front
+    depends_on:
+      - mb-back
+    image: tlcfem/motion-base:front
+    ports:
+      - '3000:3000'
+    restart: always
+  mb-worker:
+    command: celery
+    container_name: mb-worker
+    depends_on:
+      elasticsearch:
+        condition: service_healthy
+      mongo:
+        condition: service_healthy
+      rabbitmq:
+        condition: service_healthy
+    environment:
+      ELASTIC_HOST: elasticsearch
+      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
+      MB_ALGORITHM: ${MB_ALGORITHM}
+      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
+      MB_FS_BUCKET: ${MB_FS_BUCKET}
+      MB_FS_HOST: ${MB_FS_HOST}
+      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
+      MB_FS_PORT: ${MB_FS_PORT}
+      MB_FS_USERNAME: ${MB_FS_USERNAME}
+      MB_PORT: ${MB_PORT}
+      MB_SECRET_KEY: ${MB_SECRET_KEY}
+      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
+      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
+      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
+      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
+      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
+      MONGO_DB_NAME: ${MONGO_DB_NAME}
+      MONGO_HOST: mongo
+      MONGO_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_PORT: ${MONGO_PORT}
+      MONGO_USERNAME: ${MONGO_USERNAME}
+      RABBITMQ_HOST: rabbitmq
+      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
+      RABBITMQ_PORT: ${RABBITMQ_PORT}
+      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+    image: tlcfem/motion-base:back
+    restart: always
+  mongo:
+    command: '--wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}'
+    container_name: mongo
+    environment:
+      MONGO_DATA_DIR: /data/db
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+    healthcheck:
+      interval: 300s
       retries: 5
+      start_period: 10s
+      test:
+        - CMD
+        - mongosh
+        - '--eval'
+        - db.adminCommand('ping')
+        - '--quiet'
+      timeout: 10s
+    image: mongo
+    mem_limit: ${MONGO_MEM_LIMIT}
+    restart: always
+    volumes:
+      - motion_mongo:/data/db
+      - motion_mongoconfig:/data/configdb
+  mongo-express:
+    container_name: mongo-express
+    depends_on:
+      mongo:
+        condition: service_healthy
+    environment:
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@mongo:${MONGO_PORT}/
+    image: mongo-express
+    ports:
+      - '8081:8081'
+    restart: always
+  rabbitmq:
+    container_name: rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_VHOST: vhost
+      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
+    healthcheck:
+      interval: 300s
+      retries: 5
+      start_period: 10s
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - '-q'
+        - ping
+      timeout: 10s
+    image: rabbitmq:4.2-management
+    restart: always
+    volumes:
+      - motion_rabbitmq:/var/lib/rabbitmq
   seaweedfs:
     container_name: seaweedfs
     environment:
@@ -88,99 +197,10 @@ services:
     restart: always
     volumes:
       - motion_seaweedfs:/data
-  mb-back:
-    image: tlcfem/motion-base:back
-    container_name: mb-back
-    restart: always
-    depends_on:
-      - mongo
-      - rabbitmq
-      - elasticsearch
-    ports:
-      - '${MB_PORT}:${MB_PORT}'
-    environment:
-      MB_SECRET_KEY: ${MB_SECRET_KEY}
-      MB_ALGORITHM: ${MB_ALGORITHM}
-      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
-      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
-      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
-      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
-      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
-      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
-      MB_PORT: ${MB_PORT}
-      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
-      MB_FS_HOST: ${MB_FS_HOST}
-      MB_FS_PORT: ${MB_FS_PORT}
-      MB_FS_BUCKET: ${MB_FS_BUCKET}
-      MB_FS_USERNAME: ${MB_FS_USERNAME}
-      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
-      MONGO_DB_NAME: ${MONGO_DB_NAME}
-      MONGO_HOST: mongo
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      ELASTIC_HOST: elasticsearch
-    healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:${MB_PORT}" ]
-      interval: 300s
-      timeout: 5s
-      start_period: 60s
-      retries: 10
-  mb-worker:
-    image: tlcfem/motion-base:back
-    container_name: mb-worker
-    restart: always
-    depends_on:
-      mongo:
-        condition: service_healthy
-      rabbitmq:
-        condition: service_healthy
-      elasticsearch:
-        condition: service_healthy
-    command: celery
-    environment:
-      MB_SECRET_KEY: ${MB_SECRET_KEY}
-      MB_ALGORITHM: ${MB_ALGORITHM}
-      MB_ACCESS_TOKEN_EXPIRE_MINUTES: ${MB_ACCESS_TOKEN_EXPIRE_MINUTES}
-      MB_SUPERUSER_EMAIL: ${MB_SUPERUSER_EMAIL}
-      MB_SUPERUSER_FIRST_NAME: ${MB_SUPERUSER_FIRST_NAME}
-      MB_SUPERUSER_LAST_NAME: ${MB_SUPERUSER_LAST_NAME}
-      MB_SUPERUSER_USERNAME: ${MB_SUPERUSER_USERNAME}
-      MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
-      MB_PORT: ${MB_PORT}
-      MB_FASTAPI_WORKERS: ${MB_FASTAPI_WORKERS}
-      MB_FS_HOST: ${MB_FS_HOST}
-      MB_FS_PORT: ${MB_FS_PORT}
-      MB_FS_BUCKET: ${MB_FS_BUCKET}
-      MB_FS_USERNAME: ${MB_FS_USERNAME}
-      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
-      MONGO_DB_NAME: ${MONGO_DB_NAME}
-      MONGO_HOST: mongo
-      MONGO_PORT: ${MONGO_PORT}
-      MONGO_USERNAME: ${MONGO_USERNAME}
-      MONGO_PASSWORD: ${MONGO_PASSWORD}
-      RABBITMQ_HOST: rabbitmq
-      RABBITMQ_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
-      RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
-      ELASTIC_HOST: elasticsearch
-  mb-front:
-    image: tlcfem/motion-base:front
-    container_name: mb-front
-    restart: always
-    depends_on:
-      - mb-back
-    ports:
-      - '3000:3000'
-
 volumes:
-  motion_mongo:
-  motion_mongoconfig:
-  motion_rabbitmq:
-  motion_flower:
-  motion_elasticsearch:
-  motion_seaweedfs:
+  motion_elasticsearch: null
+  motion_flower: null
+  motion_mongo: null
+  motion_mongoconfig: null
+  motion_rabbitmq: null
+  motion_seaweedfs: null
