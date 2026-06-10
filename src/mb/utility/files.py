@@ -51,10 +51,8 @@ def _remote_path(uri: str):
 
 
 def _remote_bucket():
-    # noinspection HttpUrlsUsage
     bucket: UPath = _remote_path(f"s3://{MB_FS_BUCKET}")
     bucket.mkdir(0o777, True, True)
-
     return bucket
 
 
