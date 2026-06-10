@@ -213,22 +213,25 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             await task.save()
-                        if not f.name.upper().endswith((".V2A", ".V1A")):
+                        if (
+                            not f.isfile()
+                            or not f.name.upper().endswith((".V2A", ".V1A"))
+                            or not (target := archive.extractfile(f))
+                        ):
                             continue
-                        if target := archive.extractfile(f):
-                            try:
-                                records.extend(
-                                    await ParserNZSM.parse_file(
-                                        target,
-                                        user_id,
-                                        os.path.basename(f.name),
-                                        overwrite_existing,
-                                    )
+                        try:
+                            records.extend(
+                                await ParserNZSM.parse_file(
+                                    target,
+                                    user_id,
+                                    os.path.basename(f.name),
+                                    overwrite_existing,
                                 )
-                            except Exception as e:
-                                _logger.critical(
-                                    "Failed to parse.", file_name=f.name, exc_info=e
-                                )
+                            )
+                        except Exception as e:
+                            _logger.critical(
+                                "Failed to parse.", file_name=f.name, exc_info=e
+                            )
             except tarfile.ReadError as e:
                 _logger.critical("Failed to open the archive.", exc_info=e)
         elif name_string.endswith(".zip"):
