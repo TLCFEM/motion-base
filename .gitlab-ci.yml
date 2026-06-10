@@ -32,9 +32,16 @@ test:
         ES_JAVA_OPTS: '-Xms512m -Xmx512m'
         discovery.type: single-node
         xpack.security.enabled: false
+    - alias: seaweedfs
+      name: chrislusf/seaweedfs
+      pull_policy: if-not-present
+      variables:
+        AWS_ACCESS_KEY_ID: test
+        AWS_SECRET_ACCESS_KEY: password
   stage: test
 variables:
   ELASTIC_HOST: elasticsearch
+  MB_FS_HOST: seaweedfs
   MONGO_HOST: mongodb
   NUMBA_DISABLE_JIT: '1'
   RABBITMQ_HOST: rabbitmq
