@@ -1,93 +1,115 @@
 services:
-  dev-mongo:
-    image: mongo
-    container_name: dev-mongo
-    restart: no
-    command: --wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}
-    ports:
-      - '${MONGO_PORT}:${MONGO_PORT}'
-    environment:
-      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
-      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
-      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
-      MONGO_DATA_DIR: /data/db
-    volumes:
-      - motion_mongo:/data/db
-      - motion_mongoconfig:/data/configdb
-    healthcheck:
-      test: [ "CMD", "mongosh", "--eval", "db.adminCommand('ping')", "--quiet" ]
-      interval: 300s
-      timeout: 10s
-      start_period: 10s
-      retries: 5
-  dev-mongo-express:
-    image: mongo-express
-    container_name: dev-mongo-express
-    restart: no
-#    depends_on:
-#      dev-mongo:
-#        condition: service_healthy
-    ports:
-      - '8081:8081'
-    environment:
-      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
-      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
-      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@dev-mongo:${MONGO_PORT}/
-      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
-      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
-  dev-rabbitmq:
-    image: rabbitmq:4.2-management
-    container_name: dev-rabbitmq
-    restart: no
-    ports:
-      - '${RABBITMQ_PORT}:${RABBITMQ_PORT}'
-    environment:
-      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
-      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
-      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
-      RABBITMQ_DEFAULT_VHOST: vhost
-    volumes:
-      - motion_rabbitmq:/var/lib/rabbitmq
-    healthcheck:
-      test: [ "CMD", "rabbitmq-diagnostics", "-q", "ping" ]
-      interval: 300s
-      timeout: 10s
-      start_period: 10s
-      retries: 5
   def-flower:
-    image: mher/flower
+    command: >-
+      celery
+      --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost
+      flower
+      --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
     container_name: dev-flower
-    restart: no
-#    depends_on:
-#      dev-rabbitmq:
-#        condition: service_healthy
-    command: celery --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost flower --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
+    image: mher/flower
     ports:
       - '5555:5555'
+    restart: 'no'
     volumes:
-      - motion_flower:/data
+      - flower:/data
   dev-elasticsearch:
-    image: elasticsearch:${ELASTIC_VERSION}
     container_name: dev-elasticsearch
-    restart: no
-    ports:
-      - '9200:9200'
     environment:
-      ES_JAVA_OPTS: "-Xms512m -Xmx1g"
+      ES_JAVA_OPTS: '-Xms512m -Xmx1g'
       discovery.type: single-node
       xpack.security.enabled: false
-    volumes:
-      - motion_elasticsearch:/usr/share/elasticsearch/data
     healthcheck:
-      test: [ "CMD", "curl", "-f", "http://localhost:9200/_cluster/health" ]
       interval: 300s
-      timeout: 10s
-      start_period: 10s
       retries: 5
-
+      start_period: 10s
+      test:
+        - CMD
+        - curl
+        - '-f'
+        - http://localhost:9200/_cluster/health
+      timeout: 10s
+    image: elasticsearch:${ELASTIC_VERSION}
+    ports:
+      - '9200:9200'
+    restart: 'no'
+    volumes:
+      - elasticsearch:/usr/share/elasticsearch/data
+  dev-mongo:
+    command: '--wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}'
+    container_name: dev-mongo
+    environment:
+      MONGO_DATA_DIR: /data/db
+      MONGO_INITDB_DATABASE: ${MONGO_DB_NAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_PASSWORD}
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_USERNAME}
+    healthcheck:
+      interval: 300s
+      retries: 5
+      start_period: 10s
+      test:
+        - CMD
+        - mongosh
+        - '--eval'
+        - db.adminCommand('ping')
+        - '--quiet'
+      timeout: 10s
+    image: mongo
+    ports:
+      - ${MONGO_PORT}:${MONGO_PORT}
+    restart: 'no'
+    volumes:
+      - mongo_data:/data/db
+      - mongo_config:/data/configdb
+  dev-mongo-express:
+    container_name: dev-mongo-express
+    environment:
+      ME_CONFIG_BASICAUTH_PASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_BASICAUTH_USERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_ADMINPASSWORD: ${MONGO_PASSWORD}
+      ME_CONFIG_MONGODB_ADMINUSERNAME: ${MONGO_USERNAME}
+      ME_CONFIG_MONGODB_URL: mongodb://${MONGO_USERNAME}:${MONGO_PASSWORD}@dev-mongo:${MONGO_PORT}/
+    image: mongo-express
+    ports:
+      - '8081:8081'
+    restart: 'no'
+  dev-rabbitmq:
+    container_name: dev-rabbitmq
+    environment:
+      RABBITMQ_DEFAULT_PASS: ${RABBITMQ_PASSWORD}
+      RABBITMQ_DEFAULT_USER: ${RABBITMQ_USERNAME}
+      RABBITMQ_DEFAULT_VHOST: vhost
+      RABBITMQ_NODE_PORT: ${RABBITMQ_PORT}
+    healthcheck:
+      interval: 300s
+      retries: 5
+      start_period: 10s
+      test:
+        - CMD
+        - rabbitmq-diagnostics
+        - '-q'
+        - ping
+      timeout: 10s
+    image: rabbitmq:4.2-management
+    ports:
+      - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
+    restart: 'no'
+    volumes:
+      - rabbitmq:/var/lib/rabbitmq
+  dev-seaweedfs:
+    container_name: dev-seaweedfs
+    environment:
+      AWS_ACCESS_KEY_ID: ${MB_FS_USERNAME}
+      AWS_SECRET_ACCESS_KEY: ${MB_FS_PASSWORD}
+    image: chrislusf/seaweedfs
+    ports:
+      - '8333:8333'
+    restart: 'no'
+    volumes:
+      - seaweedfs_data:/data
 volumes:
-  motion_mongo:
-  motion_mongoconfig:
-  motion_rabbitmq:
-  motion_flower:
-  motion_elasticsearch:
+  elasticsearch: null
+  flower: null
+  mongo_config: null
+  mongo_data: null
+  rabbitmq: null
+  seaweedfs_data: null

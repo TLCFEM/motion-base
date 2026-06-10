@@ -15,20 +15,12 @@ spec:
       labels:
         app: mb-worker
     spec:
-      volumes:
-        - name: motion-cache
-          hostPath:
-            path: /tmp
-            type: Directory
       containers:
         - name: mb-worker
           image: tlcfem/motion-base:back
           imagePullPolicy: Always
           args:
             - celery
-          volumeMounts:
-            - name: motion-cache
-              mountPath: /tmp
           env:
             - name: MB_SECRET_KEY
               valueFrom:
@@ -72,13 +64,31 @@ spec:
                   key: MB_SUPERUSER_PASSWORD
             - name: MB_FASTAPI_WORKERS
               value: "1"
-            - name: MB_FS_ROOT
-              value: "/tmp"
-            - name: MB_MAIN_SITE
+            - name: MB_FS_HOST
               valueFrom:
                 configMapKeyRef:
                   name: mb-config
-                  key: MB_MAIN_SITE
+                  key: MB_FS_HOST
+            - name: MB_FS_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_PORT
+            - name: MB_FS_BUCKET
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_BUCKET
+            - name: MB_FS_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_USERNAME
+            - name: MB_FS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_PASSWORD
             - name: MONGO_DB_NAME
               valueFrom:
                 configMapKeyRef:

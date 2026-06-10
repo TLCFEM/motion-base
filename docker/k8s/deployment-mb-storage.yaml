@@ -17,13 +17,15 @@ spec:
     spec:
       volumes:
         - name: motion-rabbitmq
-          emptyDir: {}
+          emptyDir: { }
         - name: motion-elasticsearch
-          emptyDir: {}
+          emptyDir: { }
         - name: motion-mongo
-          emptyDir: {}
+          emptyDir: { }
         - name: motion-mongoconfig
-          emptyDir: {}
+          emptyDir: { }
+        - name: motion-seaweedfs
+          emptyDir: { }
       containers:
         - name: mb-rabbitmq
           image: rabbitmq
@@ -106,6 +108,33 @@ spec:
                   key: MONGO_PASSWORD
             - name: MONGO_DATA_DIR
               value: /data/db
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "0.5"
+            limits:
+              memory: "4Gi"
+              cpu: "1"
+        - name: mb-seaweedfs
+          image: chrislusf/seaweedfs
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8333
+              protocol: TCP
+          volumeMounts:
+            - name: motion-seaweedfs
+              mountPath: /data
+          env:
+            - name: MB_FS_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_USERNAME
+            - name: MB_FS_PASSWORD
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: MB_FS_PASSWORD
           resources:
             requests:
               memory: "512Mi"

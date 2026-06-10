@@ -29,7 +29,7 @@ from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
 from ..utility.files import FileProxy, pack, store
 from .response import UploadResponse
-from .utility import User, create_token, is_active
+from .utility import User, is_active
 
 router = APIRouter(tags=["New Zealand"])
 
@@ -37,16 +37,13 @@ router = APIRouter(tags=["New Zealand"])
 # noinspection DuplicatedCode
 async def _parse_archive_impl(
     archive_uri: str,
-    access_token: str | None,
     user_id: str,
     task_id: str | None,
     overwrite_existing: bool,
     is_local: bool,
 ) -> list[str]:
     try:
-        with FileProxy(
-            archive_uri, access_token, always_delete_on_exit=is_local
-        ) as archive_file:
+        with FileProxy(archive_uri, always_delete_on_exit=is_local) as archive_file:
             results = await ParserNZSM.parse_archive(
                 archive_obj=archive_file.file,
                 user_id=user_id,
@@ -79,7 +76,7 @@ async def _parse_archive_local(
     overwrite_existing: bool = True,
 ) -> list[str]:
     return await _parse_archive_impl(
-        archive_uri, None, user_id, task_id, overwrite_existing, True
+        archive_uri, user_id, task_id, overwrite_existing, True
     )
 
 
@@ -95,15 +92,12 @@ async def _parse_archive_local(
 )
 def _parse_archive(
     archive_uri: str,
-    access_token: str,
     user_id: str,
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
     return execute_task(
-        _parse_archive_impl(
-            archive_uri, access_token, user_id, task_id, overwrite_existing, False
-        )
+        _parse_archive_impl(archive_uri, user_id, task_id, overwrite_existing, False)
     )
 
 
@@ -133,7 +127,6 @@ async def upload_archive(
             HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload."
         )
 
-    access_token: str = create_token(user.username).access_token
     has_worker: bool = get_stats() is not None
 
     valid_uris: list[str] = []
@@ -152,9 +145,7 @@ async def upload_archive(
         if has_worker:
             for archive_uri in valid_uris:
                 task_id: str = await create_task()
-                _parse_archive.delay(
-                    archive_uri, access_token, user.id, task_id, overwrite_existing
-                )
+                _parse_archive.delay(archive_uri, user.id, task_id, overwrite_existing)
                 task_id_pool.append(task_id)
         else:
             for archive_uri in valid_uris:

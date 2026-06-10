@@ -22,3 +22,7 @@ spec:
       protocol: TCP
       port: 27017
       targetPort: 27017
+    - name: seaweedfs
+      protocol: TCP
+      port: 8333
+      targetPort: 8333

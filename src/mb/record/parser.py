@@ -20,6 +20,7 @@ import os
 import tarfile
 import zipfile
 from asyncio import gather
+from contextlib import nullcontext
 from datetime import datetime
 from math import ceil
 from typing import IO, BinaryIO
@@ -44,6 +45,10 @@ def _wrap_longitude(_longitude: float) -> float:
     return _longitude
 
 
+def _proxy(target: UPath | BinaryIO):
+    return target.open("rb") if isinstance(target, UPath) else nullcontext(target)
+
+
 class ParserNIED(BaseParserNIED):
     @staticmethod
     async def parse_archive(
@@ -62,12 +67,6 @@ class ParserNIED(BaseParserNIED):
         )
         category: str = "knt" if "knt" in name_string else "kik"
 
-        kwargs: dict = {"mode": "r:gz"}
-        if isinstance(archive_obj, UPath):
-            kwargs["name"] = archive_obj
-        else:
-            kwargs["fileobj"] = archive_obj
-
         task: UploadTask | None = None
         if task_id is not None:
             task = await UploadTask.get(task_id)
@@ -77,7 +76,10 @@ class ParserNIED(BaseParserNIED):
 
         records = []
         try:
-            with tarfile.open(**kwargs) as archive:
+            with (
+                _proxy(archive_obj) as fo,
+                tarfile.open(None, "r:gz", fo) as archive,
+            ):
                 if task:
                     task.total_size = len(archive.getnames())
                 for f in archive:
@@ -190,17 +192,6 @@ class ParserNZSM(BaseParserNZSM):
             archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
         )
 
-        kwargs: dict = {}
-        if name_string.endswith(".tar.gz"):
-            kwargs["mode"] = "r:gz"
-            if isinstance(archive_obj, UPath):
-                kwargs["name"] = archive_obj
-            else:
-                kwargs["fileobj"] = archive_obj
-        elif name_string.endswith(".zip"):
-            kwargs["mode"] = "r"
-            kwargs["file"] = archive_obj
-
         task: UploadTask | None = None
         if task_id is not None:
             task = await UploadTask.get(task_id)
@@ -212,7 +203,10 @@ class ParserNZSM(BaseParserNZSM):
 
         if name_string.endswith(".tar.gz"):
             try:
-                with tarfile.open(**kwargs) as archive:
+                with (
+                    _proxy(archive_obj) as fo,
+                    tarfile.open(None, "r:gz", fo) as archive,
+                ):
                     if task:
                         task.total_size = len(archive.getnames())
                     for f in archive:
@@ -239,7 +233,7 @@ class ParserNZSM(BaseParserNZSM):
                 _logger.critical("Failed to open the archive.", exc_info=e)
         elif name_string.endswith(".zip"):
             try:
-                with zipfile.ZipFile(**kwargs) as archive:
+                with _proxy(archive_obj) as fo, zipfile.ZipFile(fo) as archive:
                     if task:
                         task.total_size = len(archive.namelist())
                     for f in archive.namelist():

@@ -98,6 +98,17 @@ services:
       xpack.security.enabled: false
     volumes:
       - motion_elasticsearch:/usr/share/elasticsearch/data
+  mb-seaweedfs:
+    container_name: mb-seaweedfs
+    environment:
+      AWS_ACCESS_KEY_ID: \${MB_FS_USERNAME}
+      AWS_SECRET_ACCESS_KEY: \${MB_FS_PASSWORD}
+    image: chrislusf/seaweedfs
+    ports:
+      - '8333:8333'
+    restart: always
+    volumes:
+      - motion_seaweedfs:/data
   mb-back:
     image: tlcfem/motion-base:back
     container_name: mb-back
@@ -108,8 +119,6 @@ services:
       - mb-elasticsearch
     ports:
       - '\${MB_PORT}:8000'
-    volumes:
-      - motion_cache:\${MB_FS_ROOT}
     environment:
       MB_SECRET_KEY: \${MB_SECRET_KEY}
       MB_ALGORITHM: \${MB_ALGORITHM}
@@ -121,8 +130,11 @@ services:
       MB_SUPERUSER_PASSWORD: \${MB_SUPERUSER_PASSWORD}
       MB_PORT: \${MB_PORT}
       MB_FASTAPI_WORKERS: \${MB_FASTAPI_WORKERS}
-      MB_FS_ROOT: \${MB_FS_ROOT}
-      MB_MAIN_SITE: \${MB_MAIN_SITE}
+      MB_FS_HOST: \${MB_FS_HOST}
+      MB_FS_PORT: \${MB_FS_PORT}
+      MB_FS_BUCKET: \${MB_FS_BUCKET}
+      MB_FS_USERNAME: \${MB_FS_USERNAME}
+      MB_FS_PASSWORD: \${MB_FS_PASSWORD}
       MONGO_DB_NAME: \${MONGO_DB_NAME}
       MONGO_HOST: mb-mongo
       MONGO_PORT: \${MONGO_PORT}
@@ -147,8 +159,8 @@ volumes:
   motion_mongo:
   motion_mongoconfig:
   motion_rabbitmq:
-  motion_cache:
   motion_elasticsearch:
+  motion_seaweedfs:
 " >docker-compose.yml
 
 docker compose -f docker-compose.yml up -d || exit 0

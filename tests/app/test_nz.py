@@ -28,24 +28,10 @@ import pytest
     ],
 )
 @pytest.mark.parametrize(
-    "remote", [pytest.param(True, id="remote"), pytest.param(False, id="local")]
-)
-@pytest.mark.parametrize(
     "if_wait",
     [pytest.param("true", id="wait-for-result"), pytest.param("false", id="no-wait")],
 )
-async def test_upload_nz(
-    mock_client_superuser,
-    pwd,
-    monkeypatch,
-    file_name,
-    status,
-    remote,
-    if_wait,
-):
-    if remote:
-        monkeypatch.setattr("mb.utility.env.MB_MAIN_SITE", "http://i_am_remote")
-
+async def test_upload_nz(mock_client_superuser, pwd, file_name, status, if_wait):
     with open(
         os.path.join(
             pwd, f"data/{file_name}" if "zip" in file_name else "data/nz_test.tar.gz"
