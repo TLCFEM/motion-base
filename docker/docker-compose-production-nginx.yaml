@@ -79,6 +79,15 @@ services:
       timeout: 10s
       start_period: 10s
       retries: 5
+  seaweedfs:
+    container_name: seaweedfs
+    environment:
+      AWS_ACCESS_KEY_ID: ${MB_FS_USERNAME}
+      AWS_SECRET_ACCESS_KEY: ${MB_FS_PASSWORD}
+    image: chrislusf/seaweedfs
+    restart: always
+    volumes:
+      - motion_seaweedfs:/data
   mb-back:
     image: tlcfem/motion-base:back
     #    container_name: mb-back
@@ -104,6 +113,11 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 1 # using only one process for each container
+      MB_FS_HOST: ${MB_FS_HOST}
+      MB_FS_PORT: ${MB_FS_PORT}
+      MB_FS_BUCKET: ${MB_FS_BUCKET}
+      MB_FS_USERNAME: ${MB_FS_USERNAME}
+      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}
@@ -140,6 +154,11 @@ services:
       MB_SUPERUSER_PASSWORD: ${MB_SUPERUSER_PASSWORD}
       MB_PORT: ${MB_PORT}
       MB_FASTAPI_WORKERS: 2
+      MB_FS_HOST: ${MB_FS_HOST}
+      MB_FS_PORT: ${MB_FS_PORT}
+      MB_FS_BUCKET: ${MB_FS_BUCKET}
+      MB_FS_USERNAME: ${MB_FS_USERNAME}
+      MB_FS_PASSWORD: ${MB_FS_PASSWORD}
       MONGO_DB_NAME: ${MONGO_DB_NAME}
       MONGO_HOST: mongo
       MONGO_PORT: ${MONGO_PORT}

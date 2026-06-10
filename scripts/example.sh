@@ -98,6 +98,17 @@ services:
       xpack.security.enabled: false
     volumes:
       - motion_elasticsearch:/usr/share/elasticsearch/data
+  mb-seaweedfs:
+    container_name: mb-seaweedfs
+    environment:
+      AWS_ACCESS_KEY_ID: \${MB_FS_USERNAME}
+      AWS_SECRET_ACCESS_KEY: \${MB_FS_PASSWORD}
+    image: chrislusf/seaweedfs
+    ports:
+      - '8333:8333'
+    restart: always
+    volumes:
+      - motion_seaweedfs:/data
   mb-back:
     image: tlcfem/motion-base:back
     container_name: mb-back
@@ -144,6 +155,7 @@ volumes:
   motion_mongoconfig:
   motion_rabbitmq:
   motion_elasticsearch:
+  motion_seaweedfs:
 " >docker-compose.yml
 
 docker compose -f docker-compose.yml up -d || exit 0
