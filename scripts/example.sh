@@ -93,7 +93,7 @@ services:
     container_name: mb-elasticsearch
     restart: always
     environment:
-      ES_JAVA_OPTS: "-Xms1g -Xmx4g"
+      ES_JAVA_OPTS: "-Xms1g -Xmx1g"
       discovery.type: single-node
       xpack.security.enabled: false
     volumes:
