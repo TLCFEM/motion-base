@@ -17,13 +17,12 @@ from __future__ import annotations
 
 from contextlib import asynccontextmanager
 from http import HTTPStatus
-from pathlib import Path
 from uuid import UUID
 
 import aiohttp
 from beanie.operators import In
 from fastapi import Body, Depends, FastAPI, Form, HTTPException
-from fastapi.responses import FileResponse, HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse, RedirectResponse
 from pyinstrument import Profiler
 from starlette.middleware import Middleware
 from starlette.middleware.base import BaseHTTPMiddleware
@@ -33,7 +32,7 @@ from starlette.middleware.gzip import GZipMiddleware
 from ..record.async_record import MetadataRecord, Record, UploadTask
 from ..utility.config import init_mongo
 from ..utility.elastic import async_elastic
-from ..utility.env import MB_FS_ROOT, TURNSTILE_SECRET
+from ..utility.env import TURNSTILE_SECRET
 from .jp import router as jp_router
 from .nz import router as nz_router
 from .process import process_record_local
@@ -426,50 +425,6 @@ async def process_record(record_id: UUID, process_config: ProcessConfig = Body(.
         return process_record_local(result, process_config)
 
     raise HTTPException(HTTPStatus.NOT_FOUND, detail="Record not found.")
-
-
-def validate_path(file_path: str):
-    if not MB_FS_ROOT:
-        raise HTTPException(
-            HTTPStatus.NOT_FOUND, detail="File system is not available."
-        )
-
-    root_path = Path(MB_FS_ROOT)
-    target_path = root_path / file_path
-
-    if not target_path.is_relative_to(root_path):
-        raise HTTPException(HTTPStatus.BAD_REQUEST, detail="Invalid file path.")
-
-    if not target_path.exists():
-        raise HTTPException(HTTPStatus.NOT_FOUND, detail="File not found.")
-
-    return target_path
-
-
-@app.get("/access/{file_path:path}", tags=["misc"], response_class=FileResponse)
-def download_file(file_path: str):
-    return FileResponse(validate_path(file_path))
-
-
-@app.delete("/access/{file_path:path}", tags=["misc"])
-def delete_file(file_path: str, user: User = Depends(is_active)):
-    if not user.can_delete:
-        raise HTTPException(
-            HTTPStatus.UNAUTHORIZED, detail="User is not allowed to delete files."
-        )
-
-    local_path: Path = validate_path(file_path)
-
-    try:
-        local_path.unlink()
-        if not any((parent := local_path.parent).iterdir()):
-            parent.rmdir()
-    except Exception as error:
-        raise HTTPException(
-            HTTPStatus.INTERNAL_SERVER_ERROR, detail="Failed to delete file."
-        ) from error
-
-    return {"message": "File deleted."}
 
 
 @app.post("/turnstile", tags=["misc"])
