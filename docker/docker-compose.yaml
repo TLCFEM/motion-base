@@ -95,6 +95,17 @@ services:
     restart: 'no'
     volumes:
       - rabbitmq:/var/lib/rabbitmq
+  dev-rustfs:
+    container_name: dev-rustfs
+    environment:
+      RUSTFS_ACCESS_KEY: ${MB_FS_USERNAME}
+      RUSTFS_SECRET_KEY: ${MB_FS_PASSWORD}
+    image: rustfs/rustfs:latest
+    ports:
+      - '9000:9000'
+    restart: 'no'
+    volumes:
+      - rustfs_data:/data
   dev-seaweedfs:
     container_name: dev-seaweedfs
     environment:
@@ -112,4 +123,5 @@ volumes:
   mongo_config: null
   mongo_data: null
   rabbitmq: null
+  rustfs_data: null
   seaweedfs_data: null

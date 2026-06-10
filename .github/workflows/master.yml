@@ -1,61 +1,58 @@
-name: Release
-on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
 concurrency:
-  group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
+  group: ${{ github.workflow }}-${{ github.ref }}
 jobs:
   build:
-    runs-on: ubuntu-latest
     permissions:
       contents: write
-    timeout-minutes: 30
-    strategy:
-      matrix:
-        python-version: [ "3.10", "3.11", "3.12", "3.13", "3.14" ]
+    runs-on: ubuntu-latest
     services:
-      mongodb:
-        image: mongo:latest
-        env:
-          MONGO_INITDB_ROOT_USERNAME: test
-          MONGO_INITDB_ROOT_PASSWORD: password
-          MONGO_INITDB_DATABASE: StrongMotion
-        ports:
-          - "27017:27017"
-      rabbitmq:
-        image: rabbitmq:4.2
-        env:
-          RABBITMQ_DEFAULT_USER: test
-          RABBITMQ_DEFAULT_PASS: password
-          RABBITMQ_DEFAULT_VHOST: vhost
-        ports:
-          - "5672:5672"
       elasticsearch:
-        image: elasticsearch:9.3.5
-        ports:
-          - "9200:9200"
         env:
-          ES_JAVA_OPTS: "-Xms512m -Xmx512m"
+          ES_JAVA_OPTS: '-Xms512m -Xmx512m'
           discovery.type: single-node
           xpack.security.enabled: false
+        image: elasticsearch:9.3.5
+        ports:
+          - '9200:9200'
+      mongodb:
+        env:
+          MONGO_INITDB_DATABASE: StrongMotion
+          MONGO_INITDB_ROOT_PASSWORD: password
+          MONGO_INITDB_ROOT_USERNAME: test
+        image: mongo:latest
+        ports:
+          - '27017:27017'
+      rabbitmq:
+        env:
+          RABBITMQ_DEFAULT_PASS: password
+          RABBITMQ_DEFAULT_USER: test
+          RABBITMQ_DEFAULT_VHOST: vhost
+        image: rabbitmq:4.2
+        ports:
+          - '5672:5672'
+      rustfs:
+        env:
+          RUSTFS_ACCESS_KEY: test
+          RUSTFS_SECRET_KEY: password
+        image: rustfs/rustfs:latest
+        ports:
+          - '9000:9000'
       seaweedfs:
-        image: chrislusf/seaweedfs
         env:
           AWS_ACCESS_KEY_ID: test
           AWS_SECRET_ACCESS_KEY: password
+        image: chrislusf/seaweedfs
         ports:
-          - "8333:8333"
+          - '8333:8333'
     steps:
       - name: Clone
         uses: actions/checkout@v6
       - name: Python
         uses: actions/setup-python@v6
         with:
+          cache: pip
           python-version: ${{ matrix.python-version }}
-          cache: "pip"
       - name: Dependency
         run: |
           pip install -e .[dev] pyinstaller
@@ -64,49 +61,57 @@ jobs:
       - name: Codecov
         uses: codecov/codecov-action@v6
         with:
-          token: ${{ secrets.CODECOV_TOKEN }}
           plugins: pycoverage
-      - name: Binary
-        if: matrix.python-version == '3.11'
+          token: ${{ secrets.CODECOV_TOKEN }}
+      - if: matrix.python-version == '3.11'
+        name: Binary
         run: |
           export PYTHONPATH=$PYTHONPATH:./src
           /bin/bash ./scripts/pyinstaller.sh
-      - name: Artifact
-        if: matrix.python-version == '3.11'
+      - if: matrix.python-version == '3.11'
+        name: Artifact
         uses: actions/upload-artifact@v7
         with:
           path: dist/*
-      - name: Release
-        id: release
+      - id: release
         if: github.event_name == 'push' && matrix.python-version == '3.11'
+        name: Release
         uses: svenstaro/upload-release-action@v2
         with:
-          repo_token: ${{ secrets.GITHUB_TOKEN }}
-          file: dist/*
-          file_glob: true
-          tag: latest
-          overwrite: true
-          body: |
+          body: >
             The binaries are standalone executables that can be run on Linux.
 
-            1. `mb_runner`: The main application that can run the server, or the celery worker.
-            2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
-            3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
-      - name: VirusTotal
-        if: steps.release.outputs.release_id
+
+            1. `mb_runner`: The main application that can run the server, or the
+            celery worker.
+
+            2. `nied_crawler`: A specialized tool to crawl and download data
+            from the NIED website.
+
+            3. `nzsm_crawler`: A specialized tool to crawl and download data
+            from the NZ Strong Motion database.
+          file: dist/*
+          file_glob: true
+          overwrite: true
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: latest
+      - if: steps.release.outputs.release_id
+        name: VirusTotal
         uses: cssnr/virustotal-action@v2
         with:
-          vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
+          release_heading: '### 🛡️ VirusTotal Results'
           release_id: latest
-          release_heading: "### 🛡️ VirusTotal Results"
-  docker:
-    needs: build
-    runs-on: ubuntu-latest
-    if: github.event_name == 'push'
-    timeout-minutes: 20
+          vt_api_key: ${{ secrets.VIRUSTOTAL_KEY }}
     strategy:
       matrix:
-        image: [ "front", "back", "crawler" ]
+        python-version:
+          - '3.10'
+          - '3.14'
+    timeout-minutes: 30
+  docker:
+    if: github.event_name == 'push'
+    needs: build
+    runs-on: ubuntu-latest
     steps:
       - name: Clone
         uses: actions/checkout@v6
@@ -115,14 +120,14 @@ jobs:
       - name: Login
         uses: docker/login-action@v4
         with:
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
       - name: Login GitHub
         uses: docker/login-action@v4
         with:
+          password: ${{ secrets.GITHUB_TOKEN }}
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
       - name: QEMU
         uses: docker/setup-qemu-action@v4
       - name: Buildx
@@ -137,3 +142,18 @@ jobs:
           tags: |
             tlcfem/motion-base:${{ matrix.image }}
             ghcr.io/tlcfem/motion-base:${{ matrix.image }}
+    strategy:
+      matrix:
+        image:
+          - front
+          - back
+          - crawler
+    timeout-minutes: 20
+name: Release
+'on':
+  pull_request:
+    branches:
+      - master
+  push:
+    branches:
+      - master

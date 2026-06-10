@@ -6,8 +6,16 @@ test:
   image: python:${PYTHON_VERSION}-slim
   parallel:
     matrix:
-      - PYTHON_VERSION: '3.10'
-      - PYTHON_VERSION: '3.14'
+      - MB_FS_HOST: seaweedfs
+        MB_FS_PORT: '8333'
+        PYTHON_VERSION:
+          - '3.10'
+          - '3.14'
+      - MB_FS_HOST: rustfs
+        MB_FS_PORT: '9000'
+        PYTHON_VERSION:
+          - '3.10'
+          - '3.14'
   script:
     - pytest
   services:
@@ -38,10 +46,17 @@ test:
       variables:
         AWS_ACCESS_KEY_ID: test
         AWS_SECRET_ACCESS_KEY: password
+    - alias: rustfs
+      name: rustfs/rustfs:latest
+      pull_policy: if-not-present
+      variables:
+        RUSTFS_ACCESS_KEY: test
+        RUSTFS_SECRET_KEY: password
   stage: test
 variables:
   ELASTIC_HOST: elasticsearch
-  MB_FS_HOST: seaweedfs
+  MB_FS_HOST: ${MB_FS_HOST}
+  MB_FS_PORT: ${MB_FS_PORT}
   MONGO_HOST: mongodb
   NUMBA_DISABLE_JIT: '1'
   RABBITMQ_HOST: rabbitmq
