@@ -55,12 +55,21 @@ RABBITMQ_PORT: str = os.getenv("RABBITMQ_PORT", "5672")
 RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME", "test")
 RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD", "password")
 
-ELASTIC_HOST: str = os.getenv("ELASTIC_HOST", "localhost")
+
+def _ensure_protocol(target: str):
+    # assume plain http if not given
+    # otherwise if elasticsearch and/or s3 are exposed to the public
+    # the corresponding protocol shall be assigned
+    # noinspection HttpUrlsUsage
+    return target if "://" in target else f"http://{target}"
+
+
+ELASTIC_HOST: str = _ensure_protocol(os.getenv("ELASTIC_HOST", "localhost"))
 
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 
-MB_FS_HOST: str = os.getenv("MB_FS_HOST", "localhost")
+MB_FS_HOST: str = _ensure_protocol(os.getenv("MB_FS_HOST", "localhost"))
 MB_FS_PORT: str = os.getenv("MB_FS_PORT", "8333")
 MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb-cache")
 MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", "test")

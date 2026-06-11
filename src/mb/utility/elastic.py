@@ -55,8 +55,7 @@ def generate_elastic_mapping() -> dict:
 
 @asynccontextmanager
 async def async_elastic():
-    # noinspection HttpUrlsUsage
-    async with AsyncElasticsearch(f"http://{ELASTIC_HOST}:9200") as client:
+    async with AsyncElasticsearch(f"{ELASTIC_HOST}:9200") as client:
         counter: int = 0
         while not await client.ping():
             counter += delay

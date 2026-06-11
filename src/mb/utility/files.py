@@ -41,12 +41,11 @@ _logger = structlog.get_logger(__name__)
 
 
 def _remote_path(uri: str):
-    # noinspection HttpUrlsUsage
     return UPath(
         uri,
         key=MB_FS_USERNAME,
         secret=MB_FS_PASSWORD,
-        endpoint_url=f"http://{MB_FS_HOST}:{MB_FS_PORT}",
+        endpoint_url=f"{MB_FS_HOST}:{MB_FS_PORT}",
     )
 
 
