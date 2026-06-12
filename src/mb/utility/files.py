@@ -63,7 +63,7 @@ def _remote_obj(file_name: str):
     raise FileExistsError(f"File {remote_obj} already exists.")
 
 
-def store(upload: UploadFile) -> str:
+def _store(upload: UploadFile) -> str:
     remote_obj = _remote_obj(upload.filename)
     with remote_obj.open("wb") as remote_file:
         copyfileobj(upload.file, remote_file, 16 * 2**20)
@@ -71,7 +71,7 @@ def store(upload: UploadFile) -> str:
     return remote_obj.as_uri()
 
 
-def pack(uploads: list[UploadFile]):
+def _pack(uploads: list[UploadFile]):
     tmp_file: str = f"{uuid5_str(''.join(v.filename for v in uploads))}.tar.gz"
     remote_obj = _remote_obj(tmp_file)
 
@@ -85,6 +85,22 @@ def pack(uploads: list[UploadFile]):
         remote_obj.fs.put_file(tmp_path, remote_obj.path)
 
     return remote_obj.as_uri()
+
+
+def commit_files(archives: list[UploadFile], allowed_types: tuple | str) -> list[str]:
+    valid_uris: list[str] = []
+
+    plain_files: list[UploadFile] = []
+    for archive in archives:
+        if archive.filename.endswith(allowed_types):
+            valid_uris.append(_store(archive))
+        else:
+            plain_files.append(archive)
+
+    if plain_files:
+        valid_uris.append(_pack(plain_files))
+
+    return valid_uris
 
 
 def serialize_records(records: list):

@@ -27,7 +27,7 @@ from pymongo.errors import ServerSelectionTimeoutError
 from ..celery import celery, execute_task, get_stats
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNZSM
-from ..utility.files import FileProxy, pack, store
+from ..utility.files import FileProxy, commit_files
 from .response import UploadResponse
 from .utility import User, is_active
 
@@ -129,16 +129,7 @@ async def upload_archive(
 
     has_worker: bool = get_stats() is not None
 
-    valid_uris: list[str] = []
-    plain_files: list[UploadFile] = []
-    for archive in archives:
-        if archive.filename.endswith((".tar.gz", ".zip")):
-            valid_uris.append(store(archive))
-        else:
-            plain_files.append(archive)
-
-    if plain_files:
-        valid_uris.append(pack(plain_files))
+    valid_uris: list[str] = commit_files(archives, (".tar.gz", ".zip"))
 
     if not wait_for_result:
         task_id_pool: list[str] = []
