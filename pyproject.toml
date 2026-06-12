@@ -42,8 +42,7 @@ dependencies = [
     "scipy",
     "structlog",
     "universal_pathlib",
-    "uvicorn",
-    "uvloop",
+    "uvicorn[standard]",
 ]
 
 [project.urls]

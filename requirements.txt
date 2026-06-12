@@ -9,7 +9,7 @@ aiosignal==1.4.0          # via aiohttp
 amqp==5.3.1               # via kombu
 annotated-doc==0.0.4      # via fastapi
 annotated-types==0.7.0    # via pydantic
-anyio==4.13.0             # via elasticsearch, starlette
+anyio==4.13.0             # via elasticsearch, starlette, watchfiles
 attrs==26.1.0             # via aiohttp
 backports-zstd==1.5.0     # via aiohttp
 bcrypt==5.0.0             # via motion-base (pyproject.toml)
@@ -36,6 +36,7 @@ flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
 fsspec==2026.4.0          # via s3fs, universal-pathlib
 h11==0.16.0               # via uvicorn
+httptools==0.8.0          # via uvicorn
 idna==3.18                # via anyio, email-validator, requests, yarl
 jmespath==1.1.0           # via aiobotocore, botocore
 joserfc==1.7.1            # via motion-base (pyproject.toml)
@@ -58,8 +59,9 @@ pydantic-core==2.46.4     # via pydantic
 pyinstrument==5.1.2       # via motion-base (pyproject.toml)
 pymongo==4.17.0           # via beanie
 python-dateutil==2.9.0.post0  # via aiobotocore, botocore, celery, elasticsearch
-python-dotenv==1.2.2      # via motion-base (pyproject.toml)
+python-dotenv==1.2.2      # via uvicorn, motion-base (pyproject.toml)
 python-multipart==0.0.32  # via motion-base (pyproject.toml)
+pyyaml==6.0.3             # via uvicorn
 requests==2.34.2          # via motion-base (pyproject.toml)
 s3fs==2026.4.0            # via motion-base (pyproject.toml)
 scipy==1.17.1             # via motion-base (pyproject.toml)
@@ -74,8 +76,10 @@ tzlocal==5.3.1            # via celery
 universal-pathlib==0.3.10  # via motion-base (pyproject.toml)
 urllib3==2.7.0            # via botocore, elastic-transport, requests
 uvicorn==0.49.0           # via motion-base (pyproject.toml)
-uvloop==0.22.1            # via motion-base (pyproject.toml)
+uvloop==0.22.1            # via uvicorn
 vine==5.1.0               # via amqp, celery, kombu
+watchfiles==1.2.0         # via uvicorn
 wcwidth==0.8.1            # via prompt-toolkit
+websockets==16.0          # via uvicorn
 wrapt==2.2.1              # via aiobotocore
 yarl==1.24.2              # via aiohttp
