@@ -43,6 +43,7 @@ dependencies = [
     "structlog",
     "universal_pathlib",
     "uvicorn",
+    "uvloop",
 ]
 
 [project.urls]
