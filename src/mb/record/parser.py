@@ -24,11 +24,11 @@ from contextlib import nullcontext
 from datetime import datetime
 from math import ceil
 from typing import IO, BinaryIO
-from zoneinfo import ZoneInfo  # noqa
+from zoneinfo import ZoneInfo
 
 import pint
 import structlog
-import tzdata  # noqa # pylint: disable=unused-import
+import tzdata  # noqa
 
 from ..utility import UPath
 from .async_record import NIED, NZSM, UploadTask
@@ -65,7 +65,12 @@ class ParserNIED(BaseParserNIED):
         name_string: str = (
             archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
         )
-        category: str = "knt" if "knt" in name_string else "kik"
+        if "knt" in name_string:
+            category = "knt"
+        elif "kik" in name_string:
+            category = "kik"
+        else:
+            category = "unknown"
 
         task: UploadTask | None = None
         if task_id is not None:
@@ -215,7 +220,7 @@ class ParserNZSM(BaseParserNZSM):
                             await task.save()
                         if (
                             not f.isfile()
-                            or not f.name.upper().endswith((".V2A", ".V1A"))
+                            or not ParserNZSM.validate_file(f.name)
                             or not (target := archive.extractfile(f))
                         ):
                             continue
@@ -243,7 +248,7 @@ class ParserNZSM(BaseParserNZSM):
                         if task:
                             task.current_size += 1
                             await task.save()
-                        if not f.upper().endswith((".V2A", ".V1A")):
+                        if not ParserNZSM.validate_file(f):
                             continue
                         with archive.open(f) as target:
                             try:

@@ -7,7 +7,7 @@ dynamic = ["version"]
 name = "motion-base"
 description = "a strong motion database"
 readme = "README.md"
-requires-python = ">=3.10"
+requires-python = ">=3.11"
 license = "GPL-3.0-or-later"
 license-files = ["LICENSE"]
 keywords = ["earthquake", "ground motion", "response history analysis", "strong motion", "seismology"]
@@ -16,7 +16,6 @@ maintainers = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",

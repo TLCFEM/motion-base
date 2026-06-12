@@ -26,12 +26,8 @@ _logger = structlog.get_logger(__name__)
 
 class BaseParserNIED:
     @staticmethod
-    def validate_archive(archive_name: str):
-        if not archive_name.endswith(".tar.gz"):
-            raise ValueError("NIED archive file should be a .tar.gz file.")
-
-        if "knt" not in archive_name and "kik" not in archive_name:
-            raise ValueError("NIED archive file name should contain knt or kik.")
+    def validate_archive(archive_name: str) -> bool:
+        return archive_name.lower().endswith(".tar.gz")
 
     @staticmethod
     def _parse_unit(line: str) -> str:
@@ -78,11 +74,8 @@ class BaseParserNZSM:
     pattern = re.compile(r"\s(\d+\.\d+)\s")
 
     @staticmethod
-    def validate_file(file_path: str):
-        if file_path.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN")):
-            return
-
-        raise ValueError("NZSM archive file should be a V2A/V1A file.")
+    def validate_file(file_path: str) -> bool:
+        return file_path.upper().endswith((".V2A", ".V1A", ".V2A.BIN", ".V1A.BIN"))
 
     @staticmethod
     def _parse_interval(line: str):

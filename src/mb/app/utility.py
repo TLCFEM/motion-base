@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 import re
-from datetime import datetime, timedelta
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 
 import bcrypt
@@ -132,7 +132,7 @@ def create_token(sub: str):
             {"alg": MB_ALGORITHM},
             {
                 "sub": sub,
-                "exp": datetime.utcnow()
+                "exp": datetime.now(UTC)
                 + timedelta(minutes=MB_ACCESS_TOKEN_EXPIRE_MINUTES),
             },
             OCT_KEY,

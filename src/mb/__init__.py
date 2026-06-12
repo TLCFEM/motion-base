@@ -44,10 +44,7 @@ def run_app(setting: Config):
 
         celery.start(args)
     else:
-        from mb.utility.env import (  # pylint: disable=import-outside-toplevel
-            MB_FASTAPI_WORKERS,
-            MB_PORT,
-        )
+        from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 
         config: dict = {}
 

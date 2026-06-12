@@ -9,12 +9,12 @@ test:
       - MB_FS_HOST: seaweedfs
         MB_FS_PORT: '8333'
         PYTHON_VERSION:
-          - '3.10'
+          - '3.11'
           - '3.14'
       - MB_FS_HOST: rustfs
         MB_FS_PORT: '9000'
         PYTHON_VERSION:
-          - '3.10'
+          - '3.11'
           - '3.14'
   script:
     - pytest

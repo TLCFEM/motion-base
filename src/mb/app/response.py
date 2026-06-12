@@ -16,7 +16,7 @@
 from __future__ import annotations
 
 from datetime import datetime
-from enum import Enum
+from enum import StrEnum
 from typing import Literal
 
 import numpy as np
@@ -165,7 +165,7 @@ class ListRecordResponse(BaseModel):
     records: list[RecordResponse] = Field(None)
 
 
-class SortBy(str, Enum):
+class SortBy(StrEnum):
     magnitude = "magnitude"
     maximum_acceleration = "maximum_acceleration"
     event_time = "event_time"

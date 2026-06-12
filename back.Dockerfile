@@ -1,4 +1,4 @@
-FROM python:3.12-slim AS dependency
+FROM python:3.13-slim AS dependency
 
 COPY requirements.txt /mb/requirements.txt
 WORKDIR /mb
@@ -11,11 +11,11 @@ RUN apt-get update && apt-get install -y --no-install-recommends binutils && rm 
 # RUN find /usr/local/lib/python*/site-packages -type f \( -name "*.md" -o -name "*.rst" -o -name "*.txt" \) -not -path "*/pint/*.txt" -delete
 RUN find /usr/local/lib/python*/site-packages -name "*.so" -exec strip --strip-unneeded {} +
 
-FROM python:3.12-slim
+FROM python:3.13-slim
 
 RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
 
-COPY --from=dependency /usr/local/lib/python3.12/site-packages /usr/local/lib/python3.12/site-packages
+COPY --from=dependency /usr/local/lib/python3.13/site-packages /usr/local/lib/python3.13/site-packages
 
 COPY src/mb /mb/mb
 COPY mb_runner.py /mb
