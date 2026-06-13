@@ -27,7 +27,7 @@ test:
         MONGO_INITDB_ROOT_PASSWORD: password
         MONGO_INITDB_ROOT_USERNAME: test
     - alias: rabbitmq
-      name: rabbitmq:4.2
+      name: rabbitmq:4.2-management
       pull_policy: if-not-present
       variables:
         RABBITMQ_DEFAULT_PASS: password
