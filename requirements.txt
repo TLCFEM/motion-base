@@ -25,7 +25,7 @@ click==8.4.1              # via beanie, celery, click-didyoumean, click-plugins,
 click-didyoumean==0.3.1   # via celery
 click-plugins==1.1.1.2    # via celery
 click-repl==0.3.0         # via celery
-cryptography==48.0.1      # via joserfc
+cryptography==49.0.0      # via joserfc
 dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.4.1  # via elasticsearch
 elasticsearch==9.4.1      # via motion-base (pyproject.toml)
