@@ -62,8 +62,6 @@ spec:
                 configMapKeyRef:
                   name: mb-config
                   key: MB_SUPERUSER_PASSWORD
-            - name: MB_FASTAPI_WORKERS
-              value: "1"
             - name: MB_FS_HOST
               valueFrom:
                 configMapKeyRef:
