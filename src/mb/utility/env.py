@@ -47,13 +47,13 @@ MB_SUPERUSER_PASSWORD: str = os.getenv("MB_SUPERUSER_PASSWORD", "password")
 MONGO_DB_NAME: str = os.getenv("MONGO_DB_NAME", "StrongMotion")
 MONGO_HOST: str = os.getenv("MONGO_HOST", "localhost")
 MONGO_PORT: str = os.getenv("MONGO_PORT", "27017")
-MONGO_USERNAME: str = os.getenv("MONGO_USERNAME", "test")
-MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD", "password")
+MONGO_USERNAME: str = os.getenv("MONGO_USERNAME", MB_SUPERUSER_USERNAME)
+MONGO_PASSWORD: str = os.getenv("MONGO_PASSWORD", MB_SUPERUSER_PASSWORD)
 
 RABBITMQ_HOST: str = os.getenv("RABBITMQ_HOST", "localhost")
 RABBITMQ_PORT: str = os.getenv("RABBITMQ_PORT", "5672")
-RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME", "test")
-RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD", "password")
+RABBITMQ_USERNAME: str = os.getenv("RABBITMQ_USERNAME", MB_SUPERUSER_USERNAME)
+RABBITMQ_PASSWORD: str = os.getenv("RABBITMQ_PASSWORD", MB_SUPERUSER_PASSWORD)
 
 
 def _ensure_protocol(target: str):
@@ -72,8 +72,8 @@ MB_PORT: str = os.getenv("MB_PORT", "8000")
 MB_FS_HOST: str = _ensure_protocol(os.getenv("MB_FS_HOST", "localhost"))
 MB_FS_PORT: str = os.getenv("MB_FS_PORT", "8333")
 MB_FS_BUCKET: str = os.getenv("MB_FS_BUCKET", "mb-cache")
-MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", "test")
-MB_FS_PASSWORD: str = os.getenv("MB_FS_PASSWORD", "password")
+MB_FS_USERNAME: str = os.getenv("MB_FS_USERNAME", MB_SUPERUSER_USERNAME)
+MB_FS_PASSWORD: str = os.getenv("MB_FS_PASSWORD", MB_SUPERUSER_PASSWORD)
 MB_FS_PERSISTENT: bool = bool(os.getenv("MB_FS_PERSISTENT", ""))
 
 TURNSTILE_SECRET: str = os.getenv("TURNSTILE_SECRET", "")
