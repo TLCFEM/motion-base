@@ -24,10 +24,11 @@ from elastic_transport import ConnectionTimeout
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
 from pymongo.errors import ServerSelectionTimeoutError
 
-from ..celery import celery, execute_task, get_stats
+from ..celery import celery, execute_task
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNIED
 from ..utility.files import FileProxy, commit_files
+from .dispatcher import dispatch
 from .response import UploadResponse
 from .utility import User, is_active
 
@@ -126,33 +127,16 @@ async def upload_archive(
             HTTPStatus.UNAUTHORIZED, detail="User is not allowed to upload."
         )
 
-    has_worker: bool = get_stats() is not None
-
     valid_uris: list[str] = commit_files(archives, ".tar.gz")
 
     if not wait_for_result:
-        task_id_pool: list[str] = []
-        if has_worker:
-            for archive_uri in valid_uris:
-                task_id: str = await create_task()
-                _parse_archive.delay(archive_uri, user.id, task_id, overwrite_existing)
-                task_id_pool.append(task_id)
-        else:
-            for archive_uri in valid_uris:
-                task_id: str = await create_task()
-                tasks.add_task(
-                    _parse_archive_local,
-                    archive_uri,
-                    user.id,
-                    task_id,
-                    overwrite_existing,
-                )
-                task_id_pool.append(task_id)
-
-        return UploadResponse(
-            message="Successfully uploaded and will be processed in the background.",
-            task_ids=task_id_pool,
-            records=None,
+        return await dispatch(
+            tasks,
+            valid_uris,
+            _parse_archive,
+            _parse_archive_local,
+            user.id,
+            overwrite_existing,
         )
 
     return UploadResponse(
