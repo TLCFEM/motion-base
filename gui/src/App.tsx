@@ -104,7 +104,7 @@ const App: Component = () => {
                         id="btn-jackpot"
                         onClick={() => setMode("jackpot")}
                         variant="contained"
-                        disabled={!backend()}
+                        disabled={!backend() || mode() === "jackpot"}
                     >
                         Jackpot
                     </Button>
@@ -113,7 +113,7 @@ const App: Component = () => {
                         id="btn-query"
                         onClick={() => setMode("query")}
                         variant="contained"
-                        disabled={!backend()}
+                        disabled={!backend() || mode() === "query"}
                     >
                         Query
                     </Button>
@@ -122,7 +122,7 @@ const App: Component = () => {
                         id="btn-process"
                         onClick={() => setMode("process")}
                         variant="contained"
-                        disabled={!backend()}
+                        disabled={!backend() || mode() === "process"}
                     >
                         Process
                     </Button>
