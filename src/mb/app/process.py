@@ -75,7 +75,10 @@ def process_record_local(result: Record, process_config: ProcessConfig):
             get_window(
                 process_config.filter_type,
                 process_config.window_type,
-                process_config.filter_length,
+                min(
+                    process_config.filter_length,
+                    process_config.up_ratio * len(waveform) // 2,
+                ),
                 freq_list,
                 ratio=process_config.up_ratio,
             ),
