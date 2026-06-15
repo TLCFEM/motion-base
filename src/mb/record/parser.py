@@ -388,7 +388,8 @@ class ParserNZSM(BaseParserNZSM):
         record.station_location = [_wrap_longitude(float_header[11]), -float_header[10]]
         record.sampling_frequency = 1 / ParserNZSM._parse_interval(lines[10])
         record.duration = float_header[23]
-        record.direction = lines[12].split()[1].upper()
+        if segment := lines[12].split():
+            record.direction = segment[1].upper()
         record.maximum_acceleration = abs(
             pint.Quantity(float_header[35] or float_header[30], "mm/s/s")
             .to("Gal")
