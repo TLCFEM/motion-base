@@ -211,6 +211,7 @@ class ListMetadataResponse(BaseModel):
     pagination: PaginationResponse = Field(None)
 
 
+# noinspection SpellCheckingInspection
 class ProcessConfig(BaseModel):
     up_ratio: int = Field(
         1,

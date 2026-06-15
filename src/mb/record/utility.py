@@ -81,6 +81,7 @@ def get_window(
     else:
         raise ValueError(f"Unknown window type: {window_type}.")
 
+    # noinspection PyTypeChecker
     return signal.firwin(
         2 * length + 1, cutoff, window=window, pass_zero=filter_type
     ) * kwargs.get("ratio", 1)

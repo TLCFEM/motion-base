@@ -62,6 +62,7 @@ class ParserNIED(BaseParserNIED):
         if not isinstance(archive_obj, UPath) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
+        # noinspection PyTypeChecker
         name_string: str = (
             archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
         )
@@ -193,6 +194,7 @@ class ParserNZSM(BaseParserNZSM):
         if not isinstance(archive_obj, UPath) and archive_name is None:
             raise ValueError("Need archive name if archive is provided as a BinaryIO.")
 
+        # noinspection PyTypeChecker
         name_string: str = (
             archive_obj.as_posix() if isinstance(archive_obj, UPath) else archive_name
         )
@@ -304,6 +306,7 @@ class ParserNZSM(BaseParserNZSM):
         async def _populate_common_fields(record: NZSM):
             record.station_code = station_code
             record.uploaded_by = user_id
+            # noinspection PyTypeChecker
             record.file_name = os.path.basename(file_name or file_path).upper()
             record.category = (
                 "processed" if ".V2A" in record.file_name else "unprocessed"

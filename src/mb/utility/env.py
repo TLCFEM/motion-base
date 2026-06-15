@@ -23,6 +23,7 @@ _logger = structlog.get_logger(__name__)
 LOADED: bool = False
 
 if not LOADED:
+    # noinspection PyTypeChecker
     if load_dotenv(".env"):
         _logger.info("Using .env file in CWD.")
     elif load_dotenv(os.path.join(os.path.dirname(__file__), "../../../docker/.env")):
