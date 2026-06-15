@@ -96,7 +96,13 @@ const App: Component = () => {
                                 : `Record Count: ${total().toLocaleString()}.`
                             : "Motion Base"}
                     </Typography>
-                    <Button size="small" id="btn-scripting" onClick={() => setMode("scripting")} variant="contained">
+                    <Button
+                        size="small"
+                        id="btn-scripting"
+                        onClick={() => setMode("scripting")}
+                        variant="contained"
+                        disabled={mode() === "scripting"}
+                    >
                         Scripting
                     </Button>
                     <Button
