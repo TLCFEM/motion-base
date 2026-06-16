@@ -14,6 +14,9 @@
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
 import os.path
+import tarfile
+from tempfile import TemporaryDirectory
+from zipfile import ZipFile
 
 import numpy as np
 import pytest
@@ -393,11 +396,24 @@ async def test_nz_parse_file(pwd, file_path, results, mongo_connection):
     ]
 
 
-@pytest.mark.parametrize("file_path", ["data/nz_test.tar.gz"])
+@pytest.mark.parametrize("file_path", ["nz_test.tar.gz", "nz_test.zip"])
 async def test_nz_parse_archive(pwd, file_path, mongo_connection):
-    await ParserNZSM.parse_archive(
-        archive_obj=UPath(pwd) / file_path, user_id=str_factory()
-    )
+    async def test_archive(fn: UPath):
+        results = await ParserNZSM.parse_archive(archive_obj=fn, user_id=str_factory())
+        assert len(results) == 6
+
+    await test_archive(original_archive := UPath(pwd) / "data" / file_path)
+
+    with TemporaryDirectory() as tmp_dir:
+        nested_file = UPath(tmp_dir) / f"{file_path}.zip"
+        with ZipFile(nested_file.as_posix(), "w") as zip_file:
+            zip_file.write(original_archive.as_posix(), arcname=file_path)
+        await test_archive(nested_file)
+
+        nested_file = UPath(tmp_dir) / f"{file_path}.tar.gz"
+        with tarfile.open(nested_file.as_posix(), "w:gz") as tar_file:
+            tar_file.add(original_archive.as_posix(), arcname=file_path)
+        await test_archive(nested_file)
 
 
 def test_nz_response_spectrum():

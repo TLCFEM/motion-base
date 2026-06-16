@@ -23,7 +23,7 @@ from asyncio import gather
 from contextlib import nullcontext
 from datetime import datetime
 from math import ceil
-from typing import IO, BinaryIO
+from typing import IO, BinaryIO, Literal
 from zoneinfo import ZoneInfo
 
 import pint
@@ -223,6 +223,121 @@ class ParserNIED(BaseParserNIED):
 
 
 class ParserNZSM(BaseParserNZSM):
+    MAX_DEPTH: int = 10
+
+    @staticmethod
+    def _flags(_fn: str):
+        _is_zip = _fn.lower().endswith(".zip")
+        _is_tar = _fn.lower().endswith(".tar.gz")
+        return _is_zip, _is_tar, _is_zip or _is_tar
+
+    @staticmethod
+    async def _parse_archive(
+        mode: Literal["zip", "tar"],
+        fo: IO[bytes],
+        task: UploadTask | None,
+        user_id: str,
+        overwrite_existing: bool,
+        current_depth: int = 0,
+    ):
+        records: list[NZSM] = []
+
+        if current_depth >= ParserNZSM.MAX_DEPTH:
+            return records
+
+        if mode == "tar":
+            try:
+                with tarfile.open(None, "r:gz", fo) as archive:
+                    if task:
+                        task.total_size += len(archive.getnames())
+                    for f in archive:
+                        if task:
+                            task.current_size += 1
+                            await task.save()
+
+                        is_zip, is_tar, is_archive = ParserNZSM._flags(f.name)
+
+                        if (
+                            not f.isfile()
+                            or (not ParserNZSM.validate_file(f.name) and not is_archive)
+                            or not (target := archive.extractfile(f))
+                        ):
+                            continue
+
+                        if is_archive:
+                            records.extend(
+                                await ParserNZSM._parse_archive(
+                                    "zip" if is_zip else "tar",
+                                    target,
+                                    task,
+                                    user_id,
+                                    overwrite_existing,
+                                    current_depth + 1,
+                                )
+                            )
+                            continue
+
+                        try:
+                            records.extend(
+                                await ParserNZSM.parse_file(
+                                    target,
+                                    user_id,
+                                    os.path.basename(f.name),
+                                    overwrite_existing,
+                                )
+                            )
+                        except Exception as e:
+                            _logger.critical(
+                                "Failed to parse.", file_name=f.name, exc_info=e
+                            )
+            except tarfile.ReadError as e:
+                _logger.critical("Failed to open the archive.", exc_info=e)
+        elif mode == "zip":
+            try:
+                with zipfile.ZipFile(fo) as archive:
+                    if task:
+                        task.total_size += len(archive.namelist())
+                    for f in archive.namelist():
+                        if task:
+                            task.current_size += 1
+                            await task.save()
+
+                        is_zip, is_tar, is_archive = ParserNZSM._flags(f)
+
+                        if not ParserNZSM.validate_file(f) and not is_archive:
+                            continue
+
+                        with archive.open(f) as target:
+                            if is_archive:
+                                records.extend(
+                                    await ParserNZSM._parse_archive(
+                                        "zip" if is_zip else "tar",
+                                        target,
+                                        task,
+                                        user_id,
+                                        overwrite_existing,
+                                        current_depth + 1,
+                                    )
+                                )
+                            else:
+                                try:
+                                    records.extend(
+                                        await ParserNZSM.parse_file(
+                                            target,
+                                            user_id,
+                                            os.path.basename(f),
+                                            overwrite_existing,
+                                        )
+                                    )
+                                except Exception as e:
+                                    _logger.critical(
+                                        "Failed to parse.", file_name=f, exc_info=e
+                                    )
+            except zipfile.BadZipFile as e:
+                _logger.critical("Failed to open the archive.", exc_info=e)
+
+        return records
+
     @staticmethod
     async def parse_archive(
         *,
@@ -247,68 +362,14 @@ class ParserNZSM(BaseParserNZSM):
                 task.archive_path = archive_obj.as_posix()
             task.pid = os.getpid()
 
-        records: list = []
-
-        if name_string.endswith(".tar.gz"):
-            try:
-                with (
-                    _proxy(archive_obj) as fo,
-                    tarfile.open(None, "r:gz", fo) as archive,
-                ):
-                    if task:
-                        task.total_size = len(archive.getnames())
-                    for f in archive:
-                        if task:
-                            task.current_size += 1
-                            await task.save()
-                        if (
-                            not f.isfile()
-                            or not ParserNZSM.validate_file(f.name)
-                            or not (target := archive.extractfile(f))
-                        ):
-                            continue
-                        try:
-                            records.extend(
-                                await ParserNZSM.parse_file(
-                                    target,
-                                    user_id,
-                                    os.path.basename(f.name),
-                                    overwrite_existing,
-                                )
-                            )
-                        except Exception as e:
-                            _logger.critical(
-                                "Failed to parse.", file_name=f.name, exc_info=e
-                            )
-            except tarfile.ReadError as e:
-                _logger.critical("Failed to open the archive.", exc_info=e)
-        elif name_string.endswith(".zip"):
-            try:
-                with _proxy(archive_obj) as fo, zipfile.ZipFile(fo) as archive:
-                    if task:
-                        task.total_size = len(archive.namelist())
-                    for f in archive.namelist():
-                        if task:
-                            task.current_size += 1
-                            await task.save()
-                        if not ParserNZSM.validate_file(f):
-                            continue
-                        with archive.open(f) as target:
-                            try:
-                                records.extend(
-                                    await ParserNZSM.parse_file(
-                                        target,
-                                        user_id,
-                                        os.path.basename(f),
-                                        overwrite_existing,
-                                    )
-                                )
-                            except Exception as e:
-                                _logger.critical(
-                                    "Failed to parse.", file_name=f, exc_info=e
-                                )
-            except zipfile.BadZipFile as e:
-                _logger.critical("Failed to open the archive.", exc_info=e)
+        with _proxy(archive_obj) as fo:
+            records: list[NZSM] = await ParserNZSM._parse_archive(
+                "tar" if name_string.endswith(".tar.gz") else "zip",
+                fo,
+                task,
+                user_id,
+                overwrite_existing,
+            )
 
         if task:
             await task.delete()
