@@ -50,6 +50,76 @@ def _proxy(target: UPath | BinaryIO):
 
 
 class ParserNIED(BaseParserNIED):
+    MAX_DEPTH: int = 10
+    ALLOWED_SUFFIX: tuple = (
+        "TAR.GZ",
+        "EW1",
+        "EW2",
+        "NS1",
+        "NS2",
+        "UD1",
+        "UD2",
+        "EW",
+        "NS",
+        "UD",
+    )
+
+    @staticmethod
+    async def _parse_archive(
+        fo: IO[bytes],
+        task: UploadTask | None,
+        category: str,
+        user_id: str,
+        overwrite_existing: bool,
+        current_depth: int = 0,
+    ):
+        records: list[NIED] = []
+
+        if current_depth >= ParserNIED.MAX_DEPTH:
+            return records
+
+        try:
+            with tarfile.open(None, "r:gz", fo) as archive:
+                if task:
+                    task.total_size += len(archive.getnames())
+                for f in archive:
+                    if task:
+                        task.current_size += 1
+                        await task.save()
+                    if (
+                        not f.isfile()
+                        or not f.name.upper().endswith(ParserNIED.ALLOWED_SUFFIX)
+                        or not (target := archive.extractfile(f))
+                    ):
+                        continue
+                    if f.name.upper().endswith("TAR.GZ"):
+                        records.extend(
+                            await ParserNIED._parse_archive(
+                                target,
+                                task,
+                                category,
+                                user_id,
+                                overwrite_existing,
+                                current_depth + 1,
+                            )
+                        )
+                        continue
+                    try:
+                        record = await ParserNIED.parse_file(target, overwrite_existing)
+                        record.uploaded_by = user_id
+                        record.file_name = os.path.basename(f.name)
+                        record.category = category
+                        await record.save()
+                        records.append(record)
+                    except Exception as e:
+                        _logger.critical(
+                            "Failed to parse.", file_name=f.name, exc_info=e
+                        )
+        except tarfile.ReadError as e:
+            _logger.critical("Failed to open the archive.", exc_info=e)
+
+        return records
+
     @staticmethod
     async def parse_archive(
         *,
@@ -80,39 +150,10 @@ class ParserNIED(BaseParserNIED):
             if isinstance(archive_obj, UPath):
                 task.archive_path = archive_obj.as_posix()
 
-        records = []
-        try:
-            with (
-                _proxy(archive_obj) as fo,
-                tarfile.open(None, "r:gz", fo) as archive,
-            ):
-                if task:
-                    task.total_size = len(archive.getnames())
-                for f in archive:
-                    if task:
-                        task.current_size += 1
-                        await task.save()
-                    if (
-                        not f.isfile()
-                        or not f.name.endswith(
-                            ("EW1", "EW2", "NS1", "NS2", "UD1", "UD2", "EW", "NS", "UD")
-                        )
-                        or not (target := archive.extractfile(f))
-                    ):
-                        continue
-                    try:
-                        record = await ParserNIED.parse_file(target, overwrite_existing)
-                        record.uploaded_by = user_id
-                        record.file_name = os.path.basename(f.name)
-                        record.category = category
-                        await record.save()
-                        records.append(record)
-                    except Exception as e:
-                        _logger.critical(
-                            "Failed to parse.", file_name=f.name, exc_info=e
-                        )
-        except tarfile.ReadError as e:
-            _logger.critical("Failed to open the archive.", exc_info=e)
+        with _proxy(archive_obj) as fo:
+            records = await ParserNIED._parse_archive(
+                fo, task, category, user_id, overwrite_existing
+            )
 
         if task:
             await task.delete()

@@ -52,8 +52,11 @@ async def test_jp_parse_file(pwd, file_path, mongo_connection):
     }
 
 
-@pytest.mark.parametrize("file_path", ["data/jp_test.knt.tar.gz"])
+@pytest.mark.parametrize(
+    "file_path", ["data/jp_test.knt.tar.gz", "data/jp_recursive.tar.gz"]
+)
 async def test_jp_parse_archive(pwd, file_path, mongo_connection):
-    await ParserNIED.parse_archive(
+    results = await ParserNIED.parse_archive(
         archive_obj=UPath(pwd) / file_path, user_id=str_factory()
     )
+    assert len(results) == 6
