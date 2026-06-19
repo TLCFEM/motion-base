@@ -51,7 +51,6 @@ jobs:
       - name: Python
         uses: actions/setup-python@v6
         with:
-          cache: pip
           python-version: ${{ matrix.python-version }}
       - name: Dependency
         run: |
@@ -79,18 +78,12 @@ jobs:
         name: Release
         uses: svenstaro/upload-release-action@v2
         with:
-          body: >
+          body: |
             The binaries are standalone executables that can be run on Linux.
 
-
-            1. `mb_runner`: The main application that can run the server, or the
-            celery worker.
-
-            2. `nied_crawler`: A specialized tool to crawl and download data
-            from the NIED website.
-
-            3. `nzsm_crawler`: A specialized tool to crawl and download data
-            from the NZ Strong Motion database.
+            1. `mb_runner`: The main application that can run the server, or the celery worker.
+            2. `nied_crawler`: A specialized tool to crawl and download data from the NIED website.
+            3. `nzsm_crawler`: A specialized tool to crawl and download data from the NZ Strong Motion database.
           file: dist/*
           file_glob: true
           overwrite: true
