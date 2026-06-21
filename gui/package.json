@@ -11,7 +11,7 @@
     },
     "devDependencies": {
         "@types/leaflet": "^1.9.21",
-        "@types/node": "^25.9.3",
+        "@types/node": "^25.9.4",
         "@types/plotly.js-basic-dist-min": "^2.12.4",
         "prettier": "^3.8.4",
         "solid-devtools": "^0.34.5",
