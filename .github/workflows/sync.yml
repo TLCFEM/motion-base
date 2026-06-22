@@ -20,6 +20,7 @@ jobs:
             git push codeberg "+HEAD:refs/heads/${{ github.ref_name }}" --follow-tags
           max_attempts: 3
           retry_on: error
+          timeout_minutes: 5
 name: Sync
 'on':
   push:
