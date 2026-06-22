@@ -102,6 +102,11 @@ jobs:
           - '3.11'
           - '3.14'
     timeout-minutes: 30
+  delete:
+    needs:
+      - build
+      - docker
+    uses: ./.github/workflows/delete.yml
   docker:
     if: github.event_name == 'push'
     needs: build
