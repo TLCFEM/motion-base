@@ -106,6 +106,7 @@ jobs:
     needs:
       - build
       - docker
+    secrets: inherit
     uses: ./.github/workflows/delete.yml
   docker:
     if: github.event_name == 'push'
