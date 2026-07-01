@@ -59,7 +59,7 @@ jobs:
           ruff check
           pytest --cov --junitxml=junit.xml .
       - name: Codecov
-        uses: codecov/codecov-action@v6
+        uses: codecov/codecov-action@v7
         with:
           plugins: pycoverage
           token: ${{ secrets.CODECOV_TOKEN }}
