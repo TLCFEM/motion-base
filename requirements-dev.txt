@@ -2,7 +2,7 @@
 #    uv pip compile --refresh --annotation-style=line --all-extras --output-file=requirements-dev.txt pyproject.toml
 aiobotocore==3.7.0        # via s3fs
 aiodns==4.0.4             # via aiohttp
-aiohappyeyeballs==2.6.2   # via aiohttp
+aiohappyeyeballs==2.7.1   # via aiohttp
 aiohttp==3.14.1           # via aiobotocore, elasticsearch, s3fs, motion-base (pyproject.toml)
 aioitertools==0.13.0      # via aiobotocore
 aiosignal==1.4.0          # via aiohttp
@@ -30,14 +30,14 @@ click-plugins==1.1.1.2    # via celery
 click-repl==0.3.0         # via celery
 configargparse==1.7.5     # via locust
 contourpy==1.3.3          # via matplotlib
-coverage==7.14.3          # via pytest-cov
+coverage==7.15.0          # via pytest-cov
 cryptography==49.0.0      # via joserfc
 cycler==0.12.1            # via matplotlib
 dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.4.2  # via elasticsearch
 elasticsearch==9.4.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
-fastapi==0.138.1          # via motion-base (pyproject.toml)
+fastapi==0.139.0          # via motion-base (pyproject.toml)
 flask==3.1.3              # via flask-cors, flask-login, locust
 flask-cors==6.0.5         # via locust
 flask-login==0.6.3        # via locust
@@ -59,11 +59,11 @@ iniconfig==2.3.0          # via pytest
 itsdangerous==2.2.0       # via flask
 jinja2==3.1.6             # via flask
 jmespath==1.1.0           # via aiobotocore, botocore
-joserfc==1.7.1            # via motion-base (pyproject.toml)
+joserfc==1.7.2            # via motion-base (pyproject.toml)
 kiwisolver==1.5.0         # via matplotlib
 kombu==5.6.2              # via celery
 lazy-model==0.4.0         # via beanie
-llvmlite==0.47.0          # via numba
+llvmlite==0.48.0          # via numba
 locust==2.44.4            # via motion-base (pyproject.toml)
 markdown-it-py==4.2.0     # via rich
 markupsafe==3.0.3         # via flask, jinja2, werkzeug
@@ -71,11 +71,11 @@ matplotlib==3.11.0        # via motion-base (pyproject.toml)
 mdurl==0.1.2              # via markdown-it-py
 msgpack==1.2.1            # via locust
 multidict==6.7.1          # via aiobotocore, aiohttp, yarl
-numba==0.65.1             # via motion-base (pyproject.toml)
+numba==0.66.0             # via motion-base (pyproject.toml)
 numpy==2.4.6              # via contourpy, matplotlib, numba, scipy
 packaging==26.2           # via kombu, matplotlib, pytest
 pathlib-abc==0.5.2        # via universal-pathlib
-pillow==12.2.0            # via matplotlib
+pillow==12.3.0            # via matplotlib
 pint==0.25.3              # via motion-base (pyproject.toml)
 platformdirs==4.10.0      # via pint
 pluggy==1.6.0             # via pytest, pytest-cov
@@ -110,17 +110,17 @@ sniffio==1.3.1            # via elastic-transport, elasticsearch
 soupsieve==2.8.4          # via beautifulsoup4
 starlette==1.3.1          # via fastapi
 structlog==26.1.0         # via motion-base (pyproject.toml)
-typing-extensions==4.15.0  # via aiohttp, aiosignal, anyio, beanie, beautifulsoup4, elasticsearch, fastapi, flexcache, flexparser, locust, pint, pydantic, pydantic-core, starlette, typing-inspection
+typing-extensions==4.16.0  # via aiohttp, aiosignal, anyio, beanie, beautifulsoup4, elasticsearch, fastapi, flexcache, flexparser, locust, pint, pydantic, pydantic-core, starlette, typing-inspection
 typing-inspection==0.4.2  # via fastapi, pydantic
 tzdata==2026.2            # via kombu
-tzlocal==5.4.3            # via celery
+tzlocal==5.4.4            # via celery
 universal-pathlib==0.3.10  # via motion-base (pyproject.toml)
 urllib3==2.7.0            # via botocore, elastic-transport, geventhttpclient, requests
-uvicorn==0.49.0           # via motion-base (pyproject.toml)
+uvicorn==0.50.0           # via motion-base (pyproject.toml)
 uvloop==0.22.1            # via uvicorn
 vine==5.1.0               # via amqp, celery, kombu
 watchfiles==1.2.0         # via uvicorn
-wcwidth==0.8.1            # via prompt-toolkit
+wcwidth==0.8.2            # via prompt-toolkit
 websocket-client==1.9.0   # via python-socketio
 websockets==16.0          # via uvicorn
 werkzeug==3.1.8           # via flask, flask-cors, flask-login, locust

@@ -2,7 +2,7 @@
 #    uv pip compile --refresh --annotation-style=line --output-file=requirements.txt pyproject.toml
 aiobotocore==3.7.0        # via s3fs
 aiodns==4.0.4             # via aiohttp
-aiohappyeyeballs==2.6.2   # via aiohttp
+aiohappyeyeballs==2.7.1   # via aiohttp
 aiohttp==3.14.1           # via aiobotocore, elasticsearch, s3fs, motion-base (pyproject.toml)
 aioitertools==0.13.0      # via aiobotocore
 aiosignal==1.4.0          # via aiohttp
@@ -30,7 +30,7 @@ dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.4.2  # via elasticsearch
 elasticsearch==9.4.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
-fastapi==0.138.1          # via motion-base (pyproject.toml)
+fastapi==0.139.0          # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
@@ -39,12 +39,12 @@ h11==0.16.0               # via uvicorn
 httptools==0.8.0          # via uvicorn
 idna==3.18                # via anyio, email-validator, requests, yarl
 jmespath==1.1.0           # via aiobotocore, botocore
-joserfc==1.7.1            # via motion-base (pyproject.toml)
+joserfc==1.7.2            # via motion-base (pyproject.toml)
 kombu==5.6.2              # via celery
 lazy-model==0.4.0         # via beanie
-llvmlite==0.47.0          # via numba
+llvmlite==0.48.0          # via numba
 multidict==6.7.1          # via aiobotocore, aiohttp, yarl
-numba==0.65.1             # via motion-base (pyproject.toml)
+numba==0.66.0             # via motion-base (pyproject.toml)
 numpy==2.4.6              # via numba, scipy
 packaging==26.2           # via kombu
 pathlib-abc==0.5.2        # via universal-pathlib
@@ -69,17 +69,17 @@ six==1.17.0               # via python-dateutil
 sniffio==1.3.1            # via elastic-transport, elasticsearch
 starlette==1.3.1          # via fastapi
 structlog==26.1.0         # via motion-base (pyproject.toml)
-typing-extensions==4.15.0  # via aiohttp, aiosignal, anyio, beanie, elasticsearch, fastapi, flexcache, flexparser, pint, pydantic, pydantic-core, starlette, typing-inspection
+typing-extensions==4.16.0  # via aiohttp, aiosignal, anyio, beanie, elasticsearch, fastapi, flexcache, flexparser, pint, pydantic, pydantic-core, starlette, typing-inspection
 typing-inspection==0.4.2  # via fastapi, pydantic
 tzdata==2026.2            # via kombu
-tzlocal==5.4.3            # via celery
+tzlocal==5.4.4            # via celery
 universal-pathlib==0.3.10  # via motion-base (pyproject.toml)
 urllib3==2.7.0            # via botocore, elastic-transport, requests
-uvicorn==0.49.0           # via motion-base (pyproject.toml)
+uvicorn==0.50.0           # via motion-base (pyproject.toml)
 uvloop==0.22.1            # via uvicorn
 vine==5.1.0               # via amqp, celery, kombu
 watchfiles==1.2.0         # via uvicorn
-wcwidth==0.8.1            # via prompt-toolkit
+wcwidth==0.8.2            # via prompt-toolkit
 websockets==16.0          # via uvicorn
 wrapt==2.2.2              # via aiobotocore
 yarl==1.24.2              # via aiohttp
