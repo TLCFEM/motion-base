@@ -19,6 +19,7 @@ import os.path
 import uuid
 from collections.abc import Generator
 from http import HTTPStatus
+from pathlib import Path
 
 import anyio
 import httpx
@@ -26,6 +27,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from httpx_auth import OAuth2ResourceOwnerPasswordCredentials as OAuth2
 from matplotlib.figure import Figure
+from pint import Quantity
 from rich.console import Console
 from rich.progress import track
 
@@ -37,6 +39,31 @@ class MBRecord(RecordResponse):
     def new_record(data: dict):
         return MBRecord(**{k: v for k, v in data.items() if v is not None})
 
+    def to_table(self, unit: str | None = None):
+        """
+        Convert the record to a two-column table with time and acceleration magnitude.
+        """
+        x_axis = np.arange(
+            0, self.time_interval * len(self.waveform), self.time_interval
+        )
+        if unit is None:
+            y_axis = self.waveform
+        else:
+            y_axis = (
+                Quantity(self.waveform, self.processed_data_unit).to(unit).magnitude
+            )
+        return x_axis, y_axis
+
+    def to_table_file(self, file_path: str, unit: str | None = None):
+        """
+        Write the two-column table to a file.
+        """
+        Path(file_path).write_text(
+            "\n".join(
+                f"{x:.14f} {y:.14f}" for x, y in zip(*self.to_table(unit), strict=True)
+            )
+        )
+
     def plot_waveform(self, fig: Figure | None = None):
         if fig is None:
             fig = plt.figure(figsize=(10, 6), dpi=100)
@@ -46,10 +73,7 @@ class MBRecord(RecordResponse):
         else:
             gca = fig.gca()
 
-        x_axis = np.arange(
-            0, self.time_interval * len(self.waveform), self.time_interval
-        )
-        gca.plot(x_axis, self.waveform, label=self.id)
+        gca.plot(*self.to_table(), label=self.id)
 
         fig.tight_layout()
         return fig
