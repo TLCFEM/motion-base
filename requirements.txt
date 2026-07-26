@@ -3,12 +3,12 @@
 aiobotocore==3.8.0        # via s3fs
 aiodns==4.0.4             # via aiohttp
 aiohappyeyeballs==2.7.1   # via aiohttp
-aiohttp==3.14.1           # via aiobotocore, elasticsearch, s3fs, motion-base (pyproject.toml)
+aiohttp==3.14.3           # via aiobotocore, elasticsearch, s3fs, motion-base (pyproject.toml)
 aioitertools==0.13.0      # via aiobotocore
 aiosignal==1.4.0          # via aiohttp
 amqp==5.3.1               # via kombu
 annotated-doc==0.0.4      # via fastapi
-annotated-types==0.7.0    # via pydantic
+annotated-types==0.8.0    # via pydantic
 anyio==4.14.2             # via elasticsearch, starlette, watchfiles
 attrs==26.1.0             # via aiohttp
 backports-zstd==1.6.0     # via aiohttp
@@ -18,7 +18,7 @@ billiard==4.2.4           # via celery
 botocore==1.43.46         # via aiobotocore
 brotli==1.2.0             # via aiohttp
 celery==5.6.3             # via motion-base (pyproject.toml)
-certifi==2026.6.17        # via elastic-transport, requests
+certifi==2026.7.22        # via elastic-transport, requests
 cffi==2.1.0               # via cryptography, pycares
 charset-normalizer==3.4.9  # via requests
 click==8.4.2              # via beanie, celery, click-didyoumean, click-plugins, click-repl, uvicorn
@@ -30,7 +30,7 @@ dnspython==2.8.0          # via email-validator, pymongo
 elastic-transport==9.4.2  # via elasticsearch
 elasticsearch==9.4.1      # via motion-base (pyproject.toml)
 email-validator==2.3.0    # via motion-base (pyproject.toml)
-fastapi==0.139.2          # via motion-base (pyproject.toml)
+fastapi==0.140.0          # via motion-base (pyproject.toml)
 flexcache==0.3            # via pint
 flexparser==0.4           # via pint
 frozenlist==1.8.0         # via aiohttp, aiosignal
@@ -39,7 +39,7 @@ h11==0.16.0               # via uvicorn
 httptools==0.8.0          # via uvicorn
 idna==3.18                # via anyio, email-validator, requests, yarl
 jmespath==1.1.0           # via aiobotocore, botocore
-joserfc==1.7.3            # via motion-base (pyproject.toml)
+joserfc==1.7.4            # via motion-base (pyproject.toml)
 kombu==5.6.2              # via celery
 lazy-model==0.4.0         # via beanie
 llvmlite==0.48.0          # via numba
@@ -49,7 +49,7 @@ numpy==2.4.6              # via numba, scipy
 packaging==26.2           # via kombu
 pathlib-abc==0.5.2        # via universal-pathlib
 pint==0.25.3              # via motion-base (pyproject.toml)
-platformdirs==4.10.1      # via pint
+platformdirs==4.11.0      # via pint
 prompt-toolkit==3.0.52    # via click-repl
 propcache==0.5.2          # via aiohttp, yarl
 pycares==5.0.1            # via aiodns
@@ -82,4 +82,4 @@ watchfiles==1.2.0         # via uvicorn
 wcwidth==0.8.2            # via prompt-toolkit
 websockets==16.1.1        # via uvicorn
 wrapt==2.2.2              # via aiobotocore
-yarl==1.24.2              # via aiohttp
+yarl==1.24.5              # via aiohttp
