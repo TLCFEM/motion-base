@@ -15,7 +15,7 @@
         "@types/plotly.js-basic-dist-min": "^2.12.4",
         "prettier": "^3.9.6",
         "solid-devtools": "^0.34.5",
-        "typescript": "^6.0.3",
+        "typescript": "^7.0.2",
         "vite": "^6.4.3",
         "vite-plugin-solid": "^2.11.13"
     },
