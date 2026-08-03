@@ -27,7 +27,7 @@ Additional parameters may include:
 2. `semaphore(int)` - number of concurrent requests
 
 ```python
-async with MBClient('http://localhost:8000', timeout=20, semaphore=10) as client:
+async with MBClient("http://localhost:8000", timeout=20, semaphore=10) as client:
     # do something with the client
     ...
 ```
@@ -340,7 +340,6 @@ To plot response spectra, one can call the `plot_response_spectrum` method.
 ```python
 example_record.plot_response_spectrum()
 pass
-
 ```
 
 ![png](client_files/client_16_0.png)

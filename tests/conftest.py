@@ -18,7 +18,7 @@ import os.path
 from uuid import uuid4
 
 import pytest
-from httpx import ASGITransport, AsyncClient
+from httpx2 import ASGITransport, AsyncClient
 
 from mb.app.main import app
 from mb.app.utility import User, bcrypt_hash, is_active, is_admin

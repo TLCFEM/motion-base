@@ -51,7 +51,7 @@ dependencies = [
 
 [project.optional-dependencies]
 dev = [
-    "httpx",
+    "httpx2",
     "locust",
     "pytest-cov",
     "ruff",
@@ -59,8 +59,7 @@ dev = [
 client = [
     "beautifulsoup4",
     "click",
-    "httpx",
-    "httpx-auth",
+    "httpx2",
     "matplotlib",
     "rich",
 ]

@@ -22,10 +22,9 @@ from http import HTTPStatus
 from pathlib import Path
 
 import anyio
-import httpx
+import httpx2
 import matplotlib.pyplot as plt
 import numpy as np
-from httpx_auth import OAuth2ResourceOwnerPasswordCredentials as OAuth2
 from matplotlib.figure import Figure
 from pint import Quantity
 from rich.console import Console
@@ -160,9 +159,8 @@ class MBClient:
         self.username: str | None = username
         self.password: str | None = password
         self.max_file_size: int = max_file_size * 2**20
-        self.auth: OAuth2 | None = (
-            OAuth2(
-                f"{self.host_url}/user/token",
+        self.auth: httpx2.BasicAuth | None = (
+            httpx2.BasicAuth(
                 username=self.username,
                 password=self.password,
             )
@@ -178,7 +176,7 @@ class MBClient:
 
         self.semaphore = anyio.Semaphore(kwargs.pop("semaphore", 10))
 
-        self.client = httpx.AsyncClient(**kwargs)
+        self.client = httpx2.AsyncClient(**kwargs)
         self.tasks: dict[str, float] = {}
 
         self.upload_size: int = 0
