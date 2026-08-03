@@ -159,14 +159,6 @@ class MBClient:
         self.username: str | None = username
         self.password: str | None = password
         self.max_file_size: int = max_file_size * 2**20
-        self.auth: httpx2.BasicAuth | None = (
-            httpx2.BasicAuth(
-                username=self.username,
-                password=self.password,
-            )
-            if self.username and self.password
-            else None
-        )
 
         self.console = Console()
 
@@ -208,6 +200,25 @@ class MBClient:
 
     def print(self, *args, **kwargs):
         self.console.print(*args, **kwargs)
+
+    async def _header(self):
+        if not self.username or not self.password:
+            return {}
+
+        result = await self.client.post(
+            f"{self.host_url}/user/token",
+            data={"username": self.username, "password": self.password},
+        )
+        if result.status_code != HTTPStatus.OK:
+            return {}
+
+        return {"Authorization": f"Bearer {result.json()['access_token']}"}
+
+    async def me(self):
+        result = await self.client.get("/user/whoami", headers=await self._header())
+        if result.status_code != HTTPStatus.OK:
+            raise RuntimeError("Failed to get user info.")
+        return result.json()
 
     async def download(
         self,
@@ -268,7 +279,7 @@ class MBClient:
         wait_for_result: bool = False,
         overwrite_existing: bool = True,
     ):
-        if self.auth is None:
+        if not self.username or not self.password:
             self.print("Upload requires authentication.")
             return
 
@@ -321,7 +332,7 @@ class MBClient:
                         f"?wait_for_result={'true' if wait_for_result else 'false'}"
                         f"&overwrite_existing={'true' if overwrite_existing else 'false'}",
                         files={"archives": (base_name, file, "multipart/form-data")},
-                        auth=self.auth,
+                        headers=await self._header(),
                     )
 
                 result = await self._retry(_post)
