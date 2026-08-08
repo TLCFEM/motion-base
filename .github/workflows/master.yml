@@ -12,7 +12,7 @@ jobs:
           ES_JAVA_OPTS: '-Xms512m -Xmx512m'
           discovery.type: single-node
           xpack.security.enabled: false
-        image: elasticsearch:9.3.5
+        image: elasticsearch:9.4.4
         ports:
           - '9200:9200'
       mongodb:
