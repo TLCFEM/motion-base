@@ -15,9 +15,12 @@
 
 from __future__ import annotations
 
+import base64
+import json
 import os.path
 import uuid
 from collections.abc import Generator
+from datetime import UTC, datetime, timedelta
 from http import HTTPStatus
 from pathlib import Path
 
@@ -124,6 +127,16 @@ class MBRecord(RecordResponse):
         Console().print(self)
 
 
+class MBToken:
+    def __init__(self, access_token: str):
+        self.token: str = access_token
+
+        payload_segment = access_token.split(".", 2)[1]
+        encoded = (payload_segment + "=" * (-len(payload_segment) % 4)).encode()
+        expiry = json.loads(base64.urlsafe_b64decode(encoded).decode()).get("exp")
+        self.expiry = datetime.fromtimestamp(expiry, tz=UTC)
+
+
 class MBClient:
     def __init__(
         self,
@@ -178,6 +191,8 @@ class MBClient:
 
         self.download_pool: list = []
 
+        self._token: MBToken | None = None
+
     async def __aenter__(self) -> MBClient:
         if (await self.client.get("/alive")).status_code != HTTPStatus.OK:
             raise RuntimeError("Server is not reachable.")
@@ -205,6 +220,9 @@ class MBClient:
         if not self.username or not self.password:
             return {}
 
+        if self._token and self._token.expiry > datetime.now(UTC) + timedelta(0, 30):
+            return {"Authorization": f"Bearer {self._token.token}"}
+
         result = await self.client.post(
             f"{self.host_url}/user/token",
             data={"username": self.username, "password": self.password},
@@ -212,7 +230,9 @@ class MBClient:
         if result.status_code != HTTPStatus.OK:
             return {}
 
-        return {"Authorization": f"Bearer {result.json()['access_token']}"}
+        self._token = MBToken(result.json()["access_token"])
+
+        return {"Authorization": f"Bearer {self._token.token}"}
 
     async def me(self):
         result = await self.client.get("/user/whoami", headers=await self._header())
