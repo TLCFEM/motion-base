@@ -224,11 +224,16 @@ export function createDownloadLink(obj: any) {
 
 export const [backend, setBackend] = createSignal<boolean>(false);
 
-export async function check_backend() {
-    try {
-        await axios.get("/alive", { timeout: 2000 });
-        return true;
-    } catch {
-        return false;
+export async function check_backend(retry: number = 3, backoff: number = 5000) {
+    for (let attempt = 0; attempt <= retry; attempt++) {
+        try {
+            await axios.get("/alive", { timeout: 2000 });
+            return true;
+        } catch {
+            if (attempt === retry) return false;
+            await new Promise((resolve) => setTimeout(resolve, backoff));
+        }
     }
+
+    return false;
 }
