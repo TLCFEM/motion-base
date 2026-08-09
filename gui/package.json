@@ -11,7 +11,7 @@
     },
     "devDependencies": {
         "@types/leaflet": "^1.9.22",
-        "@types/node": "^26.1.2",
+        "@types/node": "^26.2.0",
         "@types/plotly.js-basic-dist-min": "^2.12.4",
         "prettier": "^3.9.6",
         "solid-devtools": "^0.34.5",
@@ -27,7 +27,7 @@
         "axios": "^1.19.0",
         "highlight.js": "^11.11.1",
         "leaflet": "^1.9.4",
-        "marked": "^18.0.7",
+        "marked": "^18.0.9",
         "marked-highlight": "^2.2.4",
         "plotly.js-basic-dist-min": "^3.7.0",
         "solid-js": "^1.9.14",
