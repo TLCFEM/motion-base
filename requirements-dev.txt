@@ -50,10 +50,10 @@ gevent==26.8.0            # via geventhttpclient, locust
 geventhttpclient==2.3.9   # via locust
 greenlet==3.5.5           # via gevent
 h11==0.16.0               # via httpcore2, uvicorn, wsproto
-httpcore2==2.10.0         # via httpx2
+httpcore2==2.12.0         # via httpx2
 httptools==0.8.0          # via uvicorn
-httpx2==2.10.0            # via motion-base (pyproject.toml)
-idna==3.18                # via anyio, email-validator, httpx2, requests, yarl
+httpx2==2.12.0            # via motion-base (pyproject.toml)
+idna==3.19                # via anyio, email-validator, httpx2, requests, yarl
 iniconfig==2.3.0          # via pytest
 itsdangerous==2.2.0       # via flask
 jinja2==3.1.6             # via flask
@@ -85,22 +85,22 @@ pycares==5.0.1            # via aiodns
 pycparser==3.0            # via cffi
 pydantic==2.13.4          # via beanie, fastapi, lazy-model
 pydantic-core==2.46.4     # via pydantic
-pygments==2.20.0          # via pytest, rich
+pygments==2.21.0          # via pytest, rich
 pyinstrument==5.1.3       # via motion-base (pyproject.toml)
 pymongo==4.17.0           # via beanie
 pyparsing==3.3.2          # via matplotlib
 pytest==9.1.1             # via locust, pytest-cov
 pytest-cov==7.1.0         # via motion-base (pyproject.toml)
 python-dateutil==2.9.0.post0  # via aiobotocore, botocore, celery, elasticsearch, matplotlib
-python-dotenv==1.2.2      # via uvicorn, motion-base (pyproject.toml)
+python-dotenv==1.2.3      # via uvicorn, motion-base (pyproject.toml)
 python-engineio==4.13.5   # via locust, python-socketio
 python-multipart==0.0.32  # via motion-base (pyproject.toml)
 python-socketio==5.16.4   # via locust
 pyyaml==6.0.3             # via uvicorn
-pyzmq==27.1.0             # via locust
+pyzmq==27.2.0             # via locust
 requests==2.34.2          # via locust, python-socketio, motion-base (pyproject.toml)
 rich==15.0.0              # via motion-base (pyproject.toml)
-ruff==0.16.3              # via motion-base (pyproject.toml)
+ruff==0.16.4              # via motion-base (pyproject.toml)
 s3fs==2026.7.0            # via motion-base (pyproject.toml)
 scipy==1.17.1             # via motion-base (pyproject.toml)
 simple-websocket==1.1.0   # via python-engineio
@@ -116,7 +116,7 @@ tzdata==2026.3            # via kombu
 tzlocal==5.4.4            # via celery
 universal-pathlib==0.3.10  # via motion-base (pyproject.toml)
 urllib3==2.7.0            # via botocore, elastic-transport, geventhttpclient, requests
-uvicorn==0.52.3           # via motion-base (pyproject.toml)
+uvicorn==0.52.4           # via motion-base (pyproject.toml)
 uvloop==0.22.1            # via uvicorn
 vine==5.1.0               # via amqp, celery, kombu
 watchfiles==1.2.0         # via uvicorn
@@ -128,4 +128,4 @@ wrapt==2.3.0              # via aiobotocore
 wsproto==1.3.2            # via simple-websocket
 yarl==1.24.5              # via aiohttp
 zope-event==6.2           # via gevent
-zope-interface==8.5       # via gevent
+zope-interface==8.6       # via gevent

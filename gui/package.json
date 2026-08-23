@@ -27,10 +27,10 @@
         "axios": "^1.19.0",
         "highlight.js": "^11.12.0",
         "leaflet": "^1.9.4",
-        "marked": "^18.0.9",
+        "marked": "^18.0.10",
         "marked-highlight": "^2.2.4",
         "plotly.js-basic-dist-min": "^3.7.0",
-        "solid-js": "^1.9.14",
+        "solid-js": "^1.9.15",
         "tippy.js": "^6.3.7"
     },
     "volta": {
