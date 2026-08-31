@@ -36,7 +36,6 @@ dependencies = [
     "pyinstrument",
     "python-dotenv",
     "python-multipart",
-    "requests",
     "s3fs",
     "scipy",
     "structlog",
