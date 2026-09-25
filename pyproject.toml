@@ -1,18 +1,8 @@
 [build-system]
-requires = ["setuptools"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools"]
 
 [project]
-dynamic = ["version"]
-name = "motion-base"
-description = "a strong motion database"
-readme = "README.md"
-requires-python = ">=3.11"
-license = "GPL-3.0-or-later"
-license-files = ["LICENSE"]
-keywords = ["earthquake", "ground motion", "response history analysis", "strong motion", "seismology"]
-authors = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
-maintainers = [{ name = "Theodore Chang", email = "tlcfem@gmail.com" }]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Programming Language :: Python :: 3",
@@ -20,7 +10,7 @@ classifiers = [
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
     "Programming Language :: Python :: 3.14",
-    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3 :: Only"
 ]
 dependencies = [
     "aiohttp[speedups]",
@@ -40,36 +30,47 @@ dependencies = [
     "scipy",
     "structlog",
     "universal_pathlib",
-    "uvicorn[standard]",
+    "uvicorn[standard]"
 ]
+description = "a strong motion database"
+dynamic = ["version"]
+keywords = [
+    "earthquake",
+    "ground motion",
+    "response history analysis",
+    "strong motion",
+    "seismology"
+]
+license = "GPL-3.0-or-later"
+license-files = ["LICENSE"]
+name = "motion-base"
+readme = "README.md"
+requires-python = ">=3.11"
 
-[project.urls]
-"Homepage" = "https://github.com/TLCFEM/motion-base"
-"Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
-"Source" = "https://github.com/TLCFEM/motion-base"
+[[project.authors]]
+name = "Theodore Chang"
+email = "tlcfem@gmail.com"
+
+[[project.maintainers]]
+name = "Theodore Chang"
+email = "tlcfem@gmail.com"
 
 [project.optional-dependencies]
-dev = [
-    "httpx2",
-    "locust",
-    "pytest-cov",
-    "ruff",
-]
-client = [
-    "beautifulsoup4",
-    "click",
-    "httpx2",
-    "matplotlib",
-    "rich",
-]
+client = ["beautifulsoup4", "click", "httpx2", "matplotlib", "rich"]
+dev = ["httpx2", "locust", "pytest-cov", "ruff"]
+
+[project.urls]
+"Bug Reports" = "https://github.com/TLCFEM/motion-base/issuess"
+Homepage = "https://github.com/TLCFEM/motion-base"
+Source = "https://github.com/TLCFEM/motion-base"
+
+[tool.pyright]
+venv = ".venv"
+venvPath = "."
 
 [tool.pytest.ini_options]
 anyio_mode = "auto"
 
-[tool.pyright]
-venvPath = "."
-venv = ".venv"
-
 [tool.ruff.lint]
-select = ["E", "F", "UP", "B", "SIM", "I"]
 ignore = ["B008", "E501"]
+select = ["E", "F", "UP", "B", "SIM", "I"]
