@@ -197,7 +197,7 @@ services:
         - '-q'
         - ping
       timeout: 10s
-    image: rabbitmq:4.2-management
+    image: rabbitmq:management
     restart: always
     volumes:
       - motion_rabbitmq:/var/lib/rabbitmq

@@ -89,7 +89,7 @@ services:
         - '-q'
         - ping
       timeout: 10s
-    image: rabbitmq:4.2-management
+    image: rabbitmq:management
     ports:
       - ${RABBITMQ_PORT}:${RABBITMQ_PORT}
     restart: 'no'
