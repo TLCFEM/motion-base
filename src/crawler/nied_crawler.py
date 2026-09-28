@@ -21,7 +21,7 @@ from datetime import datetime
 from pathlib import Path
 
 import click
-from aiohttp import BasicAuth, ClientSession
+from aiohttp import ClientSession, encode_basic_auth
 from bs4 import BeautifulSoup
 
 BASE = "https://www.kyoshin.bosai.go.jp"
@@ -68,7 +68,9 @@ async def _fetch_file(
         print(f"{datetime.now()} {counter}/{total} Downloading {full_url}")
         try:
             async with client.get(
-                full_url, auth=BasicAuth(USER, PASS), timeout=None
+                full_url,
+                headers={"Authorization": encode_basic_auth(USER, PASS)},
+                timeout=None,
             ) as response:
                 if not response.ok:
                     return
@@ -127,7 +129,9 @@ async def _parse_next(
 
     async with semaphore:
         print(f"Creating directory: {local} from {remote}")
-        async with client.get(remote, auth=BasicAuth(USER, PASS)) as response:
+        async with client.get(
+            remote, headers={"Authorization": encode_basic_auth(USER, PASS)}
+        ) as response:
             if not response.ok:
                 print(f">>> Error: {remote}")
                 pending_pool.add((local, remote))
