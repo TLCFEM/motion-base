@@ -60,7 +60,7 @@ spec:
               memory: "1Gi"
               cpu: "0.5"
         - name: mb-elasticsearch
-          image: elasticsearch:9.5.2
+          image: elasticsearch:9.5.3
           imagePullPolicy: Always
           ports:
             - containerPort: 9200
