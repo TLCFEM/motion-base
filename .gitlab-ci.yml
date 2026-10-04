@@ -2,7 +2,7 @@ stages:
   - test
 test:
   before_script:
-    - pip install -e --pre ".[dev]"
+    - pip install --pre -e ".[dev]"
   image: python:${PYTHON_VERSION}-slim
   parallel:
     matrix:
