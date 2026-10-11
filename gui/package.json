@@ -11,12 +11,12 @@
     },
     "devDependencies": {
         "@types/leaflet": "^1.9.22",
-        "@types/node": "^26.6.4",
+        "@types/node": "^26.6.5",
         "@types/plotly.js-basic-dist-min": "^2.12.4",
-        "prettier": "^3.9.9",
+        "prettier": "^3.9.10",
         "solid-devtools": "^0.34.5",
         "typescript": "^7.0.2",
-        "vite": "^6.4.3",
+        "vite": "^6.4.4",
         "vite-plugin-solid": "^2.11.14"
     },
     "dependencies": {
@@ -27,10 +27,10 @@
         "axios": "^1.20.0",
         "highlight.js": "^11.12.0",
         "leaflet": "^1.9.4",
-        "marked": "^18.0.14",
+        "marked": "^18.1.0",
         "marked-highlight": "^2.2.4",
-        "plotly.js-basic-dist-min": "^4.1.1",
-        "solid-js": "^1.9.15",
+        "plotly.js-basic-dist-min": "^4.1.2",
+        "solid-js": "^1.9.17",
         "tippy.js": "^6.3.7"
     },
     "volta": {
