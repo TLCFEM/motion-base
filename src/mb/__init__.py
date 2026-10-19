@@ -15,9 +15,6 @@
 
 from __future__ import annotations
 
-import sys
-from uuid import uuid4
-
 from pydantic import BaseModel, Field
 
 
@@ -26,23 +23,17 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
-    celery: bool = Field(default=False)
+    taskiq: bool = Field(default=False)
     debug: bool = Field(default=False)
-    celery_config: list = Field(default_factory=list)
+    taskiq_config: list = Field(default_factory=list)
 
 
 def run_app(setting: Config):
-    if setting.celery:
-        from mb.celery import celery
+    if setting.taskiq:
+        from taskiq.cli.worker.args import WorkerArgs
+        from taskiq.cli.worker.run import run_worker
 
-        args: list = ["worker"]
-        args.extend(setting.celery_config)
-        if sys.platform == "win32":
-            args.extend(
-                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
-            )
-
-        celery.start(args)
+        run_worker(WorkerArgs.from_cli(setting.taskiq_config))
     else:
         from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 

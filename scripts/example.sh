@@ -14,7 +14,7 @@ If not, please check this page: https://docs.docker.com/engine/install/linux-pos
 It means the setup only includes the \033[1;36mminimum simplest configuration\033[0m required to run the application.
 Typically, most docker services shall be run \033[1;31mbehind a reverse proxy\033[0m.
 Only the necessary ports and services shall be \033[1;31mexposed to the public\033[0m.
-Also, a production setup shall deploy \033[1;36mcelery workers\033[0m to handle processing tasks in the background.
+Also, a production setup shall deploy \033[1;36mtaskiq workers\033[0m to handle processing tasks in the background.
 \033[1;31mThese are not included in this script.\033[0m
 
 This script will create a \033[1;36mnew directory\033[0m called '\033[1;36mmb-example\033[0m' in the current directory.

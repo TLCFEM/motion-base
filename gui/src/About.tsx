@@ -22,7 +22,6 @@ import tippy_logo from "./assets/tippy.svg";
 import plotly_logo from "./assets/plotly.svg";
 import leaflet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
-import celery_logo from "./assets/celery.png";
 import scipy_logo from "./assets/scipy.svg";
 import { backend, check_backend, post_total_api, QueryConfig, setBackend } from "./API";
 import { Box, Button, Link, Modal, Stack, Typography, useTheme } from "./ui";
@@ -124,9 +123,6 @@ export default function AboutModal() {
                         </Link>
                         <Link href="https://beanie-odm.dev/">
                             <img src={beanie_logo} alt="beanie" height="40px" />
-                        </Link>
-                        <Link href="https://docs.celeryq.dev/en/stable/">
-                            <img src={celery_logo} alt="celery" height="40px" />
                         </Link>
                         <Link href="https://scipy.org/">
                             <img src={scipy_logo} alt="scipy" height="40px" />

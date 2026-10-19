@@ -1,17 +1,4 @@
 services:
-  def-flower:
-    command: >-
-      celery
-      --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:${RABBITMQ_PORT}/vhost
-      flower
-      --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@dev-rabbitmq:15672/api/vhost
-    container_name: dev-flower
-    image: mher/flower
-    ports:
-      - '5555:5555'
-    restart: 'no'
-    volumes:
-      - flower:/data
   dev-elasticsearch:
     container_name: dev-elasticsearch
     environment:
@@ -119,7 +106,6 @@ services:
       - seaweedfs_data:/data
 volumes:
   elasticsearch: null
-  flower: null
   mongo_config: null
   mongo_data: null
   rabbitmq: null
