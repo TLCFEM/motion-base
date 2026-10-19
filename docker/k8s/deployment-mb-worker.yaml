@@ -21,9 +21,6 @@ spec:
           imagePullPolicy: Always
           args:
             - taskiq
-            - mb.taskiq:broker
-            - mb.app.jp
-            - mb.app.nz
           env:
             - name: MB_SECRET_KEY
               valueFrom:

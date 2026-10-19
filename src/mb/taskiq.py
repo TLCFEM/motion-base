@@ -42,7 +42,6 @@ broker = (
     )
     .with_middlewares(
         SmartRetryMiddleware(
-            # Taskiq counts total attempts, so four attempts equal three retries.
             default_retry_count=4,
             default_delay=10,
             types_of_exceptions=(
@@ -88,9 +87,6 @@ async def has_workers() -> bool:
         return False
 
     try:
-        # Ask the broker directly. AioPikaBroker caches declared queues, so a
-        # normal passive declare would return the stale consumer count from
-        # startup instead of the current one.
         channel = await broker.write_channel.get_underlay_channel()
         declaration = await channel.queue_declare(QUEUE_NAME, passive=True)
     except Exception:

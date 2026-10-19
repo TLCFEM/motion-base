@@ -43,7 +43,7 @@ taskiq worker mb.taskiq:broker mb.app.jp mb.app.nz
 The same command is available through the bundled runner:
 
 ```bash
-python mb_runner.py taskiq mb.taskiq:broker mb.app.jp mb.app.nz
+python mb_runner.py taskiq
 ```
 
 For reverse-proxy deployment, see `docker/docker-compose-production-nginx.yaml`.

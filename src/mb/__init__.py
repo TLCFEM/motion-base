@@ -25,7 +25,6 @@ class Config(BaseModel):
     overwrite_env: bool = Field(default=False)
     taskiq: bool = Field(default=False)
     debug: bool = Field(default=False)
-    taskiq_config: list = Field(default_factory=list)
 
 
 def run_app(setting: Config):
@@ -33,7 +32,7 @@ def run_app(setting: Config):
         from taskiq.cli.worker.args import WorkerArgs
         from taskiq.cli.worker.run import run_worker
 
-        run_worker(WorkerArgs.from_cli(setting.taskiq_config))
+        run_worker(WorkerArgs.from_cli(["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]))
     else:
         from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 

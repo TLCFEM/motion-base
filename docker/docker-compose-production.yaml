@@ -74,7 +74,7 @@ services:
       - '3000:3000'
     restart: always
   mb-worker:
-    command: taskiq mb.taskiq:broker mb.app.jp mb.app.nz
+    command: taskiq
     container_name: mb-worker
     depends_on:
       elasticsearch:

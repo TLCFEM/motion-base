@@ -33,7 +33,6 @@ def config_and_run():
     while index < len(sys.argv):
         if sys.argv[index].startswith("t"):
             config.taskiq = True
-            config.taskiq_config = sys.argv[index + 1 :]
             break
 
         if sys.argv[index].startswith("w"):
