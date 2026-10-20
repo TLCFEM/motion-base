@@ -16,7 +16,7 @@
 import sys
 from multiprocessing import freeze_support
 
-from mb import Config, run_app
+from mb import Config, run_app, run_worker
 
 
 def config_and_run():
@@ -32,7 +32,7 @@ def config_and_run():
 
     while index < len(sys.argv):
         if sys.argv[index].startswith("t"):
-            config.taskiq = True
+            run_worker()
             break
 
         if sys.argv[index].startswith("w"):

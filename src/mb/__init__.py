@@ -23,38 +23,36 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
-    taskiq: bool = Field(default=False)
     debug: bool = Field(default=False)
 
 
 def run_app(setting: Config):
-    if setting.taskiq:
-        from taskiq.cli.worker.args import WorkerArgs
-        from taskiq.cli.worker.run import run_worker
+    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 
-        run_worker(WorkerArgs.from_cli(["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]))
-    else:
-        from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
+    config: dict = {}
 
-        config: dict = {}
+    if (
+        workers := setting.workers if setting.overwrite_env else int(MB_FASTAPI_WORKERS)
+    ) > 1:
+        config["workers"] = workers
+    elif setting.debug:
+        config["reload"] = True
+        config["log_level"] = "debug"
 
-        if (
-            workers := setting.workers
-            if setting.overwrite_env
-            else int(MB_FASTAPI_WORKERS)
-        ) > 1:
-            config["workers"] = workers
-        elif setting.debug:
-            config["reload"] = True
-            config["log_level"] = "debug"
+    if (port := setting.port if setting.overwrite_env else int(MB_PORT)) != 8000:
+        config["port"] = port
 
-        if (port := setting.port if setting.overwrite_env else int(MB_PORT)) != 8000:
-            config["port"] = port
+    if setting.host:
+        config["host"] = setting.host
 
-        if setting.host:
-            config["host"] = setting.host
+    import uvicorn
 
-        import uvicorn
+    print(f"Run the app with the following arguments: {config}.")
+    uvicorn.run("mb.app.main:app", **config)
 
-        print(f"Run the app with the following arguments: {config}.")
-        uvicorn.run("mb.app.main:app", **config)
+
+def run_worker():
+    from taskiq.cli.worker.args import WorkerArgs
+    from taskiq.cli.worker.run import run_worker
+
+    run_worker(WorkerArgs.from_cli(["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]))
