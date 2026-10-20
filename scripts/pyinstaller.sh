@@ -17,6 +17,6 @@ if ! command -v pyinstaller &>/dev/null; then
   fi
 fi
 
-pyinstaller --onefile --additional-hooks-dir extra-hooks --hidden-import mb.app.main ./mb_runner.py
+pyinstaller --onefile --additional-hooks-dir extra-hooks --hidden-import mb.app.main --hidden-import mb.app.jp --hidden-import mb.app.nz --hidden-import mb.taskiq ./mb_runner.py
 pyinstaller --onefile src/crawler/nied_crawler.py
 pyinstaller --onefile src/crawler/nzsm_crawler.py

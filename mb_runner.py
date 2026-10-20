@@ -16,7 +16,7 @@
 import sys
 from multiprocessing import freeze_support
 
-from mb import Config, run_app
+from mb import Config, run_app, run_worker
 
 
 def config_and_run():
@@ -31,9 +31,8 @@ def config_and_run():
         return sys.argv[index]
 
     while index < len(sys.argv):
-        if sys.argv[index].startswith("c"):
-            config.celery = True
-            config.celery_config = sys.argv[index + 1 :]
+        if sys.argv[index].startswith("t"):
+            run_worker()
             break
 
         if sys.argv[index].startswith("w"):

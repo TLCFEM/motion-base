@@ -15,9 +15,6 @@
 
 from __future__ import annotations
 
-import sys
-from uuid import uuid4
-
 from pydantic import BaseModel, Field
 
 
@@ -26,45 +23,36 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
-    celery: bool = Field(default=False)
     debug: bool = Field(default=False)
-    celery_config: list = Field(default_factory=list)
 
 
 def run_app(setting: Config):
-    if setting.celery:
-        from mb.celery import celery
+    from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
 
-        args: list = ["worker"]
-        args.extend(setting.celery_config)
-        if sys.platform == "win32":
-            args.extend(
-                ["--pool", "solo", "--hostname", uuid4().hex, "--loglevel", "error"]
-            )
+    config: dict = {}
 
-        celery.start(args)
-    else:
-        from mb.utility.env import MB_FASTAPI_WORKERS, MB_PORT
+    if (
+        workers := setting.workers if setting.overwrite_env else int(MB_FASTAPI_WORKERS)
+    ) > 1:
+        config["workers"] = workers
+    elif setting.debug:
+        config["reload"] = True
+        config["log_level"] = "debug"
 
-        config: dict = {}
+    if (port := setting.port if setting.overwrite_env else int(MB_PORT)) != 8000:
+        config["port"] = port
 
-        if (
-            workers := setting.workers
-            if setting.overwrite_env
-            else int(MB_FASTAPI_WORKERS)
-        ) > 1:
-            config["workers"] = workers
-        elif setting.debug:
-            config["reload"] = True
-            config["log_level"] = "debug"
+    if setting.host:
+        config["host"] = setting.host
 
-        if (port := setting.port if setting.overwrite_env else int(MB_PORT)) != 8000:
-            config["port"] = port
+    import uvicorn
 
-        if setting.host:
-            config["host"] = setting.host
+    print(f"Run the app with the following arguments: {config}.")
+    uvicorn.run("mb.app.main:app", **config)
 
-        import uvicorn
 
-        print(f"Run the app with the following arguments: {config}.")
-        uvicorn.run("mb.app.main:app", **config)
+def run_worker():
+    from taskiq.cli.worker.args import WorkerArgs
+    from taskiq.cli.worker.run import run_worker
+
+    run_worker(WorkerArgs.from_cli(["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]))

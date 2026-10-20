@@ -20,13 +20,11 @@ from asyncio import gather
 from http import HTTPStatus
 
 import structlog
-from elastic_transport import ConnectionTimeout
 from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, UploadFile
-from pymongo.errors import ServerSelectionTimeoutError
 
-from ..celery import celery, execute_task
 from ..record.async_record import create_task, delete_task
 from ..record.parser import ParserNIED
+from ..taskiq import broker
 from ..utility.files import FileProxy, commit_files
 from .dispatcher import dispatch
 from .response import UploadResponse
@@ -81,24 +79,15 @@ async def _parse_archive_local(
     )
 
 
-@celery.task(
-    autoretry_for=(
-        ConnectionError,
-        TimeoutError,
-        ConnectionTimeout,
-        ServerSelectionTimeoutError,
-    ),
-    retry_kwargs={"max_retries": 3},
-    default_retry_delay=10,
-)
-def _parse_archive(
+@broker.task(retry_on_error=True)
+async def _parse_archive(
     archive_uri: str,
     user_id: str,
     task_id: str | None = None,
     overwrite_existing: bool = True,
 ) -> list[str]:
-    return execute_task(
-        _parse_archive_impl(archive_uri, user_id, task_id, overwrite_existing, False)
+    return await _parse_archive_impl(
+        archive_uri, user_id, task_id, overwrite_existing, False
     )
 
 

@@ -30,6 +30,7 @@ from starlette.middleware.cors import CORSMiddleware
 from starlette.middleware.gzip import GZipMiddleware
 
 from ..record.async_record import MetadataRecord, Record, UploadTask
+from ..taskiq import broker
 from ..utility.config import init_mongo
 from ..utility.elastic import async_elastic
 from ..utility.env import TURNSTILE_SECRET
@@ -63,7 +64,11 @@ from .utility import (
 async def lifespan(_: FastAPI):
     async with init_mongo():
         await create_superuser()
-        yield
+        await broker.startup()
+        try:
+            yield
+        finally:
+            await broker.shutdown()
 
 
 async def profile_request(request, call_next):

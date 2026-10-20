@@ -20,7 +20,7 @@ spec:
           image: tlcfem/motion-base:back
           imagePullPolicy: Always
           args:
-            - celery
+            - taskiq
           env:
             - name: MB_SECRET_KEY
               valueFrom:

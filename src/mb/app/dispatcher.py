@@ -16,8 +16,8 @@
 
 from fastapi import BackgroundTasks
 
-from ..celery import get_stats
 from ..record.async_record import create_task
+from ..taskiq import has_workers
 from .response import UploadResponse
 
 
@@ -31,10 +31,10 @@ async def dispatch(
 ):
     task_id_pool: list[str] = []
 
-    if get_stats() is not None:
+    if await has_workers():
         for archive_uri in valid_uris:
             task_id: str = await create_task()
-            parse_archive.delay(archive_uri, user_id, task_id, overwrite_existing)
+            await parse_archive.kiq(archive_uri, user_id, task_id, overwrite_existing)
             task_id_pool.append(task_id)
     else:
         for archive_uri in valid_uris:

@@ -19,22 +19,6 @@ services:
     restart: always
     volumes:
       - motion_elasticsearch:/usr/share/elasticsearch/data
-  flower:
-    command: >-
-      celery
-      --broker=amqp://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:${RABBITMQ_PORT}/vhost
-      flower
-      --broker_api=http://${RABBITMQ_USERNAME}:${RABBITMQ_PASSWORD}@rabbitmq:15672/api/vhost
-    container_name: flower
-    depends_on:
-      rabbitmq:
-        condition: service_healthy
-    image: mher/flower
-    ports:
-      - '5555:5555'
-    restart: always
-    volumes:
-      - motion_flower:/data
   mb-back:
     depends_on:
       elasticsearch:
@@ -93,7 +77,7 @@ services:
       - '3000:3000'
     restart: always
   mb-worker:
-    command: celery
+    command: taskiq
     container_name: mb-worker
     depends_on:
       - mongo
@@ -212,7 +196,6 @@ services:
       - motion_seaweedfs:/data
 volumes:
   motion_elasticsearch: null
-  motion_flower: null
   motion_mongo: null
   motion_mongoconfig: null
   motion_rabbitmq: null
