@@ -23,6 +23,8 @@ class Config(BaseModel):
     host: str | None = Field(default=None)
     port: int = Field(default=8000, ge=1)
     overwrite_env: bool = Field(default=False)
+    worker: bool = Field(default=False)
+    worker_config: list[str] = Field(default_factory=list)
     debug: bool = Field(default=False)
 
 
@@ -51,8 +53,11 @@ def run_app(setting: Config):
     uvicorn.run("mb.app.main:app", **config)
 
 
-def run_worker():
+def run_worker(setting: Config):
     from taskiq.cli.worker.args import WorkerArgs
     from taskiq.cli.worker.run import run_worker
 
-    run_worker(WorkerArgs.from_cli(["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]))
+    args: list[str] = ["mb.taskiq:broker", "mb.app.jp", "mb.app.nz"]
+    args.extend(setting.worker_config)
+
+    run_worker(WorkerArgs.from_cli(args))

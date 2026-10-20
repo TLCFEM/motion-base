@@ -32,7 +32,8 @@ def config_and_run():
 
     while index < len(sys.argv):
         if sys.argv[index].startswith("t"):
-            run_worker()
+            config.worker = True
+            config.worker_config = sys.argv[index + 1 :]
             break
 
         if sys.argv[index].startswith("w"):
@@ -48,7 +49,7 @@ def config_and_run():
 
         index += 1
 
-    run_app(config)
+    (run_worker if config.worker else run_app)(config)
 
 
 if __name__ == "__main__":

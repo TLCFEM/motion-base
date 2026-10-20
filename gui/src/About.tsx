@@ -17,6 +17,7 @@ import { createSignal, onMount } from "solid-js";
 import mongodb_logo from "./assets/mongodb.svg";
 import fastapi_logo from "./assets/fastapi.svg";
 import beanie_logo from "./assets/beanie.svg";
+import taskiq_logo from "./assets/taskiq.svg";
 import solid_logo from "./assets/solid.svg";
 import tippy_logo from "./assets/tippy.svg";
 import plotly_logo from "./assets/plotly.svg";
@@ -123,6 +124,9 @@ export default function AboutModal() {
                         </Link>
                         <Link href="https://beanie-odm.dev/">
                             <img src={beanie_logo} alt="beanie" height="40px" />
+                        </Link>
+                        <Link href="https://taskiq-python.github.io/">
+                            <img src={taskiq_logo} alt="taskiq" height="40px" />
                         </Link>
                         <Link href="https://scipy.org/">
                             <img src={scipy_logo} alt="scipy" height="40px" />
