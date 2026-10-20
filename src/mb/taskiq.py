@@ -56,28 +56,20 @@ broker = (
 mongo_client: AsyncMongoClient | None = None
 
 
-async def startup(db: str | None = None):
+@broker.on_event(TaskiqEvents.WORKER_STARTUP)
+async def init_mongo_in_taskiq_worker(_):
     global mongo_client
     if mongo_client is None:
         mongo_client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
-        await mb_init_beanie(mongo_client, db)  # noqa
-
-
-async def shutdown():
-    global mongo_client
-    if mongo_client is not None:
-        await mongo_client.close()
-        mongo_client = None
-
-
-@broker.on_event(TaskiqEvents.WORKER_STARTUP)
-async def init_mongo_in_taskiq_worker(_):
-    await startup()
+        await mb_init_beanie(mongo_client, None)  # noqa
 
 
 @broker.on_event(TaskiqEvents.WORKER_SHUTDOWN)
 async def shutdown_mongo_in_taskiq_worker(_):
-    await shutdown()
+    global mongo_client
+    if mongo_client is not None:
+        await mongo_client.close()
+        mongo_client = None
 
 
 async def has_workers() -> bool:
