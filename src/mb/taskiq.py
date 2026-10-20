@@ -73,12 +73,12 @@ async def shutdown():
 
 
 @broker.on_event(TaskiqEvents.WORKER_STARTUP)
-async def init_mongo_in_taskiq_worker(**_):
+async def init_mongo_in_taskiq_worker(_):
     await startup()
 
 
 @broker.on_event(TaskiqEvents.WORKER_SHUTDOWN)
-async def shutdown_mongo_in_taskiq_worker(*_, **__):
+async def shutdown_mongo_in_taskiq_worker(_):
     await shutdown()
 
 
