@@ -26,8 +26,6 @@ from taskiq_mongodb import MongoResultBackend
 from mb.utility.config import mb_init_beanie, mongo_uri, rabbitmq_uri
 from mb.utility.env import MONGO_DB_NAME
 
-QUEUE_NAME = "taskiq"
-
 broker = (
     AioPikaBroker(
         rabbitmq_uri(),
@@ -62,7 +60,7 @@ async def startup(db: str | None = None):
     global mongo_client
     if mongo_client is None:
         mongo_client = AsyncMongoClient(mongo_uri(), uuidRepresentation="standard")
-        await mb_init_beanie(mongo_client, db)
+        await mb_init_beanie(mongo_client, db)  # noqa
 
 
 async def shutdown():
@@ -88,8 +86,8 @@ async def has_workers() -> bool:
 
     try:
         channel = await broker.write_channel.get_underlay_channel()
-        declaration = await channel.queue_declare(QUEUE_NAME, passive=True)
-    except Exception:
+        declaration = await channel.queue_declare("taskiq", passive=True)
+    except Exception:  # noqa
         return False
 
     return declaration is not None and (declaration.consumer_count or 0) > 0
