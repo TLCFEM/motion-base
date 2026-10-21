@@ -60,17 +60,20 @@ It returns `None` when the request fails.
 ```python
 from mb.app.response import PaginationConfig, QueryConfig
 
-records = await client.search(
-    QueryConfig(
-        region="jp",
-        min_magnitude=6.0,
-        min_pga=200.0,
-        pagination=PaginationConfig(
-            page_size=50,
-            sort_by="-maximum_acceleration",
-        ),
+records = (
+    await client.search(
+        QueryConfig(
+            region="jp",
+            min_magnitude=6.0,
+            min_pga=200.0,
+            pagination=PaginationConfig(
+                page_size=50,
+                sort_by="-maximum_acceleration",
+            ),
+        )
     )
-) or []
+    or []
+)
 
 for record in records:
     print(record.id, record.file_name, record.maximum_acceleration)

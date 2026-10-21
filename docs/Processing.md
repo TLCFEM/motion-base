@@ -174,9 +174,10 @@ from mb.client import MBClient
 
 async def main():
     async with MBClient("http://localhost:8000") as client:
-        records = await client.search(
-            QueryConfig(pagination=PaginationConfig(page_size=5))
-        ) or []
+        records = (
+            await client.search(QueryConfig(pagination=PaginationConfig(page_size=5)))
+            or []
+        )
 
         await client.download(records)
 

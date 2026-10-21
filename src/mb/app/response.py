@@ -22,9 +22,6 @@ from typing import Literal
 import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
 
-from ..record.response_spectrum import response_spectrum
-from ..record.utility import apply_filter, zero_stuff
-
 
 class MetadataResponse(BaseModel):
     """
@@ -122,6 +119,8 @@ class RecordResponse(RawRecordResponse):
         return self
 
     def filter(self, window, up_ratio: int = 1):
+        from ..record.utility import apply_filter, zero_stuff
+
         self.time_interval /= up_ratio
         # noinspection PyTypeChecker
         self.waveform = apply_filter(
@@ -142,6 +141,8 @@ class RecordResponse(RawRecordResponse):
     def to_response_spectrum(
         self, damping_ratio: float, period: list[float] | np.ndarray
     ):
+        from ..record.response_spectrum import response_spectrum
+
         if isinstance(period, np.ndarray):
             # noinspection PyTypeChecker
             self.period = period.tolist()

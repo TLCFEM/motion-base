@@ -260,16 +260,19 @@ from mb.client import MBClient
 
 
 async with MBClient("https://tlcfem.top/mb/api") as client:
-    records = await client.search(
-        QueryConfig(
-            min_magnitude=6.0,
-            min_pga=200.0,
-            pagination=PaginationConfig(
-                page_size=20,
-                sort_by="-maximum_acceleration",
-            ),
+    records = (
+        await client.search(
+            QueryConfig(
+                min_magnitude=6.0,
+                min_pga=200.0,
+                pagination=PaginationConfig(
+                    page_size=20,
+                    sort_by="-maximum_acceleration",
+                ),
+            )
         )
-    ) or []
+        or []
+    )
 
     for record in records:
         print(record.id, record.file_name)

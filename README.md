@@ -73,13 +73,16 @@ from mb.client import MBClient
 
 async def main():
     async with MBClient("https://tlcfem.top/mb/api", timeout=20) as client:
-        records = await client.search(
-            QueryConfig(
-                min_magnitude=6,
-                min_pga=200,
-                pagination=PaginationConfig(page_size=20),
+        records = (
+            await client.search(
+                QueryConfig(
+                    min_magnitude=6,
+                    min_pga=200,
+                    pagination=PaginationConfig(page_size=20),
+                )
             )
-        ) or []
+            or []
+        )
 
         await client.download(records)
         for record in client:
