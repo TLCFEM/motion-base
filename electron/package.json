@@ -9,6 +9,7 @@
     "build:ui": "node scripts/build-ui.js",
     "start": "node scripts/build-ui.js && electron-forge start",
     "package": "node scripts/build-ui.js && electron-forge package",
+    "portable": "node scripts/build-ui.js && electron-forge make --targets @electron-forge/maker-zip",
     "make": "node scripts/build-ui.js && electron-forge make",
     "publish": "node scripts/build-ui.js && electron-forge publish"
   },

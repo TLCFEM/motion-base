@@ -43,8 +43,31 @@ MB_API_URL=https://example.com/mb/api pnpm start
 
 ```bash
 pnpm package   # unpacked application in out/
-pnpm make      # installers in out/make/
+pnpm portable  # compressed, installation-free archive in out/make/zip/
+pnpm make      # installers and the portable archive in out/make/
 ```
+
+The portable archive contains the complete application directory and needs no
+installation. Extract it and run the executable inside.
+
+```bash
+pnpm portable
+unzip "out/make/zip/linux/x64/Motion Base-linux-x64-1.0.0.zip" -d motion-base
+./motion-base/Motion\ Base-linux-x64/motion-base
+```
+
+On Windows, run `motion-base.exe` from the extracted directory. On macOS, the
+archive contains `Motion Base.app`.
+
+The command builds for the current platform and architecture by default. Pass
+Electron Forge's `--platform` and `--arch` options for other targets.
+
+```bash
+pnpm portable -- --platform=win32 --arch=x64
+```
+
+The same ZIP archive is produced by `pnpm make` alongside the Squirrel, DEB, and
+RPM installers.
 
 The build step is shared by all commands. The following environment variables
 are available for special cases:
