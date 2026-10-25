@@ -1338,6 +1338,9 @@ table.data tbody tr.selected td {
 /* Leaflet --------------------------------------------------------------- */
 
 .leaflet-container {
+    position: relative;
+    z-index: 0;
+    isolation: isolate;
     font-family: var(--font);
     background: var(--map-bg);
 }
