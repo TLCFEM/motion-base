@@ -148,22 +148,14 @@ a:hover {
     min-width: 0;
 }
 
-.brand::before {
-    content: "M";
+.brand-mark {
+    grid-column: 1;
     grid-row: 1 / span 2;
-    display: grid;
-    place-items: center;
+    display: block;
     width: 2.15rem;
     height: 2.15rem;
-    border-radius: 11px;
-    background: linear-gradient(140deg, #14b8a6 0%, #0d9488 45%, #0f766e 100%);
-    color: #fff;
-    font-size: 0.98rem;
-    font-weight: 800;
-    letter-spacing: -0.02em;
-    box-shadow:
-        0 8px 18px -8px rgba(13, 148, 136, 0.8),
-        inset 0 1px 0 rgba(255, 255, 255, 0.3);
+    object-fit: contain;
+    filter: drop-shadow(0 6px 12px rgba(13, 148, 136, 0.22));
 }
 
 .brand strong {

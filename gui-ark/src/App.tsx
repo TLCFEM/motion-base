@@ -12,6 +12,7 @@ import hljs from "highlight.js/lib/common";
 import { Component, createEffect, createResource, createSignal, Match, onCleanup, onMount, Switch } from "solid-js";
 import AboutModal from "./About";
 import { check_backend, get_total_api } from "./api";
+import mb_logo from "./assets/logo.svg";
 import Jackpot from "./Jackpot";
 import Process from "./Process";
 import QueryDatabase from "./Query";
@@ -67,6 +68,7 @@ const App: Component = () => {
         <Tabs.Root value={mode()} onValueChange={(details) => details.value && setMode(details.value as Mode)}>
             <header class="app-header">
                 <div class="brand">
+                    <img class="brand-mark" src={mb_logo} alt="" aria-hidden="true" />
                     <strong>Motion Base</strong>
                     <span classList={{ online: online() === true, offline: online() === false }}>{subtitle()}</span>
                 </div>
