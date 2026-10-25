@@ -28,9 +28,11 @@ export interface TextFieldProps {
     class?: string;
 }
 
+const fieldClass = (className?: string) => (className ? `field ${className}` : "field");
+
 export function TextField(props: TextFieldProps) {
     return (
-        <Field.Root class={`field ${props.class ?? ""}`} invalid={props.invalid} disabled={props.disabled} title={props.title}>
+        <Field.Root class={fieldClass(props.class)} invalid={props.invalid} disabled={props.disabled} title={props.title}>
             <Field.Label class="field-label">{props.label}</Field.Label>
             <Field.Input
                 id={props.id}
@@ -71,7 +73,7 @@ export function CheckboxField(props: CheckboxFieldProps) {
             <Checkbox.Control class="check-control">
                 <Checkbox.Indicator class="check-indicator">✓</Checkbox.Indicator>
             </Checkbox.Control>
-            <Checkbox.Label class="check-label">{props.label}</Checkbox.Label>
+            <Checkbox.Label>{props.label}</Checkbox.Label>
             <Checkbox.HiddenInput />
         </Checkbox.Root>
     );
@@ -99,7 +101,7 @@ export function SelectField(props: SelectFieldProps) {
     return (
         <Select.Root
             id={props.id}
-            class={`field ${props.class ?? ""}`}
+            class={fieldClass(props.class)}
             collection={collection}
             value={[props.value]}
             disabled={props.disabled}

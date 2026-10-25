@@ -149,22 +149,27 @@ export const emptyQueryForm = (): QueryForm => ({
 
 export const isNumeric = (value: string) => /^[-+]?\d*\.?\d+$/.test(value);
 
-export const ifError = (input: string) => input !== "" && (!isNumeric(input) || Number(input) <= 0);
+const positiveNumber = (value: string) => (isNumeric(value) && Number(value) > 0 ? Number(value) : undefined);
 
-const positive = (value: string) => (isNumeric(value) && Number(value) > 0 ? Number(value) : undefined);
+export const ifError = (input: string) => input !== "" && positiveNumber(input) === undefined;
 
 export function buildQueryConfig(form: QueryForm, area?: QueryArea): QueryConfig {
     const config: QueryConfig = { pagination: {} };
 
-    const pageSize = positive(form.pageSize);
-    const pageNumber = positive(form.pageNumber);
+    const pageSize = positiveNumber(form.pageSize);
+    const pageNumber = positiveNumber(form.pageNumber);
     if (pageSize) config.pagination.page_size = Math.min(1000, Math.round(pageSize));
     if (pageNumber) config.pagination.page_number = Math.round(pageNumber);
 
-    if (positive(form.minMagnitude)) config.min_magnitude = positive(form.minMagnitude);
-    if (positive(form.maxMagnitude)) config.max_magnitude = positive(form.maxMagnitude);
-    if (positive(form.minPGA)) config.min_pga = positive(form.minPGA);
-    if (positive(form.maxPGA)) config.max_pga = positive(form.maxPGA);
+    const minMagnitude = positiveNumber(form.minMagnitude);
+    const maxMagnitude = positiveNumber(form.maxMagnitude);
+    const minPGA = positiveNumber(form.minPGA);
+    const maxPGA = positiveNumber(form.maxPGA);
+    if (minMagnitude) config.min_magnitude = minMagnitude;
+    if (maxMagnitude) config.max_magnitude = maxMagnitude;
+    if (minPGA) config.min_pga = minPGA;
+    if (maxPGA) config.max_pga = maxPGA;
+
     if (form.fromDate) config.from_date = new Date(form.fromDate);
     if (form.toDate) config.to_date = new Date(form.toDate);
     if (form.fileName) config.file_name = form.fileName;
@@ -243,15 +248,25 @@ export function buildProcessConfig(form: ProcessForm): ProcessConfig {
     };
 
     if (form.normalised) config.normalised = true;
-    if (positive(form.upRatio) > 1) config.up_ratio = Math.round(Number(form.upRatio));
-    if (positive(form.downRatio) > 1) config.down_ratio = Math.round(Number(form.downRatio));
-    if (positive(form.filterLength) > 8) config.filter_length = Math.round(Number(form.filterLength));
-    if (positive(form.lowCut)) config.low_cut = Number(form.lowCut);
-    if (positive(form.highCut)) config.high_cut = Number(form.highCut);
-    if (positive(form.dampingRatio)) config.damping_ratio = Number(form.dampingRatio);
-    if (positive(form.periodStep)) config.period_step = Number(form.periodStep);
-    if (positive(form.periodEnd)) config.period_end = Number(form.periodEnd);
-    if (positive(form.removeHead)) config.remove_head = Number(form.removeHead);
+    const upRatio = positiveNumber(form.upRatio);
+    const downRatio = positiveNumber(form.downRatio);
+    const filterLength = positiveNumber(form.filterLength);
+    if (upRatio > 1) config.up_ratio = Math.round(upRatio);
+    if (downRatio > 1) config.down_ratio = Math.round(downRatio);
+    if (filterLength > 8) config.filter_length = Math.round(filterLength);
+
+    const lowCut = positiveNumber(form.lowCut);
+    const highCut = positiveNumber(form.highCut);
+    const dampingRatio = positiveNumber(form.dampingRatio);
+    const periodStep = positiveNumber(form.periodStep);
+    const periodEnd = positiveNumber(form.periodEnd);
+    const removeHead = positiveNumber(form.removeHead);
+    if (lowCut) config.low_cut = lowCut;
+    if (highCut) config.high_cut = highCut;
+    if (dampingRatio) config.damping_ratio = dampingRatio;
+    if (periodStep) config.period_step = periodStep;
+    if (periodEnd) config.period_end = periodEnd;
+    if (removeHead) config.remove_head = removeHead;
 
     return config;
 }

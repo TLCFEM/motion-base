@@ -33,7 +33,7 @@ import {
     SeismicRecord,
     toUTC,
 } from "./api";
-import { DefaultMap, epicenterIcon, selectedStationIcon, stationIcon } from "./Map";
+import { DefaultMap, epicenterIcon, selectedStationIcon, stationIcon, toLatLng } from "./Map";
 import { ErrorDialog, TextField } from "./ui";
 
 const features = tableFeatures({
@@ -428,9 +428,7 @@ const QueryMap: Component<{
             if (existingStation) {
                 existingStation.bindPopup(`Station Designation: ${record.station_code.toUpperCase()}`);
             } else {
-                const marker = L.marker(new LatLng(record.station_location[1], record.station_location[0]), {
-                    icon: stationIcon,
-                }).addTo(current);
+                const marker = L.marker(toLatLng(record.station_location), { icon: stationIcon }).addTo(current);
                 marker.bindPopup(`Station Designation: ${record.station_code.toUpperCase()}`);
                 stationMarkers.set(stationKey, marker);
             }
@@ -447,9 +445,7 @@ const QueryMap: Component<{
             if (existingEvent) {
                 existingEvent.bindPopup([...ids].join("<br>"));
             } else {
-                const marker = L.marker(new LatLng(record.event_location[1], record.event_location[0]), {
-                    icon: epicenterIcon,
-                }).addTo(current);
+                const marker = L.marker(toLatLng(record.event_location), { icon: epicenterIcon }).addTo(current);
                 marker.bindPopup([...ids].join("<br>"));
                 eventMarkers.set(eventKey, marker);
             }
@@ -466,7 +462,7 @@ const QueryMap: Component<{
 
         if (!record) return;
 
-        const location = new LatLng(record.station_location[1], record.station_location[0]);
+        const location = toLatLng(record.station_location);
         selectedMarker = L.marker(location, { icon: selectedStationIcon }).addTo(current);
         selectedMarker.bindPopup(record.id);
         selectedMarker.setZIndexOffset(9999);

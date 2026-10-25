@@ -11,6 +11,8 @@ export type Theme = "light" | "dark";
 
 const STORAGE_KEY = "mb-theme";
 
+const isTheme = (value: unknown): value is Theme => value === "light" || value === "dark";
+
 export function systemTheme(): Theme {
     if (typeof window === "undefined" || typeof window.matchMedia !== "function") return "light";
     return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
@@ -21,7 +23,7 @@ export function storedTheme(): Theme | null {
 
     try {
         const value = window.localStorage.getItem(STORAGE_KEY);
-        return value === "light" || value === "dark" ? value : null;
+        return isTheme(value) ? value : null;
     } catch {
         return null;
     }
@@ -32,7 +34,7 @@ export function initialTheme(): Theme {
     if (stored) return stored;
 
     const current = typeof document === "undefined" ? undefined : document.documentElement.dataset.theme;
-    return current === "light" || current === "dark" ? current : systemTheme();
+    return isTheme(current) ? current : systemTheme();
 }
 
 export const [theme, setThemeSignal] = createSignal<Theme>(initialTheme());

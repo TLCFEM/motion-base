@@ -9,7 +9,7 @@ import { Component, createEffect, createResource, createSignal, For, onCleanup, 
 import L, { LatLng } from "leaflet";
 import Plotly from "plotly.js-basic-dist-min";
 import { jackpot_waveform_api, SeismicRecord, toUTC } from "./api";
-import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
+import { DefaultMap, epicenterIcon, stationIcon, toLatLng } from "./Map";
 import { plotAxis, plotConfig, plotLayout } from "./plot";
 import { CheckboxField } from "./ui";
 
@@ -118,8 +118,8 @@ const Epicenter: Component<{ record: SeismicRecord | undefined; class?: string }
         const record = props.record;
         if (!current || !record || !eventMarker || !stationMarker) return;
 
-        const eventLocation = new LatLng(record.event_location[1], record.event_location[0]);
-        const stationLocation = new LatLng(record.station_location[1], record.station_location[0]);
+        const eventLocation = toLatLng(record.event_location);
+        const stationLocation = toLatLng(record.station_location);
 
         current.flyTo(eventLocation, 6);
         eventMarker.setLatLng(eventLocation).bindPopup(`Event Location: ${eventLocation}`);

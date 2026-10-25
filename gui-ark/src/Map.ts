@@ -7,14 +7,12 @@
 
 import L, { LatLng } from "leaflet";
 import "leaflet/dist/leaflet.css";
-import "leaflet/dist/images/layers.png";
-import "leaflet/dist/images/layers-2x.png";
 import markerRetina from "leaflet/dist/images/marker-icon-2x.png";
 import marker from "leaflet/dist/images/marker-icon.png";
-import markerRetina2 from "./assets/marker-icon2-2x.png";
-import marker2 from "./assets/marker-icon2.png";
 import shadow from "leaflet/dist/images/marker-shadow.png";
 import earthquake from "./assets/earthquake.svg";
+import markerRetina2 from "./assets/marker-icon2-2x.png";
+import marker2 from "./assets/marker-icon2.png";
 
 export function DefaultMap(container: string, centre: LatLng, zoom = 6) {
     const map = L.map(container).setView(centre, zoom);
@@ -27,34 +25,26 @@ export function DefaultMap(container: string, centre: LatLng, zoom = 6) {
     return map;
 }
 
-const LeafIcon = L.Icon.extend({
-    options: {
-        iconSize: [50, 50],
-        iconAnchor: [25, 25],
-        popupAnchor: [0, -20],
-    },
-}) as unknown as typeof L.Icon;
+export const toLatLng = (location: number[]) => new LatLng(location[1], location[0]);
 
-export const epicenterIcon = new LeafIcon({ iconUrl: earthquake });
-
-export const stationIcon = L.icon({
-    iconUrl: marker,
-    iconRetinaUrl: markerRetina,
-    shadowUrl: shadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    tooltipAnchor: [16, -28],
-    shadowSize: [41, 41],
+export const epicenterIcon = L.icon({
+    iconUrl: earthquake,
+    iconSize: [50, 50],
+    iconAnchor: [25, 25],
+    popupAnchor: [0, -20],
 });
 
-export const selectedStationIcon = L.icon({
-    iconUrl: marker2,
-    iconRetinaUrl: markerRetina2,
-    shadowUrl: shadow,
-    iconSize: [25, 41],
-    iconAnchor: [12, 41],
-    popupAnchor: [1, -34],
-    tooltipAnchor: [16, -28],
-    shadowSize: [41, 41],
-});
+const markerIcon = (iconUrl: string, iconRetinaUrl: string) =>
+    L.icon({
+        iconUrl,
+        iconRetinaUrl,
+        shadowUrl: shadow,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+        tooltipAnchor: [16, -28],
+        shadowSize: [41, 41],
+    });
+
+export const stationIcon = markerIcon(marker, markerRetina);
+export const selectedStationIcon = markerIcon(marker2, markerRetina2);

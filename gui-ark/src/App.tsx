@@ -45,10 +45,8 @@ const MarkdownContent: Component<{ src: string }> = (props) => {
 const App: Component = () => {
     const [mode, setMode] = createSignal<Mode>("brief");
     const [online, { mutate: setOnline }] = createResource(() => check_backend());
-    const [total] = createResource(
-        () => online() === true,
-        (isOnline) => (isOnline ? get_total_api() : Promise.resolve(0)),
-    );
+    const isOnline = () => online() === true;
+    const [total] = createResource(isOnline, (isOnline) => (isOnline ? get_total_api() : Promise.resolve(0)));
 
     createEffect(() => applyTheme(theme()));
 
@@ -58,7 +56,7 @@ const App: Component = () => {
     });
 
     const subtitle = () => {
-        if (!online()) return "Server unavailable";
+        if (!isOnline()) return "Server unavailable";
         if (total.loading) return "Loading records…";
         const count = total();
         return count === undefined ? "Motion Base" : `${count.toLocaleString()} records`;
@@ -70,7 +68,7 @@ const App: Component = () => {
                 <div class="brand">
                     <img class="brand-mark" src={mb_logo} alt="" aria-hidden="true" />
                     <strong>Motion Base</strong>
-                    <span classList={{ online: online() === true, offline: online() === false }}>{subtitle()}</span>
+                    <span classList={{ online: isOnline(), offline: online() === false }}>{subtitle()}</span>
                 </div>
                 <Tabs.List class="nav" aria-label="Application sections">
                     <Tabs.Trigger value="brief" class="tab" title="Project overview">
@@ -79,13 +77,13 @@ const App: Component = () => {
                     <Tabs.Trigger value="scripting" class="tab" title="Guides to programmatic usage">
                         Scripting
                     </Tabs.Trigger>
-                    <Tabs.Trigger value="jackpot" class="tab" disabled={!online()} title="Get a random record from the database">
+                    <Tabs.Trigger value="jackpot" class="tab" disabled={!isOnline()} title="Get a random record from the database">
                         Jackpot
                     </Tabs.Trigger>
-                    <Tabs.Trigger value="query" class="tab" disabled={!online()} title="Query the database according to certain criteria">
+                    <Tabs.Trigger value="query" class="tab" disabled={!isOnline()} title="Query the database according to certain criteria">
                         Query
                     </Tabs.Trigger>
-                    <Tabs.Trigger value="process" class="tab" disabled={!online()} title="Apply further processing to records">
+                    <Tabs.Trigger value="process" class="tab" disabled={!isOnline()} title="Apply further processing to records">
                         Process
                     </Tabs.Trigger>
                 </Tabs.List>
@@ -104,7 +102,7 @@ const App: Component = () => {
                         <ThemeSwitch.Label class="theme-switch-label">Dark</ThemeSwitch.Label>
                         <ThemeSwitch.HiddenInput aria-label="Dark theme" />
                     </ThemeSwitch.Root>
-                    <AboutModal online={online() === true} />
+                    <AboutModal online={isOnline()} />
                     <ServerModal onConnected={() => setOnline(true)} />
                 </div>
             </header>

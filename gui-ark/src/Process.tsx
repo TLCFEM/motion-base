@@ -262,12 +262,16 @@ const Settings: Component<{
     );
 };
 
-const historyTrace = (record: ProcessResponse, x: number[], y: number[]): Plotly.Data => ({
+const lineTrace = (record: ProcessResponse, x: number[], y: number[]): Partial<Plotly.PlotData> => ({
     x,
     y,
     type: "scatter",
     mode: "lines",
     name: record.id,
+});
+
+const historyTrace = (record: ProcessResponse, x: number[], y: number[]): Plotly.Data => ({
+    ...lineTrace(record, x, y),
     line: { color: "rgba(13, 148, 136, 0.22)", width: 1 },
 });
 
@@ -286,13 +290,13 @@ const Waveform: Component<{ current: ProcessResponse; history: ProcessResponse[]
             );
         }
 
-        traces.push({
-            x: props.current.waveform.map((_, index) => index * props.current.time_interval),
-            y: props.current.waveform,
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
+        traces.push(
+            lineTrace(
+                props.current,
+                props.current.waveform.map((_, index) => index * props.current.time_interval),
+                props.current.waveform,
+            ),
+        );
 
         await Plotly.newPlot(
             "time",
@@ -326,13 +330,13 @@ const FrequencySpectrum: Component<{ current: ProcessResponse; history: ProcessR
             );
         }
 
-        traces.push({
-            x: props.current.spectrum.map((_, index) => index * props.current.frequency_interval),
-            y: props.current.spectrum,
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
+        traces.push(
+            lineTrace(
+                props.current,
+                props.current.spectrum.map((_, index) => index * props.current.frequency_interval),
+                props.current.spectrum,
+            ),
+        );
 
         await Plotly.newPlot(
             "spectrum",
@@ -373,13 +377,13 @@ const EnergyAccumulation: Component<{ current: ProcessResponse; history: Process
             );
         }
 
-        traces.push({
-            x: props.current.spectrum.map((_, index) => index * props.current.frequency_interval),
-            y: accumulatedEnergy(props.current.spectrum),
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
+        traces.push(
+            lineTrace(
+                props.current,
+                props.current.spectrum.map((_, index) => index * props.current.frequency_interval),
+                accumulatedEnergy(props.current.spectrum),
+            ),
+        );
 
         await Plotly.newPlot(
             "energy",
@@ -410,27 +414,9 @@ const ResponseSpectrum: Component<{ current: ProcessResponse; history: ProcessRe
             if (record.displacement_spectrum?.length) displacement.push(historyTrace(record, record.period, record.displacement_spectrum));
         }
 
-        acceleration.push({
-            x: props.current.period,
-            y: props.current.acceleration_spectrum,
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
-        velocity.push({
-            x: props.current.period,
-            y: props.current.velocity_spectrum,
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
-        displacement.push({
-            x: props.current.period,
-            y: props.current.displacement_spectrum,
-            type: "scatter",
-            mode: "lines",
-            name: props.current.id,
-        });
+        acceleration.push(lineTrace(props.current, props.current.period, props.current.acceleration_spectrum));
+        velocity.push(lineTrace(props.current, props.current.period, props.current.velocity_spectrum));
+        displacement.push(lineTrace(props.current, props.current.period, props.current.displacement_spectrum));
 
         const spectrumLayout = (title: string) =>
             plotLayout(props.current.file_name, {

@@ -6,6 +6,7 @@
     --bg: #f3f6f7;
     --panel: #ffffff;
     --panel-soft: #f8fafb;
+    --map-bg: #e9eef2;
     --border: #e3e9ed;
     --border-strong: #cfd9e0;
 
@@ -24,7 +25,6 @@
 
     --radius-lg: 16px;
     --radius: 12px;
-    --radius-sm: 9px;
 
     --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05), 0 1px 3px rgba(15, 23, 42, 0.03);
     --shadow-md: 0 1px 2px rgba(15, 23, 42, 0.04), 0 14px 34px -18px rgba(15, 23, 42, 0.22);
@@ -622,7 +622,7 @@ a:hover {
     max-height: 16rem;
     overflow: auto;
     padding: 0.3rem;
-    background: #fff;
+    background: var(--panel);
     border: 1px solid var(--border);
     border-radius: var(--radius);
     box-shadow: var(--shadow-lg);
@@ -740,7 +740,7 @@ a:hover {
     width: 100%;
     max-height: 88vh;
     overflow: auto;
-    background: #fff;
+    background: var(--panel);
     border: 1px solid rgba(255, 255, 255, 0.7);
     border-radius: 18px;
     box-shadow: var(--shadow-lg);
@@ -914,7 +914,7 @@ a:hover {
     width: 100%;
     height: 100%;
     overflow: hidden;
-    background: #e9eef2;
+    background: var(--map-bg);
 }
 
 /* Query ------------------------------------------------------------------- */
@@ -1120,12 +1120,6 @@ table.data tbody tr.selected td {
     background: var(--text);
     color: #fff;
     box-shadow: 0 2px 6px rgba(15, 23, 42, 0.22);
-}
-
-.ellipsis {
-    padding: 0 0.15rem;
-    color: #94a3b8;
-    font-size: 0.74rem;
 }
 
 /* Process ----------------------------------------------------------------- */
@@ -1337,7 +1331,7 @@ table.data tbody tr.selected td {
     height: 330px;
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    background: #fff;
+    background: var(--panel);
     overflow: hidden;
 }
 
@@ -1345,7 +1339,7 @@ table.data tbody tr.selected td {
 
 .leaflet-container {
     font-family: var(--font);
-    background: #e9eef2;
+    background: var(--map-bg);
 }
 
 .leaflet-bar {
@@ -1419,6 +1413,7 @@ table.data tbody tr.selected td {
     --bg: #0b1220;
     --panel: #111a2b;
     --panel-soft: #0d1625;
+    --map-bg: #0d1625;
     --border: #223047;
     --border-strong: #34465f;
 
@@ -1535,16 +1530,11 @@ table.data tbody tr.selected td {
     box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.3);
 }
 
-:root[data-theme="dark"] .select-content {
-    background: #111a2b;
-}
-
 :root[data-theme="dark"] .modal-backdrop {
     background: rgba(2, 6, 14, 0.66);
 }
 
 :root[data-theme="dark"] .modal {
-    background: var(--panel);
     border-color: rgba(52, 70, 95, 0.9);
 }
 
@@ -1570,11 +1560,6 @@ table.data tbody tr.selected td {
 :root[data-theme="dark"] .meta-actions .icon-btn:hover:not(:disabled) {
     background: var(--primary-strong);
     color: #062521;
-}
-
-:root[data-theme="dark"] .map,
-:root[data-theme="dark"] .leaflet-container {
-    background: #0d1625;
 }
 
 :root[data-theme="dark"] table.data thead th:hover {
@@ -1607,10 +1592,6 @@ table.data tbody tr.selected td {
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.35);
 }
 
-:root[data-theme="dark"] .ellipsis {
-    color: #7f91a6;
-}
-
 :root[data-theme="dark"] .markdown blockquote {
     color: #b6c4d4;
 }
@@ -1618,10 +1599,6 @@ table.data tbody tr.selected td {
 :root[data-theme="dark"] .markdown :not(pre) > code {
     background: #162033;
     color: #c3cfdd;
-}
-
-:root[data-theme="dark"] .histogram {
-    background: var(--panel);
 }
 
 :root[data-theme="dark"] .leaflet-bar a {
@@ -1669,10 +1646,6 @@ table.data tbody tr.selected td {
     .query-map {
         height: 44vh;
         min-height: 330px;
-    }
-
-    .query-side {
-        height: auto;
     }
 
     .query-table {
