@@ -16,7 +16,7 @@
         "prettier": "^3.9.10",
         "solid-devtools": "^0.34.5",
         "typescript": "^7.0.2",
-        "vite": "^6.4.4",
+        "vite": "^6.4.5",
         "vite-plugin-solid": "^2.11.14"
     },
     "dependencies": {
