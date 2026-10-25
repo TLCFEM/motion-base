@@ -1,6 +1,6 @@
 FROM oven/bun:alpine AS build
 
-COPY gui /mb/gui
+COPY gui-ark /mb/gui
 WORKDIR /mb/gui
 
 RUN bun install && bun run build
