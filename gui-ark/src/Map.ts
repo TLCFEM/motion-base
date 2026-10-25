@@ -22,6 +22,12 @@ export function DefaultMap(container: string, centre: LatLng, zoom = 6) {
         attribution: "OpenStreetMap",
     }).addTo(map);
 
+    if (typeof ResizeObserver !== "undefined") {
+        const resizeObserver = new ResizeObserver(() => map.invalidateSize());
+        resizeObserver.observe(map.getContainer());
+        map.once("unload", () => resizeObserver.disconnect());
+    }
+
     return map;
 }
 
