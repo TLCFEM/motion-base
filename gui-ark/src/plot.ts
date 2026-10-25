@@ -56,7 +56,7 @@ export const plotLayout = (title: string, extra: Partial<Plotly.Layout> = {}): P
         paper_bgcolor: "rgba(0, 0, 0, 0)",
         plot_bgcolor: "rgba(0, 0, 0, 0)",
         font: { family: 'Inter, "Segoe UI", system-ui, sans-serif', size: 12, color: colors.textSoft },
-        margin: { l: 58, r: 22, t: 46, b: 50 },
+        margin: { l: 58, r: 22, t: 46, b: 58 },
         colorway: colors.colorway,
         hoverlabel: {
             bgcolor: colors.hoverBg,
