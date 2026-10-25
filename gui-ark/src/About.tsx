@@ -15,6 +15,8 @@ import plotly_logo from "./assets/plotly.svg";
 import scipy_logo from "./assets/scipy.svg";
 import solid_logo from "./assets/solid.svg";
 import taskiq_logo from "./assets/taskiq.svg";
+import ark_logo from "./assets/ark.svg";
+import tan_logo from "./assets/tanstack.svg";
 import { post_total_api, QueryConfig } from "./api";
 import { DialogShell } from "./ui";
 
@@ -95,12 +97,13 @@ const AboutModal: Component<{ online: boolean }> = (props) => {
                     <a href="https://plotly.com/javascript/">
                         <img src={plotly_logo} alt="Plotly" />
                     </a>
+                    <a href="https://ark-ui.com/">
+                        <img src={ark_logo} alt="Ark UI" />
+                    </a>
+                    <a href="https://tanstack.com/table/">
+                        <img src={tan_logo} alt="TanStack Table" />
+                    </a>
                 </div>
-                <p class="row muted">
-                    <a href="https://ark-ui.com/">Ark UI</a>
-                    <span>·</span>
-                    <a href="https://tanstack.com/table/">TanStack Table</a>
-                </p>
             </DialogShell>
         </>
     );
