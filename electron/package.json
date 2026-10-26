@@ -36,6 +36,6 @@
         "electron-squirrel-startup": "^1.0.1"
     },
     "volta": {
-        "node": "24.20.0"
+        "node": "24.22.1"
     }
 }
