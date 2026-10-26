@@ -4,150 +4,119 @@
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createResource, createSignal, Match, onMount, Switch } from "solid-js";
-import AboutModal from "./About";
-import Jackpot from "./Jackpot";
-import QueryDatabase from "./Query";
-import tippy from "tippy.js";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/animations/scale.css";
-import { backend, check_backend, get_total_api, setBackend } from "./API";
-import Process from "./Process";
-import ServerModal from "./Server";
+import { Switch as ThemeSwitch } from "@ark-ui/solid/switch";
+import { Tabs } from "@ark-ui/solid/tabs";
 import { marked } from "marked";
-import hljs from "highlight.js";
-import { AppBar, Box, Button, Stack, Toolbar, Typography } from "./ui";
+import hljs from "highlight.js/lib/common";
+import { Component, createEffect, createResource, createSignal, Match, onCleanup, onMount, Switch } from "solid-js";
+import AboutModal from "./About";
+import { check_backend, get_total_api } from "./api";
+import mb_logo from "./assets/logo.svg";
+import Jackpot from "./Jackpot";
+import Process from "./Process";
+import QueryDatabase from "./Query";
+import ServerModal from "./Server";
+import { applyTheme, setTheme, theme, watchSystemTheme } from "./theme";
 
-const [mode, setMode] = createSignal<"jackpot" | "query" | "process" | "scripting" | "brief">("brief");
-const [total] = createResource<number>(get_total_api);
+type Mode = "brief" | "scripting" | "jackpot" | "query" | "process";
 
-const MarkdownContent = (props: { src: string }) => {
-    const [content, setContent] = createSignal<string>("");
+const MarkdownContent: Component<{ src: string }> = (props) => {
+    const [content] = createResource(
+        () => props.src,
+        async (src) => {
+            const response = await fetch(`./${src}`);
+            const text = (await response.text()).replace(/\(client_files\//g, "(./client_files/");
+            return marked.parse(text) as string;
+        },
+    );
 
-    onMount(async () => {
-        const response = await fetch(`./${props.src}`);
+    let container: HTMLDivElement | undefined;
 
-        setContent(
-            await marked
-                .use({ async: true })
-                .parse((await response.text()).replace(/\(client_files\//g, "(./client_files/")),
-        );
-
-        hljs.highlightAll();
+    createEffect(() => {
+        if (content() && container) {
+            container.querySelectorAll("pre code").forEach((element) => hljs.highlightElement(element as HTMLElement));
+        }
     });
 
-    return <div style={{ margin: "auto", "max-width": "800pt" }} innerHTML={content()} />;
+    return <div ref={container} class="markdown" innerHTML={content() ?? ""} />;
 };
 
 const App: Component = () => {
-    onMount(async () => {
-        tippy(`#btn-jackpot`, {
-            content: "Get a random record from the database.",
-            animation: "scale",
-            theme: "translucent",
-        });
-        tippy(`#btn-query`, {
-            content: "Query the database according to certain criteria.",
-            animation: "scale",
-            theme: "translucent",
-        });
-        tippy(`#btn-process`, {
-            content: "Apply further processing to records.",
-            animation: "scale",
-            theme: "translucent",
-        });
-        tippy(`#btn-scripting`, {
-            content: "Guides to programmatic usage.",
-            animation: "scale",
-            theme: "translucent",
-        });
+    const [mode, setMode] = createSignal<Mode>("brief");
+    const [online, { mutate: setOnline }] = createResource(() => check_backend());
+    const isOnline = () => online() === true;
+    const [total] = createResource(isOnline, (isOnline) => (isOnline ? get_total_api() : Promise.resolve(0)));
 
-        setBackend(await check_backend());
+    createEffect(() => applyTheme(theme()));
+
+    onMount(() => {
+        const stopWatching = watchSystemTheme();
+        onCleanup(stopWatching);
     });
 
-    const variant = screen.height <= 1080 ? "dense" : "regular";
+    const subtitle = () => {
+        if (!isOnline()) return "Server unavailable";
+        if (total.loading) return "Loading records…";
+        const count = total();
+        return count === undefined ? "Motion Base" : `${count.toLocaleString()} records`;
+    };
 
     return (
-        <Stack>
-            <AppBar position="sticky" enableColorOnDark>
-                <Toolbar
-                    variant={variant}
-                    sx={{
-                        display: "flex",
-                        alignItems: "center",
-                        alignContent: "center",
-                        gap: "1rem",
-                        height: "4rem",
-                    }}
-                >
-                    <Typography sx={{ flexGrow: 1 }} variant="h5">
-                        {backend()
-                            ? total.loading
-                                ? "..."
-                                : `Record Count: ${total().toLocaleString()}.`
-                            : "Motion Base"}
-                    </Typography>
-                    <Button
-                        size="small"
-                        id="btn-scripting"
-                        onClick={() => setMode("scripting")}
-                        variant="contained"
-                        disabled={mode() === "scripting"}
-                    >
+        <Tabs.Root value={mode()} onValueChange={(details) => details.value && setMode(details.value as Mode)}>
+            <header class="app-header">
+                <div class="brand">
+                    <img class="brand-mark" src={mb_logo} alt="" aria-hidden="true" />
+                    <strong>Motion Base</strong>
+                    <span classList={{ online: isOnline(), offline: online() === false }}>{subtitle()}</span>
+                </div>
+                <Tabs.List class="nav" aria-label="Application sections">
+                    <Tabs.Trigger value="brief" class="tab" title="Project overview">
+                        Overview
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="scripting" class="tab" title="Guides to programmatic usage">
                         Scripting
-                    </Button>
-                    <Button
-                        size="small"
-                        id="btn-jackpot"
-                        onClick={() => setMode("jackpot")}
-                        variant="contained"
-                        disabled={!backend() || mode() === "jackpot"}
-                    >
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="jackpot" class="tab" disabled={!isOnline()} title="Get a random record from the database">
                         Jackpot
-                    </Button>
-                    <Button
-                        size="small"
-                        id="btn-query"
-                        onClick={() => setMode("query")}
-                        variant="contained"
-                        disabled={!backend() || mode() === "query"}
-                    >
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="query" class="tab" disabled={!isOnline()} title="Query the database according to certain criteria">
                         Query
-                    </Button>
-                    <Button
-                        size="small"
-                        id="btn-process"
-                        onClick={() => setMode("process")}
-                        variant="contained"
-                        disabled={!backend() || mode() === "process"}
-                    >
+                    </Tabs.Trigger>
+                    <Tabs.Trigger value="process" class="tab" disabled={!isOnline()} title="Apply further processing to records">
                         Process
-                    </Button>
-                    <AboutModal />
-                    <ServerModal />
-                </Toolbar>
-            </AppBar>
-            <Box sx={{ display: "flex", gap: "1rem", alignItems: "stretch", padding: "1rem" }}>
+                    </Tabs.Trigger>
+                </Tabs.List>
+                <div class="header-actions">
+                    <ThemeSwitch.Root
+                        class="theme-switch"
+                        checked={theme() === "dark"}
+                        onCheckedChange={(details) => setTheme(details.checked ? "dark" : "light")}
+                        title="Toggle dark theme"
+                    >
+                        <ThemeSwitch.Control class="theme-switch-control">
+                            <ThemeSwitch.Thumb class="theme-switch-thumb" aria-hidden="true">
+                                {theme() === "dark" ? "☾" : "☀"}
+                            </ThemeSwitch.Thumb>
+                        </ThemeSwitch.Control>
+                        <ThemeSwitch.Label class="theme-switch-label">Dark</ThemeSwitch.Label>
+                        <ThemeSwitch.HiddenInput aria-label="Dark theme" />
+                    </ThemeSwitch.Root>
+                    <AboutModal online={isOnline()} />
+                    <ServerModal onConnected={() => setOnline(true)} />
+                </div>
+            </header>
+
+            <main class="page" classList={{ fixed: mode() === "query" }}>
                 <Switch>
                     <Match when={mode() === "jackpot"}>
-                        <Jackpot
-                            sx={{ border: "1px solid darkgrey", height: "calc(100vh - 7rem)", minHeight: "700px" }}
-                        />
+                        <Jackpot />
                     </Match>
                     <Match when={mode() === "query"}>
                         <QueryDatabase />
                     </Match>
                     <Match when={mode() === "process"}>
-                        <Process sx={{ border: "1px solid darkgrey" }} />
+                        <Process />
                     </Match>
                     <Match when={mode() === "scripting"}>
                         <MarkdownContent src="client.md" />
@@ -156,8 +125,8 @@ const App: Component = () => {
                         <MarkdownContent src="brief.md" />
                     </Match>
                 </Switch>
-            </Box>
-        </Stack>
+            </main>
+        </Tabs.Root>
     );
 };
 

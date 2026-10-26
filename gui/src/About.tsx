@@ -4,153 +4,109 @@
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { createSignal, onMount } from "solid-js";
-import mongodb_logo from "./assets/mongodb.svg";
+import { Component, createResource, createSignal } from "solid-js";
 import fastapi_logo from "./assets/fastapi.svg";
 import beanie_logo from "./assets/beanie.svg";
-import taskiq_logo from "./assets/taskiq.svg";
-import solid_logo from "./assets/solid.svg";
-import tippy_logo from "./assets/tippy.svg";
-import plotly_logo from "./assets/plotly.svg";
 import leaflet_logo from "./assets/leaflet.svg";
 import mb_logo from "./assets/logo.svg";
+import mongodb_logo from "./assets/mongodb.svg";
+import plotly_logo from "./assets/plotly.svg";
 import scipy_logo from "./assets/scipy.svg";
-import { backend, check_backend, post_total_api, QueryConfig, setBackend } from "./API";
-import { Box, Button, Link, Modal, Stack, Typography, useTheme } from "./ui";
+import solid_logo from "./assets/solid.svg";
+import taskiq_logo from "./assets/taskiq.svg";
+import ark_logo from "./assets/ark.svg";
+import tan_logo from "./assets/tanstack.svg";
+import { post_total_api, QueryConfig } from "./api";
+import { DialogShell } from "./ui";
 
-export default function AboutModal() {
+const statsConfigs = (): QueryConfig[] => [
+    { min_magnitude: 0, pagination: {} },
+    { min_magnitude: 6, pagination: {} },
+    { min_pga: 100, pagination: {} },
+];
+
+const AboutModal: Component<{ online: boolean }> = (props) => {
     const [open, setOpen] = createSignal(false);
-    const [stats, setStats] = createSignal([] as number[]);
-    const theme = useTheme();
-
-    onMount(async () => {
-        setBackend(await check_backend());
-
-        if (!backend()) return;
-
-        let configs = [] as QueryConfig[];
-        let config = new QueryConfig();
-        config.min_magnitude = 0;
-        configs.push(config);
-        config = new QueryConfig();
-        config.min_magnitude = 6;
-        configs.push(config);
-        config = new QueryConfig();
-        config.min_pga = 100;
-        configs.push(config);
-
-        setStats(await post_total_api(configs));
-    });
-
-    const commit_link = <Link href="https://github.com/TLCFEM/motion-base/tree/git-commit-long">git-commit-short</Link>;
-    const repo_link = <Link href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</Link>;
-    const nied_link = <Link href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</Link>;
-    const nzsm_link = <Link href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand Strong-Motion</Link>;
+    const [stats] = createResource(
+        () => props.online,
+        (online) => (online ? post_total_api(statsConfigs()) : Promise.resolve(null)),
+    );
 
     return (
         <>
-            <Button size="small" onClick={() => setOpen(true)} variant="contained">
+            <button class="btn secondary" onClick={() => setOpen(true)}>
                 About
-            </Button>
-            <Modal
-                open={open()}
-                onClose={() => setOpen(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        width: "60%",
-                        bgcolor: theme.palette.background.paper,
-                        border: "1px solid lightgrey",
-                        borderRadius: "4px",
-                        boxShadow: "24px",
-                        p: 4,
-                    }}
-                >
-                    <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center">
-                        <img src={mb_logo} alt="logo" height="50px" />
-                        <Typography variant="h4" sx={{ p: 1 }}>
-                            motion-base
-                        </Typography>
-                    </Stack>
-                    <Typography variant="body1" sx={{ p: 1 }}>
-                        This is a demo of the ground motion database ({commit_link}).
-                    </Typography>
-                    {backend() && (
-                        <Typography variant="body1" sx={{ p: 1 }}>
-                            Currently this server contains in total {stats()[0].toLocaleString()} records from various
-                            national database. Among them, {stats()[1].toLocaleString()} records have a magnitude
-                            greater than six, {stats()[2].toLocaleString()} records has a PGA greater than 100 Gal.
-                        </Typography>
-                    )}
-                    <Typography variant="body1" sx={{ p: 1 }}>
-                        The source code is available in this repository {repo_link}.
-                    </Typography>
-                    <Typography variant="h6" sx={{ p: 1 }}>
-                        Japan Database
-                    </Typography>
-                    <Typography variant="body1" sx={{ p: 1 }}>
-                        The data is retrieved from {nied_link}. The data is not processed. Users may want to further
-                        filter the records.
-                    </Typography>
-                    <Typography variant="h6" sx={{ p: 1 }}>
-                        New Zealand Database
-                    </Typography>
-                    <Typography variant="body1" sx={{ p: 1 }}>
-                        The data is retrieved from {nzsm_link} database. Some selected strong motions are processed
-                        (*.V2A files). The other records (*.V1A files) are not processed. Users may want to further
-                        filter the records.
-                    </Typography>
-                    <Typography variant="h6" sx={{ p: 1 }}>
-                        Built with
-                    </Typography>
-                    <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Link href="https://www.mongodb.com/">
-                            <img src={mongodb_logo} alt="mongodb" height="40px" />
-                        </Link>
-                        <Link href="https://beanie-odm.dev/">
-                            <img src={beanie_logo} alt="beanie" height="40px" />
-                        </Link>
-                        <Link href="https://taskiq-python.github.io/">
-                            <img src={taskiq_logo} alt="taskiq" height="40px" />
-                        </Link>
-                        <Link href="https://scipy.org/">
-                            <img src={scipy_logo} alt="scipy" height="40px" />
-                        </Link>
-                        <Link href="https://fastapi.tiangolo.com/">
-                            <img src={fastapi_logo} alt="fastapi" height="40px" />
-                        </Link>
-                    </Stack>
-                    <Stack direction="row" spacing={3} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Link href="https://www.solidjs.com/">
-                            <img src={solid_logo} alt="solid" height="40px" />
-                        </Link>
-                        <Link href="https://leafletjs.com/">
-                            <img src={leaflet_logo} alt="leaflet" height="40px" />
-                        </Link>
-                        <Link href="https://plotly.com/javascript/">
-                            <img src={plotly_logo} alt="plotly" height="40px" />
-                        </Link>
-                        <Link href="https://atomiks.github.io/tippyjs/">
-                            <img src={tippy_logo} alt="tippy" height="40px" />
-                        </Link>
-                    </Stack>
-                </Box>
-            </Modal>
+            </button>
+            <DialogShell open={open()} onOpenChange={setOpen} title="About" size="lg">
+                <div class="row">
+                    <img src={mb_logo} alt="Motion Base logo" height="46" />
+                    <h2>motion-base</h2>
+                </div>
+
+                <p class="about-section">
+                    This is a demo of the ground motion database. The source code is available at{" "}
+                    <a href="https://github.com/TLCFEM/motion-base">github.com/TLCFEM/motion-base</a>.
+                </p>
+
+                {stats()?.length === 3 && (
+                    <p class="about-section">
+                        This server currently contains {stats()![0].toLocaleString()} records. Among them, {stats()![1].toLocaleString()}{" "}
+                        records have a magnitude greater than six and {stats()![2].toLocaleString()} records have a PGA greater than 100
+                        Gal.
+                    </p>
+                )}
+
+                <h3 class="about-section">Japan Database</h3>
+                <p>
+                    The data is retrieved from <a href="https://www.kyoshin.bosai.go.jp/kyoshin/data/index_en.html">NIED</a>. The data is
+                    not processed. Users may want to further filter the records.
+                </p>
+
+                <h3 class="about-section">New Zealand Database</h3>
+                <p>
+                    The data is retrieved from the{" "}
+                    <a href="https://www.geonet.org.nz/data/supplementary/nzsmdb">New Zealand Strong-Motion</a> database. Some selected
+                    strong motions are processed (*.V2A files). The other records (*.V1A files) are not processed. Users may want to further
+                    filter the records.
+                </p>
+
+                <h3 class="about-section">Built with</h3>
+                <div class="about-logos">
+                    <a href="https://www.mongodb.com/">
+                        <img src={mongodb_logo} alt="MongoDB" />
+                    </a>
+                    <a href="https://beanie-odm.dev/">
+                        <img src={beanie_logo} alt="Beanie" />
+                    </a>
+                    <a href="https://taskiq-python.github.io/">
+                        <img src={taskiq_logo} alt="Taskiq" />
+                    </a>
+                    <a href="https://scipy.org/">
+                        <img src={scipy_logo} alt="SciPy" />
+                    </a>
+                    <a href="https://fastapi.tiangolo.com/">
+                        <img src={fastapi_logo} alt="FastAPI" />
+                    </a>
+                    <a href="https://www.solidjs.com/">
+                        <img src={solid_logo} alt="Solid" />
+                    </a>
+                    <a href="https://leafletjs.com/">
+                        <img src={leaflet_logo} alt="Leaflet" />
+                    </a>
+                    <a href="https://plotly.com/javascript/">
+                        <img src={plotly_logo} alt="Plotly" />
+                    </a>
+                    <a href="https://ark-ui.com/">
+                        <img src={ark_logo} alt="Ark UI" />
+                    </a>
+                    <a href="https://tanstack.com/table/">
+                        <img src={tan_logo} alt="TanStack Table" />
+                    </a>
+                </div>
+            </DialogShell>
         </>
     );
-}
+};
+
+export default AboutModal;

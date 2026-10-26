@@ -1,5 +1,5 @@
 allowBuilds:
-  electron: true
-  electron-winstaller: true
+    electron: true
+    electron-winstaller: true
 blockExoticSubdeps: false
 nodeLinker: hoisted

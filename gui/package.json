@@ -1,37 +1,38 @@
 {
-    "name": "mb",
+    "name": "mb-ark",
     "version": "1.0.0",
     "type": "module",
+    "private": true,
     "scripts": {
         "start": "vite",
         "dev": "vite",
         "build": "vite build",
-        "serve": "vite preview",
+        "preview": "vite preview",
+        "typecheck": "tsc --noEmit",
+        "test": "vitest run",
         "format": "prettier --write ."
     },
     "devDependencies": {
+        "@solidjs/testing-library": "^0.8.10",
         "@types/leaflet": "^1.9.22",
         "@types/node": "^26.6.5",
         "@types/plotly.js-basic-dist-min": "^2.12.4",
+        "jsdom": "^26.1.0",
         "prettier": "^3.9.10",
-        "solid-devtools": "^0.34.5",
         "typescript": "^7.0.2",
-        "vite": "^6.4.5",
-        "vite-plugin-solid": "^2.11.14"
+        "vite": "^6.4.4",
+        "vite-plugin-solid": "^2.11.14",
+        "vitest": "^3.2.7"
     },
     "dependencies": {
-        "@suid/icons-material": "^0.9.0",
-        "@suid/material": "^0.19.0",
-        "@suid/vite-plugin": "^0.4.1",
-        "@tanstack/solid-table": "^8.21.3",
+        "@ark-ui/solid": "^5.39.3",
+        "@tanstack/solid-table": "^9.3.1",
         "axios": "^1.20.0",
         "highlight.js": "^11.12.0",
         "leaflet": "^1.9.4",
         "marked": "^18.1.1",
-        "marked-highlight": "^2.2.4",
         "plotly.js-basic-dist-min": "^4.1.2",
-        "solid-js": "^1.9.17",
-        "tippy.js": "^6.3.7"
+        "solid-js": "^1.9.17"
     },
     "volta": {
         "node": "24.20.0"

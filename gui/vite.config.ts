@@ -1,16 +1,8 @@
-import { defineConfig } from "vite";
-import solidPlugin from "vite-plugin-solid";
-// import devtools from 'solid-devtools/vite';
+import { defineConfig } from "vitest/config";
+import solid from "vite-plugin-solid";
 
 export default defineConfig({
-    plugins: [
-        /* 
-        Uncomment the following line to enable solid-devtools.
-        For more info see https://github.com/thetarnav/solid-devtools/tree/main/packages/extension#readme
-        */
-        // devtools(),
-        solidPlugin(),
-    ],
+    plugins: [solid()],
     server: {
         port: 3000,
     },
@@ -19,4 +11,9 @@ export default defineConfig({
         chunkSizeWarningLimit: 5000,
     },
     base: "./",
+    test: {
+        environment: "jsdom",
+        globals: true,
+        include: ["tests/**/*.test.ts", "tests/**/*.test.tsx"],
+    },
 });

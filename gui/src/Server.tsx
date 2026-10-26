@@ -4,29 +4,14 @@
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createEffect, createSignal, onMount } from "solid-js";
-import axios from "axios";
-import { AggregationItem, get_stats, setBackend } from "./API";
+import { Component, createEffect, createResource, createSignal, onCleanup } from "solid-js";
 import Plotly from "plotly.js-basic-dist-min";
-import { Box, Button, LinearProgress, Modal, Paper, Stack, TextField, useTheme } from "./ui";
+import { AggregationItem, errorMessage, get_stats, getBaseUrl, http, setBaseUrl } from "./api";
+import { plotAxis, plotConfig, plotLayout } from "./plot";
+import { DialogShell, TextField } from "./ui";
 
-interface HistogramProps {
-    id: string;
-    item: string;
-    data: AggregationItem[];
-    scale: Plotly.AxisType;
-}
-
-const Histogram: Component<HistogramProps> = (props) => {
+const Histogram: Component<{ id: string; title: string; data: AggregationItem[]; scale: Plotly.AxisType }> = (props) => {
     createEffect(async () => {
         await Plotly.newPlot(
             props.id,
@@ -35,118 +20,97 @@ const Histogram: Component<HistogramProps> = (props) => {
                     x: props.data.map((item) => (item.key_as_string ? item.key_as_string.slice(0, 4) : item.key)),
                     y: props.data.map((item) => item.doc_count),
                     type: "bar",
+                    marker: { color: "#0d9488", line: { width: 0 } },
+                    opacity: 0.88,
                 },
             ],
-            {
-                title: { text: props.item + " Histogram" },
-                xaxis: {
-                    title: { text: props.item },
-                    autorange: true,
-                    automargin: true,
-                },
-                yaxis: {
-                    title: { text: "Counts" },
-                    autorange: true,
-                    automargin: true,
-                    type: props.scale,
-                },
-                width: 450,
-                height: 400,
-            },
-            { autosizable: true, responsive: true },
+            plotLayout(`${props.title} Histogram`, {
+                xaxis: plotAxis(props.title),
+                yaxis: plotAxis("Counts", { type: props.scale }),
+                bargap: 0.12,
+            }),
+            { ...plotConfig, displayModeBar: false },
         );
     });
 
-    return <Paper id={props.id} sx={{ width: 450, height: 400 }} />;
+    onCleanup(() => Plotly.purge(props.id));
+
+    return <div id={props.id} class="histogram" />;
 };
 
-export default function ServerModal() {
+const ServerModal: Component<{ onConnected: () => void }> = (props) => {
     const [open, setOpen] = createSignal(false);
-    const [newServer, setNewServer] = createSignal(axios.defaults.baseURL);
-    const [loading, setLoading] = createSignal(false);
-    const theme = useTheme();
-    const [yearHist, setYearHist] = createSignal([] as AggregationItem[]);
-    const [magnitudeHist, setMagnitudeHist] = createSignal([] as AggregationItem[]);
-    const [pgaHist, setPgaHist] = createSignal([] as AggregationItem[]);
+    const [server, setServer] = createSignal(getBaseUrl());
+    const [checking, setChecking] = createSignal(false);
+    const [error, setError] = createSignal("");
 
-    onMount(async () => {
-        const allStats = await get_stats();
-        setYearHist(allStats.year.buckets);
-        setMagnitudeHist(allStats.magnitude.buckets);
-        setPgaHist(allStats.pga.buckets);
-    });
+    const [stats] = createResource(open, (isOpen) => (isOpen ? get_stats() : Promise.resolve(null)));
+
+    function show() {
+        setServer(getBaseUrl());
+        setError("");
+        setOpen(true);
+    }
+
+    async function change() {
+        const target = server().trim().replace(/\/+$/, "");
+        if (!target) {
+            setError("Enter a server URL.");
+            return;
+        }
+
+        setChecking(true);
+        setError("");
+        try {
+            await http.get(`${target}/alive`, { timeout: 5000 });
+            setBaseUrl(target);
+            props.onConnected();
+            setOpen(false);
+        } catch (err) {
+            setError(errorMessage(err) || "Target server is not reachable.");
+        } finally {
+            setChecking(false);
+        }
+    }
 
     return (
         <>
-            <Button size="small" onClick={() => setOpen(true)} variant="contained">
+            <button class="btn secondary" onClick={show}>
                 Change Server
-            </Button>
-            <Modal
-                open={open()}
-                onClose={() => setOpen(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box
-                    sx={{
-                        position: "absolute",
-                        top: "50%",
-                        left: "50%",
-                        transform: "translate(-50%, -50%)",
-                        // width: "60ch",
-                        bgcolor: theme.palette.background.paper,
-                        border: "1px solid lightgrey",
-                        borderRadius: "4px",
-                        boxShadow: "24px",
-                    }}
-                >
-                    <Stack direction="row" spacing={2} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <TextField
-                            size="small"
-                            id="server-id"
-                            sx={{ minWidth: "36ch" }}
-                            label="Server"
-                            value={newServer()}
-                            onChange={(_, value) => setNewServer(value)}
-                        />
-                        <Button
-                            variant="contained"
-                            size="small"
-                            onClick={async () => {
-                                setLoading(true);
-                                try {
-                                    await axios.get(`${newServer().replace(/\/+$/, "")}/alive`);
-                                    axios.defaults.baseURL = newServer();
-                                    setBackend(true);
-                                    setOpen(false);
-                                } catch {
-                                    alert("Target server is not reachable.");
-                                }
-                                setLoading(false);
-                            }}
-                            disabled={loading()}
-                            id="btn-change"
-                        >
-                            Change
-                        </Button>
-                        <Button
-                            variant="contained"
-                            size="small"
-                            onClick={() => setOpen(false)}
-                            disabled={loading()}
-                            id="btn-cancel"
-                        >
-                            Cancel
-                        </Button>
-                    </Stack>
-                    {loading() ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
-                    <Stack direction="row" spacing={1} sx={{ p: 1 }} alignItems="center" justifyContent="center">
-                        <Histogram id="year-hist" item="Year" data={yearHist()} scale="log" />
-                        <Histogram id="magnitude-hist" item="Magnitude" data={magnitudeHist()} scale="linear" />
-                        <Histogram id="pga-hist" item="PGA" data={pgaHist()} scale="log" />
-                    </Stack>
-                </Box>
-            </Modal>
+            </button>
+            <DialogShell open={open()} onOpenChange={setOpen} title="Server" size="xl">
+                <div class="server-form">
+                    <TextField
+                        id="server-id"
+                        label="Server"
+                        value={server()}
+                        onValueChange={setServer}
+                        title="Base URL of the Motion Base API"
+                    />
+                    <button
+                        class="btn"
+                        classList={{ loading: checking() }}
+                        onClick={change}
+                        disabled={checking()}
+                        id="btn-change"
+                        aria-busy={checking()}
+                    >
+                        Change
+                    </button>
+                    <button class="btn secondary" onClick={() => setOpen(false)} disabled={checking()} id="btn-cancel">
+                        Cancel
+                    </button>
+                </div>
+                {error() && <p class="error-text">{error()}</p>}
+
+                <div class="histograms">
+                    <Histogram id="year-hist" title="Year" data={stats()?.year.buckets ?? []} scale="log" />
+                    <Histogram id="magnitude-hist" title="Magnitude" data={stats()?.magnitude.buckets ?? []} scale="linear" />
+                    <Histogram id="pga-hist" title="PGA" data={stats()?.pga.buckets ?? []} scale="log" />
+                </div>
+            </DialogShell>
         </>
     );
-}
+};
+
+export default ServerModal;

@@ -1,7 +1,7 @@
 # Motion Base Desktop
 
 This directory contains the Electron shell for the Motion Base interface in
-[`../gui-ark`](../gui-ark). The desktop application bundles the production build
+[`../gui`](../gui). The desktop application bundles the production build
 of the web interface and loads it from a private `motion-base://` scheme.
 
 ## Requirements
@@ -16,7 +16,7 @@ cd electron
 pnpm install
 ```
 
-The first build also installs the `gui-ark` dependencies if they are missing.
+The first build also installs the `gui` dependencies if they are missing.
 
 ## Development
 
@@ -24,7 +24,7 @@ The first build also installs the `gui-ark` dependencies if they are missing.
 pnpm start
 ```
 
-`start` builds `gui-ark`, copies the result to `electron/dist`, and launches the
+`start` builds `gui`, copies the result to `electron/dist`, and launches the
 Electron application. Any change to the web interface requires restarting this
 command.
 
@@ -72,12 +72,12 @@ RPM installers.
 The build step is shared by all commands. The following environment variables
 are available for special cases:
 
-| Variable | Purpose |
-| --- | --- |
-| `MB_API_URL` | Replace the default API base URL in the built JavaScript |
-| `MB_UI_DIR` | Build a web interface from a directory other than `../gui-ark` |
-| `MB_SKIP_UI_BUILD=1` | Reuse the existing `gui-ark/dist` instead of rebuilding |
-| `MB_PACKAGE_MANAGER` | Package manager used for the `gui-ark` build |
+| Variable             | Purpose                                                    |
+| -------------------- | ---------------------------------------------------------- |
+| `MB_API_URL`         | Replace the default API base URL in the built JavaScript   |
+| `MB_UI_DIR`          | Build a web interface from a directory other than `../gui` |
+| `MB_SKIP_UI_BUILD=1` | Reuse the existing `gui/dist` instead of rebuilding        |
+| `MB_PACKAGE_MANAGER` | Package manager used for the `gui` build                   |
 
 ## Application behaviour
 

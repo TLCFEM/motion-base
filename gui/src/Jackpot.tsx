@@ -4,267 +4,181 @@
 //  it under the terms of the GNU General Public License as published by
 //  the Free Software Foundation, either version 3 of the License, or
 //  (at your option) any later version.
-//
-//  This program is distributed in the hope that it will be useful,
-//  but WITHOUT ANY WARRANTY; without even the implied warranty of
-//  MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-//  GNU General Public License for more details.
-//
-//  You should have received a copy of the GNU General Public License
-//  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import { Component, createEffect, createMemo, createResource, createSignal, onMount } from "solid-js";
-import { jackpot_waveform_api, sxProps, toUTC } from "./API";
-import {
-    Card,
-    CardActions,
-    CardContent,
-    Checkbox,
-    FormControlLabel,
-    IconButton,
-    LinearProgress,
-    Paper,
-    Typography,
-    ShuffleOnIcon,
-} from "./ui";
+import { Component, createEffect, createResource, createSignal, For, onCleanup, onMount } from "solid-js";
 import L, { LatLng } from "leaflet";
-import { DefaultMap, epicenterIcon, stationIcon } from "./Map";
 import Plotly from "plotly.js-basic-dist-min";
-import tippy from "tippy.js";
-import "tippy.js/dist/tippy.css";
-import "tippy.js/animations/scale.css";
+import { jackpot_waveform_api, SeismicRecord, toUTC } from "./api";
+import { DefaultMap, epicenterIcon, stationIcon, toLatLng } from "./Map";
+import { plotAxis, plotConfig, plotLayout } from "./plot";
+import { CheckboxField } from "./ui";
 
-const [data, { refetch }] = createResource(jackpot_waveform_api);
-
-const [withWaveform, setWithWaveform] = createSignal(true);
-const [withMap, setWithMap] = createSignal(true);
-
-function replot() {
-    if (withWaveform()) Plotly.relayout("canvas", {}).then();
-    if (withMap()) map.invalidateSize();
-}
-
-const MetadataCard: Component<sxProps> = (props) => {
-    const metadata = createMemo(() => [
-        { label: "ID", value: data.loading ? "---" : data().id },
-        { label: "File Name", value: data.loading ? "---" : data().file_name },
-        {
-            label: "Region",
-            value: data.loading ? "---" : data().region.toUpperCase(),
-        },
-        {
-            label: "Category",
-            value: data.loading ? "---" : data().category.toUpperCase(),
-        },
-        {
-            label: "Direction",
-            value: data.loading ? "---" : data().direction.toUpperCase(),
-        },
-        { label: "Magnitude", value: data.loading ? "---" : data().magnitude },
-        { label: "Depth (km)", value: data.loading ? "---" : data().depth },
-        {
-            label: "PGA (Gal, cm/s^2)",
-            value: data.loading ? "---" : Math.abs(data().maximum_acceleration).toFixed(2),
-        },
-        {
-            label: `Sampling Frequency (${data.loading ? "---" : data().sampling_frequency_unit})`,
-            value: data.loading ? "---" : data().sampling_frequency,
-        },
-        {
-            label: "Event Time",
-            value: data.loading || data().event_time.getTime() === 0 ? "---" : toUTC(data().event_time),
-        },
-        {
-            label: "Record Time",
-            value: data.loading || data().record_time.getTime() === 0 ? "---" : toUTC(data().record_time),
-        },
-        {
-            label: "Last Update Time",
-            value: data.loading || data().last_update_time.getTime() === 0 ? "---" : toUTC(data().last_update_time),
-        },
-        // {
-        //     tooltip: "Distance between event and station locations over the delay between event and record times.",
-        //     label: "Approximated Speed (km/s)",
-        //     value:
-        //         data.loading || data().record_time.getTime() === 0 || data().event_time.getTime() === 0
-        //             ? "---"
-        //             : (
-        //                   distance_between(data().event_location, data().station_location) /
-        //                   (data().record_time.getTime() - data().event_time.getTime())
-        //               ).toFixed(2),
-        // },
-    ]);
-
-    onMount(() => {
-        tippy(`#btn-next`, {
-            content: "Get another random record from the database.",
-            animation: "scale",
-            theme: "translucent",
-        });
-    });
+const MetadataCard: Component<{
+    record: SeismicRecord | undefined;
+    loading: boolean;
+    onNext: () => void;
+    withMap: boolean;
+    withWaveform: boolean;
+    setWithMap: (value: boolean) => void;
+    setWithWaveform: (value: boolean) => void;
+}> = (props) => {
+    const metadata = () => {
+        const record = props.record;
+        return [
+            { label: "ID", value: record?.id ?? "---" },
+            { label: "File Name", value: record?.file_name ?? "---" },
+            { label: "Region", value: record?.region?.toUpperCase() ?? "---" },
+            { label: "Category", value: record?.category?.toUpperCase() ?? "---" },
+            { label: "Direction", value: record?.direction?.toUpperCase() ?? "---" },
+            { label: "Magnitude", value: record?.magnitude ?? "---" },
+            { label: "Depth (km)", value: record?.depth ?? "---" },
+            {
+                label: "PGA (Gal, cm/s^2)",
+                value: record ? Math.abs(record.maximum_acceleration).toFixed(2) : "---",
+            },
+            {
+                label: `Sampling Frequency (${record?.sampling_frequency_unit ?? "---"})`,
+                value: record?.sampling_frequency ?? "---",
+            },
+            {
+                label: "Event Time",
+                value: record && record.event_time.getTime() !== 0 ? toUTC(record.event_time) : "---",
+            },
+            {
+                label: "Record Time",
+                value: record && record.record_time.getTime() !== 0 ? toUTC(record.record_time) : "---",
+            },
+            {
+                label: "Last Update Time",
+                value: record && record.last_update_time.getTime() !== 0 ? toUTC(record.last_update_time) : "---",
+            },
+        ];
+    };
 
     return (
-        <Card
-            sx={{
-                ...props.sx,
-                display: "flex",
-                flexDirection: "column",
-            }}
-        >
-            <CardContent sx={{ flexGrow: 1 }}>
-                {metadata().map((item) => (
-                    <>
-                        <Typography
-                            color="text.secondary"
-                            variant="subtitle2"
-                            id={item.label.toLowerCase().replace(new RegExp("[s()/]", "g"), "_")}
-                        >
-                            {item.label}
-                        </Typography>
-                        <Typography variant="body2" sx={{ marginBottom: 1 }}>
-                            {item.value}
-                        </Typography>
-                    </>
-                ))}
-            </CardContent>
-            {data.loading ? <LinearProgress /> : <LinearProgress variant="determinate" value={0} />}
-            <CardActions
-                sx={{
-                    justifyContent: "flex-end",
-                    alignItems: "center",
-                    alignContent: "center",
-                }}
-            >
-                <FormControlLabel
+        <div class="panel jackpot-meta">
+            <div class="meta-list">
+                <For each={metadata()}>
+                    {(item) => (
+                        <>
+                            <div class="meta-label">{item.label}</div>
+                            <div class="meta-value">{item.value}</div>
+                        </>
+                    )}
+                </For>
+            </div>
+            <div class="meta-actions">
+                <CheckboxField
                     id="chk-map"
                     name="chk-map"
                     label="Map"
-                    control={
-                        <Checkbox
-                            checked={withMap()}
-                            onChange={(_, checked) => {
-                                if (checked || withWaveform()) {
-                                    setWithMap(checked);
-                                    replot();
-                                }
-                            }}
-                        />
-                    }
+                    checked={props.withMap}
+                    title="Show the event and station locations"
+                    onCheckedChange={(checked) => (checked || props.withWaveform) && props.setWithMap(checked)}
                 />
-                <FormControlLabel
+                <CheckboxField
                     id="chk-waveform"
                     name="chk-waveform"
                     label="Waveform"
-                    control={
-                        <Checkbox
-                            checked={withWaveform()}
-                            onChange={(_, checked) => {
-                                if (checked || withMap()) {
-                                    setWithWaveform(checked);
-                                    replot();
-                                }
-                            }}
-                        />
-                    }
+                    checked={props.withWaveform}
+                    title="Show the waveform"
+                    onCheckedChange={(checked) => (checked || props.withMap) && props.setWithWaveform(checked)}
                 />
-                <IconButton id="btn-next" size="large" color="primary" onClick={refetch} disabled={data.loading}>
-                    <ShuffleOnIcon />
-                </IconButton>
-            </CardActions>
-        </Card>
+                <button
+                    id="btn-next"
+                    class="icon-btn"
+                    classList={{ loading: props.loading }}
+                    onClick={props.onNext}
+                    disabled={props.loading}
+                    title="Get another random record from the database"
+                    aria-label="Next record"
+                    aria-busy={props.loading}
+                >
+                    <span class="spin-mark">↻</span>
+                </button>
+            </div>
+        </div>
     );
 };
 
-let map: L.Map;
-
-const Epicenter: Component<sxProps> = (props) => {
-    let event_marker: L.Marker;
-    let station_marker: L.Marker;
+const Epicenter: Component<{ record: SeismicRecord | undefined; class?: string }> = (props) => {
+    const [map, setMap] = createSignal<L.Map>();
+    let eventMarker: L.Marker | undefined;
+    let stationMarker: L.Marker | undefined;
 
     onMount(() => {
-        const event_location = new LatLng(52.5068441, 13.4247317);
-        const station_location = new LatLng(52.5068441, 13.4247317);
-
-        map = DefaultMap("epicenter", event_location);
-
-        event_marker = L.marker(event_location, { icon: epicenterIcon }).addTo(map);
-        station_marker = L.marker(station_location, {
-            icon: stationIcon,
-        }).addTo(map);
+        const current = DefaultMap("epicenter", new LatLng(52.5068441, 13.4247317));
+        eventMarker = L.marker(current.getCenter(), { icon: epicenterIcon }).addTo(current);
+        stationMarker = L.marker(current.getCenter(), { icon: stationIcon }).addTo(current);
+        setMap(current);
     });
 
     createEffect(() => {
-        if (data.loading) return;
+        const current = map();
+        const record = props.record;
+        if (!current || !record || !eventMarker || !stationMarker) return;
 
-        const event_location = new LatLng(data().event_location[1], data().event_location[0]);
-        const station_location = new LatLng(data().station_location[1], data().station_location[0]);
-        map.flyTo(event_location, 6);
+        const eventLocation = toLatLng(record.event_location);
+        const stationLocation = toLatLng(record.station_location);
 
-        event_marker.setLatLng(event_location);
-        station_marker.setLatLng(station_location);
-
-        event_marker.bindPopup("Event Location: " + event_marker.getLatLng().toString());
-        station_marker.bindPopup("Station Location: " + station_marker.getLatLng().toString());
+        current.flyTo(eventLocation, 6);
+        eventMarker.setLatLng(eventLocation).bindPopup(`Event Location: ${eventLocation}`);
+        stationMarker.setLatLng(stationLocation).bindPopup(`Station Location: ${stationLocation}`);
     });
 
-    return <Paper id="epicenter" sx={props.sx} />;
+    onCleanup(() => map()?.remove());
+
+    return <div id="epicenter" class={`panel map ${props.class ?? ""}`} />;
 };
 
-const Waveform: Component<sxProps> = (props) => {
+const Waveform: Component<{ record: SeismicRecord | undefined; class?: string }> = (props) => {
     createEffect(async () => {
-        if (data.loading) return;
+        const record = props.record;
+        if (!record?.waveform?.length) return;
 
         await Plotly.newPlot(
             "canvas",
             [
                 {
-                    x: Array<number>(data().waveform.length)
-                        .fill(0)
-                        .map((_, i) => i * data().time_interval),
-                    y: data().waveform,
+                    x: record.waveform.map((_, index) => index * record.time_interval),
+                    y: record.waveform,
                     type: "scatter",
                     mode: "lines",
-                    name: data().id,
+                    name: record.id,
                 },
             ],
-            {
-                title: { text: data().file_name },
-                xaxis: {
-                    title: { text: "Time (s)" },
-                    autorange: true,
-                    automargin: true,
-                },
-                yaxis: {
-                    title: { text: "Acceleration (cm/s^2)" },
-                    autorange: true,
-                    automargin: true,
-                },
-                autosize: true,
-            },
-            {
-                autosizable: true,
-                responsive: true,
-                modeBarButtonsToRemove: ["lasso2d"],
-                displaylogo: false,
-            },
+            plotLayout(record.file_name, {
+                xaxis: plotAxis("Time (s)"),
+                yaxis: plotAxis("Acceleration (cm/s^2)"),
+            }),
+            plotConfig,
         );
     });
 
-    return <Paper id="canvas" sx={props.sx} />;
+    onCleanup(() => Plotly.purge("canvas"));
+
+    return <div id="canvas" class={`panel map ${props.class ?? ""}`} />;
 };
 
-const Jackpot: Component<sxProps> = (props) => {
-    onMount(refetch);
-
-    const mapSize = 3;
-    const waveformSize = 4;
+const Jackpot: Component = () => {
+    const [record, { refetch }] = createResource(() => jackpot_waveform_api());
+    const [withMap, setWithMap] = createSignal(true);
+    const [withWaveform, setWithWaveform] = createSignal(true);
 
     return (
-        <>
-            <MetadataCard sx={{ ...props.sx, width: "20rem" }} />
-            {withMap() && <Epicenter sx={{ ...props.sx, flexGrow: mapSize }} />}
-            {withWaveform() && <Waveform sx={{ ...props.sx, flexGrow: waveformSize }} />}
-        </>
+        <div class="jackpot-layout">
+            <MetadataCard
+                record={record()}
+                loading={record.loading}
+                onNext={() => refetch()}
+                withMap={withMap()}
+                withWaveform={withWaveform()}
+                setWithMap={setWithMap}
+                setWithWaveform={setWithWaveform}
+            />
+            {withMap() && <Epicenter record={record()} class="jackpot-plot" />}
+            {withWaveform() && <Waveform record={record()} class="jackpot-wave" />}
+        </div>
     );
 };
 
