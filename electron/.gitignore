@@ -90,6 +90,7 @@ typings/
 
 # Electron-Forge
 out/
+dist/
 
 pnpm-lock.yaml
 package-lock.json
