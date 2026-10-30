@@ -7,12 +7,14 @@ jobs:
       contents: write
     runs-on: ubuntu-latest
     services:
-      elasticsearch:
+      search:
         env:
           ES_JAVA_OPTS: '-Xms512m -Xmx512m'
+          OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx512m'
+          DISABLE_SECURITY_PLUGIN: true
           discovery.type: single-node
-          xpack.security.enabled: false
-        image: elasticsearch:9.5.3
+          xpack.security.enabled: ${{ matrix.search-engine == 'elasticsearch' && 'false' || '' }}
+        image: ${{ matrix.search-engine == 'elasticsearch' && 'elasticsearch:9.5.3' || 'opensearchproject/opensearch:3.9.0' }}
         ports:
           - '9200:9200'
       mongodb:
@@ -53,6 +55,8 @@ jobs:
         with:
           python-version: ${{ matrix.python-version }}
       - name: Dependency
+        env:
+          SEARCH_ENGINE: ${{ matrix.search-engine }}
         run: |
           pip install -e .[dev] pyinstaller
           export NUMBA_DISABLE_JIT=1
@@ -63,18 +67,18 @@ jobs:
         with:
           plugins: pycoverage
           token: ${{ secrets.CODECOV_TOKEN }}
-      - if: matrix.python-version == '3.11'
+      - if: matrix.python-version == '3.11' && matrix.search-engine == 'elasticsearch'
         name: Binary
         run: |
           export PYTHONPATH=$PYTHONPATH:./src
           /bin/bash ./scripts/pyinstaller.sh
-      - if: matrix.python-version == '3.11'
+      - if: matrix.python-version == '3.11' && matrix.search-engine == 'elasticsearch'
         name: Artifact
         uses: actions/upload-artifact@v7
         with:
           path: dist/*
       - id: release
-        if: github.event_name == 'push' && matrix.python-version == '3.11'
+        if: github.event_name == 'push' && matrix.python-version == '3.11' && matrix.search-engine == 'elasticsearch'
         name: Release
         uses: svenstaro/upload-release-action@v2
         with:
@@ -101,6 +105,9 @@ jobs:
         python-version:
           - '3.11'
           - '3.14'
+        search-engine:
+          - elasticsearch
+          - opensearch
     timeout-minutes: 30
   delete:
     needs:
