@@ -134,6 +134,7 @@ Production containers receive variables from the Compose environment block inste
 | `RABBITMQ_PASSWORD` | `password` | RabbitMQ password |
 | `ELASTIC_VERSION` | `9.5.3` | Elasticsearch image tag |
 | `ELASTIC_HOST` | `localhost` | Elasticsearch host, with optional protocol |
+| `SEARCH_ENGINE` | `elasticsearch` | Search engine, either `elasticsearch` or `opensearch` |
 | `TURNSTILE_SECRET` | Empty | Cloudflare Turnstile secret |
 
 The application appends `:9200` to `ELASTIC_HOST`.
