@@ -18,9 +18,14 @@ from __future__ import annotations
 import asyncio
 from contextlib import asynccontextmanager
 
-from elasticsearch import AsyncElasticsearch, BadRequestError
+from mb.utility.env import ELASTIC_HOST, SEARCH_ENGINE
 
-from mb.utility.env import ELASTIC_HOST
+if SEARCH_ENGINE == "opensearch":
+    from opensearchpy import AsyncOpenSearch as SearchClient
+    from opensearchpy import RequestError as BadRequestError
+else:
+    from elasticsearch import AsyncElasticsearch as SearchClient
+    from elasticsearch import BadRequestError
 
 delay: int = 5
 
@@ -55,18 +60,18 @@ def generate_elastic_mapping() -> dict:
 
 @asynccontextmanager
 async def async_elastic():
-    async with AsyncElasticsearch(f"{ELASTIC_HOST}:9200") as client:
+    async with SearchClient(f"{ELASTIC_HOST}:9200") as client:
         counter: int = 0
         while not await client.ping():
             counter += delay
             if counter > 600:
-                raise ConnectionError("Elasticsearch is not available.")
+                raise ConnectionError(f"{SEARCH_ENGINE} is not available.")
             await asyncio.sleep(delay)
 
         if not await client.indices.exists(index="record"):
             try:
                 await client.indices.create(
-                    index="record", mappings=generate_elastic_mapping()
+                    index="record", body={"mappings": generate_elastic_mapping()}
                 )
             except BadRequestError as e:
                 if not await client.indices.exists(index="record"):

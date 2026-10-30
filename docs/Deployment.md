@@ -134,11 +134,19 @@ Production containers receive variables from the Compose environment block inste
 | `RABBITMQ_PASSWORD` | `password` | RabbitMQ password |
 | `ELASTIC_VERSION` | `9.5.3` | Elasticsearch image tag |
 | `ELASTIC_HOST` | `localhost` | Elasticsearch host, with optional protocol |
+| `SEARCH_ENGINE` | `elasticsearch` | Search engine, either `elasticsearch` or `opensearch` |
 | `TURNSTILE_SECRET` | Empty | Cloudflare Turnstile secret |
 
 The application appends `:9200` to `ELASTIC_HOST`.
 Provide an explicit scheme for remote services, such as `https://elastic.example.com`.
 `MB_FS_HOST` also accepts an explicit scheme and otherwise assumes `http`.
+
+### Search Engine Choice
+
+`SEARCH_ENGINE` selects between `elasticsearch` (default) and `opensearch`.
+The Compose search service picks the image and settings through `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and `SEARCH_DATA_PATH`.
+To run OpenSearch, uncomment the `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and `SEARCH_DATA_PATH` lines in `docker/.env`.
+The production Compose environment block forwards `SEARCH_ENGINE` to the backend and worker containers.
 
 `MB_FS_PERSISTENT` and `TURNSTILE_SECRET` are not forwarded by the production Compose environment block.
 Add them to the relevant service definitions if those features are needed.
@@ -198,6 +206,7 @@ The manifests require review before use.
 - The ingress routes only the API.
 - The ingress does not configure TLS.
 - Image tags should be pinned for reproducible deployments.
+- `SEARCH_ENGINE` in `config-mb.yaml` selects the client; for OpenSearch, adjust the storage deployment image, mount path, and env as noted in its comments.
 
 Use Secrets instead of ConfigMaps for passwords and signing keys.
 Replace `emptyDir` with PersistentVolumeClaims backed by a durable storage class.

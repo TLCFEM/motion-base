@@ -67,6 +67,9 @@ def _ensure_protocol(target: str):
 
 ELASTIC_HOST: str = _ensure_protocol(os.getenv("ELASTIC_HOST", "localhost"))
 
+# either "elasticsearch" or "opensearch"
+SEARCH_ENGINE: str = os.getenv("SEARCH_ENGINE", "elasticsearch")
+
 MB_FASTAPI_WORKERS: str = os.getenv("MB_FASTAPI_WORKERS", "2")
 MB_PORT: str = os.getenv("MB_PORT", "8000")
 

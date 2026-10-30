@@ -315,21 +315,25 @@ async def search_records(query: QueryConfig = QueryConfig()):
             page_number = min(page_number, 10000 // page_size - 1)
 
             results = await client.search(
-                track_total_hits=True,
                 index="record",
-                sort=sort,
-                query=query.generate_elastic_query(),
-                from_=page_number * page_size,
-                size=page_size,
+                body={
+                    "track_total_hits": True,
+                    "sort": sort,
+                    "query": query.generate_elastic_query(),
+                    "from": page_number * page_size,
+                    "size": page_size,
+                },
             )
         else:
             results = await client.search(
-                track_total_hits=True,
                 index="record",
-                sort=sort,
-                query=query.generate_elastic_query(),
-                search_after=search_after,
-                size=page_size,
+                body={
+                    "track_total_hits": True,
+                    "sort": sort,
+                    "query": query.generate_elastic_query(),
+                    "search_after": search_after,
+                    "size": page_size,
+                },
             )
 
     return ListMetadataResponse(
@@ -367,12 +371,12 @@ async def purge_records(
 
     async with async_elastic() as client:
         if not confirm:
-            return await client.search(index="record", query=elastic_query)
+            return await client.search(index="record", body={"query": elastic_query})
 
         all_records = []
 
         while True:
-            results = await client.search(index="record", query=elastic_query)
+            results = await client.search(index="record", body={"query": elastic_query})
             record_ids = [x["_id"] for x in results["hits"]["hits"]]
             if not record_ids:
                 break
@@ -393,18 +397,20 @@ async def aggregation_stats():
     async with async_elastic() as client:
         results = await client.search(
             index="record",
-            query={"range": {"magnitude": {"gte": 1, "lte": 10}}},
-            aggs={
-                "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
-                "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
-                "year": {
-                    "date_histogram": {
-                        "field": "event_time",
-                        "calendar_interval": "year",
-                    }
+            body={
+                "query": {"range": {"magnitude": {"gte": 1, "lte": 10}}},
+                "aggs": {
+                    "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
+                    "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
+                    "year": {
+                        "date_histogram": {
+                            "field": "event_time",
+                            "calendar_interval": "year",
+                        }
+                    },
                 },
+                "size": 0,
             },
-            size=0,
         )
 
         return results["aggregations"]

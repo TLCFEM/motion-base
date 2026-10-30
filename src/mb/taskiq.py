@@ -15,7 +15,6 @@
 
 from __future__ import annotations
 
-from elastic_transport import ConnectionTimeout
 from pymongo import AsyncMongoClient
 from pymongo.errors import ServerSelectionTimeoutError
 from taskiq import TaskiqEvents
@@ -24,7 +23,12 @@ from taskiq_aio_pika import AioPikaBroker, Queue
 from taskiq_mongodb import MongoResultBackend
 
 from mb.utility.config import mb_init_beanie, mongo_uri, rabbitmq_uri
-from mb.utility.env import MONGO_DB_NAME
+from mb.utility.env import MONGO_DB_NAME, SEARCH_ENGINE
+
+if SEARCH_ENGINE == "opensearch":
+    from opensearchpy import ConnectionTimeout
+else:
+    from elastic_transport import ConnectionTimeout
 
 broker = (
     AioPikaBroker(

@@ -3,8 +3,10 @@ services:
     container_name: dev-elasticsearch
     environment:
       ES_JAVA_OPTS: '-Xms512m -Xmx1g'
+      OPENSEARCH_JAVA_OPTS: '-Xms512m -Xmx1g'
+      DISABLE_SECURITY_PLUGIN: true
       discovery.type: single-node
-      xpack.security.enabled: false
+      xpack.security.enabled: ${XPACK_SECURITY_ENABLED-false}
     healthcheck:
       interval: 300s
       retries: 5
@@ -15,12 +17,12 @@ services:
         - '-f'
         - http://localhost:9200/_cluster/health
       timeout: 10s
-    image: elasticsearch:${ELASTIC_VERSION}
+    image: ${SEARCH_IMAGE:-elasticsearch:${ELASTIC_VERSION}}
     ports:
       - '9200:9200'
     restart: 'no'
     volumes:
-      - elasticsearch:/usr/share/elasticsearch/data
+      - elasticsearch:${SEARCH_DATA_PATH:-/usr/share/elasticsearch/data}
   dev-mongo:
     command: '--wiredTigerCacheSizeGB ${MONGO_CACHE_SIZE} --port ${MONGO_PORT}'
     container_name: dev-mongo

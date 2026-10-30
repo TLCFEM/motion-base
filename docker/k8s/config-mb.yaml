@@ -57,3 +57,6 @@ data:
   RABBITMQ_PASSWORD: "password"
   # elastic search related configurations
   ELASTIC_HOST: "localhost"
+  # search engine used by the backend, either elasticsearch or opensearch
+  # for opensearch, also adjust the storage deployment image, mount path, and env
+  SEARCH_ENGINE: "elasticsearch"
