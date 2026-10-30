@@ -14,7 +14,7 @@ jobs:
           DISABLE_SECURITY_PLUGIN: true
           discovery.type: single-node
           xpack.security.enabled: ${{ matrix.search-engine == 'elasticsearch' && 'false' || '' }}
-        image: ${{ matrix.search-engine == 'elasticsearch' && 'elasticsearch:9.5.3' || 'opensearchproject/opensearch:3.9.0' }}
+        image: ${{ matrix.search-engine == 'elasticsearch' && 'elasticsearch:9.5.3' || 'opensearchproject/opensearch:latest' }}
         ports:
           - '9200:9200'
       mongodb:
