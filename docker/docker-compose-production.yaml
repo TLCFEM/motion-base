@@ -3,8 +3,10 @@ services:
     container_name: elasticsearch
     environment:
       ES_JAVA_OPTS: '-Xms1g -Xmx4g'
+      OPENSEARCH_JAVA_OPTS: '-Xms1g -Xmx4g'
+      DISABLE_SECURITY_PLUGIN: true
       discovery.type: single-node
-      xpack.security.enabled: false
+      xpack.security.enabled: ${XPACK_SECURITY_ENABLED-false}
     healthcheck:
       interval: 300s
       retries: 5
@@ -15,10 +17,10 @@ services:
         - '-f'
         - http://localhost:9200/_cluster/health
       timeout: 10s
-    image: elasticsearch:${ELASTIC_VERSION}
+    image: ${SEARCH_IMAGE:-elasticsearch:${ELASTIC_VERSION}}
     restart: always
     volumes:
-      - motion_elasticsearch:/usr/share/elasticsearch/data
+      - motion_elasticsearch:${SEARCH_DATA_PATH:-/usr/share/elasticsearch/data}
   mb-back:
     container_name: mb-back
     depends_on:
@@ -51,6 +53,7 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      SEARCH_ENGINE: ${SEARCH_ENGINE:-elasticsearch}
     healthcheck:
       interval: 300s
       retries: 10
@@ -108,6 +111,7 @@ services:
       RABBITMQ_PASSWORD: ${RABBITMQ_PASSWORD}
       RABBITMQ_PORT: ${RABBITMQ_PORT}
       RABBITMQ_USERNAME: ${RABBITMQ_USERNAME}
+      SEARCH_ENGINE: ${SEARCH_ENGINE:-elasticsearch}
     image: tlcfem/motion-base:back
     restart: always
   mongo:

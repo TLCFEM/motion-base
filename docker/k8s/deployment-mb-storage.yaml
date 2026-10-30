@@ -60,6 +60,8 @@ spec:
               memory: "1Gi"
               cpu: "0.5"
         - name: mb-elasticsearch
+          # for opensearch, use e.g. opensearchproject/opensearch:3.9.0 as the image
+          # and /usr/share/opensearch/data as the mount path below
           image: elasticsearch:9.5.3
           imagePullPolicy: Always
           ports:
@@ -73,6 +75,9 @@ spec:
               value: single-node
             - name: xpack.security.enabled
               value: "false"
+            # for opensearch, replace xpack.security.enabled above with:
+            # - name: DISABLE_SECURITY_PLUGIN
+            #   value: "true"
           resources:
             requests:
               memory: "1Gi"

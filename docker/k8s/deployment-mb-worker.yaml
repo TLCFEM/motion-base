@@ -122,6 +122,11 @@ spec:
                   key: RABBITMQ_PASSWORD
             - name: ELASTIC_HOST
               value: "mb-storage-service"
+            - name: SEARCH_ENGINE
+              valueFrom:
+                configMapKeyRef:
+                  name: mb-config
+                  key: SEARCH_ENGINE
           resources:
             limits:
               memory: "2Gi"
