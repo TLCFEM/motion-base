@@ -4,7 +4,7 @@ aio-pika==10.2.1          # via taskiq-aio-pika
 aiobotocore==3.10.0       # via s3fs
 aiodns==4.0.4             # via aiohttp
 aiohappyeyeballs==2.7.1   # via aiohttp
-aiohttp==3.14.5           # via aiobotocore, elasticsearch, s3fs, taskiq, motion-base (pyproject.toml)
+aiohttp==3.14.5           # via aiobotocore, elasticsearch, opensearch-py, s3fs, taskiq, motion-base (pyproject.toml)
 aioitertools==0.13.0      # via aiobotocore
 aiormq==7.2.4             # via aio-pika
 aiosignal==1.4.0          # via aiohttp

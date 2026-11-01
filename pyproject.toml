@@ -22,7 +22,7 @@ dependencies = [
     "fastapi",
     "joserfc",
     "numba",
-    "opensearch-py",
+    "opensearch-py[async]",
     "Pint",
     "pyinstrument",
     "python-dotenv",
