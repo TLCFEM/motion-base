@@ -5,7 +5,7 @@ jobs:
   build:
     permissions:
       contents: write
-    runs-on: ubuntu-slim
+    runs-on: ubuntu-24.04
     services:
       search:
         env:
