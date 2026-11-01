@@ -1,6 +1,6 @@
 jobs:
   linux:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Clone
         uses: actions/checkout@v7

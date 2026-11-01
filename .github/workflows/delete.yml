@@ -1,6 +1,6 @@
 jobs:
   deployment:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Delete Deployment
         uses: strumwolf/delete-deployment-environment@v4
@@ -8,7 +8,7 @@ jobs:
           environment: github-pages
           token: ${{ secrets.ALL }}
   package:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-slim
     steps:
       - name: Delete Package
         uses: Chizkiyahu/delete-untagged-ghcr-action@v6
