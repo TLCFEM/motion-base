@@ -22,8 +22,13 @@ from httpx2 import ASGITransport, AsyncClient
 
 from mb.app.main import app
 from mb.app.utility import User, bcrypt_hash, is_active, is_admin
-from mb.utility import env
+from mb.record.async_record import Record
+from mb.record.parser import ParserNZSM
+from mb.record.utility import str_factory
+from mb.utility import UPath, env
 from mb.utility.config import init_mongo
+from mb.utility.elastic import async_elastic
+from mb.utility.files import serialize_records
 
 
 @pytest.fixture(scope="function")
@@ -75,3 +80,15 @@ async def mock_client_superuser(monkeypatch, mongo_connection):
 @pytest.fixture(scope="function")
 def pwd():
     return os.path.dirname(os.path.abspath(__file__))
+
+
+@pytest.fixture(scope="function")
+async def sample_data(pwd, mongo_connection):
+    results = await ParserNZSM.parse_archive(
+        archive_obj=UPath(pwd) / "data/nz_test.tar.gz", user_id=str_factory()
+    )
+
+    async with async_elastic() as client:
+        await client.bulk(index="record", body=serialize_records(results), refresh=True)
+
+    yield await Record.find_all().to_list()

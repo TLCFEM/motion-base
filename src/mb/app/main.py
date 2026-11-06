@@ -401,7 +401,9 @@ async def aggregation_stats():
                 "query": {"range": {"magnitude": {"gte": 1, "lte": 10}}},
                 "aggs": {
                     "magnitude": {"histogram": {"field": "magnitude", "interval": 1}},
-                    "pga": {"histogram": {"field": "maximum_acceleration", "interval": 10}},
+                    "pga": {
+                        "histogram": {"field": "maximum_acceleration", "interval": 10}
+                    },
                     "year": {
                         "date_histogram": {
                             "field": "event_time",

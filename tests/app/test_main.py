@@ -17,13 +17,6 @@ from http import HTTPStatus
 
 import pytest
 
-from mb.record.async_record import Record
-from mb.record.parser import ParserNZSM
-from mb.record.utility import str_factory
-from mb.utility import UPath
-from mb.utility.elastic import async_elastic
-from mb.utility.files import serialize_records
-
 
 async def test_redirect_to_docs(mock_client):
     response = await mock_client.get("/")
@@ -54,18 +47,6 @@ async def test_post_total(mock_client):
 async def test_for_test_only(mock_client):
     response = await mock_client.get("/test_endpoint")
     assert response.status_code == HTTPStatus.OK
-
-
-@pytest.fixture(scope="function")
-async def sample_data(pwd, mongo_connection):
-    results = await ParserNZSM.parse_archive(
-        archive_obj=UPath(pwd) / "data/nz_test.tar.gz", user_id=str_factory()
-    )
-
-    async with async_elastic() as client:
-        await client.bulk(index="record", body=serialize_records(results))
-
-    yield await Record.find_all().to_list()
 
 
 @pytest.mark.parametrize(
