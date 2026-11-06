@@ -55,9 +55,7 @@ async def test_record_waveform_and_spectrum(mongo_connection):
     assert waveform == pytest.approx((np.array(record.raw_data) + 10.0) * 1e-5)
 
     _, waveform = record.to_waveform(unit="cm/s/s")
-    assert waveform == pytest.approx(
-        (np.array(record.raw_data) + 10.0) * 1e-5 * 0.1
-    )
+    assert waveform == pytest.approx((np.array(record.raw_data) + 10.0) * 1e-5 * 0.1)
 
     _, waveform = record.to_waveform(normalised=True)
     expected = np.array(record.raw_data, dtype=float) + 10.0

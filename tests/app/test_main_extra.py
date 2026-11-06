@@ -99,9 +99,7 @@ async def test_task_status_endpoints(mock_client, mongo_connection):
     response = await mock_client.get(f"/task/status/{missing_id}")
     assert response.status_code == HTTPStatus.NOT_FOUND
 
-    response = await mock_client.post(
-        "/task/status", json=[task_id, missing_id]
-    )
+    response = await mock_client.post("/task/status", json=[task_id, missing_id])
     assert response.status_code == HTTPStatus.OK
     tasks = response.json()["tasks"]
     assert tasks[0]["id"] == task_id
@@ -244,9 +242,7 @@ async def test_purge_forbidden(mongo_connection):
 
 
 async def test_process_missing_record(mock_client):
-    response = await mock_client.post(
-        f"/process?record_id={uuid4()}", json={}
-    )
+    response = await mock_client.post(f"/process?record_id={uuid4()}", json={})
 
     assert response.status_code == HTTPStatus.NOT_FOUND
 
@@ -308,9 +304,7 @@ async def test_turnstile(monkeypatch, mock_client, payload, expected):
         main_module.aiohttp, "ClientSession", lambda: _FakeSession(payload)
     )
 
-    response = await mock_client.post(
-        "/turnstile", data={"turnstile_token": "token"}
-    )
+    response = await mock_client.post("/turnstile", data={"turnstile_token": "token"})
 
     assert response.status_code == HTTPStatus.OK
     assert response.json() == expected
@@ -319,8 +313,6 @@ async def test_turnstile(monkeypatch, mock_client, payload, expected):
 async def test_turnstile_not_configured(monkeypatch, mock_client):
     monkeypatch.setattr(main_module, "TURNSTILE_SECRET", "")
 
-    response = await mock_client.post(
-        "/turnstile", data={"turnstile_token": "token"}
-    )
+    response = await mock_client.post("/turnstile", data={"turnstile_token": "token"})
 
     assert response.status_code == HTTPStatus.INTERNAL_SERVER_ERROR

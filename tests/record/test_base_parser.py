@@ -44,9 +44,7 @@ def test_nied_parse_unit():
 
 def test_nied_normalise_unit():
     assert BaseParserNIED._normalise_unit("value (gal)") == str(pint.Unit("Gal"))
-    assert BaseParserNIED._normalise_unit("value (cm/s/s)") == str(
-        pint.Unit("cm/s/s")
-    )
+    assert BaseParserNIED._normalise_unit("value (cm/s/s)") == str(pint.Unit("cm/s/s"))
 
 
 def test_nied_strip_unit():

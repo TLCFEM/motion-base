@@ -74,9 +74,7 @@ def test_apply_filter():
 def test_zero_stuff():
     assert zero_stuff(1, [1.0, 2.0]) == pytest.approx([1.0, 2.0])
     assert zero_stuff(1, np.array([1.0, 2.0])) == pytest.approx([1.0, 2.0])
-    assert zero_stuff(2, np.array([1.0, 2.0])) == pytest.approx(
-        [1.0, 0.0, 2.0, 0.0]
-    )
+    assert zero_stuff(2, np.array([1.0, 2.0])) == pytest.approx([1.0, 0.0, 2.0, 0.0])
 
 
 @pytest.mark.parametrize(

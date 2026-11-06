@@ -45,9 +45,7 @@ async def test_process_defaults(sample_record):
     assert response.period is None
 
 
-@pytest.mark.parametrize(
-    "filter_type", ["bandpass", "bandstop", "lowpass", "highpass"]
-)
+@pytest.mark.parametrize("filter_type", ["bandpass", "bandstop", "lowpass", "highpass"])
 async def test_process_filter_types(sample_record, filter_type):
     response = process_record_local(
         sample_record,

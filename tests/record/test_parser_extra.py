@@ -52,9 +52,7 @@ async def test_nied_parse_archive_with_invalid_file(pwd, mongo_connection):
     buffer = _tar_bytes(
         {
             "bad.NS": b"not a valid NIED file",
-            "SZO0039901271027.NS": _read(
-                f"{pwd}/data/SZO0039901271027.NS"
-            ),
+            "SZO0039901271027.NS": _read(f"{pwd}/data/SZO0039901271027.NS"),
         }
     )
 
@@ -102,9 +100,7 @@ async def test_nied_parse_archive_errors(pwd, mongo_connection):
     )
 
     with pytest.raises(ValueError, match="Need archive name"):
-        await ParserNIED.parse_archive(
-            archive_obj=BytesIO(b""), user_id=str_factory()
-        )
+        await ParserNIED.parse_archive(archive_obj=BytesIO(b""), user_id=str_factory())
 
 
 async def test_nied_parse_archive_with_task(pwd, mongo_connection):
@@ -146,18 +142,14 @@ async def test_nz_parse_archive_errors(mongo_connection):
     )
 
     with pytest.raises(ValueError, match="Need archive name"):
-        await ParserNZSM.parse_archive(
-            archive_obj=BytesIO(b""), user_id=str_factory()
-        )
+        await ParserNZSM.parse_archive(archive_obj=BytesIO(b""), user_id=str_factory())
 
     with pytest.raises(ValueError, match="File name is required"):
         await ParserNZSM.parse_file(BytesIO(b""), str_factory())
 
 
 @pytest.mark.parametrize("archive_type", ["tar", "zip"])
-async def test_nz_parse_archive_with_invalid_files(
-    pwd, mongo_connection, archive_type
-):
+async def test_nz_parse_archive_with_invalid_files(pwd, mongo_connection, archive_type):
     files = {
         "readme.txt": b"ignore me",
         "bad.V1A": b"not a valid NZSM file",

@@ -89,8 +89,6 @@ async def sample_data(pwd, mongo_connection):
     )
 
     async with async_elastic() as client:
-        await client.bulk(
-            index="record", body=serialize_records(results), refresh=True
-        )
+        await client.bulk(index="record", body=serialize_records(results), refresh=True)
 
     yield await Record.find_all().to_list()

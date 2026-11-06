@@ -82,7 +82,9 @@ def _make_client(handler, **kwargs):
 
 
 def _token(expires_in: int = 3600, **claims) -> str:
-    payload = {"exp": int((datetime.now(UTC) + timedelta(seconds=expires_in)).timestamp())}
+    payload = {
+        "exp": int((datetime.now(UTC) + timedelta(seconds=expires_in)).timestamp())
+    }
     payload.update(claims)
     encoded = base64.urlsafe_b64encode(json.dumps(payload).encode()).rstrip(b"=")
     return f"header.{encoded.decode()}.signature"
@@ -129,9 +131,7 @@ def test_mb_record_plots():
     assert figure is not None
     plt.close(figure)
 
-    figure = record.plot_response_spectrum(
-        period_bracket=np.array([0.1, 0.2])
-    )
+    figure = record.plot_response_spectrum(period_bracket=np.array([0.1, 0.2]))
     assert figure is not None
     plt.close(figure)
 
@@ -225,9 +225,7 @@ async def test_header_token_failure():
 
 async def test_me():
     client = _make_client(
-        lambda method, url, kwargs: FakeResponse(
-            HTTPStatus.OK, {"username": "user"}
-        )
+        lambda method, url, kwargs: FakeResponse(HTTPStatus.OK, {"username": "user"})
     )
 
     assert await client.me() == {"username": "user"}
@@ -396,9 +394,7 @@ async def test_upload_failure(tmp_path):
 
 async def test_jackpot():
     client = _make_client(
-        lambda method, url, kwargs: FakeResponse(
-            HTTPStatus.OK, _record_data()
-        )
+        lambda method, url, kwargs: FakeResponse(HTTPStatus.OK, _record_data())
     )
 
     record = await client.jackpot()
@@ -462,9 +458,7 @@ async def test_retrieve_all():
     )
     assert [
         record
-        async for record in failing.retrieve_all(
-            {"pagination": {"page_size": 1}}
-        )
+        async for record in failing.retrieve_all({"pagination": {"page_size": 1}})
     ] == []
 
 

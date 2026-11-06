@@ -96,9 +96,7 @@ def test_to_spectrum_requires_waveform():
 
 @pytest.mark.parametrize("as_array", [True, False])
 def test_to_response_spectrum(as_array):
-    response = _record_response(
-        waveform=[0.0, 1.0, -1.0, 0.5, 0.0], time_interval=0.01
-    )
+    response = _record_response(waveform=[0.0, 1.0, -1.0, 0.5, 0.0], time_interval=0.01)
     period = np.array([0.0, 0.1, 0.2]) if as_array else [0.0, 0.1, 0.2]
 
     response.to_response_spectrum(0.05, period)
@@ -216,7 +214,9 @@ def test_query_config_elastic_all_fields():
     assert {"match": {"region": "jp"}} in must
     assert {"match": {"category": "knt"}} in must
     assert {"range": {"magnitude": {"gte": 4, "lte": 8}}} in must
-    assert {"range": {"event_time": {"gte": config.from_date, "lte": config.to_date}}} in must
+    assert {
+        "range": {"event_time": {"gte": config.from_date, "lte": config.to_date}}
+    } in must
     assert {"range": {"maximum_acceleration": {"gte": 10, "lte": 100}}} in must
     assert {
         "geo_distance": {
@@ -232,7 +232,9 @@ def test_query_config_elastic_all_fields():
     } in must
     assert {"regexp": {"direction": {"value": "NS", "case_insensitive": True}}} in must
     assert {"regexp": {"file_name": {"value": "SZO", "case_insensitive": True}}} in must
-    assert {"regexp": {"station_code": {"value": "SZO", "case_insensitive": True}}} in must
+    assert {
+        "regexp": {"station_code": {"value": "SZO", "case_insensitive": True}}
+    } in must
 
 
 def test_query_config_elastic_default_distances():

@@ -60,9 +60,7 @@ async def test_local_parse_error(
 
     task_id = await create_task()
     assert (
-        await module._parse_archive_local(
-            "s3://fake/test.tar.gz", "user", task_id
-        )
+        await module._parse_archive_local("s3://fake/test.tar.gz", "user", task_id)
         == []
     )
     assert await UploadTask.find_one(UploadTask.id == task_id) is None

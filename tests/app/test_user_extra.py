@@ -137,9 +137,7 @@ async def test_non_admin_cannot_manage_users(mock_client, mongo_connection):
     )
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
-    response = await mock_client.delete(
-        f"/user/{uuid5_str('bob')}", headers=headers
-    )
+    response = await mock_client.delete(f"/user/{uuid5_str('bob')}", headers=headers)
     assert response.status_code == HTTPStatus.BAD_REQUEST
 
 

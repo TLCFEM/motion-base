@@ -94,9 +94,7 @@ def test_run_worker(monkeypatch):
     def fake_run_worker(args):
         captured["args"] = args
 
-    monkeypatch.setattr(
-        "taskiq.cli.worker.args.WorkerArgs", FakeArgs, raising=False
-    )
+    monkeypatch.setattr("taskiq.cli.worker.args.WorkerArgs", FakeArgs, raising=False)
     monkeypatch.setattr("taskiq.cli.worker.run.run_worker", fake_run_worker)
 
     mb.run_worker(Config(worker_config=["--workers", "2"]))
