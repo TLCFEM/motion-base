@@ -30,9 +30,8 @@ dependencies = [
     "s3fs",
     "scipy",
     "structlog",
-    "taskiq<0.13.0",
+    "taskiq",
     "taskiq-aio-pika",
-    "taskiq-mongodb",
     "tzdata",
     "universal_pathlib",
     "uvicorn[standard]"
