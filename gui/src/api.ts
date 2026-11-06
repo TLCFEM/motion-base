@@ -104,6 +104,11 @@ interface TotalResponse {
     total: number[];
 }
 
+export interface TurnstileResponse {
+    success: boolean;
+    errors?: string[];
+}
+
 export interface AggregationItem {
     key: number;
     doc_count: number;
@@ -286,6 +291,22 @@ export async function query_api(config: QueryConfig) {
 
 export async function get_total_api() {
     return (await http.get<TotalResponse>("/total")).data.total[0];
+}
+
+export async function verify_turnstile_api(token: string) {
+    const payload = new URLSearchParams();
+    payload.set("turnstile_token", token);
+    return (await http.post<TurnstileResponse>("/turnstile", payload)).data;
+}
+
+/** Prefer the backend's error detail over Axios' generic status message. */
+export function responseMessage(error: unknown) {
+    if (axios.isAxiosError(error)) {
+        const detail = (error.response?.data as { detail?: unknown } | undefined)?.detail;
+        if (typeof detail === "string" && detail) return detail;
+    }
+
+    return errorMessage(error);
 }
 
 export async function get_stats() {

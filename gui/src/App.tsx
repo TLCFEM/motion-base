@@ -9,7 +9,7 @@ import { Switch as ThemeSwitch } from "@ark-ui/solid/switch";
 import { Tabs } from "@ark-ui/solid/tabs";
 import { marked } from "marked";
 import hljs from "highlight.js/lib/common";
-import { Component, createEffect, createResource, createSignal, Match, onCleanup, onMount, Switch } from "solid-js";
+import { Component, createEffect, createResource, createSignal, Match, onCleanup, onMount, Show, Switch } from "solid-js";
 import AboutModal from "./About";
 import { check_backend, get_total_api } from "./api";
 import mb_logo from "./assets/logo.svg";
@@ -18,6 +18,8 @@ import Process from "./Process";
 import QueryDatabase from "./Query";
 import ServerModal from "./Server";
 import { applyTheme, setTheme, theme, watchSystemTheme } from "./theme";
+import TurnstileGate from "./Turnstile";
+import { hasTurnstileSession, TURNSTILE_ENABLED } from "./turnstile";
 
 type Mode = "brief" | "scripting" | "jackpot" | "query" | "process";
 
@@ -42,7 +44,7 @@ const MarkdownContent: Component<{ src: string }> = (props) => {
     return <div ref={container} class="markdown" innerHTML={content() ?? ""} />;
 };
 
-const App: Component = () => {
+const MainApp: Component = () => {
     const [mode, setMode] = createSignal<Mode>("brief");
     const [online, { mutate: setOnline }] = createResource(() => check_backend());
     const isOnline = () => online() === true;
@@ -127,6 +129,16 @@ const App: Component = () => {
                 </Switch>
             </main>
         </Tabs.Root>
+    );
+};
+
+const App: Component = () => {
+    const [verified, setVerified] = createSignal(!TURNSTILE_ENABLED || hasTurnstileSession());
+
+    return (
+        <Show when={verified()} fallback={<TurnstileGate onVerified={() => setVerified(true)} />}>
+            <MainApp />
+        </Show>
     );
 };
 

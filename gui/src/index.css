@@ -1408,6 +1408,85 @@ table.data tbody tr.selected td {
     font-size: 0.62rem;
 }
 
+/* Turnstile ------------------------------------------------------------- */
+
+.turnstile-gate {
+    position: fixed;
+    inset: 0;
+    z-index: 150;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem;
+    background:
+        radial-gradient(760px 460px at 50% -12%, rgba(13, 148, 136, 0.16), transparent 64%),
+        radial-gradient(680px 420px at 108% 108%, rgba(14, 165, 233, 0.12), transparent 60%), var(--bg);
+    overflow: auto;
+}
+
+.turnstile-card {
+    width: 100%;
+    max-width: 28rem;
+    padding: clamp(1.5rem, 4vw, 2.25rem);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    box-shadow: var(--shadow-lg);
+    text-align: center;
+    animation: modal-in 0.3s cubic-bezier(0.22, 0.61, 0.36, 1);
+}
+
+.turnstile-mark {
+    display: block;
+    width: 3rem;
+    height: 3rem;
+    margin: 0 auto 0.9rem;
+    object-fit: contain;
+    filter: drop-shadow(0 8px 16px rgba(13, 148, 136, 0.24));
+}
+
+.turnstile-card h1 {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.turnstile-card > .turnstile-intro {
+    margin-top: 0.45rem;
+    color: var(--muted);
+    font-size: 0.84rem;
+}
+
+.turnstile-widget {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 65px;
+    margin: 1.25rem 0 0.3rem;
+}
+
+.turnstile-status {
+    color: var(--muted);
+    font-size: 0.8rem;
+}
+
+.turnstile-card .error-text {
+    margin: 1rem 0 0;
+    text-align: left;
+}
+
+.turnstile-actions {
+    display: flex;
+    justify-content: center;
+    gap: 0.45rem;
+    margin-top: 0.85rem;
+}
+
+.turnstile-note {
+    margin-top: 1.1rem;
+    font-size: 0.7rem;
+}
+
 /* Dark theme ------------------------------------------------------------- */
 
 :root[data-theme="dark"] {
