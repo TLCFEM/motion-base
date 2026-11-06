@@ -20,8 +20,8 @@ from pymongo.errors import ServerSelectionTimeoutError
 from taskiq import TaskiqEvents
 from taskiq.middlewares import SmartRetryMiddleware
 from taskiq_aio_pika import AioPikaBroker, Queue
-from taskiq_mongodb import MongoResultBackend
 
+from mb.taskiq_mongo import MongoResultBackend
 from mb.utility.config import mb_init_beanie, mongo_uri, rabbitmq_uri
 from mb.utility.env import MONGO_DB_NAME, SEARCH_ENGINE
 
