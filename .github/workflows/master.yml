@@ -58,7 +58,7 @@ jobs:
         env:
           SEARCH_ENGINE: ${{ matrix.search-engine }}
         run: |
-          pip install -e .[dev] pyinstaller
+          pip install -e .[dev,client] pyinstaller
           export NUMBA_DISABLE_JIT=1
           ruff check
           pytest --cov --junitxml=junit.xml .
