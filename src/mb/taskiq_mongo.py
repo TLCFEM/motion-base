@@ -3,7 +3,6 @@ from typing import Any, TypeVar
 
 from pymongo import AsyncMongoClient
 from taskiq.abc.result_backend import AsyncResultBackend
-from taskiq.compat import model_dump, model_validate
 from taskiq.depends.progress_tracker import TaskProgress
 from taskiq.exceptions import ResultGetError
 from taskiq.result import TaskiqResult
@@ -62,7 +61,7 @@ class MongoResultBackend(AsyncResultBackend[_ReturnType]):
         """
         fields = {
             "task_id": task_id,
-            "value": model_dump(result),
+            "value": result.model_dump(mode="json"),
         }
         if self.ttl_seconds > 0:
             fields["expire_at"] = datetime.now(UTC) + timedelta(
@@ -101,10 +100,7 @@ class MongoResultBackend(AsyncResultBackend[_ReturnType]):
         if not doc or "value" not in doc:
             raise ResultIsMissingError
 
-        result = model_validate(
-            TaskiqResult[_ReturnType],  # ty: ignore[invalid-argument-type]
-            doc["value"],
-        )
+        result = TaskiqResult[_ReturnType].model_validate(doc["value"])  # ty: ignore[invalid-argument-type]
 
         if not with_logs:
             result.log = None
@@ -120,11 +116,7 @@ class MongoResultBackend(AsyncResultBackend[_ReturnType]):
         """Update task progress (may coexist with a progress-only document until set_result writes the result)."""
         await self.collection.update_one(
             {"task_id": task_id},
-            {
-                "$set": {
-                    "progress": model_dump(progress),
-                },
-            },
+            {"$set": {"progress": progress.model_dump(mode="json")}},
             upsert=True,
         )
 
@@ -135,7 +127,4 @@ class MongoResultBackend(AsyncResultBackend[_ReturnType]):
         if not doc or "progress" not in doc:
             return None
 
-        return model_validate(
-            TaskProgress[_ReturnType],
-            doc["progress"],
-        )
+        return TaskProgress[_ReturnType].model_validate(doc["progress"])
