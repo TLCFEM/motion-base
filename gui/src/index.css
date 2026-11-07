@@ -27,6 +27,7 @@
     --overlay: rgba(15, 23, 42, 0.48);
     --map-control-bg: rgba(255, 255, 255, 0.95);
     --map-attribution-bg: rgba(255, 255, 255, 0.78);
+    --map-filter: none;
     --header-inset: inset 0 1px 0 rgba(255, 255, 255, 0.7);
 
     /* Lines */
@@ -947,7 +948,7 @@ a:hover {
 
 .meta-label {
     margin-top: 0.8rem;
-    color: var(--text-faint);
+    color: var(--muted);
     font-size: var(--text-2xs);
     font-weight: 700;
     letter-spacing: var(--tracking-label);
@@ -1427,6 +1428,10 @@ table.data tbody tr.selected td {
     background: var(--map-bg);
 }
 
+.leaflet-tile-pane {
+    filter: var(--map-filter);
+}
+
 .leaflet-bar {
     overflow: hidden;
     border: 0 !important;
@@ -1602,6 +1607,7 @@ table.data tbody tr.selected td {
     --overlay: rgba(2, 6, 14, 0.66);
     --map-control-bg: rgba(17, 26, 43, 0.95);
     --map-attribution-bg: rgba(17, 26, 43, 0.82);
+    --map-filter: invert(1) hue-rotate(180deg) brightness(0.85) saturate(0.7) contrast(0.9);
 
     --border: #223047;
     --border-soft: #182335;
