@@ -1557,7 +1557,7 @@ table.data tbody tr.selected td {
     align-items: center;
     justify-content: center;
     min-height: 65px;
-    margin: 1.25rem 0 0.3rem;
+    margin: 1.25rem 0 1rem;
 }
 
 .turnstile-status {
