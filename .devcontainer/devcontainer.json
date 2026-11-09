@@ -1,0 +1,10 @@
+{
+    "image": "python:trixie",
+    "customizations": {
+        "vscode": {
+            "extensions": [
+                "ms-python.vscode-python-envs"
+            ]
+        }
+    }
+}
