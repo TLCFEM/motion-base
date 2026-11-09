@@ -204,7 +204,6 @@ async def download_single_random_waveform(normalised: bool = False):
     result: Record = await get_random_record()
 
     interval, record = result.to_waveform(normalised=normalised, unit="cm/s/s")
-    # noinspection PyTypeChecker
     return RecordResponse(
         **result.model_dump(exclude_none=True),
         endpoint="/waveform/jackpot",
@@ -222,7 +221,6 @@ async def download_single_random_spectrum():
     result: Record = await get_random_record()
 
     frequency, record = result.to_spectrum()
-    # noinspection PyTypeChecker
     return RecordResponse(
         **result.model_dump(exclude_none=True),
         endpoint="/spectrum/jackpot",
