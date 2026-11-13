@@ -43,7 +43,6 @@ def convert_to(quantity: pint.Quantity, unit: pint.Unit | None):
     return quantity.to(unit).magnitude if unit else quantity.magnitude
 
 
-@njit((float64[:], float64[:], int32))
 def apply_filter(
     window: np.ndarray, waveform: np.ndarray, up_ratio: int = 1
 ) -> np.ndarray:
