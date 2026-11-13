@@ -22,7 +22,7 @@ from fastapi import HTTPException
 
 from ..record.async_record import Record
 from ..record.response_spectrum import response_spectrum
-from ..record.utility import apply_filter, get_window, perform_fft, zero_stuff
+from ..record.utility import apply_filter, get_window, perform_fft
 from .response import ProcessConfig, ProcessedResponse
 
 
@@ -82,7 +82,8 @@ def process_record_local(result: Record, process_config: ProcessConfig):
                 freq_list,
                 ratio=process_config.up_ratio,
             ),
-            zero_stuff(process_config.up_ratio, waveform),
+            waveform,
+            process_config.up_ratio,
         )
     else:
         new_interval = time_interval

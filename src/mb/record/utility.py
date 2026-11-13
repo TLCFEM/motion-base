@@ -43,9 +43,31 @@ def convert_to(quantity: pint.Quantity, unit: pint.Unit | None):
     return quantity.to(unit).magnitude if unit else quantity.magnitude
 
 
-@njit((float64[:], float64[:]))
-def apply_filter(window, waveform: np.ndarray) -> np.ndarray:
-    return np.convolve(waveform, window, mode="same")
+@njit((float64[:], float64[:], int32))
+def apply_filter(
+    window: np.ndarray, waveform: np.ndarray, up_ratio: int = 1
+) -> np.ndarray:
+    """Apply an FIR filter while optionally upsampling the waveform.
+
+    When ``up_ratio`` is greater than one, the upsampling is performed with a
+    polyphase FIR filter (``scipy.signal.upfirdn``) instead of inserting zeros
+    between the samples of the original waveform. The output is aligned with
+    the legacy zero-stuffed ``same`` convolution and has the same length.
+    """
+    waveform = np.asarray(waveform, dtype=float)
+    window = np.asarray(window, dtype=float)
+
+    if up_ratio == 1:
+        return np.convolve(waveform, window, mode="same")
+
+    full = signal.upfirdn(window, waveform, up=up_ratio)
+    expected_length = waveform.size * up_ratio + window.size - 1
+    if full.size < expected_length:
+        full = np.pad(full, (0, expected_length - full.size))
+
+    length = max(window.size, waveform.size * up_ratio)
+    offset = (min(window.size, waveform.size * up_ratio) - 1) // 2
+    return full[offset : offset + length]
 
 
 @njit((int32, float64[:]))

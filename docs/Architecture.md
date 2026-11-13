@@ -105,7 +105,7 @@ The processing pipeline can perform the following steps.
 1. Convert raw integer samples to floating-point acceleration.
 2. Normalize the waveform when requested.
 3. Remove leading samples.
-4. Optionally upsample, design a windowed FIR filter, and convolve it with the signal.
+4. Optionally resample with a windowed FIR filter applied through polyphase interpolation.
 5. Optionally downsample by decimation.
 6. Optionally compute a one-sided FFT amplitude spectrum.
 7. Optionally compute response spectra with a linear single-degree-of-freedom oscillator.
