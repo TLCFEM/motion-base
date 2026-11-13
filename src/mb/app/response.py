@@ -119,12 +119,11 @@ class RecordResponse(RawRecordResponse):
         return self
 
     def filter(self, window, up_ratio: int = 1):
-        from ..record.utility import apply_filter, zero_stuff
+        from ..record.utility import apply_filter
 
         self.time_interval /= up_ratio
-        # noinspection PyTypeChecker
         self.waveform = apply_filter(
-            window * up_ratio, zero_stuff(up_ratio, self.waveform)
+            np.asarray(window) * up_ratio, self.waveform, up_ratio
         ).tolist()
 
         return self

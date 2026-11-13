@@ -71,6 +71,19 @@ def test_apply_filter():
     assert apply_filter(np.array([1.0]), waveform) == pytest.approx(waveform)
 
 
+def test_apply_filter_polyphase():
+    rng = np.random.default_rng(0)
+    waveform = rng.normal(size=64)
+    window = rng.normal(size=17)
+    up_ratio = 3
+
+    expected = np.convolve(zero_stuff(up_ratio, waveform), window, mode="same")
+    result = apply_filter(window, waveform, up_ratio)
+
+    assert len(result) == len(waveform) * up_ratio
+    assert result == pytest.approx(expected)
+
+
 def test_zero_stuff():
     assert zero_stuff(1, [1.0, 2.0]) == pytest.approx([1.0, 2.0])
     assert zero_stuff(1, np.array([1.0, 2.0])) == pytest.approx([1.0, 2.0])

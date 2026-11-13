@@ -66,7 +66,7 @@ The server applies operations in a fixed order.
 1. Convert raw integer samples to acceleration in `cm/s/s`.
 2. Normalize the waveform when `normalised=true`.
 3. Remove `remove_head` seconds from the beginning.
-4. When `with_filter=true`, upsample by `up_ratio`, design an FIR filter, and convolve it with the signal.
+4. When `with_filter=true`, design an FIR filter and apply it while upsampling by `up_ratio` with a polyphase filter.
 5. When `down_ratio > 1`, decimate by taking every `down_ratio`-th sample.
 6. When `with_spectrum=true`, compute a one-sided FFT amplitude spectrum.
 7. When `with_response_spectrum=true`, compute response spectra on the final waveform.
@@ -90,7 +90,7 @@ With filtering enabled, the output length is approximately `len(waveform) * up_r
 Without filtering, the upsampling factor is 1 and the length is approximately `len(waveform) / down_ratio`.
 FIR edge transients affect both ends of the record rather than the output length.
 
-Upsampling is implemented by inserting zeros between samples and applying a scaled FIR filter.
+Upsampling is implemented with a polyphase FIR filter, which avoids explicitly inserting zeros between samples.
 Downsampling is plain decimation.
 When `with_filter=false` and `down_ratio > 1`, no anti-alias filter is applied, so high-frequency content can alias into the output.
 Enable filtering when decimating real data.
@@ -106,7 +106,7 @@ For `bandpass` and `bandstop`, both `low_cut` and `high_cut` are used.
 For `lowpass`, only `high_cut` is used.
 For `highpass`, only `low_cut` is used.
 
-The filter is convolved with the zero-stuffed signal using `same` output length.
+The filter is applied with polyphase interpolation using `same` output length.
 This preserves the upsampled length but introduces the usual FIR edge transients.
 Trim the beginning of a record with `remove_head` before filtering when the initial transient matters.
 
