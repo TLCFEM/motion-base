@@ -18,21 +18,21 @@
         "@types/node": "^26.6.6",
         "@types/plotly.js-basic-dist-min": "^2.12.4",
         "jsdom": "^30.1.3",
-        "prettier": "^3.9.10",
+        "prettier": "^3.10.1",
         "typescript": "^7.0.2",
-        "vite": "^8.3.6",
-        "vite-plugin-solid": "^2.11.15",
+        "vite": "^8.3.8",
+        "vite-plugin-solid": "^2.11.16",
         "vitest": "^5.1.0"
     },
     "dependencies": {
         "@ark-ui/solid": "^5.40.0",
         "@tanstack/solid-table": "^9.3.1",
-        "axios": "^1.21.0",
+        "axios": "^1.21.1",
         "highlight.js": "^11.12.0",
         "leaflet": "^1.9.4",
-        "marked": "^18.1.3",
-        "plotly.js-basic-dist-min": "^4.2.0",
-        "solid-js": "^1.9.18"
+        "marked": "^18.2.0",
+        "plotly.js-basic-dist-min": "^4.3.0",
+        "solid-js": "^1.9.19"
     },
     "volta": {
         "node": "24.22.1"
