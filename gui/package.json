@@ -21,8 +21,8 @@
         "prettier": "^3.10.1",
         "typescript": "^7.0.2",
         "vite": "^8.3.8",
-        "vite-plugin-solid": "^2.11.16",
-        "vitest": "^5.1.0"
+        "vite-plugin-solid": "^2.11.17",
+        "vitest": "^5.1.1"
     },
     "dependencies": {
         "@ark-ui/solid": "^5.40.0",
@@ -30,9 +30,9 @@
         "axios": "^1.21.1",
         "highlight.js": "^11.12.0",
         "leaflet": "^1.9.4",
-        "marked": "^18.2.0",
+        "marked": "^18.2.1",
         "plotly.js-basic-dist-min": "^4.3.0",
-        "solid-js": "^1.9.19"
+        "solid-js": "^1.9.20"
     },
     "volta": {
         "node": "24.22.1"
