@@ -5,13 +5,13 @@ The application is split into stateless HTTP processes, optional Taskiq workers,
 
 ## Deployment Options
 
-| Option | Best for | Includes |
-| --- | --- | --- |
-| Demo script | A quick local trial | Backend, frontend, MongoDB, Elasticsearch, RabbitMQ, SeaweedFS |
-| Production Compose | A single Docker host | The full stack with persistent volumes and a worker |
-| Compose with nginx | Several backend replicas | The full stack plus an nginx load balancer |
-| Kubernetes | Cluster deployment | Manifests for storage, backend, frontend, worker, and ingress |
-| Standalone binary | A minimal API or worker node | `mb_runner` without Python installed |
+| Option             | Best for                     | Includes                                                       |
+|--------------------|------------------------------|----------------------------------------------------------------|
+| Demo script        | A quick local trial          | Backend, frontend, MongoDB, Elasticsearch, RabbitMQ, SeaweedFS |
+| Production Compose | A single Docker host         | The full stack with persistent volumes and a worker            |
+| Compose with nginx | Several backend replicas     | The full stack plus an nginx load balancer                     |
+| Kubernetes         | Cluster deployment           | Manifests for storage, backend, frontend, worker, and ingress  |
+| Standalone binary  | A minimal API or worker node | `mb_runner` without Python installed                           |
 
 Docker images are published as `tlcfem/motion-base:back`, `tlcfem/motion-base:front`, and `tlcfem/motion-base:crawler`.
 Standalone Linux releases contain `mb_runner`, `nied_crawler`, and `nzsm_crawler`.
@@ -38,7 +38,8 @@ It exposes databases and management interfaces, omits a worker, and uses default
 
 ## Production Compose
 
-The production Compose file runs MongoDB, RabbitMQ, Elasticsearch, SeaweedFS, the backend, the frontend, a Taskiq worker, and mongo-express.
+The production Compose file runs MongoDB, RabbitMQ, Elasticsearch, SeaweedFS, the backend, the frontend, a Taskiq
+worker, and mongo-express.
 
 ```bash
 cd docker
@@ -102,40 +103,40 @@ The application loads `.env` from the current directory first.
 If that file is absent, it loads `docker/.env` from the repository.
 Production containers receive variables from the Compose environment block instead.
 
-| Variable | Default in `docker/.env` | Purpose |
-| --- | --- | --- |
-| `MB_SECRET_KEY` | Insecure example value | JWT signing key |
-| `MB_ALGORITHM` | `HS256` | JWT algorithm |
-| `MB_ACCESS_TOKEN_EXPIRE_MINUTES` | `120` | Token lifetime in minutes |
-| `MB_SUPERUSER_EMAIL` | `admin@admin.admin` | Initial superuser email |
-| `MB_SUPERUSER_FIRST_NAME` | `admin` | Initial superuser first name |
-| `MB_SUPERUSER_LAST_NAME` | `admin` | Initial superuser last name |
-| `MB_SUPERUSER_USERNAME` | `test` | Initial superuser username |
-| `MB_SUPERUSER_PASSWORD` | `password` | Initial superuser password |
-| `MB_PORT` | `8000` | Backend listening port |
-| `MB_FASTAPI_WORKERS` | `2` | Uvicorn workers per backend container |
-| `MB_REPLICA` | `2` | Backend replicas for the nginx Compose variant |
-| `MB_FS_HOST` | `localhost` | S3 cache host |
-| `MB_FS_PORT` | `8333` | S3 cache port |
-| `MB_FS_BUCKET` | `mb-cache` | S3 cache bucket |
-| `MB_FS_USERNAME` | `test` | S3 access key |
-| `MB_FS_PASSWORD` | `password` | S3 secret key |
-| `MB_FS_PERSISTENT` | Unset | Any non-empty value keeps processed archives |
-| `MONGO_DB_NAME` | `StrongMotion` | MongoDB database name |
-| `MONGO_HOST` | `localhost` | MongoDB host |
-| `MONGO_PORT` | `27017` | MongoDB port |
-| `MONGO_USERNAME` | `test` | MongoDB username |
-| `MONGO_PASSWORD` | `password` | MongoDB password |
-| `MONGO_CACHE_SIZE` | `2` | WiredTiger cache size in GB |
-| `MONGO_MEM_LIMIT` | `10g` | MongoDB container memory limit |
-| `RABBITMQ_HOST` | `localhost` | RabbitMQ host |
-| `RABBITMQ_PORT` | `5672` | RabbitMQ port |
-| `RABBITMQ_USERNAME` | `test` | RabbitMQ username |
-| `RABBITMQ_PASSWORD` | `password` | RabbitMQ password |
-| `ELASTIC_VERSION` | `9.5.3` | Elasticsearch image tag |
-| `ELASTIC_HOST` | `localhost` | Elasticsearch host, with optional protocol |
-| `SEARCH_ENGINE` | `elasticsearch` | Search engine, either `elasticsearch` or `opensearch` |
-| `TURNSTILE_SECRET` | Empty | Cloudflare Turnstile secret |
+| Variable                         | Default in `docker/.env` | Purpose                                               |
+|----------------------------------|--------------------------|-------------------------------------------------------|
+| `MB_SECRET_KEY`                  | Insecure example value   | JWT signing key                                       |
+| `MB_ALGORITHM`                   | `HS256`                  | JWT algorithm                                         |
+| `MB_ACCESS_TOKEN_EXPIRE_MINUTES` | `120`                    | Token lifetime in minutes                             |
+| `MB_SUPERUSER_EMAIL`             | `admin@admin.admin`      | Initial superuser email                               |
+| `MB_SUPERUSER_FIRST_NAME`        | `admin`                  | Initial superuser first name                          |
+| `MB_SUPERUSER_LAST_NAME`         | `admin`                  | Initial superuser last name                           |
+| `MB_SUPERUSER_USERNAME`          | `test`                   | Initial superuser username                            |
+| `MB_SUPERUSER_PASSWORD`          | `password`               | Initial superuser password                            |
+| `MB_PORT`                        | `8000`                   | Backend listening port                                |
+| `MB_FASTAPI_WORKERS`             | `2`                      | Uvicorn workers per backend container                 |
+| `MB_REPLICA`                     | `2`                      | Backend replicas for the nginx Compose variant        |
+| `MB_FS_HOST`                     | `localhost`              | S3 cache host                                         |
+| `MB_FS_PORT`                     | `8333`                   | S3 cache port                                         |
+| `MB_FS_BUCKET`                   | `mb-cache`               | S3 cache bucket                                       |
+| `MB_FS_USERNAME`                 | `test`                   | S3 access key                                         |
+| `MB_FS_PASSWORD`                 | `password`               | S3 secret key                                         |
+| `MB_FS_PERSISTENT`               | Unset                    | Any non-empty value keeps processed archives          |
+| `MONGO_DB_NAME`                  | `StrongMotion`           | MongoDB database name                                 |
+| `MONGO_HOST`                     | `localhost`              | MongoDB host                                          |
+| `MONGO_PORT`                     | `27017`                  | MongoDB port                                          |
+| `MONGO_USERNAME`                 | `test`                   | MongoDB username                                      |
+| `MONGO_PASSWORD`                 | `password`               | MongoDB password                                      |
+| `MONGO_CACHE_SIZE`               | `2`                      | WiredTiger cache size in GB                           |
+| `MONGO_MEM_LIMIT`                | `10g`                    | MongoDB container memory limit                        |
+| `RABBITMQ_HOST`                  | `localhost`              | RabbitMQ host                                         |
+| `RABBITMQ_PORT`                  | `5672`                   | RabbitMQ port                                         |
+| `RABBITMQ_USERNAME`              | `test`                   | RabbitMQ username                                     |
+| `RABBITMQ_PASSWORD`              | `password`               | RabbitMQ password                                     |
+| `ELASTIC_VERSION`                | `9.5.5`                  | Elasticsearch image tag                               |
+| `ELASTIC_HOST`                   | `localhost`              | Elasticsearch host, with optional protocol            |
+| `SEARCH_ENGINE`                  | `elasticsearch`          | Search engine, either `elasticsearch` or `opensearch` |
+| `TURNSTILE_SECRET`               | Empty                    | Cloudflare Turnstile secret                           |
 
 The application appends `:9200` to `ELASTIC_HOST`.
 Provide an explicit scheme for remote services, such as `https://elastic.example.com`.
@@ -144,8 +145,10 @@ Provide an explicit scheme for remote services, such as `https://elastic.example
 ### Search Engine Choice
 
 `SEARCH_ENGINE` selects between `elasticsearch` (default) and `opensearch`.
-The Compose search service picks the image and settings through `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and `SEARCH_DATA_PATH`.
-To run OpenSearch, uncomment the `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and `SEARCH_DATA_PATH` lines in `docker/.env`.
+The Compose search service picks the image and settings through `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and
+`SEARCH_DATA_PATH`.
+To run OpenSearch, uncomment the `SEARCH_IMAGE`, `XPACK_SECURITY_ENABLED`, and `SEARCH_DATA_PATH` lines in
+`docker/.env`.
 The production Compose environment block forwards `SEARCH_ENGINE` to the backend and worker containers.
 
 `MB_FS_PERSISTENT` and `TURNSTILE_SECRET` are not forwarded by the production Compose environment block.
@@ -206,7 +209,8 @@ The manifests require review before use.
 - The ingress routes only the API.
 - The ingress does not configure TLS.
 - Image tags should be pinned for reproducible deployments.
-- `SEARCH_ENGINE` in `config-mb.yaml` selects the client; for OpenSearch, adjust the storage deployment image, mount path, and env as noted in its comments.
+- `SEARCH_ENGINE` in `config-mb.yaml` selects the client; for OpenSearch, adjust the storage deployment image, mount
+  path, and env as noted in its comments.
 
 Use Secrets instead of ConfigMaps for passwords and signing keys.
 Replace `emptyDir` with PersistentVolumeClaims backed by a durable storage class.
@@ -225,7 +229,8 @@ docker compose --env-file .env -f docker-compose-production.yaml up -d mb-worker
 ```
 
 Scale workers when upload volume is high.
-Remove the `container_name` field from `mb-worker` first, because Compose cannot scale a service with a fixed container name.
+Remove the `container_name` field from `mb-worker` first, because Compose cannot scale a service with a fixed container
+name.
 
 ```bash
 docker compose --env-file .env -f docker-compose-production.yaml up -d --scale mb-worker=3
@@ -285,14 +290,14 @@ The API documentation is at `http://localhost:8000/docs`.
 
 `mb_runner.py` accepts short options.
 
-| Option | Meaning |
-| --- | --- |
-| `-w N` | Number of Uvicorn workers |
-| `-h HOST` | Bind host |
-| `-p PORT` | Bind port |
-| `-d` | Debug logging and reload |
-| `-o` | Override environment-provided worker and port values |
-| `t` or `taskiq` | Start a Taskiq worker instead of the API |
+| Option          | Meaning                                              |
+|-----------------|------------------------------------------------------|
+| `-w N`          | Number of Uvicorn workers                            |
+| `-h HOST`       | Bind host                                            |
+| `-p PORT`       | Bind port                                            |
+| `-d`            | Debug logging and reload                             |
+| `-o`            | Override environment-provided worker and port values |
+| `t` or `taskiq` | Start a Taskiq worker instead of the API             |
 
 Worker and port options only take effect with `-o`.
 The `-d` reload mode applies when the effective worker count is one.
@@ -318,13 +323,13 @@ Set `NUMBA_DISABLE_JIT=1` to avoid long JIT compilation during tests.
 
 Persistent Compose volumes hold all state.
 
-| Volume | Contents |
-| --- | --- |
-| `motion_mongo` | Records, users, tasks, and Taskiq results |
-| `motion_mongoconfig` | MongoDB configuration data |
-| `motion_elasticsearch` | Search index |
-| `motion_rabbitmq` | Queued jobs and broker state |
-| `motion_seaweedfs` | Cached upload archives |
+| Volume                 | Contents                                  |
+|------------------------|-------------------------------------------|
+| `motion_mongo`         | Records, users, tasks, and Taskiq results |
+| `motion_mongoconfig`   | MongoDB configuration data                |
+| `motion_elasticsearch` | Search index                              |
+| `motion_rabbitmq`      | Queued jobs and broker state              |
+| `motion_seaweedfs`     | Cached upload archives                    |
 
 MongoDB is the source of truth.
 Back up MongoDB and the upload cache on a regular schedule.

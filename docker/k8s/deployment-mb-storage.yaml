@@ -62,7 +62,7 @@ spec:
         - name: mb-elasticsearch
           # for opensearch, use e.g. opensearchproject/opensearch:3.9.0 as the image
           # and /usr/share/opensearch/data as the mount path below
-          image: elasticsearch:9.5.3
+          image: elasticsearch:9.5.5
           imagePullPolicy: Always
           ports:
             - containerPort: 9200
