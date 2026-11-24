@@ -18,7 +18,8 @@ import numpy as np
 import pint
 import pytest
 
-from mb.record.response_spectrum import Newmark, sdof_response
+from mb.record.integrator import Newmark
+from mb.record.response_spectrum import sdof_response
 from mb.record.utility import (
     apply_filter,
     convert_to,
