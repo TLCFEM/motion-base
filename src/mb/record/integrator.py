@@ -13,9 +13,58 @@
 #  You should have received a copy of the GNU General Public License
 #  along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
+"""Time integration methods for sampled acceleration histories.
+
+The classes in this module translate the undamped time integration methods
+shipped with suanPan.  Every integrator exposes the same interface as
+:class:`Newmark`::
+
+    displacement, velocity = integrator.integrate(interval, acceleration)
+
+``acceleration`` is an array-like object sampled at equally spaced times and
+``interval`` is the spacing between consecutive samples.  Multi-dimensional
+input is flattened to one dimension.  The returned arrays are one-dimensional,
+have the same number of elements as the input and start from zero initial
+displacement and velocity.
+
+For multi-stage schemes the intermediate stage accelerations are reconstructed
+from the two adjacent samples by linear interpolation (or extrapolation when a
+stage time lies outside the step).  The update equations are otherwise those
+used by suanPan.
+
+Scheme parameters are stored as attributes.  Spectral radii are clamped to
+their admissible ranges on construction, following suanPan.
+
+:class:`Newmark` is implemented as a numba jitclass and therefore does not
+inherit from :class:`Integrator`; it follows the same ``integrate`` protocol.
+"""
+
+from collections.abc import Sequence
+
 import numpy as np
 from numba import float64, njit
 from numba.experimental import jitclass
+
+__all__ = [
+    "BatheExplicit",
+    "BatheTwoStep",
+    "GERKN",
+    "GSSE",
+    "GSSSS",
+    "GSSSSOptimal",
+    "GSSSSU0",
+    "GSSSSV0",
+    "GeneralisedAlpha",
+    "GeneralisedAlphaExplicit",
+    "GeneralizedAlpha",
+    "GeneralizedAlphaExplicit",
+    "ICL",
+    "Integrator",
+    "Newmark",
+    "OALTS",
+    "Tchamwa",
+    "WAT2",
+]
 
 
 @jitclass(
@@ -25,6 +74,16 @@ from numba.experimental import jitclass
     ]
 )
 class Newmark:
+    """Classical Newmark method.
+
+    Parameters
+    ----------
+    gamma : float, optional
+        Velocity weighting factor, by default 0.5.
+    beta : float, optional
+        Displacement weighting factor, by default 0.25.
+    """
+
     def __init__(self, gamma: float = 0.5, beta: float = 0.25):
         self.gamma = gamma
         self.beta = beta
@@ -32,47 +91,14 @@ class Newmark:
     def integrate(
         self, interval: float, acceleration: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        acceleration = np.asarray(acceleration, dtype=np.float64)
-        displacement: np.ndarray = np.zeros_like(acceleration)
-        velocity: np.ndarray = np.zeros_like(acceleration)
-
-        fa: float = interval * self.gamma
-        fb: float = interval - fa
-        fc: float = interval**2 * self.beta
-        fd: float = interval**2 * 0.5 - fc
-
-        for i in range(1, len(acceleration)):
-            velocity[i] = (
-                velocity[i - 1] + fb * acceleration[i - 1] + fa * acceleration[i]
-            )
-            displacement[i] = (
-                displacement[i - 1]
-                + velocity[i - 1] * interval
-                + fd * acceleration[i - 1]
-                + fc * acceleration[i]
-            )
-
-        return displacement, velocity
-
-
-# ---------------------------------------------------------------------------
-# Time integration methods
-#
-# The classes below are Python translations of the undamped time integration
-# methods shipped with suanPan.  Each class stores the parameters of the
-# corresponding scheme and exposes the same ``integrate`` interface as
-# :class:`Newmark`, that is, displacement and velocity are recovered from a
-# sampled acceleration history.
-#
-# The acceleration history is assumed to be sampled at equally spaced full
-# time steps.  For multi-stage schemes the intermediate stage accelerations
-# are reconstructed from the two adjacent samples by linear interpolation.
-# The update equations are otherwise identical to those used by suanPan and
-# converge as the sampling is refined.
-# ---------------------------------------------------------------------------
+        acceleration = np.asarray(acceleration, dtype=np.float64).ravel()
+        return _integrate_newmark_like(
+            float(interval), float(self.gamma), float(self.beta), acceleration
+        )
 
 
 def _as_float_array(acceleration: np.ndarray) -> np.ndarray:
+    """Return a flat, contiguous ``float64`` view/copy of the input."""
     return np.ascontiguousarray(np.asarray(acceleration, dtype=np.float64).ravel())
 
 
@@ -278,15 +304,22 @@ def _integrate_gerkn(
     return displacement, velocity
 
 
+def _clamp(value: float, lower: float, upper: float) -> float:
+    """Clamp ``value`` to the closed interval ``[lower, upper]``."""
+    return min(upper, max(lower, float(value)))
+
+
 def _clamp_unit(value: float) -> float:
-    return min(1.0, max(0.0, float(value)))
+    """Clamp ``value`` to the unit interval."""
+    return _clamp(value, 0.0, 1.0)
 
 
 def _three_radii(
-    r1: float | np.ndarray,
+    r1: float | Sequence[float],
     r2: float | None,
     r3: float | None,
 ) -> tuple[float, float, float]:
+    """Normalise and sort the three spectral radii used by GSSSS U0/V0."""
     if r2 is None and r3 is None:
         if np.ndim(r1) == 0:
             values = [float(r1)] * 3
@@ -304,12 +337,32 @@ def _three_radii(
 
 
 class Integrator:
-    """Common interface for the translated time integration methods."""
+    """Common interface for the translated time integration methods.
+
+    Subclasses implement :meth:`integrate`, which converts a sampled
+    acceleration history into displacement and velocity histories, both with
+    zero initial conditions.
+    """
 
     def integrate(
         self, interval: float, acceleration: np.ndarray
     ) -> tuple[np.ndarray, np.ndarray]:
-        raise NotImplementedError
+        """Integrate the acceleration history.
+
+        Parameters
+        ----------
+        interval : float
+            Time interval between consecutive acceleration samples.
+        acceleration : array_like
+            Sampled acceleration history.  The input is flattened to one
+            dimension before integration.
+
+        Returns
+        -------
+        tuple of numpy.ndarray
+            Displacement and velocity histories.
+        """
+        raise NotImplementedError(f"{type(self).__name__} must implement integrate().")
 
 
 class _NewmarkLike(Integrator):
@@ -333,8 +386,22 @@ class _NewmarkLike(Integrator):
 class GeneralizedAlpha(_NewmarkLike):
     """Generalized-alpha method (doi:10.1115/1.2900803).
 
-    With a single argument the spectral radius at infinity is expected; with
-    two arguments the ``alpha_f`` and ``alpha_m`` parameters are used directly.
+    The scheme can be parameterised in two ways.
+
+    * ``GeneralizedAlpha(spectral_radius)`` selects the spectral radius at
+      infinity; ``alpha_f`` and ``alpha_m`` are then derived from it.
+    * ``GeneralizedAlpha(alpha_f, alpha_m)`` uses the two alpha parameters
+      directly.  They are clamped to their admissible ranges, matching
+      suanPan.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius at infinity, by default 0.5.  When ``alpha_m`` is
+        given, this argument is interpreted as ``alpha_f`` instead.
+    alpha_m : float, optional
+        Mass-weighted alpha parameter.  Providing it selects the direct
+        ``(alpha_f, alpha_m)`` parameterisation.
     """
 
     def __init__(self, spectral_radius: float = 0.5, alpha_m: float | None = None):
@@ -344,8 +411,8 @@ class GeneralizedAlpha(_NewmarkLike):
             alpha_m = (2.0 * radius - 1.0) / (radius + 1.0)
             self.spectral_radius: float | None = radius
         else:
-            alpha_f = min(0.5, max(float(spectral_radius), 0.0))
-            alpha_m = min(alpha_f, max(float(alpha_m), -1.0))
+            alpha_f = _clamp(spectral_radius, 0.0, 0.5)
+            alpha_m = _clamp(alpha_m, -1.0, alpha_f)
             self.spectral_radius = None
 
         gamma = 0.5 - alpha_m + alpha_f
@@ -358,7 +425,14 @@ class GeneralizedAlpha(_NewmarkLike):
 
 
 class GeneralizedAlphaExplicit(Integrator):
-    """Explicit generalized-alpha method."""
+    """Explicit generalized-alpha method.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius at infinity, by default 0.5.  It is clamped to
+        ``[0, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -379,7 +453,13 @@ class GeneralizedAlphaExplicit(Integrator):
 
 
 class GSSSS(_NewmarkLike):
-    """Base class for the generalized single-step single-solve schemes."""
+    """Base class for the generalized single-step single-solve schemes.
+
+    The GSSSS family uses the Newmark kinematic update with
+    ``beta = l3`` and ``gamma = l5``.  The remaining scheme constants are
+    stored for reference but do not enter the acceleration-to-motion
+    conversion.
+    """
 
     def __init__(self, l3: float, l5: float):
         self.l3: float = l3
@@ -388,11 +468,16 @@ class GSSSS(_NewmarkLike):
 
 
 class GSSSSU0(GSSSS):
-    """GSSSS U0 scheme (spectral radii are sorted and clamped to [0, 1])."""
+    """GSSSS U0 scheme.
+
+    The three spectral radii may be supplied as a sequence, as three separate
+    arguments, or as one scalar used for all three.  They are sorted and
+    clamped to ``[0, 1]``, matching suanPan.
+    """
 
     def __init__(
         self,
-        r1: float | np.ndarray = 1.0,
+        r1: float | Sequence[float] = 1.0,
         r2: float | None = None,
         r3: float | None = None,
     ):
@@ -412,11 +497,16 @@ class GSSSSU0(GSSSS):
 
 
 class GSSSSV0(GSSSS):
-    """GSSSS V0 scheme (spectral radii are sorted and clamped to [0, 1])."""
+    """GSSSS V0 scheme.
+
+    The three spectral radii may be supplied as a sequence, as three separate
+    arguments, or as one scalar used for all three.  They are sorted and
+    clamped to ``[0, 1]``, matching suanPan.
+    """
 
     def __init__(
         self,
-        r1: float | np.ndarray = 1.0,
+        r1: float | Sequence[float] = 1.0,
         r2: float | None = None,
         r3: float | None = None,
     ):
@@ -444,7 +534,14 @@ class GSSSSV0(GSSSS):
 
 
 class GSSSSOptimal(GSSSS):
-    """GSSSS optimal scheme."""
+    """GSSSS optimal scheme.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius at infinity, by default 0.5.  It is clamped to
+        ``[0, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -463,15 +560,20 @@ class GSSSSOptimal(GSSSS):
 
 
 class GSSE(_NewmarkLike):
-    """Generalized explicit integration method (doi:10.1002/nme.6574)."""
+    """Generalized explicit integration method (doi:10.1002/nme.6574).
+
+    Parameters
+    ----------
+    rs : float, optional
+        Spectral radius of the explicit stage, by default 0.5.
+    rb : float, optional
+        Spectral radius of the final stage.  It defaults to ``rs``.  Both
+        parameters are clamped to ``[0, 1]``.
+    """
 
     def __init__(self, rs: float = 0.5, rb: float | None = None):
-        if rb is None:
-            rs = _clamp_unit(rs)
-            rb = rs
-        else:
-            rs = float(rs)
-            rb = float(rb)
+        rs = _clamp_unit(rs)
+        rb = rs if rb is None else _clamp_unit(rb)
 
         c = (2.0 + rs - rb * rs) / (rb * rs + rb + rs + 1.0)
         ua0 = 0.5 * c**2
@@ -504,10 +606,16 @@ class GSSE(_NewmarkLike):
 
 
 class ICL(GSSE):
-    """ICL explicit scheme, a specialization of :class:`GSSE`."""
+    """ICL explicit scheme, a specialisation of :class:`GSSE`.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius, by default 0.5.  It is clamped to ``[0.5, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
-        radius = min(1.0, max(0.5, float(spectral_radius)))
+        radius = _clamp(spectral_radius, 0.5, 1.0)
         rs = 0.5 * (1.0 / radius - 1.0)
 
         super().__init__(rs, radius)
@@ -516,7 +624,13 @@ class ICL(GSSE):
 
 
 class Tchamwa(Integrator):
-    """Tchamwa explicit scheme."""
+    """Tchamwa explicit scheme.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius, by default 0.5.  It is clamped to ``[0, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -532,7 +646,16 @@ class Tchamwa(Integrator):
 
 
 class BatheExplicit(Integrator):
-    """Explicit Bathe scheme (doi:10.1016/j.compstruc.2013.06.007)."""
+    """Explicit Bathe scheme (doi:10.1016/j.compstruc.2013.06.007).
+
+    Each full step is split into a trapezoidal sub-step of length ``p * h``
+    and a second sub-step of length ``(1 - p) * h``.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius, by default 0.5.  It is clamped to ``[0, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -562,7 +685,20 @@ class BatheExplicit(Integrator):
 
 
 class BatheTwoStep(Integrator):
-    """Implicit Bathe two-step scheme."""
+    """Implicit Bathe two-step scheme.
+
+    Each full step is split into a trapezoidal sub-step of length
+    ``gamma * h`` and a three-point Euler sub-step of length
+    ``(1 - gamma) * h``.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius, by default 0.  It is clamped to ``[0, 1]``.
+    gamma : float, optional
+        Fraction of the step used by the first sub-step, by default 0.5.
+        Values outside ``(0, 1)`` are replaced by 0.5, matching suanPan.
+    """
 
     def __init__(self, spectral_radius: float = 0.0, gamma: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -594,7 +730,16 @@ class BatheTwoStep(Integrator):
 
 
 class OALTS(Integrator):
-    """OALTS scheme (doi:10.1002/nme.6188)."""
+    """OALTS scheme (doi:10.1002/nme.6188).
+
+    The first step uses the trapezoidal rule; subsequent steps use the
+    two-step OALTS recurrence.
+
+    Parameters
+    ----------
+    spectral_radius : float, optional
+        Spectral radius, by default 0.5.  It is clamped to ``[0, 1]``.
+    """
 
     def __init__(self, spectral_radius: float = 0.5):
         radius = _clamp_unit(spectral_radius)
@@ -631,27 +776,36 @@ class OALTS(Integrator):
 
 
 class GERKN(Integrator):
-    """Generalized explicit Runge-Kutta-Nystrom scheme (doi:10.1002/nme.7658)."""
+    """Generalized explicit Runge-Kutta-Nystrom scheme.
+
+    This is a low-level base class: all stage coefficients must be supplied.
+    For a prescribed acceleration history only the final velocity and
+    displacement weights (``vb*`` and ``ub*``) are used; the remaining
+    coefficients describe the underlying two-stage scheme and are stored for
+    reference.
+
+    See doi:10.1002/nme.7658.
+    """
 
     def __init__(
         self,
-        c1: float = 0.0,
-        c2: float = 0.0,
-        va10: float = 0.0,
-        va20: float = 0.0,
-        va21: float = 0.0,
-        vb0: float = 0.0,
-        vb1: float = 0.0,
-        vb2: float = 0.0,
-        ua10: float = 0.0,
-        ua20: float = 0.0,
-        ua21: float = 0.0,
-        ub0: float = 0.0,
-        ub1: float = 0.0,
-        ub2: float = 0.0,
-        ab0: float = 0.0,
-        ab1: float = 0.0,
-        ab2: float = 0.0,
+        c1: float,
+        c2: float,
+        va10: float,
+        va20: float,
+        va21: float,
+        vb0: float,
+        vb1: float,
+        vb2: float,
+        ua10: float,
+        ua20: float,
+        ua21: float,
+        ub0: float,
+        ub1: float,
+        ub2: float,
+        ab0: float,
+        ab1: float,
+        ab2: float,
     ):
         self.c1: float = c1
         self.c2: float = c2
@@ -679,10 +833,19 @@ class GERKN(Integrator):
 
 
 class WAT2(GERKN):
-    """WAT2 scheme, the concrete member of the GERKN family in suanPan."""
+    """WAT2 scheme, the concrete member of the GERKN family in suanPan.
+
+    Parameters
+    ----------
+    parameter : float, optional
+        Scheme parameter, by default ``1 / 3``.  It is clamped to
+        ``[0, 1]`` and mapped to the internal parameter range
+        ``[0.3, 0.4]``.
+    """
 
     def __init__(self, parameter: float = 1.0 / 3.0):
-        radius = 0.1 * _clamp_unit(parameter) + 0.3
+        parameter = _clamp_unit(parameter)
+        radius = 0.1 * parameter + 0.3
 
         e = 2.0 * radius - 1.0
         d = 3.0 * radius**2 - 3.0 * radius + 1.0
@@ -736,6 +899,6 @@ class WAT2(GERKN):
         self.radius: float = radius
 
 
-# Alternative British spelling used by suanPan.
+# The British spellings are accepted by the suanPan parser as aliases.
 GeneralisedAlpha = GeneralizedAlpha
 GeneralisedAlphaExplicit = GeneralizedAlphaExplicit

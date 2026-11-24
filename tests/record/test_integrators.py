@@ -17,6 +17,7 @@ import numpy as np
 import pytest
 
 from mb.record.integrator import (
+    GERKN,
     GSSE,
     GSSSSU0,
     GSSSSV0,
@@ -25,6 +26,8 @@ from mb.record.integrator import (
     WAT2,
     BatheExplicit,
     BatheTwoStep,
+    GeneralisedAlpha,
+    GeneralisedAlphaExplicit,
     GeneralizedAlpha,
     GeneralizedAlphaExplicit,
     GSSSSOptimal,
@@ -236,3 +239,52 @@ def test_oalts_constant_acceleration_various_radii(radius):
 
     assert displacement == pytest.approx(0.5 * magnitude * time**2, abs=1e-12)
     assert velocity == pytest.approx(magnitude * time, abs=1e-12)
+
+
+@pytest.mark.parametrize("factory", FACTORIES, ids=IDS)
+def test_multidimensional_input_is_flattened(factory):
+    acceleration = np.arange(6.0).reshape(2, 3)
+
+    displacement, velocity = factory().integrate(0.01, acceleration)
+    expected_displacement, expected_velocity = factory().integrate(
+        0.01, acceleration.ravel()
+    )
+
+    assert displacement.shape == (6,)
+    assert velocity.shape == (6,)
+    assert displacement == pytest.approx(expected_displacement)
+    assert velocity == pytest.approx(expected_velocity)
+
+
+def test_gsse_clamps_both_radii():
+    integrator = GSSE(2.0, -1.0)
+
+    assert integrator.rs == 1.0
+    assert integrator.rb == 0.0
+
+
+def test_wat2_clamps_parameter_and_maps_to_internal_radius():
+    assert WAT2(2.0).parameter == 1.0
+    assert WAT2(2.0).radius == pytest.approx(0.4)
+    assert WAT2(-1.0).parameter == 0.0
+    assert WAT2(-1.0).radius == pytest.approx(0.3)
+
+
+def test_gssss_accepts_scalar_or_three_radii():
+    scalar = GSSSSU0(0.5)
+    assert (scalar.r1, scalar.r2, scalar.r3) == pytest.approx((0.5, 0.5, 0.5))
+
+    with pytest.raises(ValueError):
+        GSSSSU0([0.2, 0.4])
+    with pytest.raises(ValueError):
+        GSSSSU0(0.2, 0.4)
+
+
+def test_gerkn_requires_all_coefficients():
+    with pytest.raises(TypeError):
+        GERKN()
+
+
+def test_british_spelling_aliases():
+    assert GeneralisedAlpha is GeneralizedAlpha
+    assert GeneralisedAlphaExplicit is GeneralizedAlphaExplicit
