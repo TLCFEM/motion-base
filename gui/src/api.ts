@@ -54,6 +54,11 @@ export class SeismicRecord {
     public time_interval = 0;
     public waveform: number[] = [];
 
+    public displacement_unit = "";
+    public velocity_unit = "";
+    public displacement: number[] = [];
+    public velocity: number[] = [];
+
     public frequency_interval = 0;
     public spectrum: number[] = [];
 
@@ -187,6 +192,36 @@ export function buildQueryConfig(form: QueryForm, area?: QueryArea): QueryConfig
     return config;
 }
 
+export type IntegrationType =
+    | "Newmark"
+    | "GeneralizedAlpha"
+    | "GeneralizedAlphaExplicit"
+    | "GSSSSU0"
+    | "GSSSSV0"
+    | "GSSSSOptimal"
+    | "GSSE"
+    | "ICL"
+    | "Tchamwa"
+    | "BatheExplicit"
+    | "BatheTwoStep"
+    | "OALTS"
+    | "WAT2";
+
+export interface IntegrationConfig {
+    integration_type?: IntegrationType;
+    gamma?: number;
+    beta?: number;
+    spectral_radius?: number;
+    alpha_f?: number;
+    alpha_m?: number;
+    r1?: number;
+    r2?: number;
+    r3?: number;
+    rs?: number;
+    rb?: number;
+    parameter?: number;
+}
+
 export interface ProcessConfig {
     up_ratio?: number;
     down_ratio?: number;
@@ -202,6 +237,8 @@ export interface ProcessConfig {
     with_filter?: boolean;
     with_spectrum?: boolean;
     with_response_spectrum?: boolean;
+    with_integration?: boolean;
+    integration?: IntegrationConfig;
     remove_head?: number;
 }
 
@@ -211,6 +248,7 @@ export interface ProcessForm {
     withFilter: boolean;
     withSpectrum: boolean;
     withResponseSpectrum: boolean;
+    withIntegration: boolean;
     upRatio: string;
     downRatio: string;
     filterLength: string;
@@ -222,6 +260,18 @@ export interface ProcessForm {
     periodStep: string;
     periodEnd: string;
     removeHead: string;
+    integrationType: string;
+    gamma: string;
+    beta: string;
+    spectralRadius: string;
+    alphaF: string;
+    alphaM: string;
+    r1: string;
+    r2: string;
+    r3: string;
+    rs: string;
+    rb: string;
+    parameter: string;
 }
 
 export const defaultProcessForm = (): ProcessForm => ({
@@ -230,6 +280,7 @@ export const defaultProcessForm = (): ProcessForm => ({
     withFilter: false,
     withSpectrum: false,
     withResponseSpectrum: false,
+    withIntegration: false,
     upRatio: "",
     downRatio: "",
     filterLength: "",
@@ -241,6 +292,18 @@ export const defaultProcessForm = (): ProcessForm => ({
     periodStep: "",
     periodEnd: "",
     removeHead: "",
+    integrationType: "Newmark",
+    gamma: "",
+    beta: "",
+    spectralRadius: "",
+    alphaF: "",
+    alphaM: "",
+    r1: "",
+    r2: "",
+    r3: "",
+    rs: "",
+    rb: "",
+    parameter: "",
 });
 
 export function buildProcessConfig(form: ProcessForm): ProcessConfig {
@@ -248,9 +311,36 @@ export function buildProcessConfig(form: ProcessForm): ProcessConfig {
         with_spectrum: form.withSpectrum,
         with_filter: form.withFilter,
         with_response_spectrum: form.withResponseSpectrum,
+        with_integration: form.withIntegration,
         filter_type: form.filterType,
         window_type: form.windowType,
+        integration: { integration_type: (form.integrationType || "Newmark") as IntegrationType },
     };
+
+    const integration = config.integration!;
+    const optionalNumber = (value: string) => (isNumeric(value) ? Number(value) : undefined);
+    const gamma = optionalNumber(form.gamma);
+    const beta = optionalNumber(form.beta);
+    const spectralRadius = optionalNumber(form.spectralRadius);
+    const alphaF = optionalNumber(form.alphaF);
+    const alphaM = optionalNumber(form.alphaM);
+    const r1 = optionalNumber(form.r1);
+    const r2 = optionalNumber(form.r2);
+    const r3 = optionalNumber(form.r3);
+    const rs = optionalNumber(form.rs);
+    const rb = optionalNumber(form.rb);
+    const parameter = optionalNumber(form.parameter);
+    if (gamma !== undefined) integration.gamma = gamma;
+    if (beta !== undefined) integration.beta = beta;
+    if (spectralRadius !== undefined) integration.spectral_radius = spectralRadius;
+    if (alphaF !== undefined) integration.alpha_f = alphaF;
+    if (alphaM !== undefined) integration.alpha_m = alphaM;
+    if (r1 !== undefined) integration.r1 = r1;
+    if (r2 !== undefined) integration.r2 = r2;
+    if (r3 !== undefined) integration.r3 = r3;
+    if (rs !== undefined) integration.rs = rs;
+    if (rb !== undefined) integration.rb = rb;
+    if (parameter !== undefined) integration.parameter = parameter;
 
     if (form.normalised) config.normalised = true;
     const upRatio = positiveNumber(form.upRatio);

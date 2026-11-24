@@ -104,3 +104,76 @@ async def test_process_invalid_cutoffs(sample_record):
         process_record_local(sample_record, ProcessConfig(low_cut=50.0, high_cut=10.0))
 
     assert exc_info.value.status_code == HTTPStatus.BAD_REQUEST
+
+
+@pytest.mark.parametrize(
+    "integration_type",
+    [
+        "Newmark",
+        "GeneralizedAlpha",
+        "GSSSSU0",
+        "GSSSSV0",
+        "GSSSSOptimal",
+        "GSSE",
+        "ICL",
+        "Tchamwa",
+        "BatheExplicit",
+        "BatheTwoStep",
+        "OALTS",
+        "WAT2",
+    ],
+)
+async def test_process_integration_methods(sample_record, integration_type):
+    response = process_record_local(
+        sample_record,
+        ProcessConfig(
+            with_filter=True,
+            filter_type="lowpass",
+            up_ratio=2,
+            down_ratio=2,
+            with_integration=True,
+            integration_type=integration_type,
+        ),
+    )
+
+    assert response.displacement_unit == "cm"
+    assert response.velocity_unit == "cm/s"
+    assert len(response.displacement) == len(response.waveform)
+    assert len(response.velocity) == len(response.waveform)
+    assert response.displacement[0] == pytest.approx(0.0)
+    assert response.velocity[0] == pytest.approx(0.0)
+
+
+async def test_process_integration_uses_scheme_parameters(sample_record):
+    response = process_record_local(
+        sample_record,
+        ProcessConfig(
+            with_integration=True,
+            integration={
+                "integration_type": "Newmark",
+                "gamma": 0.5,
+                "beta": 0.25,
+            },
+        ),
+    )
+
+    interval, waveform = sample_record.to_waveform(normalised=False, unit="cm/s/s")
+    displacement = np.zeros_like(waveform)
+    velocity = np.zeros_like(waveform)
+    for i in range(1, len(waveform)):
+        velocity[i] = velocity[i - 1] + 0.5 * interval * (waveform[i - 1] + waveform[i])
+        displacement[i] = (
+            displacement[i - 1]
+            + interval * velocity[i - 1]
+            + 0.25 * interval**2 * (waveform[i - 1] + waveform[i])
+        )
+
+    assert response.displacement == pytest.approx(displacement.tolist())
+    assert response.velocity == pytest.approx(velocity.tolist())
+
+
+async def test_process_without_integration_omits_motion(sample_record):
+    response = process_record_local(sample_record, ProcessConfig())
+
+    assert response.displacement is None
+    assert response.velocity is None

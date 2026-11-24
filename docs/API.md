@@ -206,6 +206,8 @@ curl -s -X POST "$BASE/process?record_id=d7348417-57b8-5f9f-bb88-aaf8f54c2ba4" \
 ```
 
 The response extends the waveform shape with `process_config`, `spectrum`, `period`, `displacement_spectrum`, `velocity_spectrum`, and `acceleration_spectrum` as requested.
+When `with_integration=true`, the response additionally contains `displacement` and `velocity` histories with `displacement_unit` and `velocity_unit`.
+The `process_config` also records the selected `integration` scheme and its parameters.
 A `400` response is returned when the cutoff frequencies are invalid.
 A `404` response is returned when the record does not exist.
 See [Processing](Processing.md) for parameter semantics and pipeline order.

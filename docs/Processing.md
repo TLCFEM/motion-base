@@ -25,6 +25,12 @@ curl -s -X POST "$BASE/process?record_id=$RECORD_ID" \
     "with_filter": true,
     "with_spectrum": true,
     "with_response_spectrum": true,
+    "with_integration": true,
+    "integration": {
+      "integration_type": "Newmark",
+      "gamma": 0.5,
+      "beta": 0.25
+    },
     "damping_ratio": 0.05,
     "period_end": 5.0,
     "period_step": 0.01
@@ -54,7 +60,38 @@ A cutoff configuration with `low_cut >= high_cut` returns `400`, even when filte
 | `with_filter` | `false` | Boolean | Enable upsampling and FIR filtering |
 | `with_spectrum` | `false` | Boolean | Compute a one-sided FFT amplitude spectrum |
 | `with_response_spectrum` | `false` | Boolean | Compute displacement, velocity, and acceleration response spectra |
+| `with_integration` | `false` | Boolean | Integrate the final acceleration waveform into velocity and displacement histories |
+| `integration` | `Newmark` | Object | Time integration scheme and its parameters, see below |
 | `remove_head` | `0.0` | `>= 0` | Seconds to remove from the start of the waveform |
+
+### Time Integration
+
+When `with_integration=true`, the final waveform is integrated with the selected scheme.
+The response then contains `displacement` and `velocity` histories on the same time grid as `waveform`, together with `displacement_unit` and `velocity_unit`.
+For acceleration in `cm/s/s`, the integrated histories are reported in `cm` and `cm/s`.
+When `normalised=true`, the dimensionless acceleration is integrated with time and the reported units are `s` and `1`.
+
+The `integration` object accepts `integration_type` and the parameters of the selected scheme.
+Only the parameters used by that scheme are read; omitted values keep the integrator defaults.
+
+| `integration_type` | Parameters |
+| --- | --- |
+| `Newmark` | `gamma` (default `0.5`), `beta` (default `0.25`) |
+| `GeneralizedAlpha` | `spectral_radius` (default `0.5`), or both `alpha_f` and `alpha_m` |
+| `GeneralizedAlphaExplicit` | `spectral_radius` (default `0.5`) |
+| `GSSSSU0`, `GSSSSV0` | `r1`, `r2`, `r3` (defaults `1.0`) |
+| `GSSSSOptimal` | `spectral_radius` (default `0.5`) |
+| `GSSE` | `rs` (default `0.5`), `rb` (defaults to `rs`) |
+| `ICL` | `spectral_radius` (default `0.5`) |
+| `Tchamwa` | `spectral_radius` (default `0.5`) |
+| `BatheExplicit` | `spectral_radius` (default `0.5`) |
+| `BatheTwoStep` | `spectral_radius` (default `0.0`), `gamma` (default `0.5`) |
+| `OALTS` | `spectral_radius` (default `0.5`) |
+| `WAT2` | `parameter` (default `1/3`) |
+
+Scheme names are matched case-insensitively, so `newmark` and `Newmark` are equivalent.
+For convenience, the integration settings may also be supplied as flat fields next to the other processing options, for example `integration_type`, `spectral_radius`, or `gamma`.
+Providing integration settings without `with_integration` enables the integration automatically.
 
 Use `period_step > 0` in practice because a zero step does not produce a useful period grid.
 Use `low_cut < high_cut` and keep both below the effective Nyquist frequency.
@@ -68,8 +105,9 @@ The server applies operations in a fixed order.
 3. Remove `remove_head` seconds from the beginning.
 4. When `with_filter=true`, design an FIR filter and apply it while upsampling by `up_ratio` with a polyphase filter.
 5. When `down_ratio > 1`, decimate by taking every `down_ratio`-th sample.
-6. When `with_spectrum=true`, compute a one-sided FFT amplitude spectrum.
-7. When `with_response_spectrum=true`, compute response spectra on the final waveform.
+6. When `with_integration=true`, integrate the final acceleration history into velocity and displacement.
+7. When `with_spectrum=true`, compute a one-sided FFT amplitude spectrum.
+8. When `with_response_spectrum=true`, compute response spectra on the final waveform.
 
 Each stage feeds the next stage.
 Filtering therefore sees the waveform after head removal, and spectra are computed after resampling.

@@ -40,6 +40,7 @@ inherit from :class:`Integrator`; it follows the same ``integrate`` protocol.
 """
 
 from collections.abc import Sequence
+from enum import StrEnum
 
 import numpy as np
 from numba import float64, njit
@@ -59,12 +60,62 @@ __all__ = [
     "GeneralizedAlpha",
     "GeneralizedAlphaExplicit",
     "ICL",
+    "IntegrationType",
     "Integrator",
     "Newmark",
     "OALTS",
     "Tchamwa",
     "WAT2",
+    "create_integrator",
 ]
+
+
+class IntegrationType(StrEnum):
+    """Names of the time integration methods available for processing."""
+
+    Newmark = "Newmark"
+    GeneralizedAlpha = "GeneralizedAlpha"
+    GeneralizedAlphaExplicit = "GeneralizedAlphaExplicit"
+    GSSSSU0 = "GSSSSU0"
+    GSSSSV0 = "GSSSSV0"
+    GSSSSOptimal = "GSSSSOptimal"
+    GSSE = "GSSE"
+    ICL = "ICL"
+    Tchamwa = "Tchamwa"
+    BatheExplicit = "BatheExplicit"
+    BatheTwoStep = "BatheTwoStep"
+    OALTS = "OALTS"
+    WAT2 = "WAT2"
+
+    # British spellings, matching the names accepted by the suanPan parser.
+    GeneralisedAlpha = "GeneralizedAlpha"
+    GeneralisedAlphaExplicit = "GeneralizedAlphaExplicit"
+
+    @classmethod
+    def _missing_(cls, value):
+        """Accept case-insensitive names and common spelling variants."""
+        if not isinstance(value, str):
+            return None
+
+        key = value.strip().lower().replace("-", "").replace("_", "").replace(" ", "")
+        aliases = {
+            "newmark": cls.Newmark,
+            "generalizedalpha": cls.GeneralizedAlpha,
+            "generalisedalpha": cls.GeneralizedAlpha,
+            "generalizedalphaexplicit": cls.GeneralizedAlphaExplicit,
+            "generalisedalphaexplicit": cls.GeneralizedAlphaExplicit,
+            "gssssu0": cls.GSSSSU0,
+            "gssssv0": cls.GSSSSV0,
+            "gssssoptimal": cls.GSSSSOptimal,
+            "gsse": cls.GSSE,
+            "icl": cls.ICL,
+            "tchamwa": cls.Tchamwa,
+            "batheexplicit": cls.BatheExplicit,
+            "bathetwostep": cls.BatheTwoStep,
+            "oalts": cls.OALTS,
+            "wat2": cls.WAT2,
+        }
+        return aliases.get(key)
 
 
 @jitclass(
@@ -897,6 +948,89 @@ class WAT2(GERKN):
 
         self.parameter: float = parameter
         self.radius: float = radius
+
+
+def _value(parameters: dict, name: str, default: float) -> float:
+    value = parameters.get(name)
+    return default if value is None else float(value)
+
+
+def create_integrator(
+    integration_type: IntegrationType | str = IntegrationType.Newmark,
+    **parameters,
+) -> Integrator:
+    """Create a time integrator from its name and scheme parameters.
+
+    Parameters that are not used by the selected scheme are ignored.  Missing
+    parameters fall back to the defaults of the corresponding integrator.
+    """
+    integration_type = IntegrationType(integration_type)
+
+    if integration_type is IntegrationType.Newmark:
+        return Newmark(
+            _value(parameters, "gamma", 0.5), _value(parameters, "beta", 0.25)
+        )
+
+    if integration_type is IntegrationType.GeneralizedAlpha:
+        alpha_f = parameters.get("alpha_f")
+        alpha_m = parameters.get("alpha_m")
+        if alpha_f is not None and alpha_m is not None:
+            return GeneralizedAlpha(float(alpha_f), float(alpha_m))
+        return GeneralizedAlpha(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.GeneralizedAlphaExplicit:
+        return GeneralizedAlphaExplicit(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.GSSSSU0:
+        radius = parameters.get("spectral_radius")
+        default = 1.0 if radius is None else float(radius)
+        return GSSSSU0(
+            _value(parameters, "r1", default),
+            _value(parameters, "r2", default),
+            _value(parameters, "r3", default),
+        )
+
+    if integration_type is IntegrationType.GSSSSV0:
+        radius = parameters.get("spectral_radius")
+        default = 1.0 if radius is None else float(radius)
+        return GSSSSV0(
+            _value(parameters, "r1", default),
+            _value(parameters, "r2", default),
+            _value(parameters, "r3", default),
+        )
+
+    if integration_type is IntegrationType.GSSSSOptimal:
+        return GSSSSOptimal(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.GSSE:
+        rb = parameters.get("rb")
+        rs = parameters.get("rs")
+        if rs is None:
+            rs = parameters.get("spectral_radius", 0.5)
+        return GSSE(float(rs), None if rb is None else float(rb))
+
+    if integration_type is IntegrationType.ICL:
+        return ICL(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.Tchamwa:
+        return Tchamwa(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.BatheExplicit:
+        return BatheExplicit(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.BatheTwoStep:
+        return BatheTwoStep(
+            _value(parameters, "spectral_radius", 0.0),
+            _value(parameters, "gamma", 0.5),
+        )
+
+    if integration_type is IntegrationType.OALTS:
+        return OALTS(_value(parameters, "spectral_radius", 0.5))
+
+    if integration_type is IntegrationType.WAT2:
+        return WAT2(_value(parameters, "parameter", 1.0 / 3.0))
+
+    raise ValueError(f"Unsupported integration type: {integration_type}.")
 
 
 # The British spellings are accepted by the suanPan parser as aliases.

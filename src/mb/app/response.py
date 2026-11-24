@@ -22,6 +22,8 @@ from typing import Literal
 import numpy as np
 from pydantic import BaseModel, Field, field_validator, model_validator
 
+from ..record.integrator import IntegrationType
+
 
 class MetadataResponse(BaseModel):
     """
@@ -90,6 +92,11 @@ class RecordResponse(RawRecordResponse):
 
     time_interval: float = Field(None)
     waveform: list[float] = Field(None)
+
+    displacement_unit: str = Field(None)
+    velocity_unit: str = Field(None)
+    displacement: list[float] = Field(None)
+    velocity: list[float] = Field(None)
 
     frequency_interval: float = Field(None)
     spectrum: list[float] = Field(None)
@@ -212,6 +219,114 @@ class ListMetadataResponse(BaseModel):
 
 
 # noinspection SpellCheckingInspection
+class IntegrationConfig(BaseModel):
+    """Parameters of the time integration scheme.
+
+    The scheme is selected with ``integration_type``.  Only the parameters
+    used by the selected scheme are read; the remaining ones are ignored.  A
+    missing parameter keeps the default of the corresponding integrator.
+    """
+
+    integration_type: IntegrationType = Field(
+        IntegrationType.Newmark,
+        description="The time integration scheme, for example `Newmark` or `BatheTwoStep`.",
+    )
+    gamma: float | None = Field(
+        None, description="Velocity weighting factor of the Newmark-like schemes."
+    )
+    beta: float | None = Field(
+        None, description="Displacement weighting factor of the Newmark-like schemes."
+    )
+    spectral_radius: float | None = Field(
+        None, description="Spectral radius at infinity of the single-parameter schemes."
+    )
+    alpha_f: float | None = Field(
+        None, description="Stiffness-weighted alpha parameter of GeneralizedAlpha."
+    )
+    alpha_m: float | None = Field(
+        None, description="Mass-weighted alpha parameter of GeneralizedAlpha."
+    )
+    r1: float | None = Field(
+        None, description="First spectral radius of the GSSSS U0/V0 schemes."
+    )
+    r2: float | None = Field(
+        None, description="Second spectral radius of the GSSSS U0/V0 schemes."
+    )
+    r3: float | None = Field(
+        None, description="Third spectral radius of the GSSSS U0/V0 schemes."
+    )
+    rs: float | None = Field(
+        None, description="Spectral radius of the explicit stage of GSSE."
+    )
+    rb: float | None = Field(
+        None, description="Spectral radius of the final stage of GSSE."
+    )
+    parameter: float | None = Field(None, description="Scheme parameter of WAT2.")
+
+    @model_validator(mode="before")
+    @classmethod
+    def normalise_parameters(cls, data):
+        if data is None:
+            return {}
+        if isinstance(data, (str, IntegrationType)):
+            return {"integration_type": data}
+        if not isinstance(data, dict):
+            return data
+
+        data = dict(data)
+
+        for container in (
+            "parameters",
+            "params",
+            "integration_parameters",
+            "integration_params",
+        ):
+            extra = data.pop(container, None)
+            if isinstance(extra, dict):
+                for key, value in extra.items():
+                    data.setdefault(key, value)
+
+        type_value = None
+        for key in ("integration_type", "type", "method", "name", "integration_method"):
+            if key in data:
+                value = data.pop(key)
+                if type_value is None:
+                    type_value = value
+        if type_value is not None:
+            data["integration_type"] = type_value
+
+        for alias in ("rho_inf", "rho", "rho_infinity", "spectral_radius_inf"):
+            if alias in data:
+                data.setdefault("spectral_radius", data.pop(alias))
+
+        for alias in ("radii", "spectral_radii", "r"):
+            if alias in data:
+                radii = data.pop(alias)
+                if np.ndim(radii) == 0:
+                    for key in ("r1", "r2", "r3"):
+                        data.setdefault(key, radii)
+                elif len(radii) == 3:
+                    for key, value in zip(("r1", "r2", "r3"), radii, strict=True):
+                        data.setdefault(key, value)
+                else:
+                    raise ValueError("Exactly three spectral radii are required.")
+
+        if "wat2_parameter" in data:
+            data.setdefault("parameter", data.pop("wat2_parameter"))
+
+        return data
+
+    def create_integrator(self):
+        """Create the configured time integrator."""
+        from ..record.integrator import create_integrator
+
+        return create_integrator(
+            self.integration_type,
+            **self.model_dump(exclude={"integration_type"}, exclude_none=True),
+        )
+
+
+# noinspection SpellCheckingInspection
 class ProcessConfig(BaseModel):
     up_ratio: int = Field(
         1,
@@ -247,7 +362,129 @@ class ProcessConfig(BaseModel):
     with_filter: bool = Field(False)
     with_spectrum: bool = Field(False)
     with_response_spectrum: bool = Field(False)
+    with_integration: bool = Field(
+        False,
+        description="Integrate the processed acceleration to obtain velocity and displacement.",
+    )
+    integration: IntegrationConfig = Field(
+        default_factory=IntegrationConfig,
+        description="Time integration scheme and its parameters.",
+    )
     remove_head: float = Field(0.0, ge=0)
+
+    @model_validator(mode="before")
+    @classmethod
+    def collect_integration(cls, data):
+        """Accept the integration settings nested or as flat convenience fields."""
+        if not isinstance(data, dict):
+            return data
+
+        data = dict(data)
+
+        for alias in ("with_time_integration", "integrate"):
+            if alias in data:
+                data.setdefault("with_integration", data.pop(alias))
+
+        nested = None
+        for key in ("integration", "time_integration", "integration_config"):
+            if key in data:
+                value = data.pop(key)
+                if isinstance(value, bool):
+                    data.setdefault("with_integration", value)
+                else:
+                    nested = value
+                break
+
+        known = {
+            "integration_type",
+            "type",
+            "method",
+            "name",
+            "integration_method",
+            "gamma",
+            "beta",
+            "spectral_radius",
+            "rho_inf",
+            "rho",
+            "rho_infinity",
+            "spectral_radius_inf",
+            "alpha_f",
+            "alpha_m",
+            "r1",
+            "r2",
+            "r3",
+            "radii",
+            "spectral_radii",
+            "r",
+            "rs",
+            "rb",
+            "parameter",
+            "parameters",
+            "params",
+            "integration_parameters",
+            "integration_params",
+        }
+
+        flat: dict = {}
+        for key in list(data):
+            if key.startswith("integration_"):
+                target = key[len("integration_") :]
+                if target in ("type", "method", "name"):
+                    target = "integration_type"
+                elif target in ("parameters", "params"):
+                    target = "parameters"
+                if target in known:
+                    flat[target] = data.pop(key)
+
+        for key in list(data):
+            if key in known:
+                flat[key] = data.pop(key)
+
+        if nested is not None or flat:
+            if isinstance(nested, IntegrationConfig):
+                nested_values = nested.model_dump(exclude_none=True)
+            elif isinstance(nested, dict):
+                nested_values = dict(nested)
+            elif nested is not None:
+                nested_values = {"integration_type": nested}
+            else:
+                nested_values = {}
+
+            data["integration"] = {**flat, **nested_values}
+            data.setdefault("with_integration", True)
+
+        return data
+
+    @property
+    def integration_config(self) -> IntegrationConfig:
+        """Alias of :attr:`integration`."""
+        return self.integration
+
+    @property
+    def integration_type(self) -> IntegrationType:
+        """The configured time integration scheme."""
+        return self.integration.integration_type
+
+    @integration_type.setter
+    def integration_type(self, value: IntegrationType | str):
+        self.integration.integration_type = IntegrationType(value)
+
+    @property
+    def integration_method(self) -> IntegrationType:
+        """Alias of :attr:`integration_type`."""
+        return self.integration.integration_type
+
+    @property
+    def integration_parameters(self) -> dict[str, float]:
+        """The explicitly configured scheme parameters."""
+        return self.integration.model_dump(
+            exclude={"integration_type"}, exclude_none=True
+        )
+
+    @property
+    def time_integration(self) -> IntegrationConfig:
+        """Alias of :attr:`integration`."""
+        return self.integration
 
 
 class ProcessedResponse(RecordResponse):

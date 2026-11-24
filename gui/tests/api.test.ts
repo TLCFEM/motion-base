@@ -134,6 +134,31 @@ describe("process helpers", () => {
         expect(config.period_end).toBe(8);
         expect(config.remove_head).toBe(1.5);
     });
+
+    it("maps time integration options", () => {
+        const config = buildProcessConfig({
+            ...defaultProcessForm(),
+            withIntegration: true,
+            integrationType: "BatheTwoStep",
+            spectralRadius: "0.8",
+            gamma: "0.4",
+        });
+
+        expect(config.with_integration).toBe(true);
+        expect(config.integration).toEqual({
+            integration_type: "BatheTwoStep",
+            spectral_radius: 0.8,
+            gamma: 0.4,
+        });
+    });
+
+    it("keeps integration disabled by default", () => {
+        const config = buildProcessConfig(defaultProcessForm());
+
+        expect(config.with_integration).toBe(false);
+        expect(config.integration?.integration_type).toBe("Newmark");
+        expect(config.integration?.gamma).toBeUndefined();
+    });
 });
 
 describe("toUTC", () => {

@@ -15,13 +15,14 @@
 
 from __future__ import annotations
 
-from enum import Enum
 from uuid import NAMESPACE_OID, uuid4, uuid5
 
 import numpy as np
 import pint
 from numba import float64, int32, njit
 from scipy import signal
+
+from .integrator import IntegrationType, create_integrator  # noqa: F401
 
 
 def perform_fft(
@@ -114,7 +115,3 @@ def str_factory():
 
 def uuid5_str(token: str) -> str:
     return str(uuid5(NAMESPACE_OID, token))
-
-
-class IntegrationType(Enum):
-    Newmark = "Newmark"

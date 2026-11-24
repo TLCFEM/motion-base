@@ -31,8 +31,10 @@ from mb.record.integrator import (
     GeneralizedAlpha,
     GeneralizedAlphaExplicit,
     GSSSSOptimal,
+    IntegrationType,
     Newmark,
     Tchamwa,
+    create_integrator,
 )
 
 # (id, factory, expected order for a prescribed smooth acceleration)
@@ -288,3 +290,48 @@ def test_gerkn_requires_all_coefficients():
 def test_british_spelling_aliases():
     assert GeneralisedAlpha is GeneralizedAlpha
     assert GeneralisedAlphaExplicit is GeneralizedAlphaExplicit
+
+
+@pytest.mark.parametrize(
+    "value,expected",
+    [
+        ("Newmark", IntegrationType.Newmark),
+        ("newmark", IntegrationType.Newmark),
+        ("generalized-alpha", IntegrationType.GeneralizedAlpha),
+        ("GeneralisedAlpha", IntegrationType.GeneralizedAlpha),
+        ("GSSSS_U0", IntegrationType.GSSSSU0),
+        ("bathe-two-step", IntegrationType.BatheTwoStep),
+    ],
+)
+def test_integration_type_accepts_names_and_aliases(value, expected):
+    assert IntegrationType(value) is expected
+
+
+def test_create_integrator_uses_scheme_parameters():
+    newmark = create_integrator("Newmark", gamma=0.6, beta=0.3)
+    assert isinstance(newmark, Newmark)
+    assert newmark.gamma == pytest.approx(0.6)
+    assert newmark.beta == pytest.approx(0.3)
+
+    alpha = create_integrator("GeneralizedAlpha", alpha_f=0.4, alpha_m=0.2)
+    assert isinstance(alpha, GeneralizedAlpha)
+    assert alpha.alpha_f == pytest.approx(0.4)
+    assert alpha.alpha_m == pytest.approx(0.2)
+
+    bathe = create_integrator("BatheTwoStep", spectral_radius=0.8, gamma=0.4)
+    assert isinstance(bathe, BatheTwoStep)
+    assert bathe.spectral_radius == pytest.approx(0.8)
+    assert bathe.gamma == pytest.approx(0.4)
+
+    wat2 = create_integrator("WAT2", parameter=0.5)
+    assert isinstance(wat2, WAT2)
+    assert wat2.parameter == pytest.approx(0.5)
+
+
+def test_create_integrator_all_presets():
+    for name, factory, _ in INTEGRATORS:
+        preset = create_integrator(name)
+        assert type(preset) is type(factory())
+
+    with pytest.raises(ValueError):
+        create_integrator("not-a-scheme")

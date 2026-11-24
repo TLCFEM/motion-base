@@ -20,6 +20,7 @@ import pytest
 from pydantic import ValidationError
 
 from mb.app.response import (
+    IntegrationConfig,
     MetadataResponse,
     PaginationConfig,
     PaginationResponse,
@@ -28,6 +29,7 @@ from mb.app.response import (
     RecordResponse,
     UploadTaskResponse,
 )
+from mb.record.integrator import BatheTwoStep, GeneralizedAlpha, Newmark
 
 
 def _record_response(**kwargs) -> RecordResponse:
@@ -262,6 +264,54 @@ def test_process_config_defaults():
     assert config.up_ratio == 1
     assert config.normalised is False
     assert config.with_filter is False
+    assert config.with_integration is False
+    assert config.integration_type.value == "Newmark"
+    assert isinstance(config.integration.create_integrator(), Newmark)
+
+
+def test_integration_config_accepts_flat_and_nested_parameters():
+    flat = ProcessConfig(
+        integration_type="bathe-two-step",
+        spectral_radius=0.8,
+        gamma=0.4,
+    )
+    assert flat.with_integration is True
+    assert flat.integration.integration_type.value == "BatheTwoStep"
+    assert isinstance(flat.integration.create_integrator(), BatheTwoStep)
+
+    nested = ProcessConfig(
+        integration={
+            "method": "generalized-alpha",
+            "parameters": {"alpha_f": 0.4, "alpha_m": 0.2},
+        }
+    )
+    assert nested.with_integration is True
+    assert isinstance(nested.integration.create_integrator(), GeneralizedAlpha)
+    assert nested.integration.create_integrator().alpha_f == pytest.approx(0.4)
+
+    disabled = ProcessConfig(with_integration=False, integration_type="Newmark")
+    assert disabled.with_integration is False
+
+
+def test_integration_config_accepts_spectral_radii_sequence():
+    config = IntegrationConfig(type="gssss-u0", r=[0.9, 0.5, 0.2])
+
+    assert (config.r1, config.r2, config.r3) == pytest.approx((0.9, 0.5, 0.2))
+
+    with pytest.raises(ValidationError):
+        IntegrationConfig(type="gssss-u0", r=[0.5, 0.9])
+
+
+def test_record_response_accepts_integrated_motion():
+    response = _record_response(
+        displacement_unit="cm",
+        velocity_unit="cm/s",
+        displacement=[0.0, 0.1, 0.3],
+        velocity=[0.0, 0.2, 0.3],
+    )
+
+    assert response.displacement == [0.0, 0.1, 0.3]
+    assert response.velocity == [0.0, 0.2, 0.3]
 
 
 def test_upload_task_response():

@@ -96,6 +96,18 @@ def process_record_local(result: Record, process_config: ProcessConfig):
     record.time_interval = new_interval
     record.waveform = new_waveform.tolist()
 
+    if process_config.with_integration:
+        integrator = process_config.integration.create_integrator()
+        displacement, velocity = integrator.integrate(new_interval, new_waveform)
+        record.displacement = displacement.tolist()
+        record.velocity = velocity.tolist()
+        if process_config.normalised:
+            record.displacement_unit = "s"
+            record.velocity_unit = "1"
+        else:
+            record.displacement_unit = "cm"
+            record.velocity_unit = "cm/s"
+
     if process_config.with_spectrum:
         frequency_interval, spectrum = perform_fft(1 / new_interval, new_waveform)
         record.frequency_interval = frequency_interval
